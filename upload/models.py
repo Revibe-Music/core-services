@@ -16,7 +16,7 @@ class Album(models.Model):
 class Song(models.Model):
 
     song = models.FileField(upload_to='songs', blank=False, null=False)
-    name = models.CharField(max_length=255, blank=False, null=False)
+    title = models.CharField(max_length=255, blank=False, null=False)
     artist = models.ForeignKey(Artist, blank=False, null=True, on_delete=models.SET_NULL)
     album = models.ForeignKey(Album, blank=False, null=True, on_delete=models.SET_NULL)
     duration = models.IntegerField(blank=False, null=False)

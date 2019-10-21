@@ -10,7 +10,7 @@ class Artist(models.Model):
 class Album(models.Model):
 
     name = models.CharField(max_length=255, blank=False, null=False)
-    image = models.FileField(upload_to='album_image', blank=False, null=False)
+    image = models.FileField(upload_to='album_image', blank=True, null=True)
     artist = models.ForeignKey(Artist, blank=True, null=True, on_delete=models.SET_NULL)
 
 class Song(models.Model):

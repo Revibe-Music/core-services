@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 
     # my apps
     'upload',
+    'newModelTesting',
 ]
 
 MIDDLEWARE = [

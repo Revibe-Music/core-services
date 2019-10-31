@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'rest_framework',
 
     # my apps
-    'upload',
     'newModelTesting',
 ]
 

@@ -65,6 +65,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+AUTH_USER_MODEL = 'newModelTesting.CustomUser'
+
 ROOT_URLCONF = 'artist_portal.urls'
 
 TEMPLATES = [

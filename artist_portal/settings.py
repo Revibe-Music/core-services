@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
 
     # my apps
-    'newModelTesting',
+    'revibe_api',
 ]
 
 MIDDLEWARE = [
@@ -64,7 +64,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-AUTH_USER_MODEL = 'newModelTesting.CustomUser'
+AUTH_USER_MODEL = 'revibe_api.CustomUser'
 
 ROOT_URLCONF = 'artist_portal.urls'
 

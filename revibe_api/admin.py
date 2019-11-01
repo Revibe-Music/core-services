@@ -1,5 +1,5 @@
 from django.contrib import admin
-from newModelTesting.models import CustomUser, Profile, Artist
+from revibe_api.models import CustomUser, Profile, Artist
 
 # Register your models here.
 admin.site.register(CustomUser)

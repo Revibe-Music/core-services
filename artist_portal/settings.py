@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     # installed apps
     'rest_framework',
+    'knox',
 
     # my apps
     'revibe_api',

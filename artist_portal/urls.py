@@ -22,6 +22,7 @@ router = routers.DefaultRouter()
 router.register(r'profiles', views.ProfileViewSet)
 router.register(r'users', views.UserViewSet)
 router.register(r'artists', views.ArtistViewSet)
+router.register(r'registration', views.RegistrationAPI)
 
 urlpatterns = [
     path('', include(router.urls)),

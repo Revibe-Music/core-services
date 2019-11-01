@@ -21,6 +21,7 @@ import revibe_api.views as views
 router = routers.DefaultRouter()
 router.register(r'profiles', views.ProfileViewSet)
 router.register(r'users', views.UserViewSet)
+router.register(r'artists', views.ArtistViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -3,16 +3,17 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import uuid
 
 # Create your models here.
 
 class Artist(models.Model):
 
-    id = models.AutoField(primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField('Display Name', max_length=255)
     image = models.FileField('Display Image', upload_to='images/artists')
     platform = models.CharField(max_length=255)
-    manager = models.ForeignKey('CustomUser', on_delete=models.SET_NULL, related_name='artist_manager', null=True)
+    manager = models.ForeignKey('CustomUser', on_delete=models.SET_NULL, related_name='artist_manager', null=True, blank=True)
 
 class CustomUser(AbstractUser):
     
@@ -43,7 +44,7 @@ def save_user_profile(sender, instance, **kwargs):
 
 class Album(models.Model):
 
-    id = models.AutoField(primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     image = models.FileField('Album Image', upload_to='image/albums', null=True)
     contributors = models.ManyToManyField(Artist, through='AlbumContributors')
@@ -56,7 +57,7 @@ class AlbumContributors(models.Model):
 
 class Song(models.Model):
 
-    id = models.AutoField(primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file = models.FileField('Song', upload_to='audio/songs', null=False)
     title = models.CharField('Title', max_length=255, null=False)
     duration = models.IntegerField('Duration', null=True)

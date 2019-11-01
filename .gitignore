@@ -1,3 +1,11 @@
-*.sqlite3
+# python files
 __pycache__
 .pyc
+
+# db stuff
+*.sqlite3
+
+# media
+media/
+*.png
+*.jpeg

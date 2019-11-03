@@ -155,7 +155,7 @@ if USE_S3:
     # static files
     STATIC_LOCATION = 'static'
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = 'artist_portal.storage_backends.StaticStorage'
 
     # media file settings
     MEDIA_LOCATION = 'media'

@@ -9,11 +9,17 @@ class Artist(models.Model):
     platform = models.CharField(max_length=255)
     manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='artist_manager', null=True, blank=True)
 
+    def __str__(self):
+        return "{} ({})".format(self.name, self.id)
+
 class Album(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     image = models.FileField('Album Image', upload_to='image/albums', null=True)
     contributors = models.ManyToManyField(Artist, through='AlbumContributors')
+
+    def __str__(self):
+        return "{} ({})".format(self.name, self.id)
 
 class AlbumContributors(models.Model):
     album = models.ForeignKey(Album, on_delete=models.CASCADE, null=False)
@@ -32,6 +38,9 @@ class Song(models.Model):
     uploaded_date = models.DateField(null=True)
     contributors = models.ManyToManyField(Artist, through='SongContributors', related_name="song_contributors")
 
+    def __str__(self):
+        return "{} ({})".format(self.title, self.id)
+
 class SongContributors(models.Model):
     song = models.ForeignKey(Song, on_delete=models.CASCADE, null=False)
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, null=False)
@@ -43,5 +52,6 @@ class Library(models.Model):
     platform = models.CharField(max_length=255, null=True)
 
 class Playlist(models.Model):
+    name = models.CharField("Name", null=True, blank=False, max_length=255)
     song = models.ForeignKey(Song, on_delete=models.SET_NULL, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)

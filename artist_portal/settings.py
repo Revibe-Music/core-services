@@ -26,7 +26,7 @@ SECRET_KEY = 'kqjvskii-n3exogny_&n7$lm)1w#_^16$a$zhdc7r*&#6(g=sf'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['api.revibe.tech']
 
 
 # Application definition

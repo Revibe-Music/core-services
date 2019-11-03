@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'knox',
 
     # my apps
-    'revibe_api',
+    'accounts',
+    'music'
 ]
 
 MIDDLEWARE = [
@@ -67,7 +68,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-AUTH_USER_MODEL = 'revibe_api.CustomUser'
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 ROOT_URLCONF = 'artist_portal.urls'
 

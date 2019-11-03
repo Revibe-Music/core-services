@@ -15,17 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework import routers
-import revibe_api.views as views
-
-router = routers.DefaultRouter()
-router.register(r'profiles', views.ProfileViewSet)
-router.register(r'users', views.UserViewSet)
-router.register(r'artists', views.ArtistViewSet)
-router.register(r'registration', views.RegistrationAPI)
 
 urlpatterns = [
-    path('', include(router.urls)),
     path('admin/', admin.site.urls),
-    path('api_auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path('accounts/', include('accounts.urls'))
 ]

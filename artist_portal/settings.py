@@ -26,7 +26,11 @@ SECRET_KEY = 'kqjvskii-n3exogny_&n7$lm)1w#_^16$a$zhdc7r*&#6(g=sf'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['api.revibe.tech']
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'api.revibe.tech',
+]
 
 
 # Application definition
@@ -41,6 +45,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+
+    # my apps
+    'accounts',
+    'music',
 
     # installed apps
     'rest_framework',
@@ -49,9 +58,11 @@ INSTALLED_APPS = [
     'knox',
     'storages',
 
-    # my apps
-    'accounts',
-    'music'
+    # all auth stuff
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.spotify',
 ]
 
 MIDDLEWARE = [
@@ -175,6 +186,10 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+# all_auth settings
+ACCOUNT_EMAIL_REQUIRED = False
+
 
 # knox settings
 KNOX_TTL = None

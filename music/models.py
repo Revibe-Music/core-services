@@ -53,5 +53,5 @@ class Library(models.Model):
 
 class Playlist(models.Model):
     name = models.CharField("Name", null=True, blank=False, max_length=255)
-    song = models.ForeignKey(Song, on_delete=models.SET_NULL, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    songs = models.ManyToManyField(Song)

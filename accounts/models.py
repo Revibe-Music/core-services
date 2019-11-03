@@ -32,4 +32,4 @@ def save_user_profile(sender, instance, **kwargs):
 
 class Social(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    paltform = models.CharField(max_length=255, null=True)
+    platform = models.CharField(max_length=255, null=True)

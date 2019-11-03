@@ -12,12 +12,6 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
         model = Profile
         fields = ['url','country','image','user']
 
-class ArtistSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Artist
-        fields = '__all__'
-
-
 class CreateAccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser

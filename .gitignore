@@ -1,6 +1,6 @@
 # python files
 __pycache__
-.pyc
+*.pyc
 
 # db stuff
 *.sqlite3

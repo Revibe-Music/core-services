@@ -30,13 +30,15 @@ class Song(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     file = models.FileField('Song', upload_to='audio/songs', null=False)
     title = models.CharField('Title', max_length=255, null=False)
-    duration = models.IntegerField('Duration', null=True)
+    duration = models.DecimalField('Duration', null=True, blank=True, max_digits=6, decimal_places=2) # seconds
     uri = models.CharField('URI', max_length=255, unique=True)
     # stream = ???
     platform = models.CharField(max_length=255, null=True)
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="song_uploaded_by") # artist or user???
     uploaded_date = models.DateField(null=True)
     contributors = models.ManyToManyField(Artist, through='SongContributors', related_name="song_contributors")
+    genre = models.CharField("Genre", max_length=255, null=True, blank=True)
+    beats_per_minute = models.IntegerField("Beats per Minute", null=True, blank=True)
 
     def __str__(self):
         return "{} ({})".format(self.title, self.id)

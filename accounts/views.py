@@ -74,7 +74,7 @@ class SpotifyConnect(SocialConnectView):
 
         return Response({'access_token':spotify_token.token,'refresh_token':spotify_token.token_secret,"expires_in": 3600}, status=status.HTTP_200_OK)
 
-# rewrite as class with serializer
+# TODO: rewrite as class with serializer
 # @api_view(['POST'])
 # def refresh_spotify_token(request):
 #     token_str = request.GET.get('authToken')

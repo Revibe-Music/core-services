@@ -1,16 +1,19 @@
+from knox.models import AuthToken
 from .models import *
 from rest_framework import serializers
 from django.contrib.auth import authenticate
+from django.forms.models import model_to_dict
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['url','profile', 'username', 'password']
-
-class ProfileSerializer(serializers.HyperlinkedModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['url','country','image','user']
+        fields = ['country','image']
+
+class UserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(many=False)
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'username','email','profile']
 
 class CreateAccountSerializer(serializers.ModelSerializer):
     class Meta:

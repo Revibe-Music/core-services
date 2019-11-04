@@ -12,13 +12,16 @@ import requests
 import json
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.all()
+class UserViewSet(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = UserSerializer
 
-class ProfileViewSet(viewsets.ModelViewSet):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
+    def get_object(self):
+        return self.request.user
+
+# class ProfileViewSet(viewsets.ModelViewSet):
+#     queryset = Profile.objects.all()
+#     serializer_class = ProfileSerializer
 
 class RegistrationAPI(generics.GenericAPIView):
     serializer_class = CreateAccountSerializer

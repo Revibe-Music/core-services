@@ -32,6 +32,7 @@ class Song(models.Model):
     title = models.CharField('Title', max_length=255, null=False)
     duration = models.DecimalField('Duration', null=True, blank=True, max_digits=6, decimal_places=2) # seconds
     uri = models.CharField('URI', max_length=255, unique=True)
+    album  = models.ForeignKey(Album, on_delete=models.SET_NULL, null=True, blank=True)
     # stream = ???
     platform = models.CharField(max_length=255, null=True)
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="song_uploaded_by") # artist or user???

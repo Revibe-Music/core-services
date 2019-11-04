@@ -1,5 +1,6 @@
 from knox.models import AuthToken
 from .models import *
+from music.models import Artist
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.forms.models import model_to_dict
@@ -14,6 +15,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['first_name', 'last_name', 'username','email','profile']
+    
+    # TODO: overwrite request methods (create, list)
+    # we have no idea what method accouts/profile is calling, not list or retrieve
 
 class CreateAccountSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,3 +41,7 @@ class LoginAccountSerializer(serializers.Serializer):
             return user
         raise serializers.ValidationError("Unable to log in, please try again")
 
+class UserArtistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Artist
+        fields = '__all__'

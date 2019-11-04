@@ -5,6 +5,7 @@ from . import views
 from knox import views as knox_views
 
 router = routers.DefaultRouter()
+router.register("create-user-artist", views.UserArtistViewSet, 'create-user-artist')
 
 urlpatterns = [
     path("", include(router.urls)),
@@ -13,4 +14,5 @@ urlpatterns = [
     path("logout/", knox_views.LogoutView.as_view()),
     path("logoutall/", knox_views.LogoutAllView.as_view()),
     path("profile/", views.UserViewSet.as_view()),
+    # path("create-user-artist", views.UserArtistViewSet.as_view()),
 ]

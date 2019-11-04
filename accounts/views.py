@@ -1,5 +1,5 @@
 from django.conf import settings
-from rest_framework import viewsets, permissions, generics
+from rest_framework import viewsets, permissions, generics, status
 from rest_framework.response import Response
 from knox.models import AuthToken
 from rest_auth.registration.views import SocialConnectView
@@ -18,10 +18,6 @@ class UserViewSet(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
-
-# class ProfileViewSet(viewsets.ModelViewSet):
-#     queryset = Profile.objects.all()
-#     serializer_class = ProfileSerializer
 
 class RegistrationAPI(generics.GenericAPIView):
     serializer_class = CreateAccountSerializer
@@ -76,6 +72,24 @@ class SpotifyConnect(SocialConnectView):
         spotify_token = SocialToken.objects.get(account=social_account)
 
         return Response({'access_token':spotify_token.token,'refresh_token':spotify_token.token_secret,"expires_in": 3600}, status=status.HTTP_200_OK)
+
+class UserArtistViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = UserArtistSerializer
+    http_method_names = ['post']
+
+    def get_queryset(self):
+        return self.request.user.artist
+    
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            artist = serializer.save()
+            request.user.artist = artist
+            request.user.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # TODO: rewrite as class with serializer
 # @api_view(['POST'])

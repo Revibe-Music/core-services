@@ -80,7 +80,7 @@ class UserArtistViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.request.user.artist
-    
+
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -125,8 +125,8 @@ class UserArtistViewSet(viewsets.ModelViewSet):
 #     # need to handle errors here
 #     else:
 #         return Response({"error":"Social Account for provider='Spotify' and user="+user.email+" does not exist."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
-#
-#
+
+
 # # rewrite as class with serializer
 # @api_view(['GET'])
 # def get_connected_platforms(request):

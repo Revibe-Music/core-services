@@ -28,8 +28,8 @@ class AlbumContributors(models.Model):
 
 class Song(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    uri = models.CharField('URI', max_length=255, unique=True)
-    file = models.FileField('Song', upload_to='audio/songs', null=False)
+    uri = models.CharField('URI', max_length=255, unique=True) #, null=False, blank=True
+    file = models.FileField('Song', upload_to='audio/songs', null=True)
     name = models.CharField('Name', max_length=255, null=False)
     album  = models.ForeignKey(Album, on_delete=models.SET_NULL, null=True, blank=True)
     duration = models.DecimalField('Duration', null=True, blank=True, max_digits=6, decimal_places=2) # seconds
@@ -55,17 +55,3 @@ class Playlist(models.Model):
     name = models.CharField("Name", null=True, blank=False, max_length=255)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     songs = models.ManyToManyField(Song)
-
-
-# temp stuff
-class Person(models.Model):
-    name = models.CharField(max_length=255, blank=True, null=True)
-
-class Group(models.Model):
-    name = models.CharField(max_length=255, blank=True, null=True)
-    members = models.ManyToManyField(Person, through="Membership")
-
-class Membership(models.Model):
-    person = models.ForeignKey(Person, on_delete=models.CASCADE)
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    reason = models.CharField(max_length=255, null=False)

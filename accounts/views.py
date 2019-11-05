@@ -2,25 +2,31 @@ from django.conf import settings
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.response import Response
 from knox.models import AuthToken
-from packages.rest_auth.registration.views import SocialConnectView
-from packages.allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
-from packages.allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from packages.allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
+from rest_auth.registration.views import SocialConnectView
+from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
 from .models import *
 from .serializers import *
 import requests
 import json
 
 
-class UserViewSet(generics.RetrieveAPIView):
+class UserViewSet(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = UserSerializer
 
-    def get_object(self):
-        return self.request.user
+    def get(self, request):
+        return Response(
+            UserSerializer(request.user, context=self.get_serializer_context()).data
+        )
+    
+    # TODO: define the update-user stuff here
+    def patch(self, request):
+        return None
 
 class RegistrationAPI(generics.GenericAPIView):
-    serializer_class = CreateAccountSerializer
+    serializer_class = UserSerializer
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

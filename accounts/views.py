@@ -2,10 +2,10 @@ from django.conf import settings
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.response import Response
 from knox.models import AuthToken
-from rest_auth.registration.views import SocialConnectView
-from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
+from packages.rest_auth.registration.views import SocialConnectView
+from packages.allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
+from packages.allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from packages.allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
 from .models import *
 from .serializers import *
 import requests
@@ -54,27 +54,19 @@ class SpotifyConnect(SocialConnectView):
             located in rest_auth/views.py. This method is responsible for returning a response
             and in this case we want to return a user's spotify access token ad refresh token.
         """
-
         serializer_class = self.get_response_serializer()
-
         if getattr(settings, 'REST_USE_JWT', False):
-            data = {
-                'user': self.user,
-                'token': self.token
-            }
-            serializer = serializer_class(instance=data,
-                                          context={'request': self.request})
+            data = {'user': self.user, 'token': self.token}
+            serializer = serializer_class(instance=data, context={'request': self.request})
         else:
-            serializer = serializer_class(instance=self.token,
-                                          context={'request': self.request})
-
+            serializer = serializer_class(instance=self.token, context={'request': self.request})
         social_account = SocialAccount.objects.get(user=self.user,provider="spotify")
         spotify_token = SocialToken.objects.get(account=social_account)
-
         return Response({'access_token':spotify_token.token,'refresh_token':spotify_token.token_secret,"expires_in": 3600}, status=status.HTTP_200_OK)
 
+
 class UserArtistViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated, ]
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserArtistSerializer
     http_method_names = ['post']
 

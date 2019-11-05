@@ -16,8 +16,28 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['first_name', 'last_name', 'username','email','profile']
     
-    # TODO: overwrite request methods (create, list)
-    # we have no idea what method accouts/profile is calling, not list or retrieve
+    # def create(self, validated_data):
+    #     profile_data = validated_data.pop('profile')
+    #     user = User.objects.create(**validated_data)
+    #     Profile.objects.create(user=user, **profile_data)
+    #     return user
+    
+    # def update(self, instance, validated_data):
+    #     profile_data = validated_data.pop('profile')
+    #     profile = instance.profile
+
+    #     instance.username = validated_data.get('username', instance.username)
+    #     instance.email = validated_data.get('email', instance.email)
+    #     instance.save()
+
+    #     # for all fields in profile
+    #     # profile.field = profile_data.get(
+    #     #   'field',
+    #     #   profile.field
+    #     # )
+    #     profile.save()
+
+    #     return instance
 
 class CreateAccountSerializer(serializers.ModelSerializer):
     class Meta:

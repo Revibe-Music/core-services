@@ -2,10 +2,10 @@ from django.conf import settings
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.response import Response
 from knox.models import AuthToken
-from rest_auth.registration.views import SocialConnectView
-from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
+from packages.rest_auth.registration.views import SocialConnectView
+from packages.allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
+from packages.allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from packages.allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
 from .models import *
 from .serializers import *
 import requests

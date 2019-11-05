@@ -17,7 +17,7 @@ class Profile(models.Model):
     # long = models.???
     dob = models.DateField('Date of Birth', null=True)
     image = models.FileField("Profile Picture", upload_to='images/profiles', null=True)
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False, related_name='user_profile')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
 
 
 # creates what are basically event listeners to create and save a profile whenever a user is created

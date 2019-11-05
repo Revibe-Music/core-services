@@ -76,7 +76,8 @@ class SocialApp(models.Model):
 @python_2_unicode_compatible
 class SocialAccount(models.Model):
     user = models.ForeignKey(allauth.app_settings.USER_MODEL,
-                             on_delete=models.CASCADE)
+                             on_delete=models.CASCADE,
+                             related_name="socialAccount_user")
     provider = models.CharField(verbose_name=_('provider'),
                                 max_length=30,
                                 choices=providers.registry.as_choices())

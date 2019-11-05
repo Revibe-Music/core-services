@@ -21,7 +21,8 @@ class EmailAddress(models.Model):
 
     user = models.ForeignKey(allauth_app_settings.USER_MODEL,
                              verbose_name=_('user'),
-                             on_delete=models.CASCADE)
+                             on_delete=models.CASCADE,
+                             related_name='emailAddress_user')
     email = models.EmailField(unique=app_settings.UNIQUE_EMAIL,
                               max_length=app_settings.EMAIL_MAX_LENGTH,
                               verbose_name=_('e-mail address'))
@@ -79,7 +80,8 @@ class EmailConfirmation(models.Model):
 
     email_address = models.ForeignKey(EmailAddress,
                                       verbose_name=_('e-mail address'),
-                                      on_delete=models.CASCADE)
+                                      on_delete=models.CASCADE,
+                                      related_name="emailConfirmation_emailAddress")
     created = models.DateTimeField(verbose_name=_('created'),
                                    default=timezone.now)
     sent = models.DateTimeField(verbose_name=_('sent'), null=True)

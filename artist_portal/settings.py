@@ -16,8 +16,6 @@ from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(os.path.join(BASE_DIR, "packages"))
-
 
 
 # Quick-start development settings - unsuitable for production
@@ -56,15 +54,15 @@ INSTALLED_APPS = [
 
     # installed apps
     'rest_framework',
-    'packages.rest_auth',
+    'rest_auth',
     'knox',
     'storages',
 
     # all auth stuff
-    'packages.allauth',
-    'packages.allauth.account',
-    'packages.allauth.socialaccount',
-    'packages.allauth.socialaccount.providers.spotify',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.spotify',
 ]
 
 MIDDLEWARE = [

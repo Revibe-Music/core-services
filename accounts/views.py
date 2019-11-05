@@ -12,15 +12,21 @@ import requests
 import json
 
 
-class UserViewSet(generics.RetrieveAPIView):
+class UserViewSet(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = UserSerializer
 
-    def get_object(self):
-        return self.request.user
+    def get(self, request):
+        return Response(
+            UserSerializer(request.user, context=self.get_serializer_context()).data
+        )
+    
+    # TODO: define the update-user stuff here
+    def patch(self, request):
+        return None
 
 class RegistrationAPI(generics.GenericAPIView):
-    serializer_class = CreateAccountSerializer
+    serializer_class = UserSerializer
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

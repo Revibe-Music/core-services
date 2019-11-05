@@ -84,6 +84,8 @@ MIDDLEWARE = [
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
+SITE_ID = 1
+
 ROOT_URLCONF = 'artist_portal.urls'
 
 TEMPLATES = [

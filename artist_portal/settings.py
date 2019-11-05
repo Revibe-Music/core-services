@@ -56,15 +56,15 @@ INSTALLED_APPS = [
 
     # installed apps
     'rest_framework',
-    'rest_auth',
+    'packages.rest_auth',
     'knox',
     'storages',
 
     # all auth stuff
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.spotify',
+    'packages.allauth',
+    'packages.allauth.account',
+    'packages.allauth.socialaccount',
+    'packages.allauth.socialaccount.providers.spotify',
 ]
 
 MIDDLEWARE = [

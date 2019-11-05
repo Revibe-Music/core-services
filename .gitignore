@@ -9,3 +9,6 @@ __pycache__
 media/
 *.png
 *.jpeg
+
+# other
+/.vscode

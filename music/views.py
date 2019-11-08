@@ -9,12 +9,24 @@ class ArtistViewSet(viewsets.ModelViewSet):
     serializer_class = ArtistSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["read"]]
+        "GET": [["ADMIN"],["read"],["read-songs"]]
     }
 
 class AlbumViewSet(viewsets.ModelViewSet):
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
+    permission_classes = [TokenMatchesOASRequirements]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"],["read"],["read-albums"]]
+    }
+
+class SongViewSet(viewsets.ModelViewSet):
+    queryset = Song.objects.all()
+    serializer_class = SongSerializer
+    permission_classes = [TokenMatchesOASRequirements]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"],["read"],["read-albums"]]
+    }
 
 # @todo replace api_view functions with rest Framework viewSets
 

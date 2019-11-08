@@ -138,7 +138,35 @@ AUTHENTICATION_BACKENDS = (
 
 ### OAUTH TOOLKIT STUFF ###
 OAUTH2_PROVIDER = {
-    'SCOPES': {'read': 'Read scope', 'write': 'Write scope'},
+    'SCOPES': {
+        'read': 'Read scope',
+        'write': 'Write scope',
+        'ADMIN': 'override on everything',
+        # account scopes
+        'read-user-only': 'Read user data but not profile data',
+        'write-user-data': 'Write user data but not profile data',
+        'read-user':'Read user data and profile data',
+        'write-user': 'Write user data and profile data',
+        'write-user-artist': 'Write user and user-artist data',
+        'read-user-artist': 'Read user and user-artist data',
+        # ...
+        # Music scopes
+        'write-artists': 'write artists',
+        'read-artists': 'Read artists',
+        'write-albums': 'Write album data',
+        'read-albums': 'Read album data',
+        'write-album-contrib': 'Write album contributions',
+        'read-album-contrib': 'Read album contributions',
+        'write-songs': 'Write song data',
+        'read-songs': 'Read song data',
+        'write-song-contrib': 'Write song contributions',
+        'read-song-contrib': 'Read song contributions',
+        'write-library': 'Write library data',
+        'read-library': 'Read library data',
+        'write-playlist': 'Write playlist data',
+        'read-playlist': 'Read playlist data',
+        # ...
+    },
     'ACCESS_TOKEN_EXPIRE_SECONDS': 3600,  # 2 hours
     # 'REFRESH_TOKEN_EXPIRE_SECONDS': 7*24*60*60,  # A week
     'ROTATE_REFRESH_TOKEN': True,  # Sends a new refresh token when a access token is refreshed.

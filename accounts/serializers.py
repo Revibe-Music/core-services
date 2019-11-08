@@ -59,6 +59,9 @@ class LoginAccountSerializer(serializers.Serializer):
             return user
         raise serializers.ValidationError("Unable to log in, please try again")
 
+class AccessTokenSerializer(serializers.Serializer):
+    access_token = serializers.CharField()
+
 class RefreshTokenSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
 

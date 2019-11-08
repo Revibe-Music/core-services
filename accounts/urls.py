@@ -12,7 +12,7 @@ urlpatterns = [
     path("register/", views.RegistrationAPI.as_view()),
     path("login/", views.LoginAPI.as_view()),
     path('token/refresh/', views.RefreshTokenAPI.as_view()),
-    path('token/revoke/', views.revoke_token),
+    path('token/revoke/', views.RevokeTokenAPI.as_view()),
 
 
     # path("logout/", knox_views.LogoutView.as_view()),

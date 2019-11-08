@@ -112,6 +112,20 @@ class RefreshTokenAPI(generics.GenericAPIView):
         req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
         return Response(req.json())
 
+class RevokeTokenAPI(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = AccessTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+        data= {
+               'token': request.data['access_token'],
+               'client_id': CLIENT_ID,
+               'client_secret': CLIENT_SECRET
+               }
+        req = requests.post('http://127.0.0.1:8000/o/revoke_token/',headers=headers,data=data)
+        return Response(req.json())
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

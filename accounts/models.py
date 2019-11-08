@@ -8,6 +8,9 @@ from music.models import Artist
 
 class CustomUser(AbstractUser):
     artist = models.OneToOneField(Artist, on_delete=models.SET_NULL, related_name='artist_user', null=True, blank=True)
+    manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
+    is_artist = models.BooleanField('Artist Flag', null=False, blank=False, default=False)
+    is_manager = models.BooleanField('Manager Flag', null=False, blank=False, default=False)
 
 class Profile(models.Model):
     id = models.AutoField(primary_key=True)

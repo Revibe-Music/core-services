@@ -7,7 +7,7 @@ class Artist(models.Model):
     name = models.CharField('Display Name', max_length=255)
     image = models.FileField('Display Image', upload_to='images/artists')
     platform = models.CharField(max_length=255)
-    manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='artist_manager', null=True, blank=True)
+    # manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='artist_manager', null=True, blank=True)
 
     def __str__(self):
         return "{} ({})".format(self.name, self.id)

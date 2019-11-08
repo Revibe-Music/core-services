@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions, generics
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 from .models import *
 from .serializers import *
 

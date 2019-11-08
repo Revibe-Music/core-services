@@ -59,6 +59,9 @@ class LoginAccountSerializer(serializers.Serializer):
             return user
         raise serializers.ValidationError("Unable to log in, please try again")
 
+class RefreshTokenSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField()
+
 class UserArtistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artist

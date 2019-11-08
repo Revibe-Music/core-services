@@ -5,7 +5,7 @@ from . import views
 # from knox import views as knox_views
 
 router = routers.DefaultRouter()
-router.register("create-user-artist", views.UserArtistViewSet, 'create-user-artist')
+# router.register("create-user-artist", views.UserArtistViewSet, 'create-user-artist')
 
 urlpatterns = [
     path("", include(router.urls)),
@@ -20,5 +20,5 @@ urlpatterns = [
     path("profile/", views.UserViewSet.as_view()),
     path('spotify-authentication/', views.SpotifyConnect.as_view()),
     path('spotify-refresh/', views.SpotifyRefresh.as_view()),
-    # path("create-user-artist", views.UserArtistViewSet.as_view()),
+    path("create-user-artist/", views.UserArtistViewSet.as_view()),
 ]

@@ -149,6 +149,7 @@ OAUTH2_PROVIDER = {
         'write-user': 'Write user data and profile data',
         'write-user-artist': 'Write user and user-artist data',
         'read-user-artist': 'Read user and user-artist data',
+        'manager': 'Manage Linked Artists',
         # ...
         # Music scopes
         'write-artists': 'write artists',
@@ -168,8 +169,9 @@ OAUTH2_PROVIDER = {
         # ...
     },
     'ACCESS_TOKEN_EXPIRE_SECONDS': 3600,  # 2 hours
-    # 'REFRESH_TOKEN_EXPIRE_SECONDS': 7*24*60*60,  # A week
-    'ROTATE_REFRESH_TOKEN': True,  # Sends a new refresh token when a access token is refreshed.
+    'REFRESH_TOKEN_EXPIRE_SECONDS': None,  # Dont expire refresh tokens
+    'ROTATE_REFRESH_TOKEN': False,  # Sends a new refresh token when a access token is refreshed.
+    'CLIENT_SECRET_GENERATOR_LENGTH': 100,
 }
 
 

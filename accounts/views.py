@@ -7,13 +7,12 @@ from rest_framework.permissions import AllowAny
 from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
+from oauth2_provider.views.generic import ProtectedResourceView
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 from .models import *
 from .serializers import *
 import requests
 import json
-from rest_framework.views import APIView
-import urllib.parse
-import base64
 
 CLIENT_ID = 'y2iPQuosC9qgIJZua9w5VCpHMTdO7Onkl2RF9qQk'
 CLIENT_SECRET = 'KE5IMAxQizJAwRKkKUY244PctidKPL88mQwyGPX6ci9ZymHsYSgxxTLeJNMppf1lerlNfjQnKYpZ1xzlsRFtdV6S9gLfb6WdFnVu29BSw8lteoqiU6ZoJtnxabs4slgs'
@@ -51,7 +50,7 @@ class RegistrationAPI(generics.GenericAPIView):
     curl -X POST -d "client_id=y2iPQuosC9qgIJZua9w5VCpHMTdO7Onkl2RF9qQk&client_secret=KE5IMAxQizJAwRKkKUY244PctidKPL88mQwyGPX6ci9ZymHsYSgxxTLeJNMppf1lerlNfjQnKYpZ1xzlsRFtdV6S9gLfb6WdFnVu29BSw8lteoqiU6ZoJtnxabs4slgs&grant_type=password&username=rileystephens&password=Reed1rile2" http://127.0.0.1:8000/o/token/
     """
     serializer_class = UserSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -63,7 +62,8 @@ class RegistrationAPI(generics.GenericAPIView):
                'username': request.data['username'],
                'password': request.data['password'],
                'client_id': CLIENT_ID,
-               'client_secret': CLIENT_SECRET
+               'client_secret': CLIENT_SECRET,
+               # 'scope': []
                }
         req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
         return Response({
@@ -96,7 +96,7 @@ class LoginAPI(generics.GenericAPIView):
 
 class RefreshTokenAPI(generics.GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = UserSerializer
+    serializer_class = RefreshTokenSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -110,30 +110,21 @@ class RefreshTokenAPI(generics.GenericAPIView):
                'client_secret': CLIENT_SECRET
                }
         req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
-        return Response({
-            "user": UserSerializer(user, context=self.get_serializer_context()).data,
-            "token": req.json()
-        })
+        return Response(req.json())
 
+class RevokeTokenAPI(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = AccessTokenSerializer
 
-
-# @api_view(['POST'])
-# @permission_classes([AllowAny])
-# def refresh_token(request):
-#     '''
-#     Registers user to the server. Input should be in the format:
-#     {"refresh_token": "<token>"}
-#     '''
-#     r = requests.post(
-#     'http://127.0.0.1:8000/o/token/',
-#         data={
-#             'grant_type': 'refresh_token',
-#             'refresh_token': request.data['refresh_token'],
-#             'client_id': CLIENT_ID,
-#             'client_secret': CLIENT_SECRET,
-#         },
-#     )
-#     return Response(r.json())
+    def post(self, request, *args, **kwargs):
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+        data= {
+               'token': request.data['access_token'],
+               'client_id': CLIENT_ID,
+               'client_secret': CLIENT_SECRET
+               }
+        req = requests.post('http://127.0.0.1:8000/o/revoke_token/',headers=headers,data=data)
+        return Response(req.json())
 
 
 @api_view(['POST'])
@@ -157,8 +148,8 @@ def revoke_token(request):
     # Return the error if it goes badly
     return Response(r.json(), r.status_code)
 
-class UserArtistViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+class UserArtistViewSet(ProtectedResourceView):
+    # permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserArtistSerializer
     http_method_names = ['post']
 
@@ -197,8 +188,8 @@ class SpotifyConnect(SocialConnectView):
         return Response({'access_token':spotify_token.token,'refresh_token':spotify_token.token_secret,"expires_in": 3600}, status=status.HTTP_200_OK)
 
 
-class SpotifyRefresh(generics.GenericAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
+class SpotifyRefresh(ProtectedResourceView):
+    # permission_classes = (permissions.IsAuthenticated,)
     serializer_class = UserSerializer
 
     def post(self, request, *args, **kwargs):

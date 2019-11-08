@@ -1,5 +1,5 @@
 from rest_framework import viewsets, permissions, generics
-from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
+from oauth2_provider.contrib.rest_framework import *
 from .models import *
 from .serializers import *
 
@@ -7,6 +7,10 @@ from .serializers import *
 class ArtistViewSet(viewsets.ModelViewSet):
     queryset = Artist.objects.all()
     serializer_class = ArtistSerializer
+    permission_classes = [TokenMatchesOASRequirements]
+    required_alternate_scopes = {
+        "GET": [["read"]]
+    }
 
 class AlbumViewSet(viewsets.ModelViewSet):
     queryset = Album.objects.all()

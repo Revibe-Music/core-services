@@ -54,8 +54,9 @@ INSTALLED_APPS = [
 
     # installed apps
     'rest_framework',
+    'oauth2_provider',
     'rest_auth',
-    'knox',
+    # 'knox',
     'storages',
 
     # all auth stuff
@@ -78,6 +79,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    #OAuth Toolkit
+    'oauth2_provider.middleware.OAuth2TokenMiddleware',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -114,6 +118,32 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.SessionAuthentication', # To keep the Browsable API
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+### Specify the authentication backends ###
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend', # To keep the Browsable API
+    'oauth2_provider.backends.OAuth2Backend',
+)
+
+### OAUTH TOOLKIT STUFF ###
+OAUTH2_PROVIDER = {
+    'SCOPES': {'read': 'Read scope', 'write': 'Write scope'},
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 3600,  # 2 hours
+    # 'REFRESH_TOKEN_EXPIRE_SECONDS': 7*24*60*60,  # A week
+    'ROTATE_REFRESH_TOKEN': True,  # Sends a new refresh token when a access token is refreshed.
+}
+
 
 
 # Password validation
@@ -194,4 +224,4 @@ ACCOUNT_EMAIL_REQUIRED = False
 
 
 # knox settings
-KNOX_TTL = None
+# KNOX_TTL = None

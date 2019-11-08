@@ -1,5 +1,4 @@
 from rest_framework import viewsets, permissions, generics
-from knox.models import AuthToken
 from .models import *
 from .serializers import *
 

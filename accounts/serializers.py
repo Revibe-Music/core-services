@@ -1,14 +1,20 @@
-from knox.models import AuthToken
 from .models import *
 from music.models import Artist
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.forms.models import model_to_dict
+from allauth.socialaccount.models import SocialToken
+from oauth2_provider.models import AccessToken, RefreshToken
+from oauth2_provider.generators import generate_client_id
+from django.conf import settings
+from django.utils import timezone
+
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['country','image']
+
 
 class UserSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(many=False)
@@ -19,12 +25,12 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
-        user = CustomUser.objects.create(**validated_data)
+        user = CustomUser.objects.create_user(**validated_data)
         user.save()
         profile = Profile.objects.create(user=user, **profile_data)
         profile.save()
         return user
-    
+
     def update(self, instance, validated_data):
         # TODO: fix this
         profile_data = validated_data.pop('profile')
@@ -43,18 +49,6 @@ class UserSerializer(serializers.ModelSerializer):
 
         return instance
 
-# class CreateAccountSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = CustomUser
-#         fields = ['username','email','password']
-#         extra_kwargs = {'password': {'write_only': True}}
-    
-#     def create(self, validated_data):
-#         user = CustomUser.objects.create_user(validated_data['username'],
-#                                             validated_data['email'],
-#                                             validated_data['password'])
-#         return user
-
 class LoginAccountSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
@@ -69,3 +63,8 @@ class UserArtistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artist
         fields = '__all__'
+
+class SocialTokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialToken
+        fields = ['token', 'token_secret', 'expires_at']

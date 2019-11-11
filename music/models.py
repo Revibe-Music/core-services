@@ -57,8 +57,8 @@ class Song(models.Model):
         return "<Song: {} {}>".format(self.title, self.id)
 
 class SongContributor(models.Model):
-    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, null=False)
-    song = models.ForeignKey(Song, on_delete=models.CASCADE, null=False)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, null=False, related_name='artist_to_song')
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, null=False, related_name='song_to_artist')
     contribution_type = models.CharField(max_length=255, null=True) # limit choices on the application side
 
     def __str__(self):

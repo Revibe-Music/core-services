@@ -28,6 +28,10 @@ class SongViewSet(viewsets.ModelViewSet):
         "GET": [["ADMIN"],["read"],["read-albums"]]
     }
 
+class SCViewSet(viewsets.ModelViewSet):
+    queryset = SongContributor.objects.all()
+    serializer_class = SongContributorSerializer
+
 # @todo replace api_view functions with rest Framework viewSets
 
 # @api_view(['GET'])

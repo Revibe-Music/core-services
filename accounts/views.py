@@ -2,8 +2,6 @@ from django.conf import settings
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.response import Response
 from rest_auth.registration.views import SocialConnectView
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
 from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
@@ -16,30 +14,6 @@ import json
 
 CLIENT_ID = 'y2iPQuosC9qgIJZua9w5VCpHMTdO7Onkl2RF9qQk'
 CLIENT_SECRET = 'KE5IMAxQizJAwRKkKUY244PctidKPL88mQwyGPX6ci9ZymHsYSgxxTLeJNMppf1lerlNfjQnKYpZ1xzlsRFtdV6S9gLfb6WdFnVu29BSw8lteoqiU6ZoJtnxabs4slgs'
-
-class UserViewSet(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated, ]
-    serializer_class = UserSerializer
-
-    def get(self, request, *args, **kwargs):
-        return Response(UserSerializer(request.user, context=self.get_serializer_context()).data)
-
-    def patch(self, request, *args, **kwargs):
-        user = request.user
-        if request.data['first_name']:
-            user.first_name = request.data['first_name']
-        if request.data['last_name']:
-            user.last_name = request.data['last_name']
-        if request.data['username']:
-            user.username = request.data['username']
-        if request.data['email']:
-            user.email = request.data['email']
-        if request.data['profile']['country']:
-            user.profile.country = request.data['profile']['country']
-        if request.data['profile']['image']:
-            user.profile.image = request.data['profile']['image']
-        user.save()
-        user.profile.save()
 
 
 class RegistrationAPI(generics.GenericAPIView):
@@ -61,19 +35,20 @@ class RegistrationAPI(generics.GenericAPIView):
                'grant_type': 'password',
                'username': request.data['username'],
                'password': request.data['password'],
-               'client_id': CLIENT_ID,
-               'client_secret': CLIENT_SECRET,
-               # 'scope': []
+               'client_id': "y2iPQuosC9qgIJZua9w5VCpHMTdO7Onkl2RF9qQk",
+               'client_secret': "KE5IMAxQizJAwRKkKUY244PctidKPL88mQwyGPX6ci9ZymHsYSgxxTLeJNMppf1lerlNfjQnKYpZ1xzlsRFtdV6S9gLfb6WdFnVu29BSw8lteoqiU6ZoJtnxabs4slgs",
                }
         req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
+        if req.status_code != 200:
+            return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
+
         return Response({
             "user": UserSerializer(user, context=self.get_serializer_context()).data,
             "token": req.json()
         })
 
-
 class LoginAPI(generics.GenericAPIView):
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = [permissions.AllowAny]
     serializer_class = LoginAccountSerializer
 
     def post(self, request, *args, **kwargs):
@@ -89,13 +64,15 @@ class LoginAPI(generics.GenericAPIView):
                'client_secret': CLIENT_SECRET
                }
         req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
+        if req.status_code != 200:
+            return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
         return Response({
             "user": UserSerializer(user, context=self.get_serializer_context()).data,
             "token": req.json()
         })
 
 class RefreshTokenAPI(generics.GenericAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = [permissions.AllowAny]
     serializer_class = RefreshTokenSerializer
 
     def post(self, request, *args, **kwargs):
@@ -110,9 +87,11 @@ class RefreshTokenAPI(generics.GenericAPIView):
                'client_secret': CLIENT_SECRET
                }
         req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
+        if req.status_code != 200:
+            return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
         return Response(req.json())
 
-class RevokeTokenAPI(generics.GenericAPIView):
+class LogoutAPI(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = AccessTokenSerializer
 
@@ -124,46 +103,9 @@ class RevokeTokenAPI(generics.GenericAPIView):
                'client_secret': CLIENT_SECRET
                }
         req = requests.post('http://127.0.0.1:8000/o/revoke_token/',headers=headers,data=data)
-        return Response(req.json())
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def revoke_token(request):
-    '''
-    Method to revoke tokens.
-    {"token": "<token>"}
-    '''
-    r = requests.post(
-        'http://127.0.0.1:8000/o/revoke_token/',
-        data={
-            'token': request.data['token'],
-            'client_id': CLIENT_ID,
-            'client_secret': CLIENT_SECRET,
-        },
-    )
-    # If it goes well return sucess message (would be empty otherwise)
-    if r.status_code == requests.codes.ok:
-        return Response({'message': 'token revoked'}, r.status_code)
-    # Return the error if it goes badly
-    return Response(r.json(), r.status_code)
-
-class UserArtistViewSet(ProtectedResourceView):
-    # permission_classes = [permissions.IsAuthenticated]
-    serializer_class = UserArtistSerializer
-    http_method_names = ['post']
-
-    def get_queryset(self):
-        return self.request.user.artist
-
-    def create(self, request):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            artist = serializer.save()
-            request.user.artist = artist
-            request.user.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if req.status_code != 200:
+            return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
+        return Response({"status":"success", "code":200, "message": "Token has been revoked."})
 
 class SpotifyConnect(SocialConnectView):
     """ Logs already authenticated user into Spotify account"""
@@ -189,7 +131,7 @@ class SpotifyConnect(SocialConnectView):
 
 
 class SpotifyRefresh(ProtectedResourceView):
-    # permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = UserSerializer
 
     def post(self, request, *args, **kwargs):
@@ -198,7 +140,6 @@ class SpotifyRefresh(ProtectedResourceView):
         user = serializer.validated_data
         if SocialAccount.objects.filter(user=user,provider="spotify").exists():
             social_account = SocialAccount.objects.get(user=user,provider="spotify")
-
             if SocialToken.objects.filter(account=social_account).exists():
                 token = SocialToken.objects.get(account=social_account)
                 spotify = SocialApp.objects.get(name="Spotify")
@@ -229,56 +170,49 @@ class SpotifyLogout(generics.GenericAPIView):
             return Response({'message':'Spotify logout successful.'}, status=status.HTTP_200_OK)
         return Response({"error":"User has not logged into Spotify."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
 
+class UserArtistViewSet(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
+    serializer_class = UserArtistSerializer
 
+    def get(self):
+        return self.request.user.artist
 
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            artist = serializer.save()
+            request.user.artist = artist
+            request.user.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# TODO: rewrite as class with serializer
-# @api_view(['POST'])
-# def refresh_spotify_token(request):
-#     token_str = request.GET.get('authToken')
-#     access_token = Token.objects.get(key=token_str)
-#     user = access_token.user
-#     if not user:
-#         return Response({"error":"No user found."},status=status.HTTP_400_BAD_REQUEST)
-#
-#     if SocialAccount.objects.filter(user=user,provider="spotify").exists():
-#         social_account = SocialAccount.objects.get(user=user,provider="spotify")
-#
-#         if SocialToken.objects.filter(account=social_account).exists():
-#             token = SocialToken.objects.get(account=social_account)
-#             spotify = SocialApp.objects.get(name="Spotify")
-#             clientid = spotify.client_id
-#             secretkey= spotify.secret
-#             refreshkey = token.token_secret
-#             try:
-#                 spotifyurl = "https://accounts.spotify.com/api/token"
-#                 spotifydata = {'grant_type': 'refresh_token', 'refresh_token':refreshkey}
-#                 response = requests.post(spotifyurl, data=spotifydata, auth=(clientid, secretkey))
-#                 response = json.loads(response.text)
-#                 token.token = response['access_token']
-#                 token.save()
-#                 return Response({'access_token':response['access_token'],'refresh_token':refreshkey, "expires_in": 3600}, status=status.HTTP_200_OK)
-#             except:
-#                 return Response({'access_token': token.token,'refresh_token':token.token_secret}, status=status.HTTP_200_OK)
-#         else:
-#             return Response({"error":"Social Token does not exist."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
-#
-#     # need to handle errors here
-#     else:
-#         return Response({"error":"Social Account for provider='Spotify' and user="+user.email+" does not exist."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
+class UserViewSet(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
+    serializer_class = UserSerializer
 
+    def get(self, request, *args, **kwargs):
+        return Response(UserSerializer(request.user, context=self.get_serializer_context()).data)
 
-# # rewrite as class with serializer
-# @api_view(['GET'])
-# def get_connected_platforms(request):
-#     user = request.user
-#     print(user)
-#     social_tokens = []
-#     if SocialAccount.objects.filter(user=user).exclude(provider="Google").exists():
-#         for social_account in SocialAccount.objects.filter(user=user).exclude(provider="Google"):
-#             social_account_obj = SocialAccount.objects.get(user=user, provider=social_account.provider)
-#             if SocialToken.objects.filter(account=social_account_obj).exists():
-#                 social_token = SocialToken.objects.get(account=social_account_obj)
-#                 social_tokens.append({"name":social_account.provider.title(), "access_token":social_token.token, "refresh_token":social_token.token_secret})
-#
-#     return Response({"platforms": social_tokens},status=status.HTTP_200_OK)
+    def patch(self, request, *args, **kwargs):
+        user = request.user
+        if request.data['first_name']:
+            user.first_name = request.data['first_name']
+        if request.data['last_name']:
+            user.last_name = request.data['last_name']
+        if request.data['username']:
+            user.username = request.data['username']
+        if request.data['email']:
+            user.email = request.data['email']
+        if request.data['profile']['country']:
+            user.profile.country = request.data['profile']['country']
+        if request.data['profile']['image']:
+            user.profile.image = request.data['profile']['image']
+        user.save()
+        user.profile.save()
+
+class UserConnectedPlatforms(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
+    serializer_class = SocialTokenSerializer
+
+    def get(self, request, *args, **kwargs):
+        return Response(SocialTokenSerializer(request.user, context=self.get_serializer_context()).data)

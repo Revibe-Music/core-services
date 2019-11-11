@@ -14,12 +14,12 @@ class CustomUser(AbstractUser):
 
 class Profile(models.Model):
     id = models.AutoField(primary_key=True)
-    country = models.CharField('Country', max_length=255, null=True)
+    country = models.CharField('Country', max_length=255, null=True, blank=True)
     # replace with???
     # lat = models.???
     # long = models.???
-    dob = models.DateField('Date of Birth', null=True)
-    image = models.FileField("Profile Picture", upload_to='images/profiles', null=True)
+    dob = models.DateField('Date of Birth', null=True, blank=True)
+    image = models.FileField("Profile Picture", upload_to='images/profiles', null=True, blank=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
 
 

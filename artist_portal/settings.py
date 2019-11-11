@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.spotify',
+    'allauth.socialaccount.providers.openid',
 ]
 
 MIDDLEWARE = [
@@ -121,8 +122,14 @@ DATABASES = {
 
 
 REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'accounts.adapter.TokenAuthSupportQueryString',
         'rest_framework.authentication.SessionAuthentication', # To keep the Browsable API
     ),
     'DEFAULT_PERMISSION_CLASSES': (

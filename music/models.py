@@ -28,8 +28,8 @@ class Album(models.Model):
         return "<Album: {} {}>".format(self.name, self.id)
 
 class AlbumContributor(models.Model):
-    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, null=False)
-    album = models.ForeignKey(Album, on_delete=models.CASCADE, null=False)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, null=False, related_name='artist_to_album')
+    album = models.ForeignKey(Album, on_delete=models.CASCADE, null=False, related_name='album_to_artist')
     contribution_type = models.CharField(max_length=255, null=True) # limit choices on the application side
 
     def __str__(self):

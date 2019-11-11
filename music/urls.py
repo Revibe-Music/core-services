@@ -5,7 +5,8 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register("artists", views.ArtistViewSet, "artists")
-router.register("albums", views.ArtistViewSet, "albums")
+router.register("albums", views.AlbumViewSet, "albums")
+router.register("songs", views.SongViewSet, "songs")
 
 urlpatterns = [
     path("", include(router.urls)),

@@ -10,7 +10,7 @@ class ArtistSerializer(serializers.ModelSerializer):
 class AlbumContributorSerializer(serializers.ModelSerializer):
     artist = ArtistSerializer(many=False)
     class Meta:
-        model = AlbumContributors
+        model = AlbumContributor
         fields = '__all__'
 
 class AlbumSerializer(serializers.ModelSerializer):
@@ -20,9 +20,9 @@ class AlbumSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SongContributorSerializer(serializers.ModelSerializer):
-    artist = ArtistSerializer(many=False)
+    artists = ArtistSerializer(many=True)
     class Meta:
-        model = SongContributors
+        model = SongContributor
         fields = '__all__'
 
 class SongSerializer(serializers.ModelSerializer):
@@ -30,7 +30,22 @@ class SongSerializer(serializers.ModelSerializer):
     contributors = SongContributorSerializer(many=True)
     class Meta:
         model = Song
-        fields = '__all__'
+        fields = [
+            'id',
+            'uri',
+            'title',
+            'album',
+            'duration',
+            'platform',
+            'uploaded_by',
+            'uploaded_date',
+            'contributors'
+        ]
+        extra_kwargs = {
+            'uri': {'read_only': True},
+            'uploaded_by': {'read_only': True},
+            'uploaded_date': {'read_only': True}
+        }
 
 class LibrarySerializer(serializers.ModelSerializer):
     class Meta:

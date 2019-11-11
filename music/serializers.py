@@ -22,7 +22,7 @@ class AlbumSerializer(serializers.ModelSerializer):
 
 class SongContributorSerializer(serializers.ModelSerializer):
     # https://www.reddit.com/r/django/comments/6yrh9k/drf_serialization_not_working_on_many_to_many/
-    artist = ArtistSerializer(many=False)
+    # artist = ArtistSerializer(many=False)
     # id = serializers.ReadOnlyField(source='artist.id')
     # name = serializers.ReadOnlyField(source='artist.name')
     class Meta:
@@ -30,13 +30,14 @@ class SongContributorSerializer(serializers.ModelSerializer):
         fields = [
             # 'id',
             # 'name',
-            'artist',
+            # 'artist',
             'contribution_type'
         ]
 
 class SongSerializer(serializers.ModelSerializer):
-    album = ss.SongAlbumSerializer(many=False)
-    contributors = SongContributorSerializer(many=True)
+    album = ss.SongAlbumSerializer(many=False, read_only=True)
+    contributors = ss.SongContributionSerializer(many=True, read_only=True)
+    # contributors = serializers.StringRelatedField(many=True)
     class Meta:
         model = Song
         fields = [

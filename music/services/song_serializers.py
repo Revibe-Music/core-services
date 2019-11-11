@@ -8,3 +8,11 @@ class SongAlbumSerializer(serializers.ModelSerializer):
             'id',
             'name'
         ]
+
+class SongContributionSerializer(serializers.RelatedField):
+    def to_representation(self, value):
+        out = {
+            'id': value.id,
+            'name': value.name
+        }
+        return out

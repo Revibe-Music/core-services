@@ -150,10 +150,8 @@ OAUTH2_PROVIDER = {
         'write': 'Write scope',
         'ADMIN': 'override on everything',
         # account scopes
-        'read-user-only': 'Read user data but not profile data',
-        'write-user-data': 'Write user data but not profile data',
-        'read-user':'Read user data and profile data',
-        'write-user': 'Write user data and profile data',
+        'read-user-profile':'Read user data and profile data',
+        'write-user-profile': 'Write user data and profile data',
         'write-user-artist': 'Write user and user-artist data',
         'read-user-artist': 'Read user and user-artist data',
         'manager': 'Manage Linked Artists',
@@ -258,7 +256,3 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # all_auth settings
 ACCOUNT_EMAIL_REQUIRED = False
-
-
-# knox settings
-# KNOX_TTL = None

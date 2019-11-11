@@ -1,5 +1,6 @@
 from .models import *
 from rest_framework import serializers
+from .services import song_serializers as ss
 
 
 class ArtistSerializer(serializers.ModelSerializer):
@@ -34,7 +35,7 @@ class SongContributorSerializer(serializers.ModelSerializer):
         ]
 
 class SongSerializer(serializers.ModelSerializer):
-    # album = AlbumSerializer(many=False)
+    album = ss.SongAlbumSerializer(many=False)
     contributors = SongContributorSerializer(many=True)
     class Meta:
         model = Song
@@ -54,7 +55,6 @@ class SongSerializer(serializers.ModelSerializer):
             'uploaded_by': {'read_only': True},
             'uploaded_date': {'read_only': True}
         }
-        # fields = '__all__'
 
 class LibrarySerializer(serializers.ModelSerializer):
     class Meta:

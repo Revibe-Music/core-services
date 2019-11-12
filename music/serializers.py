@@ -46,6 +46,7 @@ class AlbumSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'image',
+            'uploaded_by',
             'album_to_artist',
             'song_set'
         ]

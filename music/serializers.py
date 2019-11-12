@@ -55,9 +55,10 @@ class AlbumSerializer(serializers.ModelSerializer):
         return obj.image.url
 
 class LibrarySerializer(serializers.ModelSerializer):
+    songs = SongSerializer(many=True)
     class Meta:
         model = Library
-        fields = '__all__'
+        fields = ['platform','songs']
 
 class PlaylistSerializer(serializers.ModelSerializer):
     class Meta:

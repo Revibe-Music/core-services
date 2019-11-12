@@ -4,20 +4,14 @@ from .services import song_serializers, album_serializers
 
 
 class ArtistSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField('get_image_url')
+
     class Meta:
         model = Artist
         fields = '__all__'
-
-class AlbumSerializer(serializers.ModelSerializer):
-    album_to_artist = album_serializers.AlbumContributorSerializer(many=True)
-    class Meta:
-        model = Album
-        fields = [
-            'id',
-            'name',
-            'image',
-            'album_to_artist'
-        ]
+    
+    def get_image_url(self, obj):
+        return obj.image.url
 
 class SongSerializer(serializers.ModelSerializer):
     album = song_serializers.SongAlbumSerializer(many=False)
@@ -40,6 +34,24 @@ class SongSerializer(serializers.ModelSerializer):
             'uploaded_by': {'read_only': True},
             'uploaded_date': {'read_only': True}
         }
+
+class AlbumSerializer(serializers.ModelSerializer):
+    album_to_artist = album_serializers.AlbumContributorSerializer(many=True)
+    song_set = SongSerializer(many=True)
+    image = serializers.SerializerMethodField('get_image_url')
+
+    class Meta:
+        model = Album
+        fields = [
+            'id',
+            'name',
+            'image',
+            'album_to_artist',
+            'song_set'
+        ]
+    
+    def get_image_url(self, obj):
+        return obj.image.url
 
 class LibrarySerializer(serializers.ModelSerializer):
     class Meta:

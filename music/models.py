@@ -19,6 +19,8 @@ class Album(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     image = models.FileField('Album Image', upload_to='image/albums') # actual field
+    # TODO: create mutliple image fields to send different sized images for different uses
+    platform = models.CharField(max_length=255)
     contributors = models.ManyToManyField(Artist, through='AlbumContributor')
 
     def __str__(self):

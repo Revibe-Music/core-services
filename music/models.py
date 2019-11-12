@@ -21,6 +21,7 @@ class Album(models.Model):
     image = models.FileField('Album Image', upload_to='image/albums') # actual field
     # TODO: create mutliple image fields to send different sized images for different uses
     platform = models.CharField(max_length=255)
+    uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="album_uploaded_by")
     contributors = models.ManyToManyField(Artist, through='AlbumContributor')
 
     def __str__(self):

@@ -11,5 +11,4 @@ media/
 *.jpeg
 
 # other
-/.vscode
-*.vscode
+.vscode/

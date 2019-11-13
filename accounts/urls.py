@@ -16,6 +16,7 @@ urlpatterns = [
     path("profile/", views.UserViewSet.as_view()),
     path('spotify-authentication/', views.SpotifyConnect.as_view()),
     path('spotify-refresh/', views.SpotifyRefresh.as_view()),
+    path('spotify-logout/', views.SpotifyLogout.as_view()),
     path("connected-platforms/", views.UserConnectedPlatforms.as_view()),
     path("create-user-artist/", views.UserArtistViewSet.as_view()),
 ]

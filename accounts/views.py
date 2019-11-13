@@ -7,13 +7,11 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
 from oauth2_provider.views.generic import ProtectedResourceView
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
+from oauth2_provider.models import Application
 from .models import *
 from .serializers import *
 import requests
 import json
-
-CLIENT_ID = 'y2iPQuosC9qgIJZua9w5VCpHMTdO7Onkl2RF9qQk'
-CLIENT_SECRET = 'KE5IMAxQizJAwRKkKUY244PctidKPL88mQwyGPX6ci9ZymHsYSgxxTLeJNMppf1lerlNfjQnKYpZ1xzlsRFtdV6S9gLfb6WdFnVu29BSw8lteoqiU6ZoJtnxabs4slgs'
 
 
 class RegistrationAPI(generics.GenericAPIView):
@@ -29,14 +27,15 @@ class RegistrationAPI(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        application = Application.objects.get(name="Revibe First Party Application")
         user = serializer.save()
         headers={"Content-Type": "application/x-www-form-urlencoded"}
         data= {
                'grant_type': 'password',
                'username': request.data['username'],
                'password': request.data['password'],
-               'client_id': "y2iPQuosC9qgIJZua9w5VCpHMTdO7Onkl2RF9qQk",
-               'client_secret': "KE5IMAxQizJAwRKkKUY244PctidKPL88mQwyGPX6ci9ZymHsYSgxxTLeJNMppf1lerlNfjQnKYpZ1xzlsRFtdV6S9gLfb6WdFnVu29BSw8lteoqiU6ZoJtnxabs4slgs",
+               'client_id': application.client_id,
+               'client_secret': application.client_secret,
                }
         req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
         if req.status_code != 200:
@@ -54,14 +53,16 @@ class LoginAPI(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        application = Application.objects.get(name="Revibe First Party Application")
         user = serializer.validated_data
+        print(request.data)
         headers={"Content-Type": "application/x-www-form-urlencoded"}
         data= {
                'grant_type': 'password',
                'username': request.data['username'],
                'password': request.data['password'],
-               'client_id': CLIENT_ID,
-               'client_secret': CLIENT_SECRET
+               'client_id': application.client_id,
+               'client_secret': application.client_secret
                }
         req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
         if req.status_code != 200:
@@ -78,13 +79,14 @@ class RefreshTokenAPI(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        application = Application.objects.get(name="Revibe First Party Application")
         user = serializer.validated_data
         headers={"Content-Type": "application/x-www-form-urlencoded"}
         data= {
                'grant_type': 'refresh_token',
                'refresh_token': request.data['refresh_token'],
-               'client_id': CLIENT_ID,
-               'client_secret': CLIENT_SECRET
+               'client_id': application.client_id,
+               'client_secret': application.client_secret
                }
         req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
         if req.status_code != 200:
@@ -96,11 +98,12 @@ class LogoutAPI(generics.GenericAPIView):
     serializer_class = AccessTokenSerializer
 
     def post(self, request, *args, **kwargs):
+        application = Application.objects.get(name="Revibe First Party Application")
         headers={"Content-Type": "application/x-www-form-urlencoded"}
         data= {
                'token': request.data['access_token'],
-               'client_id': CLIENT_ID,
-               'client_secret': CLIENT_SECRET
+               'client_id': application.client_id,
+               'client_secret': application.client_secret
                }
         req = requests.post('http://127.0.0.1:8000/o/revoke_token/',headers=headers,data=data)
         if req.status_code != 200:

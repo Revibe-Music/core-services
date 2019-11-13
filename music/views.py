@@ -25,8 +25,22 @@ class SongViewSet(viewsets.ModelViewSet):
     serializer_class = SongSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["read"],["read-albums"]]
+        "GET": [["ADMIN"],["read"],["read-songs"]]
     }
+
+class LibraryViewSet(viewsets.ModelViewSet):
+    serializer_class = LibrarySerializer
+    permission_classes = [TokenMatchesOASRequirements]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"],["read"],["read-library"]]
+    }
+
+    def get_queryset(self):
+        """
+        Return the list of saved songs for the current user
+        """
+        user = self.request.user
+        return Library.objects.filter(user=user)
 
 # @todo replace api_view functions with rest Framework viewSets
 

@@ -78,12 +78,11 @@ class SocialLoginSerializer(serializers.Serializer):
         # http://stackoverflow.com/questions/8666316/facebook-oauth-2-0-code-and-token
 
         token_dict = {}
-
         # Case 1: We received the access_token
         if attrs.get('access_token'):
+            print("GOT ACCESS_TOKEN")
             access_token = attrs.get('access_token')
             token_dict["access_token"] = access_token
-
 
         # Case 2: We received the authorization code
         elif attrs.get('code'):

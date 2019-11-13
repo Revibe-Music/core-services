@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 
     # installed apps
     'rest_framework',
+    'rest_framework.authtoken',     # Need this for allauth social account tokens
     'oauth2_provider',
     'rest_auth',
     # 'knox',
@@ -128,8 +129,8 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.MultiPartParser',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
         'accounts.adapter.TokenAuthSupportQueryString',
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
         'rest_framework.authentication.SessionAuthentication', # To keep the Browsable API
     ),
     'DEFAULT_PERMISSION_CLASSES': (
@@ -179,6 +180,34 @@ OAUTH2_PROVIDER = {
     'CLIENT_SECRET_GENERATOR_LENGTH': 100,
 }
 
+SOCIALACCOUNT_QUERY_EMAIL=True
+SOCIALACCOUNT_STORE_TOKENS=True
+
+#Social Account Settings
+SOCIALACCOUNT_PROVIDERS = {
+    #  'google': {
+    #     'SCOPE': [
+    #         'profile',
+    #         'email',
+    #     ],
+    #     'AUTH_PARAMS': {
+    #         'access_type': 'online',
+    #     }
+    # },
+    'spotify': {
+        'SCOPE': [
+            "user-read-private",
+            "playlist-read",
+            "playlist-read-private",
+            'user-library-read',
+            'user-library-modify',
+            'user-top-read',
+            "streaming"
+        ],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'EXCHANGE_TOKEN': True,
+    }
+}
 
 
 # Password validation

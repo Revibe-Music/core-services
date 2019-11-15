@@ -1,5 +1,5 @@
 from .models import *
-from music.models import Artist
+from music.models import Artist, Library
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.forms.models import model_to_dict
@@ -29,6 +29,9 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         profile = Profile.objects.create(user=user, **profile_data)
         profile.save()
+        for plat in ['Revibe', 'YouTube']:
+            library = Library.objects.create(user=user, platform=palt)
+            library.save()
         return user
 
     def update(self, instance, validated_data):

@@ -22,18 +22,6 @@ class Profile(models.Model):
     image = models.FileField("Profile Picture", upload_to='images/profiles', null=True, blank=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
 
-
-# creates what are basically event listeners to create and save a profile whenever a user is created
-# deprecated
-# @receiver(post_save, sender=CustomUser)
-# def create_user_profile(sender, instance, created, **kwargs):
-#     if created:
-#         Profile.objects.create(user=instance)
-
-# @receiver(post_save, sender=CustomUser)
-# def save_user_profile(sender, instance, **kwargs):
-#     instance.profile.save()
-
 class Social(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='user_social')
     platform = models.CharField(max_length=255, null=True)

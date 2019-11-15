@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='song',
             name='file',
-            field=models.FileField(null=True, upload_to=music.models.rename_file, verbose_name='Song'),
+            field=models.FileField(null=True, upload_to=music.model_exts.rename_song, verbose_name='Song'),
         ),
         migrations.AlterField(
             model_name='song',

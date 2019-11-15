@@ -1,16 +1,37 @@
 from rest_framework import viewsets, permissions, generics
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
 from .models import *
 from .serializers import *
+from .services import artist_serializers
 
 
 class ArtistViewSet(viewsets.ModelViewSet):
     queryset = Artist.objects.all()
     serializer_class = ArtistSerializer
+    serializer_action_classes = {
+        # 'retrieve': artist_serializers.ArtistDetailSerializer
+    }
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["read"],["read-songs"]]
     }
+
+    def get_serializer_class(self):
+        try:
+            return self.serializer_action_classes[self.action]
+        except (KeyError, AttributeError):
+            return super().get_serializer_class()
+        
+    @action(detail=True)
+    def albums(self, request, pk=None):
+        uploaded_albums = Album.objects.filter(uploaded_by=pk)
+        print(uploaded_albums)
+
+        serializer = self.get_serializer(uploaded_albums)
+        print(serializer)
+        return Response(serializer.data)
 
 class AlbumViewSet(viewsets.ModelViewSet):
     queryset = Album.objects.all()

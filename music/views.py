@@ -48,7 +48,7 @@ class ArtistViewSet(viewsets.ModelViewSet):
         """
         artist = get_object_or_404(self.queryset, pk=pk)
         queryset = AlbumContributor.objects.filter(artist=artist)
-        serializer = artist_serializers.ArtistAlbumSerializer(queryset, many=True)
+        serializer = artist_serializers.ArtistAlbumContributorSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=True)

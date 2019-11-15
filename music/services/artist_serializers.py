@@ -15,12 +15,20 @@ class ArtistAlbumSerializer(serializers.ModelSerializer):
     def get_image_url(self, obj):
         return obj.image.url
 
+class ArtistAlbumContributorSerializer(serializers.ModelSerializer):
+    album = ArtistAlbumSerializer(many=False)
+    class Meta:
+        model = AlbumContributor
+        fields = [
+            'contribution_type',
+            'album'
+        ]
+
 class ArtistSongSerializer(SongSerializer):
     """
     TODO: this
     """
     pass
-
 
 class ArtistSongContributorSerializer(serializers.ModelSerializer):
     song = ArtistSongSerializer(many=False)

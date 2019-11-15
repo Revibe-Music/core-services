@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -8,30 +9,59 @@ from .services import artist_serializers
 
 
 class ArtistViewSet(viewsets.ModelViewSet):
-    queryset = Artist.objects.all()
+    queryset = Artist.objects.filter(platform="Revibe")
     serializer_class = ArtistSerializer
-    serializer_action_classes = {
-        # 'retrieve': artist_serializers.ArtistDetailSerializer
-    }
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["read"],["read-songs"]]
     }
 
-    def get_serializer_class(self):
-        try:
-            return self.serializer_action_classes[self.action]
-        except (KeyError, AttributeError):
-            return super().get_serializer_class()
-        
     @action(detail=True)
     def albums(self, request, pk=None):
-        uploaded_albums = Album.objects.filter(uploaded_by=pk)
-        print(uploaded_albums)
-
-        serializer = self.get_serializer(uploaded_albums)
-        print(serializer)
+        """
+        Sends the artist's list of albums (only uploaded albums, not contributions)
+        """
+        artist = get_object_or_404(self.queryset, pk=pk)
+        queryset = Album.objects.filter(uploaded_by=artist)
+        serializer = artist_serializers.ArtistAlbumSerializer(queryset, many=True)
         return Response(serializer.data)
+    
+    @action(detail=True)
+    def top_songs(self, request, pk=None):
+        # this is gonna be a bitch
+        pass
+    
+    @action(detail=True)
+    def songs(self, request, pk=None):
+        """
+        Sends the artist's list of songs (only uploaded songs, not contributions)
+        """
+        artist = get_object_or_404(self.queryset, pk=pk)
+        queryset = Song.objects.filter(uploaded_by=artist)
+        serializer = artist_serializers.ArtistSongSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True)
+    def album_contributions(self, request, pk=None):
+        """
+        Sends the list of albums that the artist has contributed to
+        """
+        artist = get_object_or_404(self.queryset, pk=pk)
+        queryset = AlbumContributor.objects.filter(artist=artist)
+        serializer = artist_serializers.ArtistAlbumSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True)
+    def song_contributions(self, request, pk=None):
+        """
+        TODO: this
+        Sends the list of songs that the artist has contributed to
+        """
+        artist = get_object_or_404(self.queryset, pk=pk)
+        queryset = SongContributor.objects.filter(artist=artist)
+        serializer = artist_serializers.ArtistSongContributorSerializer(queryset, many=True)
+        return Response(serializer.data)
+
 
 class AlbumViewSet(viewsets.ModelViewSet):
     queryset = Album.objects.all()

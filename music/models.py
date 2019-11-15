@@ -18,7 +18,7 @@ class Artist(models.Model):
 class Album(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
-    image = models.FileField('Album Image', upload_to='image/albums') # actual field
+    image = models.FileField('Album Image', upload_to='images/albums') # actual field
     # TODO: create mutliple image fields to send different sized images for different uses
     platform = models.CharField(max_length=255)
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="album_uploaded_by")
@@ -41,10 +41,18 @@ class AlbumContributor(models.Model):
     def __repr__(self):
         return "<AlbumContribution: {}-{}>".format(self.album, self.artist)
 
+def rename_file(instance, filename):
+    ext = filename.split('.')[-1]
+    path = "audio/songs/"
+    if instance.uri:
+        return path + "{}.{}".format(instance.uri, ext)
+    else:
+        return path + filename
+
 class Song(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    uri = models.CharField('URI', max_length=255, unique=True) #, null=False, blank=True
-    file = models.FileField('Song', upload_to='audio/songs', null=True)
+    uri = models.UUIDField('URI', default=uuid.uuid4, unique=True, editable=False)
+    file = models.FileField('Song', upload_to=rename_file, null=True)
     title = models.CharField('Name', max_length=255, null=False)
     album  = models.ForeignKey(Album, on_delete=models.SET_NULL, null=True, blank=True)
     duration = models.DecimalField('Duration', null=True, blank=True, max_digits=6, decimal_places=2) # seconds
@@ -58,6 +66,7 @@ class Song(models.Model):
     
     def __repr__(self):
         return "<Song: {} {}>".format(self.title, self.id)
+    
 
 class SongContributor(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, null=False, related_name='artist_to_song')

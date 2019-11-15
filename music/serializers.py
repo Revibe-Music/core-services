@@ -16,17 +16,19 @@ class ArtistSerializer(serializers.ModelSerializer):
 class SongSerializer(serializers.ModelSerializer):
     album = song_serializers.SongAlbumSerializer(many=False)
     song_to_artist = song_serializers.SongContributorSerializer(many=True)
+    uploaded_by = ArtistSerializer(many=False, read_only=True)
     class Meta:
         model = Song
         fields = [
             'id',
             'uri',
             'title',
-            'album',
+            'genre',
             'duration',
             'platform',
-            'uploaded_by',
             'uploaded_date',
+            'album',
+            'uploaded_by',
             'song_to_artist'
         ]
         extra_kwargs = {

@@ -23,6 +23,7 @@ class Album(models.Model):
     image = models.FileField('Album Image', upload_to='images/albums') # actual field
     # TODO: create mutliple image fields to send different sized images for different uses
     platform = models.CharField(max_length=255)
+    type = models.CharField(max_length=255, null=True, blank=True)
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="album_uploaded_by")
     contributors = models.ManyToManyField(Artist, through='AlbumContributor')
 
@@ -63,7 +64,7 @@ class Song(models.Model):
         return "<Song: {} {}>".format(self.title, self.id)
 
 class SongAnalysis(models.Model):
-    pass    
+    pass
 
 class SongContributor(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, null=False, related_name='artist_to_song')

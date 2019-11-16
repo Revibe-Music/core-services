@@ -8,7 +8,7 @@ from oauth2_provider.models import Application
 
 class AuthenticationTest(TestCase):
     def setUp(self):
-        self.base_url  = 'http://127.0.0.1:8000/accounts/'
+        self.base_url  = 'http://127.0.0.1:8000/account/'
         self.test_user = CustomUser.objects.create_user("test_user", "test@user.com", "123456")
         self.application = Application(
             name="Revibe First Party Application",
@@ -34,5 +34,5 @@ class AuthenticationTest(TestCase):
             }
         }
         response = client.post(self.base_url+'register/',data=json.dumps(data),headers=headers)
-        print(response.json())
+        print(response)
         self.assertEqual(response.status_code, 200)

@@ -5,13 +5,14 @@ from rest_auth.registration.views import SocialConnectView
 from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
-from oauth2_provider.views.generic import ProtectedResourceView
+from oauth2_provider.views import TokenView
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
 from oauth2_provider.models import Application
 from .models import *
 from .serializers import *
 import requests
 import json
+from django.http import HttpRequest
 
 
 class RegistrationAPI(generics.GenericAPIView):
@@ -25,6 +26,7 @@ class RegistrationAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
+        print("UOOOOO")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         application = Application.objects.get(name="Revibe First Party Application")
@@ -37,7 +39,13 @@ class RegistrationAPI(generics.GenericAPIView):
                'client_id': application.client_id,
                'client_secret': application.client_secret,
                }
-        req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
+        # req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
+        token_request = HttpRequest()
+        token_request.method = "POST"
+        token_request.headers = headers
+        token_request.data = data
+        req = TokenView.as_view()(token_request)
+        print(req)
         if req.status_code != 200:
             return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
 
@@ -94,6 +102,25 @@ class RefreshTokenAPI(generics.GenericAPIView):
         return Response(req.json())
 
 class LogoutAPI(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = AccessTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        application = Application.objects.get(name="Revibe First Party Application")
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+        data= {
+               'token': request.data['access_token'],
+               'client_id': application.client_id,
+               'client_secret': application.client_secret
+               }
+        req = requests.post('http://127.0.0.1:8000/o/revoke_token/',headers=headers,data=data)
+        if req.status_code != 200:
+            return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
+        return Response({"status":"success", "code":200, "message": "Token has been revoked."})
+
+### Implement ###
+class LogoutAllAPI(generics.GenericAPIView):
+
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = AccessTokenSerializer
 

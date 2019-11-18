@@ -49,7 +49,7 @@ class Song(models.Model):
     uri = models.UUIDField('URI', default=uuid.uuid4, unique=True, editable=False)
     file = models.FileField('Song', upload_to=ext.rename_song, null=True)
     title = models.CharField('Name', max_length=255, null=False)
-    album  = models.ForeignKey(Album, on_delete=models.SET_NULL, null=True, blank=True)
+    album  = models.ForeignKey(Album, on_delete=models.CASCADE, null=False, blank=False)
     duration = models.DecimalField('Duration', null=True, blank=True, max_digits=6, decimal_places=2) # seconds
     platform = models.CharField(max_length=255, null=True)
     contributors = models.ManyToManyField(Artist, through='SongContributor', related_name="song_contributors")
@@ -80,7 +80,7 @@ class SongContributor(models.Model):
 class Library(models.Model):
     platform = models.CharField(max_length=255, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
-    songs = models.ManyToManyField(Song)
+    songs = models.ManyToManyField(Song, through='LibrarySongs', related_name='library_songs')
     
     def __str__(self):
         return "{} on {}".format(self.user, self.platform)
@@ -91,10 +91,20 @@ class Library(models.Model):
 class Playlist(models.Model):
     name = models.CharField("Name", null=True, blank=False, max_length=255)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    songs = models.ManyToManyField(Song)
+    songs = models.ManyToManyField(Song, through='PlaylistSongs', related_name='playlist_songs')
 
     def __str__(self):
         return "{}".format(self.name)
     
     def __repr__(self):
         return "<Playlist: {}>".format(self.name)
+
+class LibrarySongs(models.Model):
+    library = models.ForeignKey(Library, on_delete=models.CASCADE, null=False, related_name='library_to_song')
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, null=False, related_name='song_to_library')
+    date_saved = models.DateTimeField(auto_now_add=True) # test that serializer will auto add the datetime
+
+class PlaylistSongs(models.Model):
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='playlist_to_song')
+    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='song_to_playlist')
+    date_saved = models.DateTimeField(auto_now_add=True) # test that serializer will auto add the datetime

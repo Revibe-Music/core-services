@@ -23,7 +23,7 @@ class ArtistViewSet(viewsets.ModelViewSet):
         """
         artist = get_object_or_404(self.queryset, pk=pk)
         queryset = Album.objects.filter(uploaded_by=artist)
-        serializer = artist_serializers.ArtistAlbumSerializer(queryset, many=True)
+        serializer = BaseAlbumSerializer(queryset, many=True)
         return Response(serializer.data)
     
     @action(detail=True)
@@ -70,12 +70,12 @@ class AlbumViewSet(viewsets.ModelViewSet):
         "GET": [["ADMIN"],["read"],["read-albums"]]
     }
 
-    @action(detail=True)
-    def songs(self, request, pk=None):
-        album = get_object_or_404(self.queryset, pk=pk)
-        queryset = Song.objects.filter(album=album)
-        serializer = album_serializers.AlbumSongSerializer(queryset, many=True)
-        return Response(serializer.data)
+    # @action(detail=True)
+    # def songs(self, request, pk=None):
+    #     album = get_object_or_404(self.queryset, pk=pk)
+    #     queryset = Song.objects.filter(album=album)
+    #     serializer = album_serializers.AlbumSongSerializer(queryset, many=True)
+    #     return Response(serializer.data)
 
 class SongViewSet(viewsets.ModelViewSet):
     queryset = Song.objects.all()

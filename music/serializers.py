@@ -1,6 +1,10 @@
 from .models import *
 from . import mixins
 from rest_framework import serializers
+from .services import (
+    song_serializers as ss,
+    album_serializers as als
+)
 
 
 class BaseArtistSerializer(serializers.ModelSerializer, mixins.ImageURLMixin):
@@ -14,6 +18,7 @@ class BaseArtistSerializer(serializers.ModelSerializer, mixins.ImageURLMixin):
         ]
 
 class BaseAlbumSerializer(serializers.ModelSerializer, mixins.ImageURLMixin):
+    contributions = als.AlbumContributorSerializer(many=True, source='album_to_artist')
     class Meta:
         model = Album
         fields = [
@@ -21,24 +26,29 @@ class BaseAlbumSerializer(serializers.ModelSerializer, mixins.ImageURLMixin):
             'name',
             'image',
             'platform',
-            'uploaded_by',
-            'album_to_artist',
+            'contributions',
         ]
 
 class BaseSongSerializer(serializers.ModelSerializer):
+    """
+    Base of the rest of the song serializers in the API.
+
+    The base is considered what is shown in the library list (app landing page)
+    """
+
+    contributions = ss.SongContributorSerializer(many=True, source='song_to_artist')
+    album = ss.SongAlbumSerializer(many=False)
+
     class Meta:
         model = Song
         fields = [
             'id',
             'uri',
             'title',
-            'genre',
             'duration',
             'platform',
-            'uploaded_date',
             'album',
-            'uploaded_by',
-            'song_to_artist',
+            'contributions',
         ]
 
 class BaseAlbumContributorSerializer(serializers.ModelSerializer):
@@ -64,6 +74,7 @@ class BaseSongContributorSerialzer(serializers.ModelSerializer):
         ]
 
 class BaseLibrarySerializer(serializers.ModelSerializer):
+    songs = BaseSongSerializer(many=True)
     class Meta:
         model = Library
         fields = ['platform','songs']

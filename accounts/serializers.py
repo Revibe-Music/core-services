@@ -30,7 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
         profile = Profile.objects.create(user=user, **profile_data)
         profile.save()
         for plat in ['Revibe', 'YouTube']:
-            library = Library.objects.create(user=user, platform=palt)
+            library = Library.objects.create(user=user, platform=plat)
             library.save()
         return user
 

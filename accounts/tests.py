@@ -25,9 +25,9 @@ class AuthenticationTest(TestCase):
         data = {
             "first_name": "test",
             "last_name": "test",
-            "username": "test12131",
-            "password": "test11344",
-            "email": "test1313@gmail.com",
+            "username": "test121312",
+            "password": "test",
+            "email": "test12313@gmail.com",
             "profile": {
                 "country": "",
                 "image": None

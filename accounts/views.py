@@ -15,7 +15,7 @@ import json
 from django.http import HttpRequest
 
 
-class RegistrationAPI(generics.GenericAPIView):
+class RegistrationAPI(generics.GenericAPIView, TokenView):
     """
     this works when application has following attributes:
     client type: confidential
@@ -26,7 +26,6 @@ class RegistrationAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
-        print("UOOOOO")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         application = Application.objects.get(name="Revibe First Party Application")
@@ -39,19 +38,17 @@ class RegistrationAPI(generics.GenericAPIView):
                'client_id': application.client_id,
                'client_secret': application.client_secret,
                }
-        # req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
-        token_request = HttpRequest()
-        token_request.method = "POST"
-        token_request.headers = headers
-        token_request.data = data
-        req = TokenView.as_view()(token_request)
-        print(req)
+        auth_request = HttpRequest()
+        auth_request.method = "POST"
+        auth_request.POST = data
+        auth_request.content_type = "application/x-www-form-urlencoded"
+        req = TokenView.post(self, auth_request)
         if req.status_code != 200:
             return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
 
         return Response({
             "user": UserSerializer(user, context=self.get_serializer_context()).data,
-            "token": req.json()
+            "token": json.loads(req.content.decode('utf-8'))
         })
 
 class LoginAPI(generics.GenericAPIView):
@@ -195,6 +192,16 @@ class SpotifyLogout(generics.GenericAPIView):
             return Response({'message':'Spotify logout successful.'}, status=status.HTTP_200_OK)
         return Response({"error":"User has not logged into Spotify."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
 
+class UserConnectedPlatforms(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
+
+    def get(self, request, *args, **kwargs):
+            social_accounts = list([item for item in SocialAccount.objects.filter(user=request.user)])
+            return Response({'message':'Spotify logout successful.'}, status=status.HTTP_200_OK)
+        # return Response({"error":"User has not logged into Spotify."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
+
+        # return Response(SocialTokenSerializer(request.user, context=self.get_serializer_context()).data)
+
 class UserArtistViewSet(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     serializer_class = UserArtistSerializer
@@ -234,10 +241,3 @@ class UserViewSet(generics.GenericAPIView):
             user.profile.image = request.data['profile']['image']
         user.save()
         user.profile.save()
-
-class UserConnectedPlatforms(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
-    serializer_class = SocialTokenSerializer
-
-    def get(self, request, *args, **kwargs):
-        return Response(SocialTokenSerializer(request.user, context=self.get_serializer_context()).data)

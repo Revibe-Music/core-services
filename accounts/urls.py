@@ -9,6 +9,7 @@ router = routers.DefaultRouter()
 
 urlpatterns = [
     path("", include(router.urls)),
+    path('allauth/', include('allauth.urls'), name='socialaccount_signup'),
     path("register/", views.RegistrationAPI.as_view()),
     path("login/", views.LoginAPI.as_view()),
     path('logout/', views.LogoutAPI.as_view()),

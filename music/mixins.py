@@ -1,10 +1,9 @@
-from rest_framework.serializers import SerializerMethodField
 class ImageURLMixin:
-    image = SerializerMethodField('get_image_url')
     def get_image_url(self, obj):
         return obj.image.url
-
 class ArtistImageURLMixin:
-    image = SerializerMethodField('get_image_url')
     def get_image_url(self, obj):
         return obj.artist.image.url
+class AlbumImageURLMixin:
+    def get_image_url(self, obj):
+        return obj.album.image.url

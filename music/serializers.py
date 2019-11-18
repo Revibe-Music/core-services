@@ -1,22 +1,31 @@
 from .models import *
+from . import mixins
 from rest_framework import serializers
-from .services import song_serializers, album_serializers
 
 
-class ArtistSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField('get_image_url')
-
+class BaseArtistSerializer(serializers.ModelSerializer, mixins.ImageURLMixin):
     class Meta:
         model = Artist
-        fields = '__all__'
-    
-    def get_image_url(self, obj):
-        return obj.image.url
+        fields = [
+            'id',
+            'name',
+            'image',
+            'platform'
+        ]
 
-class SongSerializer(serializers.ModelSerializer):
-    album = song_serializers.SongAlbumSerializer(many=False)
-    song_to_artist = song_serializers.SongContributorSerializer(many=True)
-    uploaded_by = ArtistSerializer(many=False, read_only=True)
+class BaseAlbumSerializer(serializers.ModelSerializer, mixins.ImageURLMixin):
+    class Meta:
+        model = Album
+        fields = [
+            'id',
+            'name',
+            'image',
+            'platform',
+            'uploaded_by',
+            'album_to_artist',
+        ]
+
+class BaseSongSerializer(serializers.ModelSerializer):
     class Meta:
         model = Song
         fields = [
@@ -29,40 +38,38 @@ class SongSerializer(serializers.ModelSerializer):
             'uploaded_date',
             'album',
             'uploaded_by',
-            'song_to_artist'
+            'song_to_artist',
         ]
-        extra_kwargs = {
-            'uri': {'read_only': True},
-            'uploaded_by': {'read_only': True},
-            'uploaded_date': {'read_only': True}
-        }
 
-class AlbumSerializer(serializers.ModelSerializer):
-    album_to_artist = album_serializers.AlbumContributorSerializer(many=True)
-    song_set = SongSerializer(many=True)
-    image = serializers.SerializerMethodField('get_image_url')
-
+class BaseAlbumContributorSerializer(serializers.ModelSerializer):
+    artist = BaseArtistSerializer(many=False)
+    album = BaseAlbumSerializer(many=False)
     class Meta:
-        model = Album
+        model = AlbumContributor
         fields = [
-            'id',
-            'name',
-            'image',
-            'uploaded_by',
-            'album_to_artist',
-            'song_set'
+            'artist',
+            'album',
+            'contribution_type'
         ]
-    
-    def get_image_url(self, obj):
-        return obj.image.url
 
-class LibrarySerializer(serializers.ModelSerializer):
-    songs = SongSerializer(many=True)
+class BaseSongContributorSerialzer(serializers.ModelSerializer):
+    artist = BaseArtistSerializer(many=False)
+    song = BaseSongSerializer(many=False)
+    class Meta:
+        model = SongContributor
+        fields = [
+            'artist',
+            'song',
+            'contribution_type'
+        ]
+
+class BaseLibrarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Library
         fields = ['platform','songs']
 
-class PlaylistSerializer(serializers.ModelSerializer):
+class BasePlaylistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Playlist
+        # TODO: set fields manually
         fields = '__all__'

@@ -4,9 +4,9 @@ from rest_framework import routers
 from . import views
 
 router = routers.DefaultRouter()
-router.register("artists", views.ArtistViewSet, "artists")
-router.register("albums", views.AlbumViewSet, "albums")
-router.register("songs", views.SongViewSet, "songs")
+router.register("artist", views.ArtistViewSet, "artist")
+router.register("album", views.AlbumViewSet, "album")
+router.register("song", views.SongViewSet, "song")
 router.register("library", views.LibraryViewSet, "library")
 
 urlpatterns = [

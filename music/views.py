@@ -10,7 +10,7 @@ from .services import artist_serializers
 
 class ArtistViewSet(viewsets.ModelViewSet):
     queryset = Artist.objects.filter(platform="Revibe")
-    serializer_class = ArtistSerializer
+    serializer_class = BaseArtistSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["read"],["read-songs"]]
@@ -54,7 +54,6 @@ class ArtistViewSet(viewsets.ModelViewSet):
     @action(detail=True)
     def song_contributions(self, request, pk=None):
         """
-        TODO: this
         Sends the list of songs that the artist has contributed to
         """
         artist = get_object_or_404(self.queryset, pk=pk)
@@ -65,22 +64,29 @@ class ArtistViewSet(viewsets.ModelViewSet):
 
 class AlbumViewSet(viewsets.ModelViewSet):
     queryset = Album.objects.all()
-    serializer_class = AlbumSerializer
+    serializer_class = BaseAlbumSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["read"],["read-albums"]]
     }
 
+    @action(detail=True)
+    def songs(self, request, pk=None):
+        album = get_object_or_404(self.queryset, pk=pk)
+        queryset = Song.objects.filter(album=album)
+        serializer = album_serializers.AlbumSongSerializer(queryset, many=True)
+        return Response(serializer.data)
+
 class SongViewSet(viewsets.ModelViewSet):
     queryset = Song.objects.all()
-    serializer_class = SongSerializer
+    serializer_class = BaseSongSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["read"],["read-songs"]]
     }
 
 class LibraryViewSet(viewsets.ModelViewSet):
-    serializer_class = LibrarySerializer
+    serializer_class = BaseLibrarySerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["read"],["read-library"]]

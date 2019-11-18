@@ -1,5 +1,5 @@
 from music.models import Album, AlbumContributor
-# from music.serializers import SongSerializer
+from music.serializers import SongSerializer
 from rest_framework import serializers
 
 class AlbumContributorSerializer(serializers.ModelSerializer):
@@ -18,3 +18,6 @@ class AlbumContributorSerializer(serializers.ModelSerializer):
     
     def get_image_url(self, obj):
         return obj.artist.image.url
+
+class AlbumSongSerializer(SongSerializer):
+    pass

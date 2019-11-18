@@ -1,21 +1,34 @@
 from music.models import *
-from music.serializers import SongSerializer
+from music.serializers import *
 from rest_framework import serializers
 
-class ArtistAlbumSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField('get_image_url')
-    class Meta:
-        model = Album
+class ArtistAlbumSerializer(BaseAlbumSerializer):
+    class Meta(BaseAlbumSerializer.Meta):
         fields = [
             'id',
             'name',
             'image',
-            'platform'
+            'platform',
+            'album_to_artist'
         ]
-    def get_image_url(self, obj):
-        return obj.image.url
 
-class ArtistAlbumContributorSerializer(serializers.ModelSerializer):
+class ArtistSongSerializer(BaseSongSerializer):
+    album = ArtistAlbumSerializer(many=False)
+    song_to_artist = BaseSongContributorSerialzer(many=True)
+    class Meta(BaseSongSerializer.Meta):
+        fields = [
+            'id',
+            'uri',
+            'title',
+            'genre',
+            'duration',
+            'platform',
+            'uploaded_date',
+            'album',
+            'song_to_artist'
+        ]
+
+class ArtistAlbumContributorSerializer(BaseAlbumContributorSerializer):
     album = ArtistAlbumSerializer(many=False)
     class Meta:
         model = AlbumContributor
@@ -23,12 +36,6 @@ class ArtistAlbumContributorSerializer(serializers.ModelSerializer):
             'contribution_type',
             'album'
         ]
-
-class ArtistSongSerializer(SongSerializer):
-    """
-    TODO: this
-    """
-    pass
 
 class ArtistSongContributorSerializer(serializers.ModelSerializer):
     song = ArtistSongSerializer(many=False)

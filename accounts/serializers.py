@@ -3,7 +3,7 @@ from music.models import Artist, Library
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.forms.models import model_to_dict
-from allauth.socialaccount.models import SocialToken
+from allauth.socialaccount.models import SocialToken, SocialApp
 from oauth2_provider.models import AccessToken, RefreshToken
 from oauth2_provider.generators import generate_client_id
 from django.conf import settings
@@ -74,6 +74,12 @@ class UserArtistSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SocialTokenSerializer(serializers.ModelSerializer):
+    platform = serializers.ReadOnlyField(source='app.name')
     class Meta:
         model = SocialToken
-        fields = ['token', 'token_secret', 'expires_at']
+        fields = [
+            'platform',
+            'token',
+            'token_secret',
+            'expires_at',
+        ]

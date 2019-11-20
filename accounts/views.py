@@ -5,8 +5,8 @@ from rest_auth.registration.views import SocialConnectView
 from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
-from oauth2_provider.views import TokenView
-from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope
+from oauth2_provider.views import TokenView, RevokeTokenView
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope,TokenMatchesOASRequirements
 from oauth2_provider.models import Application
 from .models import *
 from .serializers import *
@@ -51,7 +51,7 @@ class RegistrationAPI(generics.GenericAPIView, TokenView):
             "token": json.loads(req.content.decode('utf-8'))
         })
 
-class LoginAPI(generics.GenericAPIView):
+class LoginAPI(generics.GenericAPIView, TokenView):
     permission_classes = [permissions.AllowAny]
     serializer_class = LoginAccountSerializer
 
@@ -60,7 +60,6 @@ class LoginAPI(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         application = Application.objects.get(name="Revibe First Party Application")
         user = serializer.validated_data
-        print(request.data)
         headers={"Content-Type": "application/x-www-form-urlencoded"}
         data= {
                'grant_type': 'password',
@@ -69,23 +68,24 @@ class LoginAPI(generics.GenericAPIView):
                'client_id': application.client_id,
                'client_secret': application.client_secret
                }
-        req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
+        auth_request = HttpRequest()
+        auth_request.method = "POST"
+        auth_request.POST = data
+        auth_request.content_type = "application/x-www-form-urlencoded"
+        req = TokenView.post(self, auth_request)
         if req.status_code != 200:
             return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
         return Response({
             "user": UserSerializer(user, context=self.get_serializer_context()).data,
-            "token": req.json()
+            "token": json.loads(req.content.decode('utf-8'))
         })
 
-class RefreshTokenAPI(generics.GenericAPIView):
+class RefreshTokenAPI(generics.GenericAPIView, TokenView):
     permission_classes = [permissions.AllowAny]
     serializer_class = RefreshTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
         application = Application.objects.get(name="Revibe First Party Application")
-        user = serializer.validated_data
         headers={"Content-Type": "application/x-www-form-urlencoded"}
         data= {
                'grant_type': 'refresh_token',
@@ -93,12 +93,16 @@ class RefreshTokenAPI(generics.GenericAPIView):
                'client_id': application.client_id,
                'client_secret': application.client_secret
                }
-        req = requests.post('http://127.0.0.1:8000/o/token/',headers=headers,data=data)
+        auth_request = HttpRequest()
+        auth_request.method = "POST"
+        auth_request.POST = data
+        auth_request.content_type = "application/x-www-form-urlencoded"
+        req = TokenView.post(self, auth_request)
         if req.status_code != 200:
-            return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
-        return Response(req.json())
+            return Response(json.loads(req.content.decode('utf-8')), status=status.HTTP_400_BAD_REQUEST)
+        return Response(json.loads(req.content.decode('utf-8')))
 
-class LogoutAPI(generics.GenericAPIView):
+class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = AccessTokenSerializer
 
@@ -110,29 +114,22 @@ class LogoutAPI(generics.GenericAPIView):
                'client_id': application.client_id,
                'client_secret': application.client_secret
                }
-        req = requests.post('http://127.0.0.1:8000/o/revoke_token/',headers=headers,data=data)
+        auth_request = HttpRequest()
+        auth_request.method = "POST"
+        auth_request.POST = data
+        auth_request.content_type = "application/x-www-form-urlencoded"
+        req = RevokeTokenView.post(self, auth_request)
         if req.status_code != 200:
-            return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
+            return Response(json.loads(req.content.decode('utf-8')), status=status.HTTP_400_BAD_REQUEST)
         return Response({"status":"success", "code":200, "message": "Token has been revoked."})
 
-### Implement ###
 class LogoutAllAPI(generics.GenericAPIView):
-
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = AccessTokenSerializer
 
     def post(self, request, *args, **kwargs):
         application = Application.objects.get(name="Revibe First Party Application")
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
-        data= {
-               'token': request.data['access_token'],
-               'client_id': application.client_id,
-               'client_secret': application.client_secret
-               }
-        req = requests.post('http://127.0.0.1:8000/o/revoke_token/',headers=headers,data=data)
-        if req.status_code != 200:
-            return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
-        return Response({"status":"success", "code":200, "message": "Token has been revoked."})
+        AccessToken.objects.filter(user=request.user).delete()
+        return Response({"status":"success", "code":200, "message": "All devices have been logged out."})
 
 class SpotifyConnect(SocialConnectView):
     """ Logs already authenticated user into Spotify account """
@@ -192,15 +189,33 @@ class SpotifyLogout(generics.GenericAPIView):
             return Response({'message':'Spotify logout successful.'}, status=status.HTTP_200_OK)
         return Response({"error":"User has not logged into Spotify."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
 
-class UserConnectedPlatforms(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
 
-    def get(self, request, *args, **kwargs):
-            social_accounts = list([item for item in SocialAccount.objects.filter(user=request.user)])
-            return Response({'message':'Spotify logout successful.'}, status=status.HTTP_200_OK)
-        # return Response({"error":"User has not logged into Spotify."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
+class UserLinkedAccounts(viewsets.ModelViewSet):
+    serializer_class = SocialTokenSerializer
+    permission_classes = [TokenMatchesOASRequirements]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"],["read"]]
+    }
 
-        # return Response(SocialTokenSerializer(request.user, context=self.get_serializer_context()).data)
+    def get_queryset(self):
+        """
+        Return the list of saved songs for the current user
+        """
+        user = self.request.user
+        return SocialToken.objects.filter(account__user=user)
+
+# class UserLinkedAccounts(generics.GenericAPIView):
+#     permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
+#     serializer_class = SocialTokenSerializer
+#
+#     def get(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         data = serializer.validated_data
+#         return Response(data, status=status.HTTP_200_OK)
+#     #     # return Response({"error":"User has not logged into Spotify."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
+#     #
+#     #     # return Response(SocialTokenSerializer(request.user, context=self.get_serializer_context()).data)
 
 class UserArtistViewSet(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]

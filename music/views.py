@@ -3,10 +3,9 @@ from rest_framework import viewsets, permissions, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
-from .models import *
-from .serializers import *
-from .services import artist_serializers
-
+from music.models import *
+from music.serializers import *
+from music.services import artist_serializers
 
 class ArtistViewSet(viewsets.ModelViewSet):
     queryset = Artist.objects.filter(platform="Revibe")
@@ -38,7 +37,7 @@ class ArtistViewSet(viewsets.ModelViewSet):
         """
         artist = get_object_or_404(self.queryset, pk=pk)
         queryset = Song.objects.filter(uploaded_by=artist)
-        serializer = artist_serializers.ArtistSongSerializer(queryset, many=True)
+        serializer = BaseSongSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=True)
@@ -48,7 +47,7 @@ class ArtistViewSet(viewsets.ModelViewSet):
         """
         artist = get_object_or_404(self.queryset, pk=pk)
         queryset = AlbumContributor.objects.filter(artist=artist)
-        serializer = artist_serializers.ArtistAlbumContributorSerializer(queryset, many=True)
+        serializer = AlbumAlbumContributorSerializer(queryset, many=True)
         return Response(serializer.data)
 
     @action(detail=True)
@@ -58,9 +57,23 @@ class ArtistViewSet(viewsets.ModelViewSet):
         """
         artist = get_object_or_404(self.queryset, pk=pk)
         queryset = SongContributor.objects.filter(artist=artist)
-        serializer = artist_serializers.ArtistSongContributorSerializer(queryset, many=True)
+        serializer = SongSongContributorSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @action(detail=True)
+    def test(self, request, pk=None):
+        """
+        testing how to send multiple querysets in one response
+        """
+        artist = get_object_or_404(self.queryset, pk=pk)
+        queryset = Album.objects.filter(uploaded_by=artist)
+        album_serializer = BaseAlbumSerializer(queryset, many=True)
+        queryset = AlbumContributor.objects.filter(artist=artist)
+        contrib_serializer = AlbumAlbumContributorSerializer(queryset, many=True)
+        return Response({
+            'albums': album_serializer.data,
+            'contribs': contrib_serializer.data
+        })
 
 class AlbumViewSet(viewsets.ModelViewSet):
     queryset = Album.objects.all()
@@ -70,12 +83,12 @@ class AlbumViewSet(viewsets.ModelViewSet):
         "GET": [["ADMIN"],["read"],["read-albums"]]
     }
 
-    # @action(detail=True)
-    # def songs(self, request, pk=None):
-    #     album = get_object_or_404(self.queryset, pk=pk)
-    #     queryset = Song.objects.filter(album=album)
-    #     serializer = album_serializers.AlbumSongSerializer(queryset, many=True)
-    #     return Response(serializer.data)
+    @action(detail=True)
+    def songs(self, request, pk=None):
+        album = get_object_or_404(self.queryset, pk=pk)
+        queryset = Song.objects.filter(album=album)
+        serializer = BaseSongSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 class SongViewSet(viewsets.ModelViewSet):
     queryset = Song.objects.all()
@@ -98,6 +111,21 @@ class LibraryViewSet(viewsets.ModelViewSet):
         """
         user = self.request.user
         return Library.objects.filter(user=user)
+
+class LibrarySongViewSet(viewsets.ModelViewSet):
+    serializer_class = BaseLibrarySongSerializer
+    permission_classes = [TokenMatchesOASRequirements]
+
+    def perform_create(self, serializer):
+        """
+        Overwrites the part of the create function where the saving of the data takes place,
+        without removing the added functionality of the rest of the default create function
+        """
+        super().perform_create(serializer)
+
+    def get_queryset(self):
+        user = self.request.user
+        return LibrarySongs.objects.filter(user=user)
 
 # @todo replace api_view functions with rest Framework viewSets
 

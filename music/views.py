@@ -95,8 +95,12 @@ class SongViewSet(viewsets.ModelViewSet):
     serializer_class = BaseSongSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["read"],["read-songs"]]
+        "GET": [["ADMIN"],["read"],["read-songs"]],
+        "POST": [["ADMIN"]]
     }
+
+    # def create(self, request, *args, **kwargs):
+
 
 class LibraryViewSet(viewsets.ModelViewSet):
     serializer_class = BaseLibrarySerializer

@@ -3,6 +3,7 @@ from music.mixins import ImageURLMixin, ArtistImageURLMixin
 from rest_framework import serializers
 
 class SongAlbumSerializer(serializers.ModelSerializer, ImageURLMixin):
+    image = serializers.SerializerMethodField('get_image_url')
     class Meta:
         model = Album
         fields = [

@@ -80,7 +80,8 @@ class AlbumViewSet(viewsets.ModelViewSet):
     serializer_class = BaseAlbumSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["read"],["read-albums"]]
+        "GET": [["ADMIN"],["read"],["read-albums"]],
+        "POST": [["ADMIN"]]
     }
 
     @action(detail=True)

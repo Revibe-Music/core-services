@@ -20,17 +20,38 @@ class BaseArtistSerializer(serializers.ModelSerializer, mixins.ImageURLMixin):
 
 class BaseAlbumSerializer(serializers.ModelSerializer,mixins.ImageURLMixin):
     contributions = als.AlbumContributorSerializer(many=True, source='album_to_artist', read_only=True)
-    image = serializers.SerializerMethodField('get_image_url')
+    image = serializers.SerializerMethodField('get_image_url', read_only=True)
+    image_up = serializers.FileField(source='image', write_only=True)
+    # artist_id = serializers.UUIDField(source='uploaded_by.id', write_only=True)
     class Meta:
         model = Album
         fields = [
             'id',
             'name',
             'image',
+            'image_up',
             'platform',
             'type',
             'contributions',
+            # 'artist_id',
         ]
+    
+    def create(self, validated_data):
+        # get the current user - the uploading artist ... ?
+        artist = None
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            artist = request.user.artist
+        
+        # create and save the album
+        album = Album.objects.create(**validated_data, uploaded_by=artist)
+        album.save()
+
+        # create and save the default Album Contributors
+        album_contrib = AlbumContributor.objects.create(artist=artist, album=album, contribution_type="Artist")
+        album_contrib.save()
+
+        return album
 
 class BaseSongSerializer(serializers.ModelSerializer):
     """
@@ -44,6 +65,7 @@ class BaseSongSerializer(serializers.ModelSerializer):
 
     # write_only fields for creating and updating songs
     album_id = serializers.UUIDField(source='album.id', write_only=True)
+    song = serializers.FileField(source='file', write_only=True)
 
     class Meta:
         model = Song
@@ -56,6 +78,7 @@ class BaseSongSerializer(serializers.ModelSerializer):
             'genre',
             'album',
             'contributions',
+            'song', # write only!
             'album_id',
         ]
     
@@ -68,7 +91,7 @@ class BaseSongSerializer(serializers.ModelSerializer):
         album = get_object_or_404(Album.objects.all(), pk=album['id'])
 
         # get the current user
-        user = None
+        artist = None
         request = self.context.get("request")
         if request and hasattr(request, "user"):
             artist = request.user.artist
@@ -82,6 +105,36 @@ class BaseSongSerializer(serializers.ModelSerializer):
         song_contrib.save()
 
         return song
+
+class BaseAlbumContributorSerializer(serializers.ModelSerializer):
+    """
+    write-only serializer for creating, updating, and deleting
+    album contributors
+    """
+    artist = serializers.UUIDField(source='artist.id', write_only=True)
+    album = serializers.UUIDField(source='album.id', write_only=True)
+    class Meta:
+        model = AlbumContributor
+        fields = [
+            'artist',
+            'album',
+            'contribution_type'
+        ]
+    def list(self, request):
+        pass
+    def retrieve(self, request, pk=None):
+        pass
+
+    def create(self, validated_data):
+        # get artist and song data from validated_data
+        artist = validated_data.pop('artist')
+        artist = get_object_or_404(Artist.objects.all(), pk=artist['id'])
+        album = validated_data.pop('album')
+        album = get_object_or_404(Album.objects.all(), pk=album['id'])
+
+        album_contrib = SongContributor.objects.create(**validated_data, artist=artist, song=song)
+        album_contrib.save()
+        return song_contrib
 
 class AlbumAlbumContributorSerializer(serializers.ModelSerializer, mixins.AlbumImageURLMixin):
     id = serializers.ReadOnlyField(source='album.id')

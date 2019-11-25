@@ -54,7 +54,7 @@ class Song(models.Model):
     platform = models.CharField(max_length=255, null=True)
     contributors = models.ManyToManyField(Artist, through='SongContributor', related_name="song_contributors")
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="song_uploaded_by") # artist or user???
-    uploaded_date = models.DateField(null=True) # need to save the date when object is created
+    uploaded_date = models.DateField(auto_now_add=True, null=True, blank=True, editable=False)
     genre = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):

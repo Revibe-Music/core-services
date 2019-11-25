@@ -21,8 +21,7 @@ class BaseArtistSerializer(serializers.ModelSerializer, mixins.ImageURLMixin):
 class BaseAlbumSerializer(serializers.ModelSerializer,mixins.ImageURLMixin):
     contributions = als.AlbumContributorSerializer(many=True, source='album_to_artist', read_only=True)
     image = serializers.SerializerMethodField('get_image_url', read_only=True)
-    image_up = serializers.FileField(source='image', write_only=True)
-    # artist_id = serializers.UUIDField(source='uploaded_by.id', write_only=True)
+    image_up = serializers.FileField(source='image', write_only=True, allow_null=True)
     class Meta:
         model = Album
         fields = [
@@ -33,7 +32,6 @@ class BaseAlbumSerializer(serializers.ModelSerializer,mixins.ImageURLMixin):
             'platform',
             'type',
             'contributions',
-            # 'artist_id',
         ]
     
     def create(self, validated_data):
@@ -65,7 +63,7 @@ class BaseSongSerializer(serializers.ModelSerializer):
 
     # write_only fields for creating and updating songs
     album_id = serializers.UUIDField(source='album.id', write_only=True)
-    song = serializers.FileField(source='file', write_only=True)
+    song = serializers.FileField(source='file', write_only=True, allow_null=True)
 
     class Meta:
         model = Song
@@ -116,14 +114,11 @@ class BaseAlbumContributorSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlbumContributor
         fields = [
+            'id',
             'artist',
             'album',
             'contribution_type'
         ]
-    def list(self, request):
-        pass
-    def retrieve(self, request, pk=None):
-        pass
 
     def create(self, validated_data):
         # get artist and song data from validated_data
@@ -137,25 +132,27 @@ class BaseAlbumContributorSerializer(serializers.ModelSerializer):
         return song_contrib
 
 class AlbumAlbumContributorSerializer(serializers.ModelSerializer, mixins.AlbumImageURLMixin):
-    id = serializers.ReadOnlyField(source='album.id')
+    album_id = serializers.ReadOnlyField(source='album.id')
     name = serializers.ReadOnlyField(source='album.name')
     image = serializers.SerializerMethodField('get_image_url')
     class Meta:
         model = AlbumContributor
         fields = [
             'id',
+            'album_id',
             'name',
             'image',
             'contribution_type'
         ]
 class ArtistAlbumContributorSerializer(serializers.ModelSerializer, mixins.ArtistImageURLMixin):
-    id = serializers.ReadOnlyField(source='artist.id')
+    artist_id = serializers.ReadOnlyField(source='artist.id')
     name = serializers.ReadOnlyField(source='artist.name')
     image = serializers.SerializerMethodField('get_image_url')
     class Meta:
         model = AlbumContributor
         fields = [
             'id',
+            'artist_id',
             'name',
             'image',
             'contribution_type'
@@ -167,6 +164,7 @@ class BaseSongContributorSerialzer(serializers.ModelSerializer):
     class Meta:
         model = SongContributor
         fields = [
+            'id',
             'artist',
             'song',
             'contribution_type'
@@ -189,7 +187,7 @@ class BaseSongContributorSerialzer(serializers.ModelSerializer):
         return song_contrib
 
 class SongSongContributorSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField(source='song.id')
+    song_id = serializers.ReadOnlyField(source='song.id')
     uri = serializers.ReadOnlyField(source='song.uri')
     title = serializers.ReadOnlyField(source='song.title')
     duration = serializers.ReadOnlyField(source='song.duration')
@@ -200,6 +198,7 @@ class SongSongContributorSerializer(serializers.ModelSerializer):
         model = SongContributor
         fields = [
             'id',
+            'song_id',
             'uri',
             'title',
             'duration',

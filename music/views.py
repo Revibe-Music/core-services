@@ -4,11 +4,12 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
 from music.models import *
+from music.queries import *
 from music.serializers import *
 from music.services import artist_serializers
 
 class ArtistViewSet(viewsets.ModelViewSet):
-    queryset = Artist.objects.filter(platform="Revibe")
+    queryset = RevibeArtists
     serializer_class = BaseArtistSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
@@ -56,7 +57,7 @@ class ArtistViewSet(viewsets.ModelViewSet):
         Sends the list of songs that the artist has contributed to
         """
         artist = get_object_or_404(self.queryset, pk=pk)
-        queryset = SongContributor.objects.filter(artist=artist)
+        queryset = SongContributor.objects.filter(artist=artist).exclude(song__uploaded_by=artist)
         serializer = SongSongContributorSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -76,13 +77,21 @@ class ArtistViewSet(viewsets.ModelViewSet):
         })
 
 class AlbumViewSet(viewsets.ModelViewSet):
-    queryset = Album.objects.all()
+    queryset = RevibeAlbums
     serializer_class = BaseAlbumSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["read"],["read-albums"]],
-        "POST": [["ADMIN"]]
+        "POST": [["ADMIN"]],
+        "PUT": [["ADMIN"]],
+        "PATCH": [["ADMIN"]],
+        "UPDATE": [["ADMIN"]],
+        "DELETE": [["ADMIN"]]
     }
+
+    def perform_destroy(self, instance):
+        instance.is_deleted = True
+        instance.save()
 
     @action(detail=True)
     def songs(self, request, pk=None):
@@ -92,16 +101,34 @@ class AlbumViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 class SongViewSet(viewsets.ModelViewSet):
-    queryset = Song.objects.all()
+    queryset = RevibeSongs
     serializer_class = BaseSongSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["read"],["read-songs"]],
-        "POST": [["ADMIN"]]
+        "POST": [["ADMIN"]],
+        "PUT": [["ADMIN"]],
+        "PATCH": [["ADMIN"]],
+        "UPDATE": [["ADMIN"]],
+        "DELETE": [["ADMIN"]]
     }
 
-    # def create(self, request, *args, **kwargs):
+    def perform_destroy(self, instance):
+        instance.is_deleted = True
+        instance.save()
 
+class SongContributorViewSet(viewsets.ModelViewSet):
+    queryset = SongContributor.objects.all()
+    serializer_class = BaseSongContributorSerialzer
+    permission_classes = [TokenMatchesOASRequirements]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"],["read"],["read-songs"]],
+        "POST": [["ADMIN"]],
+        "PUT": [["ADMIN"]],
+        "PATCH": [["ADMIN"]],
+        "UPDATE": [["ADMIN"]],
+        "DELETE": [["ADMIN"]]
+    }
 
 class LibraryViewSet(viewsets.ModelViewSet):
     serializer_class = BaseLibrarySerializer

@@ -20,12 +20,14 @@ class Artist(models.Model):
 class Album(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
-    image = models.FileField('Album Image', upload_to='images/albums') # actual field
+    image = models.FileField('Album Image', upload_to='images/albums', null=True) # actual field
     # TODO: create mutliple image fields to send different sized images for different uses
     platform = models.CharField(max_length=255)
     type = models.CharField(max_length=255, null=True, blank=True)
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="album_uploaded_by")
     contributors = models.ManyToManyField(Artist, through='AlbumContributor')
+    is_displayed = models.BooleanField(null=False, blank=True, default=True)
+    is_deleted = models.BooleanField(null=False, blank=True, default=False)
 
     def __str__(self):
         return "{}".format(self.name)
@@ -39,7 +41,7 @@ class AlbumContributor(models.Model):
     contribution_type = models.CharField(max_length=255, null=True) # limit choices on the application side
 
     def __str__(self):
-        return "'{}' with '{}' as {}".format(self.artist, self.album, self.contribution_type)
+        return "'{}' with '{}' as {}".format(self.album, self.artist, self.contribution_type)
 
     def __repr__(self):
         return "<AlbumContribution: {}-{}>".format(self.album, self.artist)
@@ -56,6 +58,8 @@ class Song(models.Model):
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="song_uploaded_by") # artist or user???
     uploaded_date = models.DateField(auto_now_add=True, null=True, blank=True, editable=False)
     genre = models.CharField(max_length=255, null=True, blank=True)
+    is_displayed = models.BooleanField(null=False, blank=True, default=True)
+    is_deleted = models.BooleanField(null=False, blank=True, default=False)
 
     def __str__(self):
         return "{}".format(self.title)

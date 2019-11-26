@@ -1,5 +1,6 @@
 from django.conf import settings
 from rest_framework import viewsets, permissions, generics, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_auth.registration.views import SocialConnectView
 from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
@@ -221,10 +222,16 @@ class UserArtistViewSet(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     serializer_class = UserArtistSerializer
 
-    def get(self):
-        return self.request.user.artist
+    def get(self, request):
+        artist = self.serializer_class(request.user.artist, context=self.get_serializer_context()).data
+        return Response(artist)
 
     def post(self, request):
+        # check if user already has an artist object
+        if request.user.artist != None:
+            return Response(status=status.HTTP_400_BAD_REQUEST)        
+        
+        # create the artist and attach to the user
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             artist = serializer.save()
@@ -233,26 +240,30 @@ class UserArtistViewSet(generics.GenericAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def patch(self, request):
+        print(request.data)
+
 class UserViewSet(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     serializer_class = UserSerializer
+    
+    def get_serializer_class(self):
+        serializer_class = self.serializer_class
+
+        if self.request.method == "PATCH":
+            serializer_class = UserPatchSerializer
+        
+        return serializer_class
 
     def get(self, request, *args, **kwargs):
         return Response(UserSerializer(request.user, context=self.get_serializer_context()).data)
 
     def patch(self, request, *args, **kwargs):
-        user = request.user
-        if request.data['first_name']:
-            user.first_name = request.data['first_name']
-        if request.data['last_name']:
-            user.last_name = request.data['last_name']
-        if request.data['username']:
-            user.username = request.data['username']
-        if request.data['email']:
-            user.email = request.data['email']
-        if request.data['profile']['country']:
-            user.profile.country = request.data['profile']['country']
-        if request.data['profile']['image']:
-            user.profile.image = request.data['profile']['image']
-        user.save()
-        user.profile.save()
+        partial = kwargs.pop('partial', False)
+        instance = request.user
+        print(request.data)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)

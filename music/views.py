@@ -13,7 +13,7 @@ class ArtistViewSet(viewsets.ModelViewSet):
     serializer_class = BaseArtistSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["read"],["read-songs"]]
+        "GET": [["ADMIN"],["read"],["read-songs"]],
     }
 
     @action(detail=True)

@@ -8,7 +8,7 @@ from oauth2_provider.models import AccessToken, RefreshToken
 from oauth2_provider.generators import generate_client_id
 from django.conf import settings
 from django.utils import timezone
-
+from music.mixins import ImageURLMixin
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,8 +20,22 @@ class UserSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(many=False)
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'username', 'password','email','profile']
-        extra_kwargs = {'password': {'write_only': True}, 'profile': {'required': False}}
+        fields = [
+            'first_name',
+            'last_name',
+            'username',
+            'password',
+            'email',
+            'profile',
+            'is_artist',
+            'is_manager',
+        ]
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'is_artist': {'read_only': True},
+            'is_manager': {'read_only': True},
+            'profile': {'required': False},
+        }
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
@@ -33,24 +47,24 @@ class UserSerializer(serializers.ModelSerializer):
             library = Library.objects.create(user=user, platform=plat)
             library.save()
         return user
-
-    def update(self, instance, validated_data):
-        # TODO: fix this
-        profile_data = validated_data.pop('profile')
-        profile = instance.profile
-
-        instance.username = validated_data.get('username', instance.username)
-        instance.email = validated_data.get('email', instance.email)
-        instance.save()
-
-        # for all fields in profile
-        # profile.field = profile_data.get(
-        #   'field',
-        #   profile.field
-        # )
-        profile.save()
-
-        return instance
+    
+class UserPatchSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(many=False, required=False)
+    class Meta:
+        model = CustomUser
+        fields = [
+            'first_name',
+            'last_name',
+            'username',
+            'email',
+            'profile'
+        ]
+        extra_kwargs = {
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+            'username': {'required': False},
+            'email': {'required': False},
+        }
 
 class LoginAccountSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -68,10 +82,23 @@ class AccessTokenSerializer(serializers.Serializer):
 class RefreshTokenSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
 
-class UserArtistSerializer(serializers.ModelSerializer):
+class UserArtistSerializer(serializers.ModelSerializer, ImageURLMixin):
+    # read only
+    image = serializers.SerializerMethodField('get_image_url', read_only=True)
+    user = UserSerializer(source='artist_user', read_only=True)
+
+    # write only
+    user_id = serializers.UUIDField(write_only=True, required=False)
     class Meta:
         model = Artist
-        fields = '__all__'
+        fields = [
+            'id',
+            'name',
+            'image',
+            'platform',
+            'user',
+            'user_id',
+        ]
 
 class SocialTokenSerializer(serializers.ModelSerializer):
     platform = serializers.ReadOnlyField(source='app.name')

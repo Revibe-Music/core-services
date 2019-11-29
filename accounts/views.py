@@ -9,12 +9,14 @@ from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
 from oauth2_provider.views import TokenView, RevokeTokenView
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope,TokenMatchesOASRequirements
 from oauth2_provider.models import Application
-from .models import *
-from .serializers import *
 import requests
 import json
 from django.http import HttpRequest
 
+from .models import *
+from .serializers import *
+from music.models import Album, Song
+from music.serializers import BaseAlbumSerializer, BaseSongSerializer
 
 class RegistrationAPI(generics.GenericAPIView, TokenView):
     """
@@ -218,7 +220,33 @@ class UserLinkedAccounts(viewsets.ModelViewSet):
 #     #
 #     #     # return Response(SocialTokenSerializer(request.user, context=self.get_serializer_context()).data)
 
-class UserArtistViewSet(generics.GenericAPIView):
+class UserArtistViewSet(viewsets.GenericViewSet):
+    """
+    Endpoint: account/artist/
+        Get: 
+            Gets the profile information of the authenticated user, assuming they have an artist linked to their account
+            TODO: implement error send if they do not have a linked artist
+        Post:
+            Creates an artist and attaches it to the current user
+        Patch:
+            Used to update user-artist profile information (artist name, image, etc.)
+            TODO: implement
+    
+    Endpoint: account/artist/album/
+        Get:
+            Gets a list of albums uploaded by the current user.
+        Post:
+            TODO: implement
+            Calls the POST method of the Album viewset.
+    
+    Endpoint: account/artist/song/
+        Get:
+            Gets a list of songs uploaded by the current user
+        Post:
+            TODO: implement
+            Calls the POST method of the Song viewset
+    """
+    queryset = CustomUser.objects.all()
     permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     serializer_class = UserArtistSerializer
 
@@ -240,8 +268,27 @@ class UserArtistViewSet(generics.GenericAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def patch(self, request):
-        print(request.data)
+    def patch(self, request, *args, **kwargs):
+        instance = request.user.artist
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+    
+    @action(detail=False)
+    def albums(self, request):
+        artist = request.user.artist
+        albums = Album.objects.filter(uploaded_by=artist)
+        serializer = BaseAlbumSerializer(albums, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False)
+    def songs(self, request):
+        artist = request.user.artist
+        songs = Song.objects.filter(uploaded_by=artist)
+        serializer = BaseSongSerializer(songs, many=True)
+        return Response(serializer.data)
 
 class UserViewSet(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]

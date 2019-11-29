@@ -2,11 +2,18 @@ from django.urls import path
 from django.conf.urls import include
 from rest_framework import routers
 from . import views
+from . import view_reference
 # from knox import views as knox_views
 
 router = routers.DefaultRouter()
 router.register("linked-accounts", views.UserLinkedAccounts, 'linked_accounts')
 
+
+artist_urls = [
+    path("", views.UserArtistViewSet.as_view(view_reference.UserArtistViewSet_actions)),
+    path("album/", views.UserArtistViewSet.as_view(view_reference.UserArtistViewSet_albums_actions)),
+    path("song/", views.UserArtistViewSet.as_view(view_reference.UserArtistViewSet_songs_actions)),
+]
 
 
 urlpatterns = [
@@ -23,5 +30,5 @@ urlpatterns = [
     path('spotify-refresh/', views.SpotifyRefresh.as_view()),
     path('spotify-logout/', views.SpotifyLogout.as_view()),
     # path("linked-accounts/", views.UserLinkedAccounts.as_view()),
-    path("create-user-artist/", views.UserArtistViewSet.as_view()),
+    path("artist/", include(artist_urls), name="artist_account"),
 ]

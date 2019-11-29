@@ -89,6 +89,7 @@ class UserArtistSerializer(serializers.ModelSerializer, ImageURLMixin):
 
     # write only
     user_id = serializers.UUIDField(write_only=True, required=False)
+    image_up = serializers.FileField(source='image', write_only=True, allow_null=True, required=False)
     class Meta:
         model = Artist
         fields = [
@@ -97,7 +98,9 @@ class UserArtistSerializer(serializers.ModelSerializer, ImageURLMixin):
             'image',
             'platform',
             'user',
+            # write only fields
             'user_id',
+            'image_up',
         ]
 
 class SocialTokenSerializer(serializers.ModelSerializer):

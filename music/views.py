@@ -147,6 +147,11 @@ class LibraryViewSet(viewsets.ModelViewSet):
 class LibrarySongViewSet(viewsets.ModelViewSet):
     serializer_class = BaseLibrarySongSerializer
     permission_classes = [TokenMatchesOASRequirements]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"]],
+        "POST": [["ADMIN"]],
+        "DELETE": [["ADMIN"]]
+    }
 
     def perform_create(self, serializer):
         """
@@ -157,7 +162,11 @@ class LibrarySongViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return LibrarySongs.objects.filter(user=user)
+        return LibrarySongs.objects.filter(library__user=user)
+    
+    @action(detail=False, methods=['post'])
+    def save_album(self, request, *args, **kwargs):
+        pass
 
 # @todo replace api_view functions with rest Framework viewSets
 

@@ -76,7 +76,8 @@ class BaseSongSerializer(serializers.ModelSerializer):
             'genre',
             'album',
             'contributions',
-            'song', # write only!
+            # write-only fields
+            'song',
             'album_id',
         ]
     
@@ -221,12 +222,52 @@ class BasePlaylistSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BaseLibrarySongSerializer(serializers.ModelSerializer):
+    # read-only fields
+    library = BaseLibrarySerializer(read_only=True)
+    song = serializers.ReadOnlyField()
+    # write-only fields
+    song_id = serializers.UUIDField(write_only=True)
     class Meta:
         model = LibrarySongs
         fields = [
             'library',
             'song',
+            # write-only fields
+            'song_id',
         ]
+    
+    def create(self, validated_data):
+        request = self.context.get("request")
+        user = request.user
+        
+        # get song
+        song = get_object_or_404(Song.objects.all(), pk=validated_data["song_id"])
+        platform = song.platform
+        if settings.DEBUG:
+            print(song)
+
+        # get the library based on the song's platform and the current user
+        libraries = Library.objects.filter(platform=platform, user=user)
+        if len(libraries) != 1:
+            raise serializers.ValidationError("Error retrieving user's Revibe library")
+        library = libraries[0]
+        if settings.DEBUG:
+            print(library)
+
+        # make sure the song hasn't already been added
+        check = LibrarySongs.objects.filter(library=library, song=song)
+        if len(check) > 0:
+            if settings.DEBUG:
+                print(check)
+            raise serializers.ValidationError("Song already exists in library")
+
+        # save the song to that library
+        lib_song = LibrarySongs.objects.create(library=library, song=song)
+        lib_song.save()
+        if settings.DEBUG:
+            print(lib_song)
+        return song
+
 class BasePlaylistSongSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaylistSongs

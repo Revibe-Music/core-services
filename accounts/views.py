@@ -7,7 +7,7 @@ from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
 from oauth2_provider.views import TokenView, RevokeTokenView
-from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope,TokenMatchesOASRequirements
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope,TokenMatchesOASRequirements, TokenHasScope
 from oauth2_provider.models import Application
 import requests
 import json
@@ -106,7 +106,8 @@ class RefreshTokenAPI(generics.GenericAPIView, TokenView):
         return Response(json.loads(req.content.decode('utf-8')))
 
 class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [TokenHasScope]
+    required_scopes = []
     serializer_class = AccessTokenSerializer
 
     def post(self, request, *args, **kwargs):

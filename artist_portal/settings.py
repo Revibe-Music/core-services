@@ -31,7 +31,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     'api.revibe.tech',
-    'http://revibeap2iv-env.ftjbtmnm4a.us-east-2.elasticbeanstalk.com/', # test, delete when necessary
+    # '.compute-1.amazonaws.com', # allows viewing of instances directly
+    '.elasticbeanstalk.com',
 ]
 
 

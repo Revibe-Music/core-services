@@ -308,7 +308,6 @@ class UserViewSet(generics.GenericAPIView):
     def patch(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = request.user
-        print(request.data)
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()

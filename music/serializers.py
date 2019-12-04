@@ -264,10 +264,12 @@ class BaseLibrarySongSerializer(serializers.ModelSerializer):
 
         # make sure the song hasn't already been added
         check = LibrarySongs.objects.filter(library=library, song=song)
-        if len(check) > 0:
-            if settings.DEBUG:
-                print(check)
-            raise serializers.ValidationError("Song already exists in library")
+        if settings.DEBUG:
+            print(check)
+        if len(check) == 1:
+            return check[0]
+        elif len(check) > 1:
+            raise serializers.ValidationError("Error saving song to library: multiple songs found with this ID.")
 
         # save the song to that library
         lib_song = LibrarySongs.objects.create(library=library, song=song)

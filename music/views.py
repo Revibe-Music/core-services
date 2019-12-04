@@ -176,11 +176,45 @@ class LibraryViewSet(viewsets.ModelViewSet):
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
     
-    @action(detail=False, methods=['get','post'])
-    def albums(self, request):
-        print(request)
-        print(request.data)
-        return None
+    @action(detail=False, methods=['get','post', 'delete'])
+    def albums(self, request, *args, **kwargs):
+
+        # get the album from the ID if it's not a GET request
+        album = None
+        if request.method != 'GET':
+            if settings.DEBUG:
+                print(request.data)
+            album = get_object_or_404(Album.objects.all(), pk=request.data['album_id'])
+            if settings.DEBUG:
+                print(album)
+
+            kwargs['context'] = self.get_serializer_context()
+
+        # handle all the requests
+        if request.method == 'GET':
+            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+        
+        elif request.method == 'POST':
+            # add all songs to the library
+            for song in album.song_set.all():
+                serializer = BaseLibrarySongSerializer(data={'song_id': song.id}, *args, **kwargs)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+
+            return Response(status=status.HTTP_201_CREATED)
+        
+        elif request.method == 'DELETE':
+            # delete all songs from the library
+            for song in album.song_set.all():
+                data = {'song_id': song.id}
+                serializer = BaseLibrarySongSerializer(data=data, *args, **kwargs)
+                serializer.is_valid(raise_exception=True)
+                serializer.delete(data=data)
+            
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        else:
+            return Reponse(status=status.HTTP_400_BAD_REQUEST)
 
 # @todo replace api_view functions with rest Framework viewSets
 

@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, permissions, generics
+from rest_framework import viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
@@ -134,7 +134,9 @@ class LibraryViewSet(viewsets.ModelViewSet):
     serializer_class = BaseLibrarySerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["read"],["read-library"]]
+        "GET": [["ADMIN"],["read"],["read-library"]],
+        "POST": [["ADMIN"]],
+        "DELETE": [["ADMIN"]]
     }
 
     def get_queryset(self):
@@ -143,30 +145,42 @@ class LibraryViewSet(viewsets.ModelViewSet):
         """
         user = self.request.user
         return Library.objects.filter(user=user)
-
-class LibrarySongViewSet(viewsets.ModelViewSet):
-    serializer_class = BaseLibrarySongSerializer
-    permission_classes = [TokenMatchesOASRequirements]
-    required_alternate_scopes = {
-        "GET": [["ADMIN"]],
-        "POST": [["ADMIN"]],
-        "DELETE": [["ADMIN"]]
-    }
-
-    def perform_create(self, serializer):
-        """
-        Overwrites the part of the create function where the saving of the data takes place,
-        without removing the added functionality of the rest of the default create function
-        """
-        super().perform_create(serializer)
-
-    def get_queryset(self):
-        user = self.request.user
-        return LibrarySongs.objects.filter(library__user=user)
     
-    @action(detail=False, methods=['post'])
-    def save_album(self, request, *args, **kwargs):
-        pass
+    @action(detail=False, methods=['get','post', 'delete'])
+    def songs(self, request, *args, **kwargs):
+
+        if request.method == 'GET':
+            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+
+        elif request.method == 'POST':
+            kwargs['context'] = self.get_serializer_context()
+            serializer = BaseLibrarySongSerializer(data=request.data, *args, **kwargs)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            # print to console if in debug mode
+            if settings.DEBUG:
+                print(serializer)
+                print(serializer.data)
+            
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        elif request.method == 'DELETE':
+            kwargs['context'] = self.get_serializer_context()
+            serializer = BaseLibrarySongSerializer(data=request.data, *args, **kwargs)
+            serializer.is_valid(raise_exception=True)
+            serializer.delete(data=request.data)
+            
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['get','post'])
+    def albums(self, request):
+        print(request)
+        print(request.data)
+        return None
 
 # @todo replace api_view functions with rest Framework viewSets
 

@@ -223,8 +223,8 @@ class BasePlaylistSerializer(serializers.ModelSerializer):
 
 class BaseLibrarySongSerializer(serializers.ModelSerializer):
     # read-only fields
-    library = BaseLibrarySerializer(read_only=True)
-    song = serializers.ReadOnlyField()
+    library = serializers.ReadOnlyField(source='library.id')
+    song = serializers.ReadOnlyField(source='song.id')
     # write-only fields
     song_id = serializers.UUIDField(write_only=True)
     class Meta:
@@ -236,23 +236,31 @@ class BaseLibrarySongSerializer(serializers.ModelSerializer):
             'song_id',
         ]
     
-    def create(self, validated_data):
+    def get_library(self, platform):
+        """
+        Gets the library of the current request's user based on the platform passed
+        """
         request = self.context.get("request")
         user = request.user
+
+        libraries = Library.objects.filter(platform=platform, user=user)
+        if len(libraries) != 1:
+            raise serializers.ValidationError("Error retrieving user's {} library".format(platform))
         
+        library = libraries[0]
+        if settings.DEBUG:
+            print(library)
+        
+        return library
+    
+    def create(self, validated_data):
         # get song
         song = get_object_or_404(Song.objects.all(), pk=validated_data["song_id"])
         platform = song.platform
         if settings.DEBUG:
             print(song)
 
-        # get the library based on the song's platform and the current user
-        libraries = Library.objects.filter(platform=platform, user=user)
-        if len(libraries) != 1:
-            raise serializers.ValidationError("Error retrieving user's Revibe library")
-        library = libraries[0]
-        if settings.DEBUG:
-            print(library)
+        library = self.get_library(platform)
 
         # make sure the song hasn't already been added
         check = LibrarySongs.objects.filter(library=library, song=song)
@@ -263,10 +271,31 @@ class BaseLibrarySongSerializer(serializers.ModelSerializer):
 
         # save the song to that library
         lib_song = LibrarySongs.objects.create(library=library, song=song)
-        lib_song.save()
         if settings.DEBUG:
             print(lib_song)
-        return song
+        
+        return lib_song
+    
+    def delete(self, data):
+        assert data['song_id'], "'song_id' must be passed with this endpoint"
+
+        # get the current song
+        song = get_object_or_404(Song.objects.all(), pk=data["song_id"])
+        platform = song.platform
+        if settings.DEBUG:
+            print(song)
+        
+        library = self.get_library(platform)
+
+        lib_song = LibrarySongs.objects.filter(library=library, song=song)
+        if len(lib_song) != 1:
+            raise serializers.ValidationError("error retrieving song from library")
+        lib_song = lib_song[0]
+
+        if settings.DEBUG:
+            print(lib_song)
+        
+        lib_song.delete()
 
 class BasePlaylistSongSerializer(serializers.ModelSerializer):
     class Meta:

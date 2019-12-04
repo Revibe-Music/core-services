@@ -265,6 +265,7 @@ class UserArtistViewSet(viewsets.GenericViewSet):
         if serializer.is_valid():
             artist = serializer.save()
             request.user.artist = artist
+            request.user.is_artist = True
             request.user.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

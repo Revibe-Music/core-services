@@ -90,7 +90,7 @@ class Library(models.Model):
         return "{} on {}".format(self.user, self.platform)
     
     def __repr__(self):
-        return "<Library: {}-{}>".format(self.user.verbose_name, self.platform)
+        return "<Library: {}-{}>".format(self.user, self.platform)
 
 class Playlist(models.Model):
     name = models.CharField("Name", null=True, blank=False, max_length=255)

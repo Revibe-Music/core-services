@@ -118,3 +118,9 @@ class PlaylistSongs(models.Model):
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='playlist_to_song')
     song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='song_to_playlist')
     date_saved = models.DateTimeField(auto_now_add=True) # test that serializer will auto add the datetime
+
+    def __str__(self):
+        return "{} in {}".format(self.song, self.playlist)
+    
+    def __repr__(self):
+        return "<LibrarySongs: {}-{}>".format(self.song, self.playlist)

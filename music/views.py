@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import views, viewsets, permissions, generics, status
+from rest_framework import views, viewsets, permissions as perm, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
@@ -257,10 +257,11 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
 
 class MusicSearch(viewsets.GenericViewSet):
-    permission_classes = [TokenMatchesOASRequirements]
-    required_alternate_scopes = {
-        "GET": [["ADMIN"],["first-party"]],
-    }
+    # permission_classes = [TokenMatchesOASRequirements]
+    # required_alternate_scopes = {
+    #     "GET": [["ADMIN"],["first-party"]],
+    # }
+    permission_classes = [perm.AllowAny] # temporary, TODO: change back
 
     def list(self, request, *args, **kwargs):
         text = request.data['text']

@@ -264,7 +264,8 @@ class MusicSearch(viewsets.GenericViewSet):
     permission_classes = [perm.AllowAny] # temporary, TODO: change back
 
     def list(self, request, *args, **kwargs):
-        text = request.data['text']
+        params = request.query_params
+        text = params['text']
         songs = BaseSongSerializer(RevibeSongs.filter(title__icontains=text), many=True).data
         albums = BaseAlbumSerializer(RevibeAlbums.filter(name__icontains=text), many=True).data
         artists = BaseArtistSerializer(RevibeArtists.filter(name__icontains=text), many=True).data

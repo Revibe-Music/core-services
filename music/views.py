@@ -250,7 +250,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
         elif request.method == 'DELETE':
             serializer = BasePlaylistSongSerializer(data=request.data, *args, **kwargs)
-            serializer.is_valid(raise)
+            serializer.is_valid(raise_exception=True)
 
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)

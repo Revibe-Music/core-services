@@ -6,8 +6,9 @@ import music.model_exts as ext
 
 class Artist(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uri = models.UUIDField('URI', default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField('Display Name', max_length=255)
-    image = models.FileField('Display Image', upload_to='images/artists') # actual field
+    image = models.FileField('Display Image', upload_to=ext.rename_image) # actual field
     platform = models.CharField(max_length=255)
     # manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='artist_manager', null=True, blank=True)
 
@@ -19,8 +20,9 @@ class Artist(models.Model):
 
 class Album(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uri = models.UUIDField('URI', default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=255, null=False)
-    image = models.FileField('Album Image', upload_to='images/albums', null=True) # actual field
+    image = models.FileField('Album Image', upload_to=ext.rename_image, null=True) # actual field
     # TODO: create mutliple image fields to send different sized images for different uses
     platform = models.CharField(max_length=255)
     type = models.CharField(max_length=255, null=True, blank=True)

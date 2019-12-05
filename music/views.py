@@ -13,7 +13,7 @@ class ArtistViewSet(viewsets.ModelViewSet):
     serializer_class = BaseArtistSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["read"],["read-songs"]],
+        "GET": [["ADMIN"],["first-party"]],
     }
 
     @action(detail=True)
@@ -81,12 +81,12 @@ class AlbumViewSet(viewsets.ModelViewSet):
     serializer_class = BaseAlbumSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["read"],["read-albums"]],
-        "POST": [["ADMIN"]],
-        "PUT": [["ADMIN"]],
-        "PATCH": [["ADMIN"]],
-        "UPDATE": [["ADMIN"]],
-        "DELETE": [["ADMIN"]]
+        "GET": [["ADMIN"],["first-party"]],
+        "POST": [["ADMIN"],["first-party"]],
+        "PUT": [["ADMIN"],["first-party"]],
+        "PATCH": [["ADMIN"],["first-party"]],
+        "UPDATE": [["ADMIN"],["first-party"]],
+        "DELETE": [["ADMIN"],["first-party"]],
     }
 
     def perform_destroy(self, instance):
@@ -105,12 +105,12 @@ class SongViewSet(viewsets.ModelViewSet):
     serializer_class = BaseSongSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["read"],["read-songs"]],
-        "POST": [["ADMIN"]],
-        "PUT": [["ADMIN"]],
-        "PATCH": [["ADMIN"]],
-        "UPDATE": [["ADMIN"]],
-        "DELETE": [["ADMIN"]]
+        "GET": [["ADMIN"],["first-party"]],
+        "POST": [["ADMIN"],["first-party"]],
+        "PUT": [["ADMIN"],["first-party"]],
+        "PATCH": [["ADMIN"],["first-party"]],
+        "UPDATE": [["ADMIN"],["first-party"]],
+        "DELETE": [["ADMIN"],["first-party"]],
     }
 
     def perform_destroy(self, instance):
@@ -122,21 +122,21 @@ class SongContributorViewSet(viewsets.ModelViewSet):
     serializer_class = BaseSongContributorSerialzer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["read"],["read-songs"]],
-        "POST": [["ADMIN"]],
-        "PUT": [["ADMIN"]],
-        "PATCH": [["ADMIN"]],
-        "UPDATE": [["ADMIN"]],
-        "DELETE": [["ADMIN"]]
+        "GET": [["ADMIN"],["first-party"]],
+        "POST": [["ADMIN"],["first-party"]],
+        "PUT": [["ADMIN"],["first-party"]],
+        "PATCH": [["ADMIN"],["first-party"]],
+        "UPDATE": [["ADMIN"],["first-party"]],
+        "DELETE": [["ADMIN"],["first-party"]],
     }
 
 class LibraryViewSet(viewsets.ModelViewSet):
     serializer_class = BaseLibrarySerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["read"],["read-library"]],
-        "POST": [["ADMIN"]],
-        "DELETE": [["ADMIN"]]
+        "GET": [["ADMIN"],["first-party"]],
+        "POST": [["ADMIN"],["first-party"]],
+        "DELETE": [["ADMIN"],["first-party"]],
     }
 
     def get_queryset(self):
@@ -220,9 +220,9 @@ class PlaylistViewSet(viewsets.ModelViewSet):
     serializer_class = BasePlaylistSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["read"],["read-playlist"]],
-        "POST": [["ADMIN"]],
-        "DELETE": [["ADMIN"]]
+        "GET": [["ADMIN"],["first-party"]],
+        "POST": [["ADMIN"],["first-party"]],
+        "DELETE": [["ADMIN"],["first-party"]],
     }
 
     def get_queryset(self):

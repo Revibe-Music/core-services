@@ -198,7 +198,7 @@ class UserLinkedAccounts(viewsets.ModelViewSet):
     serializer_class = SocialTokenSerializer
     permission_classes = [TokenMatchesOASRequirements]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["read"]]
+        "GET": [["ADMIN"],["first-party"]],
     }
 
     def get_queryset(self):

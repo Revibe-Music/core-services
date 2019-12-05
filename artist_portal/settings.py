@@ -164,6 +164,8 @@ OAUTH2_PROVIDER = {
         'read': 'Read scope',
         'write': 'Write scope',
         'ADMIN': 'override on everything',
+        # for first-party applications/users only
+        'first-party',
         # account scopes
         'read-user-profile':'Read user data and profile data',
         'write-user-profile': 'Write user data and profile data',

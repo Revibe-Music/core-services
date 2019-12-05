@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, permissions, generics, status
+from rest_framework import views, viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
@@ -254,3 +254,21 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class MusicSearch(viewsets.GenericViewSet):
+    permission_classes = [TokenMatchesOASRequirements]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"],["first-party"]],
+    }
+
+    def list(self, request, *args, **kwargs):
+        text = request.data['text']
+        songs = BaseSongSerializer(RevibeSongs.filter(title__icontains=text), many=True).data
+        albums = BaseAlbumSerializer(RevibeAlbums.filter(name__icontains=text), many=True).data
+        artists = BaseArtistSerializer(RevibeArtists.filter(name__icontains=text), many=True).data
+
+        return Response(
+            {'songs': songs, 'albums': albums, 'artists': artists},
+            status=status.HTTP_200_OK
+        )

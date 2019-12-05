@@ -165,7 +165,7 @@ OAUTH2_PROVIDER = {
         'write': 'Write scope',
         'ADMIN': 'override on everything',
         # for first-party applications/users only
-        'first-party',
+        'first-party': 'For users of first-party Revibe applications',
         # account scopes
         'read-user-profile':'Read user data and profile data',
         'write-user-profile': 'Write user data and profile data',

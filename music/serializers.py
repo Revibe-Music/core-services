@@ -216,10 +216,43 @@ class BaseLibrarySerializer(serializers.ModelSerializer):
         fields = ['platform','songs']
 
 class BasePlaylistSerializer(serializers.ModelSerializer):
+    songs = BaseSongSerializer(many=True, read_only=True)
+    # write-only fields
+    song_id = serializers.UUIDField(write_only=True, required=False)
     class Meta:
         model = Playlist
-        # TODO: set fields manually
-        fields = '__all__'
+        fields = [
+            'id',
+            'name',
+            'songs',
+            # write-only fields
+            'song_id',
+        ]
+    
+    def get_user(self):
+        request = self.context.get("request")
+        user = request.user
+        assert user is not None, "Could not identify the user."
+        return user
+    
+    def create(self, validated_data, *args, **kwargs):
+        user = self.get_user()
+
+        if settings.DEBUG:
+            print(validated_data)
+        name = validated_data['name']
+
+        # check that this user does not have a playlist with this name already
+        check = Playlist.objects.filter(name=name, user=user)
+        if len(check) == 1:
+            raise serializers.ValidationError("A playlist with this name already exists")
+        if len(check) > 1:
+            raise serializers.ValidationError("Error retrieving playlist data")
+
+        # create the playlist
+        playlist = Playlist.objects.create(name=name, user=user)
+        playlist.save()
+        return playlist
 
 class BaseLibrarySongSerializer(serializers.ModelSerializer):
     # read-only fields
@@ -300,10 +333,41 @@ class BaseLibrarySongSerializer(serializers.ModelSerializer):
         lib_song.delete()
 
 class BasePlaylistSongSerializer(serializers.ModelSerializer):
+    # read-only fields
+    playlist = serializers.ReadOnlyField(source='playlist.id')
+    song = serializers.ReadOnlyField(source='song.id')
+    # write-only fields
+    song_id = serializers.UUIDField(write_only=True)
+    playlist_id = serializers.IntegerField(write_only=True)
     class Meta:
-        model = PlaylistSongs
+        model = LibrarySongs
         fields = [
             'playlist',
             'song',
-            'date_saved'
+            # write-only fields
+            'song_id',
+            'playlist_id',
         ]
+    
+    def create(self, validated_data, *args, **kwargs):
+        request = self.context.get("request")
+        user = request.user
+
+        song_id = validated_data['song_id']
+        playlist_id = validated_data["playlist_id"]
+        user_playlists = Playlist.objects.filter(user=user)
+        if len(user_playlists) == 0:
+            raise serializers.ValidationError("Could not find user's playlists")
+
+        song = get_object_or_404(Song.objects.all(), pk=song_id)
+        playlist = get_object_or_404(user_playlists, pk=playlist_id)
+        if settings.DEBUG:
+            print(song)
+            print(playlist)
+
+        ps = PlaylistSongs.objects.create(playlist=playlist, song=song)
+        ps.save()
+        if settings.DEBUG:
+            print(ps)
+
+        return ps        

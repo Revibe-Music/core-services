@@ -1,3 +1,4 @@
+from artist_portal._helpers.debug import debug_print
 from music.models import *
 from music import mixins
 from django.shortcuts import get_object_or_404
@@ -349,9 +350,14 @@ class BasePlaylistSongSerializer(serializers.ModelSerializer):
             'playlist_id',
         ]
     
-    def create(self, validated_data, *args, **kwargs):
+    def get_user(self):
         request = self.context.get("request")
         user = request.user
+        assert user is not None, "Could not identify the user."
+        return user
+    
+    def create(self, validated_data, *args, **kwargs):
+        user = self.get_user()
 
         song_id = validated_data['song_id']
         playlist_id = validated_data["playlist_id"]
@@ -361,13 +367,41 @@ class BasePlaylistSongSerializer(serializers.ModelSerializer):
 
         song = get_object_or_404(Song.objects.all(), pk=song_id)
         playlist = get_object_or_404(user_playlists, pk=playlist_id)
-        if settings.DEBUG:
-            print(song)
-            print(playlist)
+        debug_print(song)
+        debug_print(playlist)
+        
+        debug_print(playlist.songs.all())
+        if song in playlist.songs.all():
+            return PlaylistSongs.objects.filter(playlist=playlist, song=song)[0]
 
         ps = PlaylistSongs.objects.create(playlist=playlist, song=song)
         ps.save()
-        if settings.DEBUG:
-            print(ps)
+        debug_print(ps)
 
-        return ps        
+        return ps
+    
+    def delete(self, data, *args, **kwargs):
+        assert data['song_id'], "'song_id' must be passed in this endpoint"
+        assert data['playlist_id'], "'playlist_id' must be passed in this endpoint"
+
+        user = self.get_user()
+
+        song = get_object_or_404(Song.objects.all(), pk=data['song_id'])
+        playlist = get_object_or_404(Playlist.objects.filter(user=user), pk=data['playlist_id'])
+        debug_print(song)
+        debug_print(playlist)
+
+        ps = PlaylistSongs.objects.filter(playlist=playlist, song=song)
+        debug_print(ps)
+        if (len(ps) == 0) or (len(ps) > 1):
+            raise serializers.ValidationError("Error finding song in playlist: found {} songs.".format(len(ps)))
+        else:
+            try:
+                ps = ps[0]
+            except TypeError:
+                pass
+            except Exception as e:
+                raise e
+        
+        ps.delete()
+

@@ -37,7 +37,7 @@ class ArtistViewSet(viewsets.ModelViewSet):
         Sends the artist's list of songs (only uploaded songs, not contributions)
         """
         artist = get_object_or_404(self.queryset, pk=pk)
-        queryset = Song.objects.filter(uploaded_by=artist)
+        queryset = RevibeSongs.filter(uploaded_by=artist)
         serializer = BaseSongSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -246,11 +246,14 @@ class PlaylistViewSet(viewsets.ModelViewSet):
             serializer = BasePlaylistSongSerializer(data=request.data, *args, **kwargs)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         elif request.method == 'DELETE':
             serializer = BasePlaylistSongSerializer(data=request.data, *args, **kwargs)
             serializer.is_valid(raise_exception=True)
+            serializer.delete(data=request.data, *args, **kwargs)
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)

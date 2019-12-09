@@ -3,7 +3,7 @@ from music.models import *
 from music import mixins
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from .services import (
+from music.services import (
     song_serializers as ss,
     album_serializers as als
 )

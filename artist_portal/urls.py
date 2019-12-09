@@ -16,9 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+v1_urls = [
+    path('account/', include('accounts.urls.v1')),
+    path('music/', include('music.urls.v1'))
+]
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
-    path('account/', include('accounts.urls')),
-    path('music/', include('music.urls'))
+    path('v1/', include(v1_urls))
 ]

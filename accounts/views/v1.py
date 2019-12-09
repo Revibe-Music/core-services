@@ -13,10 +13,10 @@ import requests
 import json
 from django.http import HttpRequest
 
-from .models import *
-from .serializers import *
+from accounts.models import *
+from accounts.serializers.v1 import *
 from music.models import Album, Song
-from music.serializers import BaseAlbumSerializer, BaseSongSerializer
+from music.serializers.v1 import BaseAlbumSerializer, BaseSongSerializer
 
 class RegistrationAPI(generics.GenericAPIView, TokenView):
     """

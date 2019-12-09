@@ -1,4 +1,4 @@
-from .models import *
+from accounts.models import *
 from music.models import Artist, Library
 from rest_framework import serializers
 from django.contrib.auth import authenticate

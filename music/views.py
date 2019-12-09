@@ -7,6 +7,7 @@ from music.models import *
 from music.queries import *
 from music.serializers import *
 from music.services import artist_serializers
+from artist_portal._helpers.debug import debug_print
 
 class ArtistViewSet(viewsets.ModelViewSet):
     queryset = RevibeArtists
@@ -37,7 +38,11 @@ class ArtistViewSet(viewsets.ModelViewSet):
         Sends the artist's list of songs (only uploaded songs, not contributions)
         """
         artist = get_object_or_404(self.queryset, pk=pk)
+        debug_print(artist)
+        
         queryset = RevibeSongs.filter(uploaded_by=artist)
+        debug_print(queryset)
+
         serializer = BaseSongSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -47,7 +52,11 @@ class ArtistViewSet(viewsets.ModelViewSet):
         Sends the list of albums that the artist has contributed to
         """
         artist = get_object_or_404(self.queryset, pk=pk)
+        debug_print(artist)
+
         queryset = AlbumContributor.objects.filter(artist=artist)
+        debug_print(queryset)
+        
         serializer = AlbumAlbumContributorSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -57,24 +66,13 @@ class ArtistViewSet(viewsets.ModelViewSet):
         Sends the list of songs that the artist has contributed to
         """
         artist = get_object_or_404(self.queryset, pk=pk)
+        debug_print(artist)
+
         queryset = SongContributor.objects.filter(artist=artist).exclude(song__uploaded_by=artist)
+        debug_print(queryset)
+
         serializer = SongSongContributorSerializer(queryset, many=True)
         return Response(serializer.data)
-
-    @action(detail=True)
-    def test(self, request, pk=None):
-        """
-        testing how to send multiple querysets in one response
-        """
-        artist = get_object_or_404(self.queryset, pk=pk)
-        queryset = Album.objects.filter(uploaded_by=artist)
-        album_serializer = BaseAlbumSerializer(queryset, many=True)
-        queryset = AlbumContributor.objects.filter(artist=artist)
-        contrib_serializer = AlbumAlbumContributorSerializer(queryset, many=True)
-        return Response({
-            'albums': album_serializer.data,
-            'contribs': contrib_serializer.data
-        })
 
 class AlbumViewSet(viewsets.ModelViewSet):
     queryset = RevibeAlbums
@@ -90,8 +88,12 @@ class AlbumViewSet(viewsets.ModelViewSet):
     }
 
     def perform_destroy(self, instance):
+        debug_print(instance)
+
         instance.is_deleted = True
         instance.save()
+
+        debug_print("Instance is {}deleted".format("" if instance.is_deleted else "not "))
 
     @action(detail=True)
     def songs(self, request, pk=None):
@@ -114,8 +116,12 @@ class SongViewSet(viewsets.ModelViewSet):
     }
 
     def perform_destroy(self, instance):
+        debug_print(instance)
+        
         instance.is_deleted = True
         instance.save()
+
+        debug_print("Instance is {}deleted".format("" if instance.is_deleted else "not "))
 
 class SongContributorViewSet(viewsets.ModelViewSet):
     queryset = SongContributor.objects.all()
@@ -144,6 +150,7 @@ class LibraryViewSet(viewsets.ModelViewSet):
         Return the list of saved songs for the current user
         """
         user = self.request.user
+        debug_print(user)
         return Library.objects.filter(user=user)
     
     @action(detail=False, methods=['get','post', 'delete'])

@@ -219,15 +219,12 @@ class BaseLibrarySerializer(serializers.ModelSerializer):
 class BasePlaylistSerializer(serializers.ModelSerializer):
     songs = BaseSongSerializer(many=True, read_only=True)
     # write-only fields
-    song_id = serializers.UUIDField(write_only=True, required=False)
     class Meta:
         model = Playlist
         fields = [
             'id',
             'name',
             'songs',
-            # write-only fields
-            'song_id',
         ]
     
     def get_user(self):

@@ -1,5 +1,5 @@
-# Revibe Artist Portal Backend
-
+# Revibe API
+Welcome to the Revibe API repository
 
 #### temp help stuff
 Amazon S3 tutorials: https://testdriven.io/blog/storing-django-static-and-media-files-on-amazon-s3/

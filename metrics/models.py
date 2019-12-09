@@ -1,11 +1,11 @@
 from django.db import models
 from django.conf import settings
-from music.models import Song
+# from music.models import Song
 
 # Create your models here.
 
 class Streams(models.Model):
-    song = models.ForeignKey(Song, on_delete=models.CASCADE, related_name='song_streams', null=False, blank=False)
+    song = models.ForeignKey('music.Song', on_delete=models.CASCADE, related_name='song_streams', null=False, blank=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="user_streams", on_delete=models.SET_NULL, null=True, blank=False)
     timestamp = models.DateTimeField(auto_now_add=True, null=False, blank=True, editable=False)
     stream_duration = models.IntegerField()

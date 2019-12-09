@@ -365,7 +365,7 @@ class BasePlaylistSongSerializer(serializers.ModelSerializer):
         if len(user_playlists) == 0:
             raise serializers.ValidationError("Could not find user's playlists")
 
-        song = get_object_or_404(Song.objects.all(), pk=song_id)
+        song = get_object_or_404(Song.objects.all(), pk=song_id) # needs to be changed later to save other platform's songs
         playlist = get_object_or_404(user_playlists, pk=playlist_id)
         debug_print(song)
         debug_print(playlist)

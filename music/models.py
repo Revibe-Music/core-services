@@ -30,6 +30,8 @@ class Album(models.Model):
     contributors = models.ManyToManyField(Artist, through='AlbumContributor')
     is_displayed = models.BooleanField(null=False, blank=True, default=True)
     is_deleted = models.BooleanField(null=False, blank=True, default=False)
+    date_added = models.DateTimeField(auto_now_add=True, null=True, editable=False)
+    last_changed = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         return "{}".format(self.name)

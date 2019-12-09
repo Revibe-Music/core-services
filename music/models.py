@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 import uuid
+from datetime import datetime
 
 import music.model_exts as ext
 
@@ -32,6 +33,7 @@ class Album(models.Model):
     is_deleted = models.BooleanField(null=False, blank=True, default=False)
     date_added = models.DateTimeField(auto_now_add=True, null=True, editable=False)
     last_changed = models.DateTimeField(auto_now=True, null=True)
+    date_published = models.DateField(null=True, blank=True, default=datetime.now)
 
     def __str__(self):
         return "{}".format(self.name)

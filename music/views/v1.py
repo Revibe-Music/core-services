@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
 from music.models import *
 from music.queries import *
+from music.serializers._services import artist_serializers
 from music.serializers.v1 import *
-from music.services import artist_serializers
 from artist_portal._helpers.debug import debug_print
 
 class ArtistViewSet(viewsets.ModelViewSet):

@@ -13,6 +13,7 @@ import requests
 import json
 from django.http import HttpRequest
 
+from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *
 from music.models import Album, Song
@@ -159,7 +160,11 @@ class SpotifyConnect(SocialConnectView):
 
 
 class SpotifyRefresh(generics.GenericAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (TokenOrSessionAuthentication)
+    required_alternate_scopes = {
+        'GET': [['ADMIN'], ['first-party']],
+        'POST': [['ADMIN'], ['first-party']]
+    }
     serializer_class = RefreshTokenSerializer
 
     def post(self, request, *args, **kwargs):
@@ -184,7 +189,11 @@ class SpotifyRefresh(generics.GenericAPIView):
         return Response({"error":"Social Token does not exist."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
 
 class SpotifyLogout(generics.GenericAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (TokenOrSessionAuthentication)
+    required_alternate_scopes = {
+        'GET': [['ADMIN'], ['first-party']],
+        'POST': [['ADMIN'], ['first-party']]
+    }
 
     def post(self, request, *args, **kwargs):
         if SocialAccount.objects.filter(user=request.user,provider="spotify").exists():
@@ -196,7 +205,7 @@ class SpotifyLogout(generics.GenericAPIView):
 
 class UserLinkedAccounts(viewsets.ModelViewSet):
     serializer_class = SocialTokenSerializer
-    permission_classes = [TokenMatchesOASRequirements]
+    permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
     }
@@ -248,7 +257,14 @@ class UserArtistViewSet(viewsets.GenericViewSet):
             Calls the POST method of the Song viewset
     """
     queryset = CustomUser.objects.all()
-    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
+    permission_classes = [TokenOrSessionAuthentication]
+    required_alternate_scopes = {
+        'GET': [['ADMIN'],['first-party']],
+        'POST': [['ADMIN'],['first-party']],
+        'PATCH': [['ADMIN'],['first-party']],
+        'PUT': [['ADMIN'],['first-party']],
+        'DELETE': [['ADMIN'],['first-party']],
+    }
     serializer_class = UserArtistSerializer
 
     def get(self, request):
@@ -293,8 +309,15 @@ class UserArtistViewSet(viewsets.GenericViewSet):
         return Response(serializer.data)
 
 class UserViewSet(generics.GenericAPIView):
-    permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     serializer_class = UserSerializer
+    permission_classes = [TokenOrSessionAuthentication]
+    required_alternate_scopes = {
+        'GET': [['ADMIN'],['first-party']],
+        'POST': [['ADMIN'],['first-party']],
+        'PATCH': [['ADMIN'],['first-party']],
+        'PUT': [['ADMIN'],['first-party']],
+        'DELETE': [['ADMIN'],['first-party']],
+    }
     
     def get_serializer_class(self):
         serializer_class = self.serializer_class

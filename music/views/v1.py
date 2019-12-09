@@ -1,18 +1,20 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import views, viewsets, permissions as perm, generics, status
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
+from artist_portal._helpers.debug import debug_print
+from accounts.permissions import TokenOrSessionAuthentication
 from music.models import *
 from music.queries import *
 from music.serializers._services import artist_serializers
 from music.serializers.v1 import *
-from artist_portal._helpers.debug import debug_print
 
 class ArtistViewSet(viewsets.ModelViewSet):
     queryset = RevibeArtists
     serializer_class = BaseArtistSerializer
-    permission_classes = [TokenMatchesOASRequirements]
+    permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
     }
@@ -77,7 +79,7 @@ class ArtistViewSet(viewsets.ModelViewSet):
 class AlbumViewSet(viewsets.ModelViewSet):
     queryset = RevibeAlbums
     serializer_class = BaseAlbumSerializer
-    permission_classes = [TokenMatchesOASRequirements]
+    permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
         "POST": [["ADMIN"],["first-party"]],
@@ -105,7 +107,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
 class SongViewSet(viewsets.ModelViewSet):
     queryset = RevibeSongs
     serializer_class = BaseSongSerializer
-    permission_classes = [TokenMatchesOASRequirements]
+    permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
         "POST": [["ADMIN"],["first-party"]],
@@ -126,7 +128,7 @@ class SongViewSet(viewsets.ModelViewSet):
 class SongContributorViewSet(viewsets.ModelViewSet):
     queryset = SongContributor.objects.all()
     serializer_class = BaseSongContributorSerialzer
-    permission_classes = [TokenMatchesOASRequirements]
+    permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
         "POST": [["ADMIN"],["first-party"]],
@@ -138,7 +140,7 @@ class SongContributorViewSet(viewsets.ModelViewSet):
 
 class LibraryViewSet(viewsets.ModelViewSet):
     serializer_class = BaseLibrarySerializer
-    permission_classes = [TokenMatchesOASRequirements]
+    permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
         "POST": [["ADMIN"],["first-party"]],
@@ -225,7 +227,7 @@ class LibraryViewSet(viewsets.ModelViewSet):
 
 class PlaylistViewSet(viewsets.ModelViewSet):
     serializer_class = BasePlaylistSerializer
-    permission_classes = [TokenMatchesOASRequirements]
+    permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
         "POST": [["ADMIN"],["first-party"]],
@@ -267,11 +269,10 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
 
 class MusicSearch(viewsets.GenericViewSet):
-    # permission_classes = [TokenMatchesOASRequirements]
-    # required_alternate_scopes = {
-    #     "GET": [["ADMIN"],["first-party"]],
-    # }
-    permission_classes = [perm.AllowAny] # temporary, TODO: change back
+    permission_classes = [TokenOrSessionAuthentication]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"],["first-party"]],
+    }
 
     def list(self, request, *args, **kwargs):
         params = request.query_params

@@ -55,8 +55,8 @@ class AlbumContributor(models.Model):
         return "<AlbumContribution: {}-{}>".format(self.album, self.artist)
 
 class Song(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    uri = models.UUIDField('URI', default=uuid.uuid4, unique=True, editable=False)
+    id = models.CharField(primary_key=True, default=uuid.uuid4, editable=False, max_length=255)
+    uri = models.CharField('URI', default=uuid.uuid4, unique=True, editable=False, max_length=255)
     file = models.FileField('Song', upload_to=ext.rename_song, null=True)
     title = models.CharField('Name', max_length=255, null=False)
     album  = models.ForeignKey(Album, on_delete=models.CASCADE, null=False, blank=False)

@@ -5,7 +5,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
 from artist_portal._helpers.debug import debug_print
+from artist_portal.platforms.platform import Platform
 from accounts.permissions import TokenOrSessionAuthentication
+from music.mixins import Version1Mixin
 from music.models import *
 from music.queries import *
 from music.serializers._services import artist_serializers
@@ -138,7 +140,7 @@ class SongContributorViewSet(viewsets.ModelViewSet):
         "DELETE": [["ADMIN"],["first-party"]],
     }
 
-class LibraryViewSet(viewsets.ModelViewSet):
+class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
     serializer_class = BaseLibrarySerializer
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
@@ -163,14 +165,17 @@ class LibraryViewSet(viewsets.ModelViewSet):
 
         elif request.method == 'POST':
             kwargs['context'] = self.get_serializer_context()
-            serializer = BaseLibrarySongSerializer(data=request.data, *args, **kwargs)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            version = self.get_version()
+            platform = Platform.get_platform(request.data['platform'])
+            debug_print(platform)
 
-            # print to console if in debug mode
-            if settings.DEBUG:
-                print(serializer)
-                print(serializer.data)
+            serializer = platform().save_to_library(data=request.data, version=version, *args, **kwargs)
+            # serializer = BaseLibrarySongSerializer(data=request.data, *args, **kwargs)
+            # serializer.is_valid(raise_exception=True)
+            # serializer.save()
+
+            # debug_print(serializer)
+            # debug_print(serializer.data)
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         

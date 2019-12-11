@@ -63,7 +63,7 @@ class BaseSongSerializer(serializers.ModelSerializer):
     album = ss.SongAlbumSerializer(many=False, read_only=True)
 
     # write_only fields for creating and updating songs
-    album_id = serializers.UUIDField(source='album.id', write_only=True)
+    album_id = serializers.CharField(source='album.id', write_only=True)
     song = serializers.FileField(source='file', write_only=True, allow_null=True)
 
     class Meta:
@@ -111,8 +111,8 @@ class BaseAlbumContributorSerializer(serializers.ModelSerializer):
     write-only serializer for creating, updating, and deleting
     album contributors
     """
-    artist = serializers.UUIDField(source='artist.id', write_only=True)
-    album = serializers.UUIDField(source='album.id', write_only=True)
+    artist = serializers.CharField(source='artist.id', write_only=True)
+    album = serializers.CharField(source='album.id', write_only=True)
     class Meta:
         model = AlbumContributor
         fields = [
@@ -161,8 +161,8 @@ class ArtistAlbumContributorSerializer(serializers.ModelSerializer, mixins.Artis
         ]
 
 class BaseSongContributorSerialzer(serializers.ModelSerializer):
-    artist = serializers.UUIDField(source='artist.id', write_only=True)
-    song = serializers.UUIDField(source='song.id', write_only=True)
+    artist = serializers.CharField(source='artist.id', write_only=True)
+    song = serializers.CharField(source='song.id', write_only=True)
     class Meta:
         model = SongContributor
         fields = [
@@ -257,7 +257,7 @@ class BaseLibrarySongSerializer(serializers.ModelSerializer):
     library = serializers.ReadOnlyField(source='library.id')
     song = serializers.ReadOnlyField(source='song.id')
     # write-only fields
-    song_id = serializers.UUIDField(write_only=True)
+    song_id = serializers.CharField(write_only=True)
     class Meta:
         model = LibrarySongs
         fields = [
@@ -335,7 +335,7 @@ class BasePlaylistSongSerializer(serializers.ModelSerializer):
     playlist = serializers.ReadOnlyField(source='playlist.id')
     song = serializers.ReadOnlyField(source='song.id')
     # write-only fields
-    song_id = serializers.UUIDField(write_only=True)
+    song_id = serializers.CharField(write_only=True)
     playlist_id = serializers.IntegerField(write_only=True)
     class Meta:
         model = LibrarySongs

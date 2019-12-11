@@ -24,3 +24,7 @@ class AlbumImageURLMixin:
             return ""
         except Exception as err:
             raise err
+
+class Version1Mixin:
+    def get_version(self):
+        return 'v1'

@@ -4,8 +4,9 @@ from music.models import (
     Album, Artist,
     Song, Library, LibrarySongs
 )
+from platforms.platform import Platform
 
-class YouTube:
+class YouTube(Platform):
     strings = [
         'youtube',
         'YOUTUBE',
@@ -18,9 +19,6 @@ class YouTube:
         'You tube',
         'you Tube',
     ]
-
-    def __str__(self):
-        return "YouTube"
     
     def get_library(self, user, *args, **kwargs):
         request = kwargs['context']['request']
@@ -33,6 +31,9 @@ class YouTube:
     def song_in_library(self, song_id):
         songs = Song.objects.filter(id=song_id, platform=self.__str__())
         return True if (len(songs) > 0) else False
+    
+    def save_artist(self, data):
+        required_fields = ['id','uri','name']
     
     def save_album_artist(self, data):
         artist = Artist.objects.create(

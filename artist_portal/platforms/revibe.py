@@ -1,7 +1,8 @@
 from artist_portal._errors.versions import VersionError
 from music.serializers import v1 as ser_v1
+from platforms.platform import Platform
 
-class Revibe:
+class Revibe(Platform):
     strings = [
         'revibe',
         'REVIBE',
@@ -9,9 +10,6 @@ class Revibe:
         'ReVibe',
         'reVibe',
     ]
-
-    def __str__(self):
-        return "Revibe"
 
     @classmethod
     def save_to_library(cls, data, version=None, *args, **kwargs):

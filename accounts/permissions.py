@@ -32,4 +32,7 @@ class TokenOrSessionAuthentication(BasePermission):
         try:
             return getattr(view, "required_alternate_scopes")
         except AttributeError:
-            raise ImproperlyConfigured("This one fucked up too")
+            raise ImproperlyConfigured("Must specify 'required_alternate_scopes'")
+
+class TokenOrSessionUserPermissions(BasePermission):
+    pass

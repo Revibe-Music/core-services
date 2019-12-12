@@ -6,11 +6,11 @@ import uuid
 import music.model_exts as ext
 
 class Artist(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    uri = models.UUIDField('URI', default=uuid.uuid4, unique=True, editable=False)
+    id = models.CharField(max_length=255, primary_key=True, default=uuid.uuid4, editable=False)
+    uri = models.CharField(max_length=255, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField('Display Name', max_length=255)
-    image = models.FileField('Display Image', upload_to=ext.rename_image) # actual field
-    platform = models.CharField(max_length=255)
+    image = models.FileField('Display Image', upload_to=ext.rename_image, null=True, blank=True) # actual field
+    platform = models.CharField(max_length=255, null=False, blank=False)
     # manager = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, related_name='artist_manager', null=True, blank=True)
 
     def __str__(self):
@@ -20,12 +20,12 @@ class Artist(models.Model):
         return "<Artist: {} {}>".format(self.name, self.id)
 
 class Album(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    uri = models.UUIDField('URI', default=uuid.uuid4, unique=True, editable=False)
+    id = models.CharField(max_length=255, primary_key=True, default=uuid.uuid4, editable=False)
+    uri = models.CharField(max_length=255, unique=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
-    image = models.FileField('Album Image', upload_to=ext.rename_image, null=True) # actual field
+    image = models.FileField('Album Image', upload_to=ext.rename_image, null=True, blank=True) # actual field
     # TODO: create mutliple image fields to send different sized images for different uses
-    platform = models.CharField(max_length=255)
+    platform = models.CharField(max_length=255, null=False, blank=False)
     type = models.CharField(max_length=255, null=True, blank=True)
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="album_uploaded_by")
     contributors = models.ManyToManyField(Artist, through='AlbumContributor')
@@ -57,7 +57,7 @@ class AlbumContributor(models.Model):
 class Song(models.Model):
     id = models.CharField(primary_key=True, default=uuid.uuid4, editable=False, max_length=255)
     uri = models.CharField('URI', default=uuid.uuid4, unique=True, editable=False, max_length=255)
-    file = models.FileField('Song', upload_to=ext.rename_song, null=True)
+    file = models.FileField('Song', upload_to=ext.rename_song, null=True, blank=True)
     title = models.CharField('Name', max_length=255, null=False)
     album  = models.ForeignKey(Album, on_delete=models.CASCADE, null=False, blank=False)
     duration = models.DecimalField('Duration', null=True, blank=True, max_digits=6, decimal_places=2) # seconds
@@ -65,6 +65,7 @@ class Song(models.Model):
     contributors = models.ManyToManyField(Artist, through='SongContributor', related_name="song_contributors")
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="song_uploaded_by") # artist or user???
     uploaded_date = models.DateField(auto_now_add=True, null=True, blank=True, editable=False)
+    last_changed = models.DateField(auto_now=True, null=True, blank=True)
     genre = models.CharField(max_length=255, null=True, blank=True)
     is_displayed = models.BooleanField(null=False, blank=True, default=True)
     is_deleted = models.BooleanField(null=False, blank=True, default=False)

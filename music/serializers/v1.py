@@ -86,6 +86,7 @@ class BaseSongSerializer(serializers.ModelSerializer):
         """
         Function/endpoint for artists to upload their songs
         """
+        debug_print(validated_data)
         # get the song's album from the provided ID
         album = validated_data.pop('album')
         album = get_object_or_404(Album.objects.all(), pk=album['id'])

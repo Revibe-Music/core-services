@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
 from artist_portal._helpers.debug import debug_print
-from artist_portal.platforms.platform import Platform
+from artist_portal._helpers.platforms import get_platform
 from accounts.permissions import TokenOrSessionAuthentication
 from music.mixins import Version1Mixin
 from music.models import *
@@ -159,17 +159,19 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
     
     @action(detail=False, methods=['get','post', 'delete'])
     def songs(self, request, *args, **kwargs):
+        """
+        """
 
         if request.method == 'GET':
             return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
 
         elif request.method == 'POST':
             kwargs['context'] = self.get_serializer_context()
-            version = self.get_version()
-            platform = Platform.get_platform(request.data['platform'])
+            kwargs['version'] = self.get_version()
+            platform = get_platform(request.data['platform'])
             debug_print(platform)
 
-            serializer = platform().save_to_library(data=request.data, version=version, *args, **kwargs)
+            serializer = platform().save_song_to_library(data=request.data, *args, **kwargs)
             # serializer = BaseLibrarySongSerializer(data=request.data, *args, **kwargs)
             # serializer.is_valid(raise_exception=True)
             # serializer.save()

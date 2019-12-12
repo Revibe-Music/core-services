@@ -82,7 +82,7 @@ class BaseSongSerializer(serializers.ModelSerializer):
             'album_id',
         ]
     
-    def create(self, validated_data):
+    def create(self, validated_data, *args, **kwargs):
         """
         Function/endpoint for artists to upload their songs
         """
@@ -106,6 +106,8 @@ class BaseSongSerializer(serializers.ModelSerializer):
         song_contrib.save()
 
         return song
+    
+    # def update(self, validated_data, *args, **kwargs)
 
 class BaseAlbumContributorSerializer(serializers.ModelSerializer):
     """

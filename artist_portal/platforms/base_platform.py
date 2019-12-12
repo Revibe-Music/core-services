@@ -13,6 +13,9 @@ class Platform:
     def __str__(self):
         return self.__class__.__name__
     
+    def __repr__(self):
+        return "<class {}>".format(self.__class__.__name__)
+    
     def invalidate_revibe(self):
         if self.__class__.__name__ == 'Revibe':
             raise NotImplementedError("Class 'Revibe' must overwrite this method")

@@ -39,3 +39,11 @@ class YouTube(Platform):
         album.type = 'Single'
         album.save()
         return album
+
+
+class Spotify(Platform):
+    strings = [
+        'Spotify',
+        'SPOTIFY',
+        'spotify',
+    ]

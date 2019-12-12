@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
 from artist_portal._helpers.debug import debug_print
-from artist_portal._helpers.platforms import get_platform
+from artist_portal._helpers.platforms import get_platform, linked_platforms
 from accounts.permissions import TokenOrSessionAuthentication
 from music.mixins import Version1Mixin
 from music.models import *
@@ -154,8 +154,26 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
         Return the list of saved songs for the current user
         """
         user = self.request.user
-        debug_print(user)
         return Library.objects.filter(user=user)
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        params = request.query_params
+        if 'library' in params.keys():
+            library = params['library']
+            for platform in linked_platforms:
+                if library in platform.strings:
+                    queryset = queryset.filter(platform=platform())
+                    break
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
     
     @action(detail=False, methods=['get','post', 'delete'])
     def songs(self, request, *args, **kwargs):

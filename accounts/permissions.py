@@ -9,8 +9,7 @@ class TokenOrSessionAuthentication(BasePermission):
 
     def has_permission(self ,request, view):
         token = request.auth
-        debug_print('token: ')
-        debug_print(token)
+        debug_print('token: {}'.format(token))
 
         if (not token) and (request.session.session_key != None):
             return True

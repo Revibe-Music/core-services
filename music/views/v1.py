@@ -302,12 +302,23 @@ class MusicSearch(viewsets.GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         params = request.query_params
-        text = params['text']
-        songs = BaseSongSerializer(RevibeSongs.filter(title__icontains=text), many=True).data
-        albums = BaseAlbumSerializer(RevibeAlbums.filter(name__icontains=text), many=True).data
-        artists = BaseArtistSerializer(RevibeArtists.filter(name__icontains=text), many=True).data
 
-        return Response(
-            {'songs': songs, 'albums': albums, 'artists': artists},
-            status=status.HTTP_200_OK
-        )
+        if 'text' not in params.keys():
+            return Response({"error": "'text' must be included as a parameter in this request"}, status=status.HTTP_417_EXPECTATION_FAILED)
+        text = params['text']
+        
+        result = {}
+
+        t = params.get('type', False)
+        if t:
+            if t not in ['songs','albums','artists']:
+                return Response({'error': "parameter 'type' must be 'songs', 'albums', or 'artists'."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if (t == 'songs') or (not t):
+            result['songs'] = BaseSongSerializer(RevibeSongs.filter(title__icontains=text), many=True).data
+        if (t == 'albums') or (not t):
+            result['albums'] = BaseAlbumSerializer(RevibeAlbums.filter(name__icontains=text), many=True).data
+        if (t == 'artists') or (not t):
+            result['artists'] = BaseArtistSerializer(RevibeArtists.filter(name__icontains=text), many=True).data
+
+        return Response(result ,status=status.HTTP_200_OK)

@@ -277,9 +277,9 @@ if USE_S3:
     AWS_QUERYSTRING_AUTH = False
 
     # # static files
-    # STATIC_LOCATION = 'static'
-    # STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
-    # STATICFILES_STORAGE = 'artist_portal.storage_backends.StaticStorage'
+    STATIC_LOCATION = 'static'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+    STATICFILES_STORAGE = 'artist_portal.storage_backends.StaticStorage'
 
     # media file settings
     MEDIA_LOCATION = 'media'

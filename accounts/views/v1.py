@@ -257,6 +257,9 @@ class UserArtistViewSet(viewsets.GenericViewSet):
         Post:
             TODO: implement
             Calls the POST method of the Song viewset
+    
+    Endpoint: account/artist/contributions/songs/
+        See the .song_contributions method
     """
     queryset = CustomUser.objects.all()
     permission_classes = [TokenOrSessionAuthentication]
@@ -307,7 +310,7 @@ class UserArtistViewSet(viewsets.GenericViewSet):
     def songs(self, request):
         artist = request.user.artist
         songs = Song.objects.filter(uploaded_by=artist)
-        serializer = BaseSongSerializer(songs, many=True)
+        serializer = ser_v1.BaseSongSerializer(songs, many=True)
         return Response(serializer.data)
     
     @action(detail=False)
@@ -329,14 +332,32 @@ class UserArtistViewSet(viewsets.GenericViewSet):
         Takes GET, POST, PATCH, and DELETE requests.
 
         Endpoint: /v1/account/artist/contributions/songs/
+            Get:
+                nothing special
+            Post:
+                Required data:
+                    song: the song's ID
+                    artist: the contributing artist's ID
+                    contribution_type: string
+            Patch:
+                Can only update the contribution type - cannot change the artist or the song.
+                We will just force users to create new contributions for that purpose. 
 
-        The PATCH and DELETE require the contribution ID as a param - 'id'
+                Required data:
+                    id: the contribution ID
+                Optional data:
+                    contribution_type: string
+            Delete:
+                Required parameters:
+                    id: the contribution ID
         """
         if request.method == 'GET':
             artist = request.user.artist
             songs = SongContributor.objects.filter(artist=artist, primary_artist=False)
             song_serializer = ser_v1.SongSongContributorSerializer(songs, many=True)
+
             return Response(song_serializer.data)
+
         elif request.method == 'POST':
             serializer = ser_v1.BaseSongContributorSerialzer(data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -345,22 +366,30 @@ class UserArtistViewSet(viewsets.GenericViewSet):
 
         elif request.method == 'PATCH':
             partial = kwargs.pop('partial', False)
-            data = request.data
-            instance = SongContributor.objects.get(id=data['id'])
+            if 'contribution_type' in request.data.keys():
+                data = {'contribution_type': request.data['contribution_type']}
+            else:
+                return Response({"detail": "field 'contribution_type' must be sent in the body of this request"}, status=status.HTTP_400_BAD_REQUEST)
 
-            serializer = ser_v1.BaseSongContributorSerialzer(instance, data=data, partial=partial, *args, **kwargs)
+            instance = SongContributor.objects.get(pk=data['id'])
+
+            serializer = ser_v1.BaseSongContributorSerialzer(instance=instance, data=data, partial=partial, *args, **kwargs)
             serializer.is_valid(raise_exception=True)
             serializer.save()
 
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         elif request.method == 'DELETE':
             params = request.query_params
-            if 'id' in params.keys():
-                pass
+            if 'id' not in params.keys():
+                return Response({"detail": "The contribution ID, 'id', must be passed as a parameter to this request"}, status=status.HTTP_417_EXPECTATION_FAILED)
             else:
-                return Response({"error": "The contribution ID, 'id', must be passed as a parameter to this request"}, status=status.HTTP_417_EXPECTATION_FAILED)
-            return Response(status=status.HTTP_501_NOT_IMPLEMENTED) # temp
+                id = params['id']
+
+            instance = SongContributor.objects.get(pk=id)
+            instance.delete()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
     
     @action(detail=False, url_path='contributions/albums')
     def album_contributions(self, request):

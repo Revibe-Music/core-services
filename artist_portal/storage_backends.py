@@ -8,3 +8,7 @@ class MediaStorage(S3Boto3Storage):
     location = 'media'
     default_acl = 'public-read'
     file_overwrite = False
+
+    # def someshit(self):
+    #     file = self._open()
+    #     file = file.file

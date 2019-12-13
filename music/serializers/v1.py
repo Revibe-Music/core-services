@@ -164,13 +164,13 @@ class ArtistAlbumContributorSerializer(serializers.ModelSerializer, mixins.Artis
         ]
 
 class BaseSongContributorSerialzer(serializers.ModelSerializer):
-    artist = serializers.CharField(source='artist.id', write_only=True)
+    # artist = serializers.CharField(source='artist.id', write_only=True)
     song = serializers.CharField(source='song.id', write_only=True)
     class Meta:
         model = SongContributor
         fields = [
             'id',
-            'artist',
+            # 'artist',
             'song',
             'contribution_type'
         ]
@@ -182,8 +182,8 @@ class BaseSongContributorSerialzer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         # get artist and song data from validated_data
-        artist = validated_data.pop('artist')
-        artist = get_object_or_404(Artist.objects.all(), pk=artist['id'])
+        request = self.context.get("request")
+        artist = request.user.artist
         song = validated_data.pop('song')
         song = get_object_or_404(Song.objects.all(), pk=song['id'])
 

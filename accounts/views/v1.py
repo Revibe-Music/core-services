@@ -14,13 +14,12 @@ import requests
 import json
 from django.http import HttpRequest
 
+from artist_portal._errors.random import ValidationError
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *
 from music.models import Album, Song, SongContributor, AlbumContributor
-from music.serializers.v1 import (
-    BaseAlbumSerializer, BaseSongSerializer, SongSongContributorSerializer, AlbumAlbumContributorSerializer
-)
+from music.serializers import v1 as ser_v1
 
 class RegistrationAPI(generics.GenericAPIView, TokenView):
     """
@@ -324,22 +323,37 @@ class UserArtistViewSet(viewsets.GenericViewSet):
         })
     
     @action(detail=False, url_path='contributions/songs', methods=['get','post','patch','delete'])
-    def song_contributions(self, request):
+    def song_contributions(self, request, *args, **kwargs):
         """
         URL Endpoint for handling all of the authenticated artist's song contributor information.
         Takes GET, POST, PATCH, and DELETE requests.
 
         Endpoint: /v1/account/artist/contributions/songs/
+
+        The PATCH and DELETE require the contribution ID as a param - 'id'
         """
         if request.method == 'GET':
             artist = request.user.artist
             songs = SongContributor.objects.filter(artist=artist, primary_artist=False)
-            song_serializer = SongSongContributorSerializer(songs, many=True)
+            song_serializer = ser_v1.SongSongContributorSerializer(songs, many=True)
             return Response(song_serializer.data)
         elif request.method == 'POST':
-            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+            serializer = ser_v1.BaseSongContributorSerialzer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         elif request.method == 'PATCH':
-            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+            partial = kwargs.pop('partial', False)
+            data = request.data
+            instance = SongContributor.objects.get(id=data['id'])
+
+            serializer = ser_v1.BaseSongContributorSerialzer(instance, data=data, partial=partial, *args, **kwargs)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            return Response(serializer.data)
+
         elif request.method == 'DELETE':
             params = request.query_params
             if 'id' in params.keys():
@@ -352,7 +366,7 @@ class UserArtistViewSet(viewsets.GenericViewSet):
     def album_contributions(self, request):
         artist = request.user.artist
         albums = AlbumContributor.objects.filter(artist=artist, primary_artist=False)
-        album_serializer = AlbumAlbumContributorSerializer(albums, many=True)
+        album_serializer = ser_v1.AlbumAlbumContributorSerializer(albums, many=True)
         return Response(album_serializer.data)
 
 class UserViewSet(generics.GenericAPIView):

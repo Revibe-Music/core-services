@@ -7,8 +7,9 @@ def rename_song(instance, filename):
         return path + filename
 
 def rename_image(instance, filename):
+    folder = instance.__class__.__name__
     ext = filename.split('.')[-1]
-    path = "audio/images/"
+    path = "images/{}/".format(folder)
     if instance.uri:
         return "{path}{uri}.{ext}".format(path=path, uri=instance.uri, ext=ext)
     else:

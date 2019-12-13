@@ -294,10 +294,11 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
 
 class MusicSearch(viewsets.GenericViewSet):
-    permission_classes = [TokenOrSessionAuthentication]
-    required_alternate_scopes = {
-        "GET": [["ADMIN"],["first-party"]],
-    }
+    permission_classes = [perm.AllowAny]
+    # permission_classes = [TokenOrSessionAuthentication]
+    # required_alternate_scopes = {
+    #     "GET": [["ADMIN"],["first-party"]],
+    # }
 
     def list(self, request, *args, **kwargs):
         params = request.query_params

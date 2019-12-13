@@ -16,8 +16,10 @@ from django.http import HttpRequest
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *
-from music.models import Album, Song
-from music.serializers.v1 import BaseAlbumSerializer, BaseSongSerializer
+from music.models import Album, Song, SongContributor, AlbumContributor
+from music.serializers.v1 import (
+    BaseAlbumSerializer, BaseSongSerializer, SongSongContributorSerializer, AlbumAlbumContributorSerializer
+)
 
 class RegistrationAPI(generics.GenericAPIView, TokenView):
     """
@@ -307,6 +309,32 @@ class UserArtistViewSet(viewsets.GenericViewSet):
         songs = Song.objects.filter(uploaded_by=artist)
         serializer = BaseSongSerializer(songs, many=True)
         return Response(serializer.data)
+    
+    @action(detail=False)
+    def contributions(self, request):
+        artist = request.user.artist
+        songs = SongContributor.objects.filter(artist=artist)
+        albums = AlbumContributor.objects.filter(artist=artist)
+        song_serializer = SongSongContributorSerializer(songs, many=True)
+        album_serializer = AlbumAlbumContributorSerializer(albums, many=True)
+        return Response({
+            'songs': song_serializer.data,
+            'albums': album_serializer.data
+        })
+    
+    @action(detail=False, url_path='contributions/songs')
+    def song_contributions(self, request):
+        artist = request.user.artist
+        songs = SongContributor.objects.filter(artist=artist)
+        song_serializer = SongSongContributorSerializer(songs, many=True)
+        return Response(song_serializer.data)
+    
+    @action(detail=False, url_path='contributions/albums')
+    def album_contributions(self, request):
+        artist = request.user.artist
+        albums = AlbumContributor.objects.filter(artist=artist)
+        album_serializer = AlbumAlbumContributorSerializer(albums, many=True)
+        return Response(album_serializer.data)
 
 class UserViewSet(generics.GenericAPIView):
     serializer_class = UserSerializer

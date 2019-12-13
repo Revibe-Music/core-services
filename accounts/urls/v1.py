@@ -6,13 +6,14 @@ from accounts.views import v1, v1_reference
 
 router = routers.DefaultRouter()
 router.register("linked-accounts", v1.UserLinkedAccounts, 'linked_accounts')
+router.register("artist", v1.UserArtistViewSet, "artist")
 
 
-artist_urls = [
-    path("", v1.UserArtistViewSet.as_view(v1_reference.UserArtistViewSet_actions)),
-    path("album/", v1.UserArtistViewSet.as_view(v1_reference.UserArtistViewSet_albums_actions)),
-    path("song/", v1.UserArtistViewSet.as_view(v1_reference.UserArtistViewSet_songs_actions)),
-]
+# artist_urls = [
+#     path("", v1.UserArtistViewSet.as_view(v1_reference.UserArtistViewSet_actions)),
+#     path("album/", v1.UserArtistViewSet.as_view(v1_reference.UserArtistViewSet_albums_actions)),
+#     path("song/", v1.UserArtistViewSet.as_view(v1_reference.UserArtistViewSet_songs_actions)),
+# ]
 
 
 urlpatterns = [
@@ -29,5 +30,5 @@ urlpatterns = [
     path('spotify-refresh/', v1.SpotifyRefresh.as_view()),
     path('spotify-logout/', v1.SpotifyLogout.as_view()),
     # path("linked-accounts/", views.UserLinkedAccounts.as_view()),
-    path("artist/", include(artist_urls), name="artist_account"),
+    # path("artist/", include(artist_urls), name="artist_account"),
 ]

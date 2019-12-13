@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Q
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -322,17 +323,35 @@ class UserArtistViewSet(viewsets.GenericViewSet):
             'albums': album_serializer.data
         })
     
-    @action(detail=False, url_path='contributions/songs')
+    @action(detail=False, url_path='contributions/songs', methods=['get','post','patch','delete'])
     def song_contributions(self, request):
-        artist = request.user.artist
-        songs = SongContributor.objects.filter(artist=artist)
-        song_serializer = SongSongContributorSerializer(songs, many=True)
-        return Response(song_serializer.data)
+        """
+        URL Endpoint for handling all of the authenticated artist's song contributor information.
+        Takes GET, POST, PATCH, and DELETE requests.
+
+        Endpoint: /v1/account/artist/contributions/songs/
+        """
+        if request.method == 'GET':
+            artist = request.user.artist
+            songs = SongContributor.objects.filter(artist=artist, primary_artist=False)
+            song_serializer = SongSongContributorSerializer(songs, many=True)
+            return Response(song_serializer.data)
+        elif request.method == 'POST':
+            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+        elif request.method == 'PATCH':
+            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+        elif request.method == 'DELETE':
+            params = request.query_params
+            if 'id' in params.keys():
+                pass
+            else:
+                return Response({"error": "The contribution ID, 'id', must be passed as a parameter to this request"}, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response(status=status.HTTP_501_NOT_IMPLEMENTED) # temp
     
     @action(detail=False, url_path='contributions/albums')
     def album_contributions(self, request):
         artist = request.user.artist
-        albums = AlbumContributor.objects.filter(artist=artist)
+        albums = AlbumContributor.objects.filter(artist=artist, primary_artist=False)
         album_serializer = AlbumAlbumContributorSerializer(albums, many=True)
         return Response(album_serializer.data)
 

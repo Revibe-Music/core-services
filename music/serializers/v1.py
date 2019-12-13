@@ -47,7 +47,7 @@ class BaseAlbumSerializer(serializers.ModelSerializer,mixins.ImageURLMixin):
         album.save()
 
         # create and save the default Album Contributors
-        album_contrib = AlbumContributor.objects.create(artist=artist, album=album, contribution_type="Artist")
+        album_contrib = AlbumContributor.objects.create(artist=artist, album=album, contribution_type="Artist", primary_artist=True)
         album_contrib.save()
 
         return album
@@ -102,7 +102,7 @@ class BaseSongSerializer(serializers.ModelSerializer):
         song.save()
 
         # add the uploading artist as a contributor to the SongContributor table
-        song_contrib = SongContributor.objects.create(artist=artist, song=song, contribution_type="Artist")
+        song_contrib = SongContributor.objects.create(artist=artist, song=song, contribution_type="Artist", primary_artist=True)
         song_contrib.save()
 
         return song

@@ -47,6 +47,7 @@ class AlbumContributor(models.Model):
     contribution_type = models.CharField(max_length=255, null=True) # limit choices on the application side
     date_added = models.DateField(auto_now_add=True, null=True, editable=False)
     last_changed = models.DateField(auto_now=True, null=True)
+    primary_artist = models.BooleanField(null=False, blank=True, default=False)
 
     def __str__(self):
         return "'{}' with '{}' as {}".format(self.album, self.artist, self.contribution_type)
@@ -82,6 +83,7 @@ class SongContributor(models.Model):
     contribution_type = models.CharField(max_length=255, null=True) # limit choices on the application side
     date_added = models.DateField(auto_now_add=True, null=True, editable=False)
     last_changed = models.DateField(auto_now=True, null=True)
+    primary_artist = models.BooleanField(null=False, blank=True, default=False)
 
     def __str__(self):
         return "'{}' with '{}' as {}".format(self.song, self.artist, self.contribution_type)

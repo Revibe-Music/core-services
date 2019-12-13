@@ -29,11 +29,15 @@ class Album(models.Model):
     type = models.CharField(max_length=255, null=True, blank=True)
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="album_uploaded_by")
     contributors = models.ManyToManyField(Artist, through='AlbumContributor')
-    is_displayed = models.BooleanField(null=False, blank=True, default=True)
-    is_deleted = models.BooleanField(null=False, blank=True, default=False)
     date_added = models.DateTimeField(auto_now_add=True, null=True, editable=False)
     last_changed = models.DateTimeField(auto_now=True, null=True)
     date_published = models.DateField(null=True, blank=True, default=now)
+    is_displayed = models.BooleanField(null=False, blank=True, default=True)
+    is_deleted = models.BooleanField(null=False, blank=True, default=False)
+
+    objects = ext.DisplayModelManager()
+
+    all_objects = ext.HiddenModelManager()
 
     def __str__(self):
         return "{}".format(self.name)
@@ -70,6 +74,10 @@ class Song(models.Model):
     genre = models.CharField(max_length=255, null=True, blank=True)
     is_displayed = models.BooleanField(null=False, blank=True, default=True)
     is_deleted = models.BooleanField(null=False, blank=True, default=False)
+
+    objects = ext.DisplayModelManager()
+
+    all_objects = ext.HiddenModelManager()
 
     def __str__(self):
         return "{}".format(self.title)

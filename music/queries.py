@@ -13,3 +13,8 @@ RevibeSongs = Song.objects \
     .filter(is_displayed=True) \
     .filter(is_deleted=False)
 
+RevibeHiddenAlbums = Album.all_objects \
+    .filter(platform="Revibe")
+
+RevibeHiddenSongs = Song.all_objects \
+    .filter(platform="Revibe")

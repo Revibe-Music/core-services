@@ -4,14 +4,10 @@ RevibeArtists = Artist.objects \
     .filter(platform="Revibe")
 
 RevibeAlbums = Album.objects \
-    .filter(platform="Revibe") \
-    .filter(is_displayed=True) \
-    .filter(is_deleted=False)
+    .filter(platform="Revibe")
 
 RevibeSongs = Song.objects \
-    .filter(platform="Revibe") \
-    .filter(is_displayed=True) \
-    .filter(is_deleted=False)
+    .filter(platform="Revibe")
 
 RevibeHiddenAlbums = Album.all_objects \
     .filter(platform="Revibe")

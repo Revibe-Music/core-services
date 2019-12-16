@@ -425,8 +425,8 @@ class UserArtistViewSet(viewsets.GenericViewSet):
         artist = request.user.artist
         songs = SongContributor.objects.filter(artist=artist)
         albums = AlbumContributor.objects.filter(artist=artist)
-        song_serializer = SongSongContributorSerializer(songs, many=True)
-        album_serializer = AlbumAlbumContributorSerializer(albums, many=True)
+        song_serializer = ser_v1.SongSongContributorSerializer(songs, many=True)
+        album_serializer = ser_v1.AlbumAlbumContributorSerializer(albums, many=True)
         return Response({
             'songs': song_serializer.data,
             'albums': album_serializer.data

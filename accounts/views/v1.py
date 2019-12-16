@@ -423,8 +423,8 @@ class UserArtistViewSet(viewsets.GenericViewSet):
     @action(detail=False)
     def contributions(self, request):
         artist = request.user.artist
-        songs = SongContributor.objects.filter(artist=artist)
-        albums = AlbumContributor.objects.filter(artist=artist)
+        songs = SongContributor.objects.filter(artist=artist, primary_artist=False, album__is_displayed=True)
+        albums = AlbumContributor.objects.filter(artist=artist, primary_artist=False, album__is_displayed=True)
         song_serializer = ser_v1.SongSongContributorSerializer(songs, many=True)
         album_serializer = ser_v1.AlbumAlbumContributorSerializer(albums, many=True)
         return Response({

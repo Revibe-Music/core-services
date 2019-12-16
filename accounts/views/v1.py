@@ -238,27 +238,29 @@ class UserArtistViewSet(viewsets.GenericViewSet):
     Endpoint: account/artist/
         Get: 
             Gets the profile information of the authenticated user, assuming they have an artist linked to their account
-            TODO: implement error send if they do not have a linked artist
         Post:
             Creates an artist and attaches it to the current user
+            Required data:
+                name: (string) artist's display name
+                image_up: (file) artist's display image
         Patch:
-            Used to update user-artist profile information (artist name, image, etc.)
-            TODO: implement
+            Updates the artist's profile information
+            Optional data:
+                name: (string) artist's display name
+                image_up: (file) artist's dispaly image
     
     Endpoint: account/artist/album/
-        Get:
-            Gets a list of albums uploaded by the current user.
-        Post:
-            TODO: implement
-            Calls the POST method of the Album viewset.
-    
+        See the .albums method
+
     Endpoint: account/artist/song/
-        Get:
-            Gets a list of songs uploaded by the current user
-        Post:
-            TODO: implement
-            Calls the POST method of the Song viewset
-    
+        See the .songs method
+
+    Endpoint: /account/artist/contributions/
+        See the .contributions method
+
+    Endpoint: /account/artist/contributions/albums/
+        See the .album_contributions method
+
     Endpoint: account/artist/contributions/songs/
         See the .song_contributions method
     """
@@ -273,18 +275,10 @@ class UserArtistViewSet(viewsets.GenericViewSet):
     }
     serializer_class = UserArtistSerializer
 
-    # @action(detail=False, url_path=None, methods=['get','post','patch'])
-    # def base(self, request, *args, **kwargs):
-    #     if request.method == 'GET':
-    #         return self.get(request)
-    #     elif request.method == 'POST':
-    #         return self.post(request)
-    #     elif request.method == 'PATCH':
-    #         return self.patch(request, *args, **kwargs)
-    #     else:
-    #         return Response({"detail": "Could not identify request method"}, status=status.HTTP_400_BAD_REQUEST)
-
     def list(self, request):
+        if not request.user.artist:
+            return Response({"detail": "could not identify the current user's artist profile"}, status=status.HTTP_401_UNAUTHORIZED)
+
         artist = self.serializer_class(request.user.artist, context=self.get_serializer_context()).data
         return Response(artist)
 
@@ -294,6 +288,7 @@ class UserArtistViewSet(viewsets.GenericViewSet):
             return Response({"detail": "this user already has an artist account"}, status=status.HTTP_400_BAD_REQUEST)        
         
         # create the artist and attach to the user
+        request.data['platform'] = 'Revibe'
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             artist = serializer.save()

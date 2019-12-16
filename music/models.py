@@ -72,6 +72,7 @@ class Song(models.Model):
     uploaded_date = models.DateField(auto_now_add=True, null=True, blank=True, editable=False)
     last_changed = models.DateField(auto_now=True, null=True, blank=True)
     genre = models.CharField(max_length=255, null=True, blank=True)
+    is_explicit = models.BooleanField(null=False, blank=True, default=False)
     is_displayed = models.BooleanField(null=False, blank=True, default=True)
     is_deleted = models.BooleanField(null=False, blank=True, default=False)
 
@@ -114,6 +115,7 @@ class Playlist(models.Model):
     name = models.CharField("Name", null=True, blank=False, max_length=255)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     songs = models.ManyToManyField(Song, through='PlaylistSongs', related_name='playlist_songs')
+    is_public = models.BooleanField(null=False, blank=True, default=False)
     date_created = models.DateField(auto_now_add=True, editable=False, null=True, blank=True)
 
     class Meta:

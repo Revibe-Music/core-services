@@ -4,6 +4,7 @@ from django.utils.timezone import now
 import uuid
 
 import music.model_exts as ext
+from music.managers import *
 
 class Artist(models.Model):
     id = models.CharField(max_length=255, primary_key=True, default=uuid.uuid4, editable=False)
@@ -35,9 +36,9 @@ class Album(models.Model):
     is_displayed = models.BooleanField(null=False, blank=True, default=True)
     is_deleted = models.BooleanField(null=False, blank=True, default=False)
 
-    objects = ext.DisplayModelManager()
+    objects = DisplayModelManager()
 
-    all_objects = ext.HiddenModelManager()
+    all_objects = HiddenModelManager()
 
     def __str__(self):
         return "{}".format(self.name)
@@ -52,6 +53,8 @@ class AlbumContributor(models.Model):
     date_added = models.DateField(auto_now_add=True, null=True, editable=False)
     last_changed = models.DateField(auto_now=True, null=True)
     primary_artist = models.BooleanField(null=False, blank=True, default=False)
+
+    objects = AlbumContributorManager()
 
     def __str__(self):
         return "'{}' with '{}' as {}".format(self.album, self.artist, self.contribution_type)
@@ -76,9 +79,9 @@ class Song(models.Model):
     is_displayed = models.BooleanField(null=False, blank=True, default=True)
     is_deleted = models.BooleanField(null=False, blank=True, default=False)
 
-    objects = ext.DisplayModelManager()
+    objects = DisplayModelManager()
 
-    all_objects = ext.HiddenModelManager()
+    all_objects = HiddenModelManager()
 
     def __str__(self):
         return "{}".format(self.title)
@@ -93,6 +96,8 @@ class SongContributor(models.Model):
     date_added = models.DateField(auto_now_add=True, null=True, editable=False)
     last_changed = models.DateField(auto_now=True, null=True)
     primary_artist = models.BooleanField(null=False, blank=True, default=False)
+
+    objects = SongContributorManager()
 
     def __str__(self):
         return "'{}' with '{}' as {}".format(self.song, self.artist, self.contribution_type)

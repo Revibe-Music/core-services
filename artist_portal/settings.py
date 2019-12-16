@@ -292,19 +292,10 @@ else:
 
 STATIC_URL = '/static/'
 
-# CORS settings
-# CORS_ALLOW_HEADERS = list(default_headers) + [
-#     'example',
-# ]
 
+# CORS Settings
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
-# CORS_ORIGIN_ALLOW_ALL = False
-
-# CORS_ORIGIN_WHITELIST = [
-#     '.elasticbeanstalk.com',
-#     ''
-# ]
 
 # all_auth settings
 ACCOUNT_EMAIL_REQUIRED = False

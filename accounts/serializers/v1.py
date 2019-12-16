@@ -82,10 +82,18 @@ class AccessTokenSerializer(serializers.Serializer):
 class RefreshTokenSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
 
+class UserArtistProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArtistProfile
+        fields = [
+            'require_contribution_approval',
+        ]
+
 class UserArtistSerializer(serializers.ModelSerializer, ImageURLMixin):
     # read only
     image = serializers.SerializerMethodField('get_image_url', read_only=True)
     user = UserSerializer(source='artist_user', read_only=True)
+    artist_profile = UserArtistProfileSerializer(read_only=True)
 
     # write only
     user_id = serializers.UUIDField(write_only=True, required=False)
@@ -98,6 +106,7 @@ class UserArtistSerializer(serializers.ModelSerializer, ImageURLMixin):
             'image',
             'platform',
             'user',
+            'artist_profile',
             # write only fields
             'user_id',
             'image_up',

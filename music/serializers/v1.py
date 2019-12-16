@@ -1,4 +1,5 @@
 from artist_portal._helpers.debug import debug_print
+from accounts.models import ArtistProfile
 from music.models import *
 from music import mixins
 from django.shortcuts import get_object_or_404
@@ -16,7 +17,7 @@ class BaseArtistSerializer(serializers.ModelSerializer, mixins.ImageURLMixin):
             'id',
             'name',
             'image',
-            'platform'
+            'platform',
         ]
 
 class BaseAlbumSerializer(serializers.ModelSerializer,mixins.ImageURLMixin):

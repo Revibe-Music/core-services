@@ -24,7 +24,7 @@ class Profile(models.Model):
 
 class ArtistProfile(models.Model):
     id = models.AutoField(primary_key=True)
-    artist = models.OneToOneField(Artist, on_delete=models.CASCADE, null=False, blank=False)
+    artist = models.OneToOneField(Artist, on_delete=models.CASCADE, related_name='artist_profile', null=False, blank=False)
 
     require_contribution_approval = models.BooleanField(null=False, blank=True, default=True)
 

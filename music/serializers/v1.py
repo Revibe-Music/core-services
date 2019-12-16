@@ -193,6 +193,7 @@ class BaseSongContributorSerialzer(serializers.ModelSerializer):
         return song_contrib
 
 class SongSongContributorSerializer(serializers.ModelSerializer):
+    contribution_id = serializers.ReadOnlyField(source='id')
     song_id = serializers.ReadOnlyField(source='song.id')
     uri = serializers.ReadOnlyField(source='song.uri')
     title = serializers.ReadOnlyField(source='song.title')
@@ -203,7 +204,7 @@ class SongSongContributorSerializer(serializers.ModelSerializer):
     class Meta:
         model = SongContributor
         fields = [
-            'id',
+            'contribution_id',
             'song_id',
             'uri',
             'title',

@@ -434,6 +434,8 @@ class UserArtistViewSet(viewsets.GenericViewSet):
     
     @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums')
     def album_contributions(self, request, *args, **kwargs):
+        """
+        """
         artist = request.user.artist
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['patch','delete']:
@@ -501,13 +503,13 @@ class UserArtistViewSet(viewsets.GenericViewSet):
                 Required data:
                     contribution_id: the contribution ID
         """
+        artist = request.user.artist
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['PATCH','DELETE']:
             contribution_id = request.data.pop('contribution_id')
 
         if request.method == 'GET':
-            artist = request.user.artist
-            songs = SongContributor.objects.filter(artist=artist, primary_artist=False)
+            songs = SongContributor.objects.filter(artist=artist, primary_artist=False, song__is_displayed=True)
             song_serializer = ser_v1.SongSongContributorSerializer(songs, many=True, *args, **kwargs)
 
             return Response(song_serializer.data)
@@ -520,11 +522,6 @@ class UserArtistViewSet(viewsets.GenericViewSet):
 
         elif request.method == 'PATCH':
             partial = kwargs.pop('partial', False)
-            if 'contribution_type' in request.data.keys():
-                data = {'contribution_type': request.data['contribution_type']}
-            else:
-                return Response({"detail": "field 'contribution_type' must be sent in the body of this request"}, status=status.HTTP_400_BAD_REQUEST)
-
             instance = SongContributor.objects.get(pk=contribution_id)
 
             serializer = ser_v1.BaseSongContributorSerialzer(instance=instance, data=data, partial=partial, *args, **kwargs)

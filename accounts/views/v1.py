@@ -334,10 +334,11 @@ class UserArtistViewSet(viewsets.GenericViewSet):
             if 'platform' not in request.data.keys():
                 request.data['platform'] = 'Revibe'
             serializer = ser_v1.BaseAlbumSerializer(data=request.data, *args, **kwargs)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         elif request.method == 'PATCH':
             instance = album_queryset.get(pk=album_id)
 
@@ -346,9 +347,10 @@ class UserArtistViewSet(viewsets.GenericViewSet):
                 return Response({"detail": "You are not authorized to edit this album"}, status=status.HTTP_403_FORBIDDEN)
 
             serializer = ser_v1.BaseAlbumSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         elif request.method == 'DELETE':
             instance = RevibeHiddenAlbums.get(pk=album_id)
@@ -389,10 +391,12 @@ class UserArtistViewSet(viewsets.GenericViewSet):
             return Response(serializer.data)
 
         elif request.method == 'POST':
+            request.data['platform'] = 'Revibe'
             serializer = ser_v1.BaseSongSerializer(data=request.data, *args, **kwargs)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'PATCH':
             instance = song_queryset.get(pk=song_id)
@@ -402,9 +406,10 @@ class UserArtistViewSet(viewsets.GenericViewSet):
                 return Response({"detail": "You are not authorized to edit this song"}, status=status.HTTP_403_FORBIDDEN)
 
             serializer = ser_v1.BaseSongSerializer(data=request.data, instance=instance, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
             instance = song_queryset.get(pk=song_id)
@@ -448,9 +453,10 @@ class UserArtistViewSet(viewsets.GenericViewSet):
         
         if request.method == 'POST':
             serializer = ser_v1.BaseAlbumContributorSerializer(data=request.data, *args, **kwargs)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'PATCH':
             instance = AlbumContributor.objects.get(pk=contribution_id)
@@ -460,10 +466,10 @@ class UserArtistViewSet(viewsets.GenericViewSet):
                 return Response({"detail": "You are not authorized to edit this contribution"}, status=status.HTTP_403_FORBIDDEN)
 
             serializer = BaseAlbumContributorSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
             instance = AlbumContributor.objects.get(pk=contribution_id)
@@ -525,10 +531,10 @@ class UserArtistViewSet(viewsets.GenericViewSet):
             instance = SongContributor.objects.get(pk=contribution_id)
 
             serializer = ser_v1.BaseSongContributorSerialzer(instance=instance, data=data, partial=partial, *args, **kwargs)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
             instance = SongContributor.objects.get(pk=contribution_id)

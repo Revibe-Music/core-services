@@ -114,22 +114,23 @@ class BaseAlbumContributorSerializer(serializers.ModelSerializer):
     write-only serializer for creating, updating, and deleting
     album contributors
     """
-    artist = serializers.CharField(source='artist.id', write_only=True)
-    album = serializers.CharField(source='album.id', write_only=True)
+    contribution_id = serializers.ReadOnlyField(source='id')
+    artist_id = serializers.CharField(source='artist.id', write_only=True)
+    album_id = serializers.CharField(source='album.id', write_only=True)
     class Meta:
         model = AlbumContributor
         fields = [
-            'id',
-            'artist',
-            'album',
+            'contribution_id',
+            'artist_id',
+            'album_id',
             'contribution_type'
         ]
 
     def create(self, validated_data):
         # get artist and song data from validated_data
-        artist = validated_data.pop('artist')
+        artist = validated_data.pop('artist_id')
         artist = get_object_or_404(Artist.objects.all(), pk=artist['id'])
-        album = validated_data.pop('album')
+        album = validated_data.pop('album_id')
         album = get_object_or_404(Album.objects.all(), pk=album['id'])
 
         album_contrib = SongContributor.objects.create(**validated_data, artist=artist, song=song)
@@ -165,14 +166,14 @@ class ArtistAlbumContributorSerializer(serializers.ModelSerializer, mixins.Artis
 
 class BaseSongContributorSerialzer(serializers.ModelSerializer):
     contribution_id = serializers.ReadOnlyField(source='id')
-    artist = serializers.CharField(source='artist.id', write_only=True, required=False)
-    song = serializers.CharField(source='song.id', write_only=True, required=False)
+    artist_id = serializers.CharField(source='artist.id', write_only=True, required=False)
+    song_id = serializers.CharField(source='song.id', write_only=True, required=False)
     class Meta:
         model = SongContributor
         fields = [
             'contribution_id',
-            'artist',
-            'song',
+            'artist_id',
+            'song_id',
             'contribution_type'
         ]
     
@@ -183,9 +184,9 @@ class BaseSongContributorSerialzer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         # get artist and song data from validated_data
-        artist = validated_data.pop('artist')
+        artist = validated_data.pop('artist_id')
         artist = get_object_or_404(Artist.objects.all(), pk=artist['id'])
-        song = validated_data.pop('song')
+        song = validated_data.pop('song_id')
         song = get_object_or_404(Song.objects.all(), pk=song['id'])
 
         song_contrib = SongContributor.objects.create(**validated_data, artist=artist, song=song)

@@ -14,13 +14,19 @@ class CustomUser(AbstractUser):
 
 class Profile(models.Model):
     id = models.AutoField(primary_key=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
+
     country = models.CharField('Country', max_length=255, null=True, blank=True)
-    # replace with???
-    # lat = models.???
-    # long = models.???
     dob = models.DateField('Date of Birth', null=True, blank=True)
     image = models.FileField("Profile Picture", upload_to='images/profiles', null=True, blank=True)
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
+    # user settings fields
+    allow_explicit = models.BooleanField(null=False, blank=True, default=True)
+
+class ArtistProfile(models.Model):
+    id = models.AutoField(primary_key=True)
+    artist = models.OneToOneField(Artist, on_delete=models.CASCADE, null=False, blank=False)
+
+    require_contribution_approval = models.BooleanField(null=False, blank=True, default=True)
 
 class Social(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='user_social')

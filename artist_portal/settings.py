@@ -294,7 +294,7 @@ STATIC_URL = '/static/'
 
 
 # logging settings
-log_location = '/var/logs/app-logs/django.log' if USE_S3 else BASE_DIR + '/app-logs/django.log'
+log_location = '/var/log/app-logs/django.log' if USE_S3 else BASE_DIR + '/app-logs/django.log'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

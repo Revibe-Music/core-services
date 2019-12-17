@@ -13,6 +13,6 @@ class MediaStorage(S3Boto3Storage):
     file_overwrite = False
 
     def _save_content(self, obj, content, parameters):
-        logger.log(obj)
-        logger.log(type(obj))
+        logger.log(20, obj)
+        logger.log(20, type(obj))
         super()._save_content(obj, content, parameters)

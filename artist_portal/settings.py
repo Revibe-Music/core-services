@@ -263,8 +263,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 
-# USE_S3 = os.getenv('USE_S3') == 'TRUE'
-USE_S3 = True
+USE_S3 = os.getenv('USE_S3') == 'TRUE'
 if USE_S3:
     # AWS stuff
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')

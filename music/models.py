@@ -1,6 +1,10 @@
 from django.db import models
 from django.conf import settings
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils.timezone import now
+from PIL import Image
+from io import BytesIO
+import sys
 import uuid
 
 import music.model_exts as ext
@@ -45,6 +49,20 @@ class Album(models.Model):
     
     def __repr__(self):
         return "<Album: {} {}>".format(self.name, self.id)
+    
+    def save(self, *args, **kwargs):
+        im = Image.open(self.image)
+
+        output = BytesIO()
+
+        im = im.resize( (100,100) )
+
+        im.save(output, 'PNG', quality=100)
+        output.seek(0)
+
+        self.image = InMemoryUploadedFile(output, 'FileField', "{}.jpg".format(self.image.name.split('.')[0]), 'image/jpeg', sys.getsizeof(output), None)
+
+        super(Album, self).save(*args, **kwargs)
 
 class AlbumContributor(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, null=False, related_name='artist_to_album')

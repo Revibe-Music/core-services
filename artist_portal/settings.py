@@ -293,6 +293,28 @@ else:
 STATIC_URL = '/static/'
 
 
+# logging settings
+log_location = '/var/log/app-logs/django.log' if USE_S3 else BASE_DIR + '/app-logs/django.log'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': log_location,
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+
 # CORS Settings
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True

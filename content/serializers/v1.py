@@ -114,7 +114,8 @@ class AlbumSerializer(serializers.ModelSerializer):
     album_uri = serializers.CharField(source='uri', required=False)
     name = serializers.CharField(required=True)
     type = serializers.CharField(required=True)
-    platform = serializers.CharField(required=True)
+    platform = serializers.CharField(required=False)
+    displayed = serializers.BooleanField(source='is_displayed', required=False)
 
     # read-only
     artist = ArtistSerializer(source='album_uploaded_by', read_only=True)
@@ -131,6 +132,7 @@ class AlbumSerializer(serializers.ModelSerializer):
             'name',
             'type',
             'platform',
+            'displayed',
 
             # read-only
             'artist',
@@ -160,6 +162,8 @@ class AlbumSerializer(serializers.ModelSerializer):
 class SongSerializer(serializers.ModelSerializer):
     song_id = serializers.CharField(source='id', required=False)
     song_uri = serializers.CharField(source='uri', required=False)
+    genre = serializers.CharField(required=False)
+    displayed = serializers.BooleanField(required=False)
 
     # read-only
     artist = ArtistSerializer(source='song_uploaded_by', read_only=True)
@@ -168,7 +172,7 @@ class SongSerializer(serializers.ModelSerializer):
 
     # write-only
     album_id = serializers.CharField(write_only=True, required=True)
-    file = serializers.FileField(write_only=True, required=False)
+    file = serializers.FileField(write_only=True, required=True)
 
     class Meta:
         model = Song

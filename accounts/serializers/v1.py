@@ -84,9 +84,11 @@ class RefreshTokenSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
 
 class UserArtistProfileSerializer(serializers.ModelSerializer):
+    profile_id = serializers.ReadOnlyField(source='id')
     class Meta:
         model = ArtistProfile
         fields = [
+            'profile_id',
             'require_contribution_approval',
         ]
 
@@ -113,6 +115,15 @@ class UserArtistSerializer(serializers.ModelSerializer):
             'user_id',
             'image_up',
         ]
+    
+    def create(self, validated_data):
+        artist = Artist.objects.create(**validated_data)
+        artist.save()
+
+        profile = ArtistProfile.objects.create(artist=artist)
+        profile.save()
+
+        return artist
 
 class SocialTokenSerializer(serializers.ModelSerializer):
     platform = serializers.ReadOnlyField(source='app.name')

@@ -10,7 +10,6 @@ from rest_framework import serializers
 from accounts.models import *
 from content.models import Artist
 from music.models import Library
-from music.mixins import ImageURLMixin
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -91,9 +90,8 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
             'require_contribution_approval',
         ]
 
-class UserArtistSerializer(serializers.ModelSerializer, ImageURLMixin):
+class UserArtistSerializer(serializers.ModelSerializer):
     # read only
-    image = serializers.SerializerMethodField('get_image_url', read_only=True)
     user = UserSerializer(source='artist_user', read_only=True)
     artist_profile = UserArtistProfileSerializer(read_only=True)
 
@@ -105,7 +103,6 @@ class UserArtistSerializer(serializers.ModelSerializer, ImageURLMixin):
         fields = [
             'id',
             'name',
-            'image',
             'platform',
             'user',
             'artist_profile',

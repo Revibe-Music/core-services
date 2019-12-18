@@ -13,6 +13,7 @@ import requests
 import json
 from django.http import HttpRequest
 
+from artist_portal.viewsets import GenericPlatformViewSet
 from artist_portal._errors.random import ValidationError
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
@@ -231,38 +232,12 @@ class UserLinkedAccounts(viewsets.ModelViewSet):
 #     #
 #     #     # return Response(SocialTokenSerializer(request.user, context=self.get_serializer_context()).data)
 
-class UserArtistViewSet(viewsets.GenericViewSet):
+class UserArtistViewSet(GenericPlatformViewSet):
     """
-    Endpoint: account/artist/
-        Get: 
-            Gets the profile information of the authenticated user, assuming they have an artist linked to their account
-        Post:
-            Creates an artist and attaches it to the current user
-            Required data:
-                name: (string) artist's display name
-                image_up: (file) artist's display image
-        Patch:
-            Updates the artist's profile information
-            Optional data:
-                name: (string) artist's display name
-                image_up: (file) artist's dispaly image
-    
-    Endpoint: account/artist/album/
-        See the .albums method
-
-    Endpoint: account/artist/song/
-        See the .songs method
-
-    Endpoint: /account/artist/contributions/
-        See the .contributions method
-
-    Endpoint: /account/artist/contributions/albums/
-        See the .album_contributions method
-
-    Endpoint: account/artist/contributions/songs/
-        See the .song_contributions method
     """
+    platform = 'Revibe'
     queryset = CustomUser.objects.all()
+    serializer_class = UserArtistSerializer
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         'GET': [['ADMIN'],['first-party']],
@@ -271,7 +246,6 @@ class UserArtistViewSet(viewsets.GenericViewSet):
         'PUT': [['ADMIN'],['first-party']],
         'DELETE': [['ADMIN'],['first-party']],
     }
-    serializer_class = UserArtistSerializer
 
     def list(self, request):
         if not request.user.artist:
@@ -286,7 +260,6 @@ class UserArtistViewSet(viewsets.GenericViewSet):
             return Response({"detail": "this user already has an artist account"}, status=status.HTTP_400_BAD_REQUEST)        
         
         # create the artist and attach to the user
-        request.data['platform'] = 'Revibe'
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             artist = serializer.save()
@@ -299,23 +272,14 @@ class UserArtistViewSet(viewsets.GenericViewSet):
     def patch(self, request, *args, **kwargs):
         instance = request.user.artist
         serializer = self.get_serializer(data=request.data, instance=instance, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.data)
-    
     @action(detail=False, methods=['get','post','patch','delete'])
     def albums(self, request, *args, **kwargs):
         """
-        URL endpoint for all artist album-related requests.
-        Takes GET, POST, PATCH, and DELETE requests.
-
-        Endpoint: /account/artist/albums/
-            GET:
-            POST:
-            PATCH:
-            DELETE:
-            TODO: write docs
         """
         artist = request.user.artist
         album_queryset = RevibeHiddenAlbums.filter(uploaded_by=artist)
@@ -366,17 +330,6 @@ class UserArtistViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['get','post','patch','delete'])
     def songs(self, request, *args, **kwargs):
-        """
-        The URL endpoint for all artist song-related requests
-        Takes GET, POST, PATCH, and DELETE requests
-
-        Endpoint: /account/artist/songs/
-            GET:
-            POST:
-            PATCH:
-            DELETE:
-            TODO: write docs
-        """
         artist = request.user.artist
         song_queryset = RevibeHiddenSongs.filter(uploaded_by=artist)
         kwargs['context'] = self.get_serializer_context()
@@ -437,8 +390,6 @@ class UserArtistViewSet(viewsets.GenericViewSet):
     
     @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums')
     def album_contributions(self, request, *args, **kwargs):
-        """
-        """
         artist = request.user.artist
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['patch','delete']:
@@ -484,29 +435,6 @@ class UserArtistViewSet(viewsets.GenericViewSet):
     
     @action(detail=False, url_path='contributions/songs', methods=['get','post','patch','delete'])
     def song_contributions(self, request, *args, **kwargs):
-        """
-        URL Endpoint for handling all of the authenticated artist's song contributor information.
-        Takes GET, POST, PATCH, and DELETE requests.
-
-        Endpoint: /v1/account/artist/contributions/songs/
-            Get:
-                nothing special
-            Post:
-                Required data:
-                    song: the song's ID
-                    artist: the contributing artist's ID
-                    contribution_type: string
-            Patch:
-                Can only update the contribution type - cannot change the artist or the song.
-                We will just force users to create new contributions for that purpose. 
-
-                Required data:
-                    contribution_id: the contribution ID
-                    contribution_type: string
-            Delete:
-                Required data:
-                    contribution_id: the contribution ID
-        """
         artist = request.user.artist
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['PATCH','DELETE']:

@@ -6,7 +6,6 @@ from music.views import v1
 router = routers.DefaultRouter()
 router.register("library", v1.LibraryViewSet, "library")
 router.register("playlist", v1.PlaylistViewSet, "playlist")
-router.register("search", v1.MusicSearch, "music_search")
 
 urlpatterns = [
     path("", include(router.urls)),

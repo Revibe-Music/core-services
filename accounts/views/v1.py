@@ -19,7 +19,8 @@ from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *
 from content.models import Album, Song, SongContributor, AlbumContributor
-from music.serializers import v1 as ser_v1
+from content.serializers import v1 as content_ser_v1
+from music.serializers import v1 as music_ser_v1
 
 class RegistrationAPI(generics.GenericAPIView, TokenView):
     """
@@ -282,20 +283,20 @@ class UserArtistViewSet(GenericPlatformViewSet):
         """
         """
         artist = request.user.artist
-        album_queryset = RevibeHiddenAlbums.filter(uploaded_by=artist)
+        album_queryset = self.platform.HiddenAlbums.filter(uploaded_by=artist)
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['PATCH','DELETE']:
             album_id = request.data.pop('album_id')
 
         if request.method == 'GET':
             albums = album_queryset
-            serializer = ser_v1.BaseAlbumSerializer(albums, many=True)
+            serializer = content_ser_v1.AlbumSerializer(albums, many=True)
             return Response(serializer.data)
         
         elif request.method == 'POST':
             if 'platform' not in request.data.keys():
                 request.data['platform'] = 'Revibe'
-            serializer = ser_v1.BaseAlbumSerializer(data=request.data, *args, **kwargs)
+            serializer = content_ser_v1.AlbumSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)

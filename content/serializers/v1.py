@@ -63,7 +63,7 @@ class AlbumContributorSerializer(serializers.ModelSerializer):
 
 class AlbumSerializer(serializers.ModelSerializer):
     artist = ArtistSerializer(source='album_uploaded_by', many=False, required=False)
-    contributors = AlbumContributorSerializer(many=True)
+    contributors = AlbumContributorSerializer(many=True, required=False)
 
     album_id = serializers.CharField(source='id', required=False)
     album_uri = serializers.CharField(source='uri', required=False)
@@ -77,7 +77,7 @@ class AlbumSerializer(serializers.ModelSerializer):
             'type',
             'platform',
 
-            'images',
+            # 'images',
 
             'artist',
             'contributors',

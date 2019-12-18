@@ -235,6 +235,7 @@ class UserLinkedAccounts(viewsets.ModelViewSet):
 
 class UserArtistViewSet(GenericPlatformViewSet):
     """
+    Artist Portal ONLY
     """
     platform = 'Revibe'
     queryset = CustomUser.objects.all()
@@ -295,7 +296,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         
         elif request.method == 'POST':
             if 'platform' not in request.data.keys():
-                request.data['platform'] = 'Revibe'
+                request.data['platform'] = str(self.platform)
             serializer = content_ser_v1.AlbumSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
@@ -309,14 +310,14 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if artist != instance.uploaded_by:
                 return Response({"detail": "You are not authorized to edit this album"}, status=status.HTTP_403_FORBIDDEN)
 
-            serializer = ser_v1.BaseAlbumSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
+            serializer = content_ser_v1.AlbumSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         elif request.method == 'DELETE':
-            instance = RevibeHiddenAlbums.get(pk=album_id)
+            instance = album_queryset.get(pk=album_id)
 
             # ensure editing artist is the uploading artist
             if artist != instance.uploaded_by:
@@ -332,19 +333,20 @@ class UserArtistViewSet(GenericPlatformViewSet):
     @action(detail=False, methods=['get','post','patch','delete'])
     def songs(self, request, *args, **kwargs):
         artist = request.user.artist
-        song_queryset = RevibeHiddenSongs.filter(uploaded_by=artist)
+        song_queryset = self.platform.HiddenSongs.filter(uploaded_by=artist)
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['PATCH','DELETE']:
             song_id = request.data.pop('song_id')
 
         if request.method == 'GET':
             songs = song_queryset
-            serializer = ser_v1.BaseSongSerializer(songs, many=True)
+            serializer = content_ser_v1.SongSerializer(songs, many=True)
             return Response(serializer.data)
 
         elif request.method == 'POST':
-            request.data['platform'] = 'Revibe'
-            serializer = ser_v1.BaseSongSerializer(data=request.data, *args, **kwargs)
+            if 'platform' not in request.data.keys():
+                request.data['platform'] = str(self.platform)
+            serializer = content_ser_v1.SongSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -357,10 +359,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if artist != instance.uploaded_by:
                 return Response({"detail": "You are not authorized to edit this song"}, status=status.HTTP_403_FORBIDDEN)
 
-            serializer = ser_v1.BaseSongSerializer(data=request.data, instance=instance, partial=True)
+            serializer = content_ser_v1.SongSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
@@ -380,10 +382,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
     @action(detail=False)
     def contributions(self, request):
         artist = request.user.artist
-        songs = SongContributor.objects.filter(artist=artist, primary_artist=False, album__is_displayed=True)
-        albums = AlbumContributor.objects.filter(artist=artist, primary_artist=False, album__is_displayed=True)
-        song_serializer = ser_v1.SongSongContributorSerializer(songs, many=True)
-        album_serializer = ser_v1.AlbumAlbumContributorSerializer(albums, many=True)
+        songs = self.platform.HiddenSongContributors.filter(artist=artist, primary_artist=False)
+        albums = self.platform.HiddenAlbumContributions.filter(artist=artist, primary_artist=False, album__is_displayed=True)
+        song_serializer = content_ser_v1.SongContributorSerializer(songs, many=True)
+        album_serializer = content_ser_v1.AlbumContributorSerializer(albums, many=True)
         return Response({
             'songs': song_serializer.data,
             'albums': album_serializer.data
@@ -392,27 +394,28 @@ class UserArtistViewSet(GenericPlatformViewSet):
     @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums')
     def album_contributions(self, request, *args, **kwargs):
         artist = request.user.artist
+        albumcontribution_queryset = self.platform.HiddenAlbumContributions.filter(artist=artist, primary_artist=False)
         kwargs['context'] = self.get_serializer_context()
-        if request.method in ['patch','delete']:
+        if request.method in ['PATCH','DELETE']:
             contribution_id = request.data['contribution_id']
 
         if request.method == 'GET':
-            albums = AlbumContributor.objects.filter(artist=artist, primary_artist=False, album__is_displayed=True)
-            album_serializer = ser_v1.AlbumAlbumContributorSerializer(albums, many=True)
+            albums = albumcontribution_queryset
+            album_serializer = content_ser_v1.AlbumContributorSerializer(albums, many=True)
             return Response(album_serializer.data)
         
         if request.method == 'POST':
-            serializer = ser_v1.BaseAlbumContributorSerializer(data=request.data, *args, **kwargs)
+            serializer = content_ser_v1.AlbumContributorSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'PATCH':
-            instance = AlbumContributor.objects.get(pk=contribution_id)
+            instance = albumcontribution_queryset.get(pk=contribution_id)
 
             # check that the current artist is the album's uploading artist
-            if artist != instance.song.uploaded_by:
+            if artist != instance.album.uploaded_by:
                 return Response({"detail": "You are not authorized to edit this contribution"}, status=status.HTTP_403_FORBIDDEN)
 
             serializer = BaseAlbumContributorSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
@@ -422,11 +425,11 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
-            instance = AlbumContributor.objects.get(pk=contribution_id)
+            instance = albumcontribution_queryset.get(pk=contribution_id)
 
             # check that the current artist is the album's uploading artist
-            if artist != instance.song.uploaded_by:
-                return Response({"detail": "You are not authorized to edit this contribution"}, status=status.HTTP_403_FORBIDDEN)
+            if artist != instance.album.uploaded_by:
+                return Response({"detail": "You are not authorized to delete this contribution"}, status=status.HTTP_403_FORBIDDEN)
 
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -437,36 +440,44 @@ class UserArtistViewSet(GenericPlatformViewSet):
     @action(detail=False, url_path='contributions/songs', methods=['get','post','patch','delete'])
     def song_contributions(self, request, *args, **kwargs):
         artist = request.user.artist
+        songcontribution_queryset = self.platform.HiddenSongContributors.filter(artist=artist, primary_artist=False)
+        full_queryset = SongContributor.all_objects.all()
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['PATCH','DELETE']:
             contribution_id = request.data.pop('contribution_id')
 
         if request.method == 'GET':
-            songs = SongContributor.objects.filter(artist=artist, primary_artist=False, song__is_displayed=True)
-            song_serializer = ser_v1.SongSongContributorSerializer(songs, many=True, *args, **kwargs)
+            songs = songcontribution_queryset
+            song_serializer = content_ser_v1.SongContributorSerializer(songs, many=True, *args, **kwargs)
 
             return Response(song_serializer.data)
 
         elif request.method == 'POST':
-            serializer = ser_v1.BaseSongContributorSerialzer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer = content_ser_v1.SongContributorSerializer(data=request.data, *args, **kwargs)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'PATCH':
-            partial = kwargs.pop('partial', False)
-            instance = SongContributor.objects.get(pk=contribution_id)
+            instance = full_queryset.get(pk=contribution_id)
 
-            serializer = ser_v1.BaseSongContributorSerialzer(instance=instance, data=data, partial=partial, *args, **kwargs)
+            if artist != instance.song.uploaded_by:
+                return Response({"detail": "You are not authorized to edit this contribution"}, status=status.HTTP_403_FORBIDDEN)
+
+            serializer = content_ser_v1.SongContributorSerializer(instance=instance, data=data, partial=True, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
-            instance = SongContributor.objects.get(pk=contribution_id)
-            instance.delete()
+            instance = full_queryset.get(pk=contribution_id)
 
+            if artist != instance.song.uploaded_by:
+                return Response({"detail": "You are not authorized to delete this contribution"}, status=status.HTTP_403_FORBIDDEN)
+
+            instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         
         else:

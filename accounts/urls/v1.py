@@ -6,7 +6,7 @@ from accounts.views import v1, v1_reference
 
 router = routers.DefaultRouter()
 router.register("linked-accounts", v1.UserLinkedAccounts, 'linked_accounts')
-router.register("artist", v1.UserArtistViewSet, "artist")
+router.register("artist", v1.UserArtistViewSet, "artist") # artist portal ONLY
 
 
 # artist_urls = [

@@ -6,29 +6,29 @@ from content import model_exts as ext
 from content.managers import *
 
 
-class Image(models.Model):
-    file = models.FileField(null=True, blank=True, default=None)
-    reference = models.CharField(max_length=255, null=True, blank=True, default=None)
+# class Image(models.Model):
+#     file = models.FileField(null=True, blank=True, default=None)
+#     reference = models.CharField(max_length=255, null=True, blank=True, default=None)
 
-    height = models.IntegerField(null=False, blank=False)
-    width = models.IntegerField(null=False, blank=False)
+#     height = models.IntegerField(null=False, blank=False)
+#     width = models.IntegerField(null=False, blank=False)
 
-    def __str__(self):
-        if self.reference != None:
-            return self.reference
-        else:
-            return "{} ({}x{})".format(self.file.name, self.height, self.width)
+#     def __str__(self):
+#         if self.reference != None:
+#             return self.reference
+#         else:
+#             return "{} ({}x{})".format(self.file.name, self.height, self.width)
     
-    class Meta:
-        verbose_name = 'image'
-        verbose_name_plural = 'images'
+#     class Meta:
+#         verbose_name = 'image'
+#         verbose_name_plural = 'images'
 
 
 class Artist(models.Model):
     id = models.CharField(max_length=255, primary_key=True, default=uuid.uuid4, editable=False)
     uri = models.CharField(max_length=255, default=uuid.uuid4, unique=True, editable=False)
-    name = models.CharField('Display Name', max_length=255, null=False, blank=False)
-    # image = models.FileField('Display Image', upload_to=ext.rename_image, null=True, blank=True)
+    name = models.CharField(max_length=255, null=False, blank=False)
+    image = models.FileField(upload_to=ext.rename_image, null=True, blank=True)
     platform = models.CharField(max_length=255, null=False, blank=False)
 
     def __str__(self):
@@ -47,6 +47,7 @@ class Album(models.Model):
     uri = models.CharField(max_length=255, unique=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     type = models.CharField(max_length=255, null=True, blank=True)
+    image = models.FileField(upload_to=ext.rename_image, null=True, blank=True)
     platform = models.CharField(max_length=255, null=False, blank=False)
 
     date_added = models.DateTimeField(auto_now_add=True, null=True, editable=False)
@@ -55,7 +56,6 @@ class Album(models.Model):
     is_displayed = models.BooleanField(null=False, blank=True, default=True)
     is_deleted = models.BooleanField(null=False, blank=True, default=False)
 
-    # image = models.FileField('Album Image', upload_to=ext.rename_image, null=True, blank=True)
 
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="album_uploaded_by")
     contributors = models.ManyToManyField(Artist, through='AlbumContributor')
@@ -67,7 +67,6 @@ class Album(models.Model):
         return "<Album: {} {}>".format(self.name, self.id)
 
     objects = NotHiddenNotDeletedManager()
-
     all_objects = NotDeletedManager()
 
     class Meta:
@@ -78,12 +77,17 @@ class Album(models.Model):
 class AlbumContributor(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, null=False, related_name='artist_to_album')
     album = models.ForeignKey(Album, on_delete=models.CASCADE, null=False, related_name='album_to_artist')
-    contribution_type = models.CharField(max_length=255, null=True) # limit choices on the application side
+    contribution_type = models.CharField(max_length=255, null=True)
+    pending = models.BooleanField(null=False, blank=True, default=False)
+    approved = models.BooleanField(null=False, blank=True, default=True)
+
     date_added = models.DateField(auto_now_add=True, null=True, editable=False)
     last_changed = models.DateField(auto_now=True, null=True)
     primary_artist = models.BooleanField(null=False, blank=True, default=False)
 
-    # objects = AlbumContributorManager()
+    objects = AlbumContributorManager()
+    all_objects = HiddenAlbumContributorManager()
+    display_objects = AlbumContributionDisplayManager()
 
     def __str__(self):
         return "'{}' with '{}' as {}".format(self.album, self.artist, self.contribution_type)
@@ -116,7 +120,6 @@ class Song(models.Model):
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="song_uploaded_by") # artist or user???
 
     objects = NotHiddenNotDeletedManager()
-
     all_objects = NotDeletedManager()
 
     def __str__(self):
@@ -133,13 +136,17 @@ class Song(models.Model):
 class SongContributor(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, null=False, related_name='artist_to_song')
     song = models.ForeignKey(Song, on_delete=models.CASCADE, null=False, related_name='song_to_artist')
-    contribution_type = models.CharField(max_length=255, null=True) # limit choices on the application side
+    contribution_type = models.CharField(max_length=255, null=True)
+    pending = models.BooleanField(null=False, blank=True, default=False)
+    approved = models.BooleanField(null=False, blank=True, default=True)
 
     date_added = models.DateField(auto_now_add=True, null=True, editable=False)
     last_changed = models.DateField(auto_now=True, null=True)
     primary_artist = models.BooleanField(null=False, blank=True, default=False)
 
-    # objects = SongContributorManager()
+    objects = SongContributorManager()
+    all_objects = HiddenSongContributorManager()
+    display_objects = SongContributionDisplayManager()
 
     def __str__(self):
         return "'{}' with '{}' as {}".format(self.song, self.artist, self.contribution_type)

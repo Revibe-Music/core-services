@@ -92,6 +92,8 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
 
 class UserArtistSerializer(serializers.ModelSerializer):
     # read only
+    artist_id = serializers.ReadOnlyField(source='id')
+    artist_uri = serializers.ReadOnlyField(source='uri')
     user = UserSerializer(source='artist_user', read_only=True)
     artist_profile = UserArtistProfileSerializer(read_only=True)
 
@@ -101,7 +103,8 @@ class UserArtistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artist
         fields = [
-            'id',
+            'artist_id',
+            'artist_uri',
             'name',
             'platform',
             'user',

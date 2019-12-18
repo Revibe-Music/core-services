@@ -28,6 +28,8 @@ class Platform:
         if self.__str__() == 'Revibe':
             self.HiddenAlbums = Album.all_objects.filter(platform=p)
             self.HiddenSongs = Song.all_objects.filter(platform=p)
+            self.HiddenAlbumContributions = AlbumContributor.all_objects.filter(album__platform=p)
+            self.HiddenSongContributors = SongContributor.all_objects.filter(song__platform=p)
 
     def invalidate_revibe(self):
         if self.__class__.__name__ == 'Revibe':

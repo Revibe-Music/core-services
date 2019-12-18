@@ -1,5 +1,7 @@
 from artist_portal.platforms.base_platform import Platform
 from artist_portal._helpers.versions import Version
+from content.models import *
+from content.serializers import v1 as content_ser_v1
 from music.serializers import v1 as ser_v1
 
 class Revibe(Platform):
@@ -19,6 +21,14 @@ class Revibe(Platform):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return serializer
+    
+    def destroy(self, instance):
+        if isinstance(instance, (Song, Album)):
+            instance.is_deleted = True
+            instance.save()
+        else:
+            instance.delete()
+
 
 class YouTube(Platform):
     strings = [

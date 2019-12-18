@@ -4,144 +4,144 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
+
 from artist_portal._helpers.debug import debug_print
 from artist_portal._helpers.platforms import get_platform, linked_platforms
 from accounts.permissions import TokenOrSessionAuthentication
+from content.serializers.v1 import *
 from music.mixins import Version1Mixin
 from music.models import *
-from music.queries import *
-from music.serializers._services import artist_serializers
 from music.serializers.v1 import *
 
-class ArtistViewSet(viewsets.ModelViewSet):
-    queryset = RevibeArtists
-    serializer_class = BaseArtistSerializer
-    permission_classes = [TokenOrSessionAuthentication]
-    required_alternate_scopes = {
-        "GET": [["ADMIN"],["first-party"]],
-    }
+# class ArtistViewSet(viewsets.ModelViewSet):
+#     queryset = RevibeArtists
+#     serializer_class = ArtistSerializer
+#     permission_classes = [TokenOrSessionAuthentication]
+#     required_alternate_scopes = {
+#         "GET": [["ADMIN"],["first-party"]],
+#     }
 
-    @action(detail=True)
-    def albums(self, request, pk=None):
-        """
-        Sends the artist's list of albums (only uploaded albums, not contributions)
-        """
-        artist = get_object_or_404(self.queryset, pk=pk)
-        queryset = Album.objects.filter(uploaded_by=artist)
-        serializer = BaseAlbumSerializer(queryset, many=True)
-        return Response(serializer.data)
+#     @action(detail=True)
+#     def albums(self, request, pk=None):
+#         """
+#         Sends the artist's list of albums (only uploaded albums, not contributions)
+#         """
+#         artist = get_object_or_404(self.queryset, pk=pk)
+#         queryset = Album.objects.filter(uploaded_by=artist)
+#         serializer = BaseAlbumSerializer(queryset, many=True)
+#         return Response(serializer.data)
     
-    @action(detail=True)
-    def top_songs(self, request, pk=None):
-        # this is gonna be a bitch
-        pass
+#     @action(detail=True)
+#     def top_songs(self, request, pk=None):
+#         # this is gonna be a bitch
+#         pass
     
-    @action(detail=True)
-    def songs(self, request, pk=None):
-        """
-        Sends the artist's list of songs (only uploaded songs, not contributions)
-        """
-        artist = get_object_or_404(self.queryset, pk=pk)
-        debug_print(artist)
+#     @action(detail=True)
+#     def songs(self, request, pk=None):
+#         """
+#         Sends the artist's list of songs (only uploaded songs, not contributions)
+#         """
+#         artist = get_object_or_404(self.queryset, pk=pk)
+#         debug_print(artist)
         
-        queryset = RevibeSongs.filter(uploaded_by=artist)
-        debug_print(queryset)
+#         queryset = RevibeSongs.filter(uploaded_by=artist)
+#         debug_print(queryset)
 
-        serializer = BaseSongSerializer(queryset, many=True)
-        return Response(serializer.data)
+#         serializer = BaseSongSerializer(queryset, many=True)
+#         return Response(serializer.data)
 
-    @action(detail=True)
-    def album_contributions(self, request, pk=None):
-        """
-        Sends the list of albums that the artist has contributed to
-        """
-        artist = get_object_or_404(self.queryset, pk=pk)
-        debug_print(artist)
+#     @action(detail=True)
+#     def album_contributions(self, request, pk=None):
+#         """
+#         Sends the list of albums that the artist has contributed to
+#         """
+#         artist = get_object_or_404(self.queryset, pk=pk)
+#         debug_print(artist)
 
-        queryset = AlbumContributor.objects.filter(artist=artist)
-        debug_print(queryset)
+#         queryset = AlbumContributor.objects.filter(artist=artist)
+#         debug_print(queryset)
         
-        serializer = AlbumAlbumContributorSerializer(queryset, many=True)
-        return Response(serializer.data)
+#         serializer = AlbumAlbumContributorSerializer(queryset, many=True)
+#         return Response(serializer.data)
 
-    @action(detail=True)
-    def song_contributions(self, request, pk=None):
-        """
-        Sends the list of songs that the artist has contributed to
-        """
-        artist = get_object_or_404(self.queryset, pk=pk)
-        debug_print(artist)
+#     @action(detail=True)
+#     def song_contributions(self, request, pk=None):
+#         """
+#         Sends the list of songs that the artist has contributed to
+#         """
+#         artist = get_object_or_404(self.queryset, pk=pk)
+#         debug_print(artist)
 
-        queryset = SongContributor.objects.filter(artist=artist).exclude(song__uploaded_by=artist)
-        debug_print(queryset)
+#         queryset = SongContributor.objects.filter(artist=artist).exclude(song__uploaded_by=artist)
+#         debug_print(queryset)
 
-        serializer = SongSongContributorSerializer(queryset, many=True)
-        return Response(serializer.data)
+#         serializer = SongSongContributorSerializer(queryset, many=True)
+#         return Response(serializer.data)
 
-class AlbumViewSet(viewsets.ModelViewSet):
-    queryset = RevibeAlbums
-    serializer_class = BaseAlbumSerializer
-    permission_classes = [TokenOrSessionAuthentication]
-    required_alternate_scopes = {
-        "GET": [["ADMIN"],["first-party"]],
-        "POST": [["ADMIN"],["first-party"]],
-        "PUT": [["ADMIN"],["first-party"]],
-        "PATCH": [["ADMIN"],["first-party"]],
-        "UPDATE": [["ADMIN"],["first-party"]],
-        "DELETE": [["ADMIN"],["first-party"]],
-    }
+# class AlbumViewSet(viewsets.ModelViewSet):
+#     queryset = RevibeAlbums
+#     serializer_class = BaseAlbumSerializer
+#     permission_classes = [TokenOrSessionAuthentication]
+#     required_alternate_scopes = {
+#         "GET": [["ADMIN"],["first-party"]],
+#         "POST": [["ADMIN"],["first-party"]],
+#         "PUT": [["ADMIN"],["first-party"]],
+#         "PATCH": [["ADMIN"],["first-party"]],
+#         "UPDATE": [["ADMIN"],["first-party"]],
+#         "DELETE": [["ADMIN"],["first-party"]],
+#     }
 
-    def perform_destroy(self, instance):
-        debug_print(instance)
+#     def perform_destroy(self, instance):
+#         debug_print(instance)
 
-        instance.is_deleted = True
-        instance.save()
+#         instance.is_deleted = True
+#         instance.save()
 
-        debug_print("Instance is {}deleted".format("" if instance.is_deleted else "not "))
+#         debug_print("Instance is {}deleted".format("" if instance.is_deleted else "not "))
 
-    @action(detail=True)
-    def songs(self, request, pk=None):
-        album = get_object_or_404(self.queryset, pk=pk)
-        queryset = Song.objects.filter(album=album)
-        serializer = BaseSongSerializer(queryset, many=True)
-        return Response(serializer.data)
+#     @action(detail=True)
+#     def songs(self, request, pk=None):
+#         album = get_object_or_404(self.queryset, pk=pk)
+#         queryset = Song.objects.filter(album=album)
+#         serializer = BaseSongSerializer(queryset, many=True)
+#         return Response(serializer.data)
 
-class SongViewSet(viewsets.ModelViewSet):
-    queryset = RevibeSongs
-    serializer_class = BaseSongSerializer
-    permission_classes = [TokenOrSessionAuthentication]
-    required_alternate_scopes = {
-        "GET": [["ADMIN"],["first-party"]],
-        "POST": [["ADMIN"],["first-party"]],
-        "PUT": [["ADMIN"],["first-party"]],
-        "PATCH": [["ADMIN"],["first-party"]],
-        "UPDATE": [["ADMIN"],["first-party"]],
-        "DELETE": [["ADMIN"],["first-party"]],
-    }
+# class SongViewSet(viewsets.ModelViewSet):
+#     queryset = RevibeSongs
+#     serializer_class = BaseSongSerializer
+#     permission_classes = [TokenOrSessionAuthentication]
+#     required_alternate_scopes = {
+#         "GET": [["ADMIN"],["first-party"]],
+#         "POST": [["ADMIN"],["first-party"]],
+#         "PUT": [["ADMIN"],["first-party"]],
+#         "PATCH": [["ADMIN"],["first-party"]],
+#         "UPDATE": [["ADMIN"],["first-party"]],
+#         "DELETE": [["ADMIN"],["first-party"]],
+#     }
 
-    def perform_destroy(self, instance):
-        debug_print(instance)
+#     def perform_destroy(self, instance):
+#         debug_print(instance)
         
-        instance.is_deleted = True
-        instance.save()
+#         instance.is_deleted = True
+#         instance.save()
 
-        debug_print("Instance is {}deleted".format("" if instance.is_deleted else "not "))
+#         debug_print("Instance is {}deleted".format("" if instance.is_deleted else "not "))
 
-class SongContributorViewSet(viewsets.ModelViewSet):
-    queryset = SongContributor.objects.all()
-    serializer_class = BaseSongContributorSerialzer
-    permission_classes = [TokenOrSessionAuthentication]
-    required_alternate_scopes = {
-        "GET": [["ADMIN"],["first-party"]],
-        "POST": [["ADMIN"],["first-party"]],
-        "PUT": [["ADMIN"],["first-party"]],
-        "PATCH": [["ADMIN"],["first-party"]],
-        "UPDATE": [["ADMIN"],["first-party"]],
-        "DELETE": [["ADMIN"],["first-party"]],
-    }
+# class SongContributorViewSet(viewsets.ModelViewSet):
+#     queryset = SongContributor.objects.all()
+#     serializer_class = BaseSongContributorSerialzer
+#     permission_classes = [TokenOrSessionAuthentication]
+#     required_alternate_scopes = {
+#         "GET": [["ADMIN"],["first-party"]],
+#         "POST": [["ADMIN"],["first-party"]],
+#         "PUT": [["ADMIN"],["first-party"]],
+#         "PATCH": [["ADMIN"],["first-party"]],
+#         "UPDATE": [["ADMIN"],["first-party"]],
+#         "DELETE": [["ADMIN"],["first-party"]],
+#     }
 
 class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
-    serializer_class = BaseLibrarySerializer
+    serializer_class = LibrarySerializer
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
@@ -251,7 +251,7 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
             return Reponse(status=status.HTTP_400_BAD_REQUEST)
 
 class PlaylistViewSet(viewsets.ModelViewSet):
-    serializer_class = BasePlaylistSerializer
+    serializer_class = PlaylistSerializer
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
@@ -315,10 +315,10 @@ class MusicSearch(viewsets.GenericViewSet):
                 return Response({'error': "parameter 'type' must be 'songs', 'albums', or 'artists'."}, status=status.HTTP_400_BAD_REQUEST)
 
         if (t == 'songs') or (not t):
-            result['songs'] = BaseSongSerializer(RevibeSongs.filter(title__icontains=text), many=True).data
+            result['songs'] = SongSerializer(RevibeSongs.filter(title__icontains=text), many=True).data
         if (t == 'albums') or (not t):
-            result['albums'] = BaseAlbumSerializer(RevibeAlbums.filter(name__icontains=text), many=True).data
+            result['albums'] = AlbumSerializer(RevibeAlbums.filter(name__icontains=text), many=True).data
         if (t == 'artists') or (not t):
-            result['artists'] = BaseArtistSerializer(RevibeArtists.filter(name__icontains=text), many=True).data
+            result['artists'] = ArtistSerializer(RevibeArtists.filter(name__icontains=text), many=True).data
 
         return Response(result ,status=status.HTTP_200_OK)

@@ -1,230 +1,228 @@
-from artist_portal._helpers.debug import debug_print
-from accounts.models import ArtistProfile
-from music.models import *
-from music import mixins
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from music.serializers._services import (
-    song_serializers as ss,
-    album_serializers as als
-)
+
+from artist_portal._helpers.debug import debug_print
+from accounts.models import ArtistProfile
+from content.serializers.v1 import *
+from music.models import *
+from music import mixins
 
 
-class BaseArtistSerializer(serializers.ModelSerializer, mixins.ImageURLMixin):
-    class Meta:
-        model = Artist
-        fields = [
-            'id',
-            'name',
-            'image',
-            'platform',
-        ]
+# class ArtistSerializer(serializers.ModelSerializer, mixins.ImageURLMixin):
+#     class Meta:
+#         model = Artist
+#         fields = [
+#             'id',
+#             'name',
+#             'image',
+#             'platform',
+#         ]
 
-class BaseAlbumSerializer(serializers.ModelSerializer,mixins.ImageURLMixin):
-    contributions = als.AlbumContributorSerializer(many=True, source='album_to_artist', read_only=True)
-    image = serializers.SerializerMethodField('get_image_url', read_only=True)
-    image_up = serializers.FileField(source='image', write_only=True, allow_null=True)
-    class Meta:
-        model = Album
-        fields = [
-            'id',
-            'name',
-            'image',
-            'image_up',
-            'platform',
-            'type',
-            'contributions',
-        ]
+# class AlbumSerializer(serializers.ModelSerializer,mixins.ImageURLMixin):
+#     contributions = als.AlbumContributorSerializer(many=True, source='album_to_artist', read_only=True)
+#     image = serializers.SerializerMethodField('get_image_url', read_only=True)
+#     image_up = serializers.FileField(source='image', write_only=True, allow_null=True)
+#     class Meta:
+#         model = Album
+#         fields = [
+#             'id',
+#             'name',
+#             'image',
+#             'image_up',
+#             'platform',
+#             'type',
+#             'contributions',
+#         ]
     
-    def create(self, validated_data):
-        # get the current user - the uploading artist ... ?
-        artist = None
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
-            artist = request.user.artist
+#     def create(self, validated_data):
+#         # get the current user - the uploading artist ... ?
+#         artist = None
+#         request = self.context.get("request")
+#         if request and hasattr(request, "user"):
+#             artist = request.user.artist
         
-        # create and save the album
-        album = Album.objects.create(**validated_data, uploaded_by=artist)
-        album.save()
+#         # create and save the album
+#         album = Album.objects.create(**validated_data, uploaded_by=artist)
+#         album.save()
 
-        # create and save the default Album Contributors
-        album_contrib = AlbumContributor.objects.create(artist=artist, album=album, contribution_type="Artist", primary_artist=True)
-        album_contrib.save()
+#         # create and save the default Album Contributors
+#         album_contrib = AlbumContributor.objects.create(artist=artist, album=album, contribution_type="Artist", primary_artist=True)
+#         album_contrib.save()
 
-        return album
+#         return album
 
-class BaseSongSerializer(serializers.ModelSerializer):
-    """
-    Base of the rest of the song serializers in the API.
+# class SongSerializer(serializers.ModelSerializer):
+#     """
+#      of the rest of the song serializers in the API.
 
-    The base is considered what is shown in the library list (app landing page)
-    """
-    # read_only fields for displaying data
-    contributions = ss.SongContributorSerializer(many=True, source='song_to_artist', read_only=True)
-    album = ss.SongAlbumSerializer(many=False, read_only=True)
+#     The  is considered what is shown in the library list (app landing page)
+#     """
+#     # read_only fields for displaying data
+#     contributions = ss.SongContributorSerializer(many=True, source='song_to_artist', read_only=True)
+#     album = ss.SongAlbumSerializer(many=False, read_only=True)
 
-    # write_only fields for creating and updating songs
-    album_id = serializers.CharField(source='album.id', write_only=True)
-    song = serializers.FileField(source='file', write_only=True, allow_null=True)
+#     # write_only fields for creating and updating songs
+#     album_id = serializers.CharField(source='album.id', write_only=True)
+#     song = serializers.FileField(source='file', write_only=True, allow_null=True)
 
-    class Meta:
-        model = Song
-        fields = [
-            'id',
-            'uri',
-            'title',
-            'duration',
-            'platform',
-            'genre',
-            'album',
-            'contributions',
-            # write-only fields
-            'song',
-            'album_id',
-        ]
+#     class Meta:
+#         model = Song
+#         fields = [
+#             'id',
+#             'uri',
+#             'title',
+#             'duration',
+#             'platform',
+#             'genre',
+#             'album',
+#             'contributions',
+#             # write-only fields
+#             'song',
+#             'album_id',
+#         ]
     
-    def create(self, validated_data, *args, **kwargs):
-        """
-        Function/endpoint for artists to upload their songs
-        """
-        debug_print(validated_data)
-        # get the song's album from the provided ID
-        album = validated_data.pop('album')
-        album = get_object_or_404(Album.objects.all(), pk=album['id'])
+#     def create(self, validated_data, *args, **kwargs):
+#         """
+#         Function/endpoint for artists to upload their songs
+#         """
+#         debug_print(validated_data)
+#         # get the song's album from the provided ID
+#         album = validated_data.pop('album')
+#         album = get_object_or_404(Album.objects.all(), pk=album['id'])
 
-        # get the current user
-        artist = None
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
-            artist = request.user.artist
+#         # get the current user
+#         artist = None
+#         request = self.context.get("request")
+#         if request and hasattr(request, "user"):
+#             artist = request.user.artist
 
-        # create and save object to the database
-        song = Song.objects.create(**validated_data, uploaded_by=artist, album=album)
-        song.save()
+#         # create and save object to the data
+#         song = Song.objects.create(**validated_data, uploaded_by=artist, album=album)
+#         song.save()
 
-        # add the uploading artist as a contributor to the SongContributor table
-        song_contrib = SongContributor.objects.create(artist=artist, song=song, contribution_type="Artist", primary_artist=True)
-        song_contrib.save()
+#         # add the uploading artist as a contributor to the SongContributor table
+#         song_contrib = SongContributor.objects.create(artist=artist, song=song, contribution_type="Artist", primary_artist=True)
+#         song_contrib.save()
 
-        return song
+#         return song
     
-    # def update(self, validated_data, *args, **kwargs)
+#     # def update(self, validated_data, *args, **kwargs)
 
-class BaseAlbumContributorSerializer(serializers.ModelSerializer):
-    """
-    write-only serializer for creating, updating, and deleting
-    album contributors
-    """
-    contribution_id = serializers.ReadOnlyField(source='id')
-    artist_id = serializers.CharField(source='artist.id', write_only=True)
-    album_id = serializers.CharField(source='album.id', write_only=True)
-    class Meta:
-        model = AlbumContributor
-        fields = [
-            'contribution_id',
-            'artist_id',
-            'album_id',
-            'contribution_type'
-        ]
+# class AlbumContributorSerializer(serializers.ModelSerializer):
+#     """
+#     write-only serializer for creating, updating, and deleting
+#     album contributors
+#     """
+#     contribution_id = serializers.ReadOnlyField(source='id')
+#     artist_id = serializers.CharField(source='artist.id', write_only=True)
+#     album_id = serializers.CharField(source='album.id', write_only=True)
+#     class Meta:
+#         model = AlbumContributor
+#         fields = [
+#             'contribution_id',
+#             'artist_id',
+#             'album_id',
+#             'contribution_type'
+#         ]
 
-    def create(self, validated_data):
-        # get artist and song data from validated_data
-        artist = validated_data.pop('artist_id')
-        artist = get_object_or_404(Artist.objects.all(), pk=artist['id'])
-        album = validated_data.pop('album_id')
-        album = get_object_or_404(Album.objects.all(), pk=album['id'])
+#     def create(self, validated_data):
+#         # get artist and song data from validated_data
+#         artist = validated_data.pop('artist_id')
+#         artist = get_object_or_404(Artist.objects.all(), pk=artist['id'])
+#         album = validated_data.pop('album_id')
+#         album = get_object_or_404(Album.objects.all(), pk=album['id'])
 
-        album_contrib = SongContributor.objects.create(**validated_data, artist=artist, song=song)
-        album_contrib.save()
-        return song_contrib
+#         album_contrib = SongContributor.objects.create(**validated_data, artist=artist, song=song)
+#         album_contrib.save()
+#         return song_contrib
 
-class AlbumAlbumContributorSerializer(serializers.ModelSerializer, mixins.AlbumImageURLMixin):
-    album_id = serializers.ReadOnlyField(source='album.id')
-    name = serializers.ReadOnlyField(source='album.name')
-    image = serializers.SerializerMethodField('get_image_url')
-    class Meta:
-        model = AlbumContributor
-        fields = [
-            'id',
-            'album_id',
-            'name',
-            'image',
-            'contribution_type'
-        ]
-class ArtistAlbumContributorSerializer(serializers.ModelSerializer, mixins.ArtistImageURLMixin):
-    artist_id = serializers.ReadOnlyField(source='artist.id')
-    name = serializers.ReadOnlyField(source='artist.name')
-    image = serializers.SerializerMethodField('get_image_url')
-    class Meta:
-        model = AlbumContributor
-        fields = [
-            'id',
-            'artist_id',
-            'name',
-            'image',
-            'contribution_type'
-        ]
+# class AlbumAlbumContributorSerializer(serializers.ModelSerializer, mixins.AlbumImageURLMixin):
+#     album_id = serializers.ReadOnlyField(source='album.id')
+#     name = serializers.ReadOnlyField(source='album.name')
+#     image = serializers.SerializerMethodField('get_image_url')
+#     class Meta:
+#         model = AlbumContributor
+#         fields = [
+#             'id',
+#             'album_id',
+#             'name',
+#             'image',
+#             'contribution_type'
+#         ]
+# class ArtistAlbumContributorSerializer(serializers.ModelSerializer, mixins.ArtistImageURLMixin):
+#     artist_id = serializers.ReadOnlyField(source='artist.id')
+#     name = serializers.ReadOnlyField(source='artist.name')
+#     image = serializers.SerializerMethodField('get_image_url')
+#     class Meta:
+#         model = AlbumContributor
+#         fields = [
+#             'id',
+#             'artist_id',
+#             'name',
+#             'image',
+#             'contribution_type'
+#         ]
 
-class BaseSongContributorSerialzer(serializers.ModelSerializer):
-    contribution_id = serializers.ReadOnlyField(source='id')
-    artist_id = serializers.CharField(source='artist.id', write_only=True, required=False)
-    song_id = serializers.CharField(source='song.id', write_only=True, required=False)
-    class Meta:
-        model = SongContributor
-        fields = [
-            'contribution_id',
-            'artist_id',
-            'song_id',
-            'contribution_type'
-        ]
+# class SongContributorSerialzer(serializers.ModelSerializer):
+#     contribution_id = serializers.ReadOnlyField(source='id')
+#     artist_id = serializers.CharField(source='artist.id', write_only=True, required=False)
+#     song_id = serializers.CharField(source='song.id', write_only=True, required=False)
+#     class Meta:
+#         model = SongContributor
+#         fields = [
+#             'contribution_id',
+#             'artist_id',
+#             'song_id',
+#             'contribution_type'
+#         ]
     
-    def list(self, request):
-        pass
-    def retrieve(self, request, pk=None):
-        pass
+#     def list(self, request):
+#         pass
+#     def retrieve(self, request, pk=None):
+#         pass
     
-    def create(self, validated_data):
-        # get artist and song data from validated_data
-        artist = validated_data.pop('artist_id')
-        artist = get_object_or_404(Artist.objects.all(), pk=artist['id'])
-        song = validated_data.pop('song_id')
-        song = get_object_or_404(Song.objects.all(), pk=song['id'])
+#     def create(self, validated_data):
+#         # get artist and song data from validated_data
+#         artist = validated_data.pop('artist_id')
+#         artist = get_object_or_404(Artist.objects.all(), pk=artist['id'])
+#         song = validated_data.pop('song_id')
+#         song = get_object_or_404(Song.objects.all(), pk=song['id'])
 
-        song_contrib = SongContributor.objects.create(**validated_data, artist=artist, song=song)
-        song_contrib.save()
-        return song_contrib
+#         song_contrib = SongContributor.objects.create(**validated_data, artist=artist, song=song)
+#         song_contrib.save()
+#         return song_contrib
 
-class SongSongContributorSerializer(serializers.ModelSerializer):
-    contribution_id = serializers.ReadOnlyField(source='id')
-    song_id = serializers.ReadOnlyField(source='song.id')
-    uri = serializers.ReadOnlyField(source='song.uri')
-    title = serializers.ReadOnlyField(source='song.title')
-    duration = serializers.ReadOnlyField(source='song.duration')
-    platform = serializers.ReadOnlyField(source='song.platform')
-    album = ss.SongAlbumSerializer(many=False,source='song.album')
-    contributions = ss.SongContributorSerializer(many=True, source='song.song_to_artist')
-    class Meta:
-        model = SongContributor
-        fields = [
-            'contribution_id',
-            'song_id',
-            'uri',
-            'title',
-            'duration',
-            'platform',
-            'album',
-            'contributions',
-            'contribution_type',
-        ]
+# class SongSongContributorSerializer(serializers.ModelSerializer):
+#     contribution_id = serializers.ReadOnlyField(source='id')
+#     song_id = serializers.ReadOnlyField(source='song.id')
+#     uri = serializers.ReadOnlyField(source='song.uri')
+#     title = serializers.ReadOnlyField(source='song.title')
+#     duration = serializers.ReadOnlyField(source='song.duration')
+#     platform = serializers.ReadOnlyField(source='song.platform')
+#     album = ss.SongAlbumSerializer(many=False,source='song.album')
+#     contributions = ss.SongContributorSerializer(many=True, source='song.song_to_artist')
+#     class Meta:
+#         model = SongContributor
+#         fields = [
+#             'contribution_id',
+#             'song_id',
+#             'uri',
+#             'title',
+#             'duration',
+#             'platform',
+#             'album',
+#             'contributions',
+#             'contribution_type',
+#         ]
 
-class BaseLibrarySerializer(serializers.ModelSerializer):
-    songs = BaseSongSerializer(many=True)
+class LibrarySerializer(serializers.ModelSerializer):
+    songs = SongSerializer(many=True)
     class Meta:
         model = Library
         fields = ['platform','songs']
 
-class BasePlaylistSerializer(serializers.ModelSerializer):
-    songs = BaseSongSerializer(many=True, read_only=True)
+class PlaylistSerializer(serializers.ModelSerializer):
+    songs = SongSerializer(many=True, read_only=True)
     # write-only fields
     class Meta:
         model = Playlist
@@ -259,14 +257,14 @@ class BasePlaylistSerializer(serializers.ModelSerializer):
         playlist.save()
         return playlist
 
-class BaseLibrarySongSerializer(serializers.ModelSerializer):
+class LibrarySongSerializer(serializers.ModelSerializer):
     # read-only fields
     library = serializers.ReadOnlyField(source='library.id')
     song = serializers.ReadOnlyField(source='song.id')
     # write-only fields
     song_id = serializers.CharField(write_only=True)
     class Meta:
-        model = LibrarySongs
+        model = LibrarySong
         fields = [
             'library',
             'song',
@@ -276,7 +274,7 @@ class BaseLibrarySongSerializer(serializers.ModelSerializer):
     
     def get_library(self, platform):
         """
-        Gets the library of the current request's user based on the platform passed
+        Gets the library of the current request's user d on the platform passed
         """
         request = self.context.get("request")
         user = request.user
@@ -337,7 +335,7 @@ class BaseLibrarySongSerializer(serializers.ModelSerializer):
         
         lib_song.delete()
 
-class BasePlaylistSongSerializer(serializers.ModelSerializer):
+class PlaylistSongSerializer(serializers.ModelSerializer):
     # read-only fields
     playlist = serializers.ReadOnlyField(source='playlist.id')
     song = serializers.ReadOnlyField(source='song.id')
@@ -345,7 +343,7 @@ class BasePlaylistSongSerializer(serializers.ModelSerializer):
     song_id = serializers.CharField(write_only=True)
     playlist_id = serializers.IntegerField(write_only=True)
     class Meta:
-        model = LibrarySongs
+        model = PlaylistSong
         fields = [
             'playlist',
             'song',

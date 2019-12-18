@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.db.models import Q
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -18,9 +17,8 @@ from artist_portal._errors.random import ValidationError
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *
-from music.models import Album, Song, SongContributor, AlbumContributor
+from content.models import Album, Song, SongContributor, AlbumContributor
 from music.serializers import v1 as ser_v1
-from music.queries import *
 
 class RegistrationAPI(generics.GenericAPIView, TokenView):
     """

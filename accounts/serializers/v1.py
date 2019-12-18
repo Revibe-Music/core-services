@@ -1,13 +1,15 @@
-from accounts.models import *
-from music.models import Artist, Library
-from rest_framework import serializers
+from allauth.socialaccount.models import SocialToken, SocialApp
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.forms.models import model_to_dict
-from allauth.socialaccount.models import SocialToken, SocialApp
+from django.utils import timezone
 from oauth2_provider.models import AccessToken, RefreshToken
 from oauth2_provider.generators import generate_client_id
-from django.conf import settings
-from django.utils import timezone
+from rest_framework import serializers
+
+from accounts.models import *
+from content.models import Artist
+from music.models import Library
 from music.mixins import ImageURLMixin
 
 class ProfileSerializer(serializers.ModelSerializer):

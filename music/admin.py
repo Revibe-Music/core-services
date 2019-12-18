@@ -1,12 +1,8 @@
 from django.contrib import admin
-from .models import *
 
-admin.site.register(Artist)
-admin.site.register(Album)
-admin.site.register(AlbumContributor)
-admin.site.register(Song)
-admin.site.register(SongContributor)
+from music.models import *
+
 admin.site.register(Library)
 admin.site.register(Playlist)
-admin.site.register(LibrarySongs)
-admin.site.register(PlaylistSongs)
+admin.site.register(LibrarySong)
+admin.site.register(PlaylistSong)

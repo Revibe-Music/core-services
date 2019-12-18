@@ -1,6 +1,7 @@
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from artist_portal._errors import random as errors, platforms as plt_er
 from artist_portal._helpers.versions import Version
+from content.models import *
 from music.models import *
 from music.serializers import v1 as ser_v1
 
@@ -9,13 +10,22 @@ class Platform:
     def __init__(self, *args, **kwargs):
         if self.__class__.__name__ == 'Platform':
             raise plt_er.InvalidPlatformOperation("Cannot instantiate class 'Platform', can only create instances of a subclass")
+        self.get_queries()
 
     def __str__(self):
         return self.__class__.__name__
     
     def __repr__(self):
         return "<class {}>".format(self.__class__.__name__)
-    
+
+    def get_queries(self):
+        p = self.__str__()
+        self.Artists = Artist.objects.filter(platform=p)
+        self.Albums = Album.objects.filter(platform=p)
+        self.Songs = Song.objects.filter(platform=p)
+        self.AlbumContributors = AlbumContributor.objects.filter(album__platform=p)
+        self.SongContributors = SongContributor.objects.filter(song__platform=p)
+
     def invalidate_revibe(self):
         if self.__class__.__name__ == 'Revibe':
             raise NotImplementedError("Class 'Revibe' must overwrite this method")
@@ -121,4 +131,8 @@ class Platform:
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return serializer
+    
+    def destroy(self, instance):
+        self.invalidate_revibe()
+        instance.delete()
         

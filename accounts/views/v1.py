@@ -263,6 +263,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return Response({"detail": "this user already has an artist account"}, status=status.HTTP_409_CONFLICT)        
         
         # create the artist and attach to the user
+        request.data['platform'] = 'Revibe'
         serializer = self.serializer_class(data=request.data, *args, **kwargs)
         if serializer.is_valid():
             artist = serializer.save()
@@ -280,7 +281,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+        return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get','post','patch','delete'])
     def albums(self, request, *args, **kwargs):
@@ -304,7 +307,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'PATCH':
             instance = album_queryset.get(pk=album_id)
@@ -317,7 +322,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
         
         elif request.method == 'DELETE':
             instance = album_queryset.get(pk=album_id)
@@ -353,7 +360,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'PATCH':
             instance = song_queryset.get(pk=song_id)
@@ -366,7 +375,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
             instance = song_queryset.get(pk=song_id)
@@ -412,7 +423,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'PATCH':
             instance = albumcontribution_queryset.get(pk=contribution_id)
@@ -425,7 +438,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
             instance = albumcontribution_queryset.get(pk=contribution_id)
@@ -460,7 +475,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'PATCH':
             instance = full_queryset.get(pk=contribution_id)
@@ -472,7 +489,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'DELETE':
             instance = full_queryset.get(pk=contribution_id)

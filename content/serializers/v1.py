@@ -17,7 +17,7 @@ class ArtistSerializer(serializers.ModelSerializer):
     platform = serializers.CharField(required=True)
 
     # write-only
-    image = serializers.FileField(required=False)
+    image = serializers.FileField(write_only=True, required=False)
 
     class Meta:
         model = Artist

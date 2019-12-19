@@ -25,6 +25,10 @@ class ArtistProfile(models.Model):
     id = models.AutoField(primary_key=True)
     artist = models.OneToOneField('content.artist', on_delete=models.CASCADE, related_name='artist_profile', null=False, blank=False)
 
+    # additional fields
+    about_me = models.TextField(null=True, blank=True)
+
+    # account settings
     require_contribution_approval = models.BooleanField(null=False, blank=True, default=True)
 
 class Social(models.Model):

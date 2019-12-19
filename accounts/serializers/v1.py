@@ -84,11 +84,20 @@ class RefreshTokenSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
 
 class UserArtistProfileSerializer(serializers.ModelSerializer):
+    about_me = serializers.CharField(required=False)
+    require_contribution_approval = serializers.BooleanField(required=False)
+
+    # read-only
     profile_id = serializers.ReadOnlyField(source='id')
     class Meta:
         model = ArtistProfile
         fields = [
             'profile_id',
+
+            # profile fields
+            'about_me',
+
+            # settings fields
             'require_contribution_approval',
         ]
 

@@ -3,30 +3,25 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission
 from oauth2_provider.settings import oauth2_settings
 
-from artist_portal._helpers.debug import debug_print
-
 class TokenOrSessionAuthentication(BasePermission):
 
     def has_permission(self ,request, view):
         token = request.auth
-        debug_print('token: {}'.format(token))
 
-        if (not token) and (request.session.session_key != None):
+        if (not token) and (request.session.session_key != None): # TODO: NOT A PERMANENT SOLUTION
             return True
 
         if hasattr(token, "scope"):
-            debug_print("Token has a 'scope'")
             required_alternate_scopes = self.get_scopes(request, view)
 
             m = request.method.upper()
             if m in required_alternate_scopes:
                 for alt in required_alternate_scopes[m]:
                     if token.is_valid(alt):
-                        debug_print('user has scope {} for {} request'.format(alt, m))
                         return True
-            return False
+            raise PermissionError("You do not have access for this request type")
 
-        assert False, ("everything fucked up")
+        raise PermissionError("Could not identify a session or a request access token")
 
     def get_scopes(self, request, view):
         try:

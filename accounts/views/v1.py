@@ -256,13 +256,14 @@ class UserArtistViewSet(GenericPlatformViewSet):
         artist = self.serializer_class(request.user.artist, context=self.get_serializer_context()).data
         return Response(artist)
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
+        kwargs['context'] = self.get_serializer_context()
         # check if user already has an artist object
         if request.user.artist != None:
             return Response({"detail": "this user already has an artist account"}, status=status.HTTP_409_CONFLICT)        
         
         # create the artist and attach to the user
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, *args, **kwargs)
         if serializer.is_valid():
             artist = serializer.save()
             request.user.artist = artist

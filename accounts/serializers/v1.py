@@ -109,23 +109,29 @@ class UserArtistSerializer(serializers.ModelSerializer):
     artist_profile = UserArtistProfileSerializer(read_only=True)
 
     # write only
-    user_id = serializers.UUIDField(write_only=True, required=False)
     image_up = serializers.FileField(source='image', write_only=True, allow_null=True, required=False)
     class Meta:
         model = Artist
         fields = [
-            'artist_id',
-            'artist_uri',
             'name',
             'platform',
+
+            # read-only
+            'artist_id',
+            'artist_uri',
             'user',
             'artist_profile',
-            # write only fields
-            'user_id',
+
+            # write only
             'image_up',
         ]
     
-    def create(self, validated_data):
+    def create(self, validated_data, *args, **kwargs):
+        # request = self.context.get("request")
+        # user = request.user
+        # if not user:
+        #     raise Exception("Could not identify user")
+
         artist = Artist.objects.create(**validated_data)
         artist.save()
 

@@ -84,11 +84,10 @@ class SongViewSet(PlatformViewSet):
 
 class MusicSearch(GenericPlatformViewSet):
     platform = 'Revibe'
-    permission_classes = [permissions.AllowAny]
-    # permission_classes = [TokenOrSessionAuthentication]
-    # required_alternate_scopes = {
-    #     "GET": [["ADMIN"],["first-party"]],
-    # }
+    permission_classes = [TokenOrSessionAuthentication]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"],["first-party"]],
+    }
 
     def list(self, request, *args, **kwargs):
         params = request.query_params

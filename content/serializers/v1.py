@@ -163,6 +163,7 @@ class SongSerializer(serializers.ModelSerializer):
     song_id = serializers.CharField(source='id', required=False)
     song_uri = serializers.CharField(source='uri', required=False)
     genre = serializers.CharField(required=False)
+    is_explicit = serializers.BooleanField(required=False)
     displayed = serializers.BooleanField(required=False)
 
     # read-only
@@ -184,6 +185,7 @@ class SongSerializer(serializers.ModelSerializer):
             'genre',
             'platform',
             'is_explicit',
+            'displayed',
 
             # read-only
             'album',

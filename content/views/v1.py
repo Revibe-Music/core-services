@@ -2,7 +2,7 @@ from rest_framework import views, viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from artist_portal.viewsets import PlatformViewSet
+from artist_portal.viewsets import *
 from artist_portal._helpers.platforms import get_platform
 from accounts.permissions import TokenOrSessionAuthentication
 from content.mixins import V1Mixin
@@ -82,7 +82,8 @@ class SongViewSet(PlatformViewSet):
     }
 
 
-class MusicSearch(viewsets.GenericViewSet):
+class MusicSearch(GenericPlatformViewSet):
+    platform = 'Revibe'
     permission_classes = [permissions.AllowAny]
     # permission_classes = [TokenOrSessionAuthentication]
     # required_alternate_scopes = {
@@ -104,10 +105,10 @@ class MusicSearch(viewsets.GenericViewSet):
                 return Response({'error': "parameter 'type' must be 'songs', 'albums', or 'artists'."}, status=status.HTTP_400_BAD_REQUEST)
 
         if (t == 'songs') or (not t):
-            result['songs'] = SongSerializer(RevibeSongs.filter(title__icontains=text), many=True).data
+            result['songs'] = ser_v1.SongSerializer(self.platform.Songs.filter(title__icontains=text), many=True).data
         if (t == 'albums') or (not t):
-            result['albums'] = AlbumSerializer(RevibeAlbums.filter(name__icontains=text), many=True).data
+            result['albums'] = ser_v1.AlbumSerializer(self.platform.Albums.filter(name__icontains=text), many=True).data
         if (t == 'artists') or (not t):
-            result['artists'] = ArtistSerializer(RevibeArtists.filter(name__icontains=text), many=True).data
+            result['artists'] = ser_v1.ArtistSerializer(self.platform.Artists.filter(name__icontains=text), many=True).data
 
         return Response(result ,status=status.HTTP_200_OK)

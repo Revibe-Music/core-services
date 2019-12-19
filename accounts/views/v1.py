@@ -269,7 +269,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             request.user.is_artist = True
             request.user.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+        return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, *args, **kwargs):
         instance = request.user.artist

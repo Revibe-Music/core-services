@@ -117,11 +117,12 @@ class RegistrationAPI(generics.GenericAPIView, TokenView):
             return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
         return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
-class LoginAPI(generics.GenericAPIView, TokenView):
+class LoginAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = LoginAccountSerializer
 
     def post(self, request, *args, **kwargs):
+        print(request.data)
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
 
@@ -210,26 +211,18 @@ class RefreshTokenAPI(generics.GenericAPIView, TokenView):
         return Response(json.loads(req.content.decode('utf-8')))
 
 class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
-    permission_classes = [TokenHasScope]
-    required_scopes = []
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = AccessTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        application = Application.objects.get(name="Revibe First Party Application")
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
-        data= {
-               'token': request.data['access_token'],
-               'client_id': application.client_id,
-               'client_secret': application.client_secret
-               }
-        auth_request = HttpRequest()
-        auth_request.method = "POST"
-        auth_request.POST = data
-        auth_request.content_type = "application/x-www-form-urlencoded"
-        req = RevokeTokenView.post(self, auth_request)
-        if req.status_code != 200:
-            return Response(json.loads(req.content.decode('utf-8')), status=status.HTTP_400_BAD_REQUEST)
-        return Response({"status":"success", "code":200, "message": "Token has been revoked."})
+        token = AccessToken.objects.get(token=request.data['access_token'])
+        assert token.user == request.user, "Could not identify the current user"
+        device = token.token_device # maybe token.device?
+
+        token.delete()
+        device.delete()
+
+        return Response({"detail": "logout successful"}, status=status.HTTP_200_OK)
 
 class LogoutAllAPI(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]

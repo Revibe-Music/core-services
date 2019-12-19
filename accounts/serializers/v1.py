@@ -49,8 +49,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         remove = ['device_id', 'device_name','device_type']
-        for a in remove:
-            del validated_data[a]
+        data = validated_data
+        for key, value in validated_data:
+            if key not in remove:
+                data.update({key, value})
+        validated_data = data
         profile_data = validated_data.pop('profile')
         user = CustomUser.objects.create_user(**validated_data)
         user.save()
@@ -82,9 +85,9 @@ class UserPatchSerializer(serializers.ModelSerializer):
 class LoginAccountSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
-    device_id = serializers.CharField(required=False)
-    device_type = serializers.CharField(required=False)
-    device_name = serializers.CharField(required=False)
+    device_id = serializers.CharField(required=True)
+    device_type = serializers.CharField(required=True)
+    device_name = serializers.CharField(required=True)
 
     def validate(self, data):
         data = {"username": data['username'], "password": data['password']}

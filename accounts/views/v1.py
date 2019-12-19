@@ -1,18 +1,23 @@
 from django.conf import settings
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.http import HttpRequest
+from django.utils import timesince
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_auth.registration.views import SocialConnectView
+from oauth2_provider.views import TokenView, RevokeTokenView
+from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope,TokenMatchesOASRequirements, TokenHasScope
+from oauth2_provider.models import Application, AccessToken, RefreshToken
+from oauthlib import common
+
+import datetime
+import requests
+import json
+
 from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
-from oauth2_provider.views import TokenView, RevokeTokenView
-from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope,TokenMatchesOASRequirements, TokenHasScope
-from oauth2_provider.models import Application
-import requests
-import json
-from django.http import HttpRequest
-
 from artist_portal.viewsets import GenericPlatformViewSet
 from artist_portal._errors.random import ValidationError
 from accounts.permissions import TokenOrSessionAuthentication
@@ -32,60 +37,156 @@ class RegistrationAPI(generics.GenericAPIView, TokenView):
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
+    # def post(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     application = Application.objects.get(name="Revibe First Party Application")
+    #     user = serializer.save()
+    #     headers={"Content-Type": "application/x-www-form-urlencoded"}
+    #     data= {
+    #            'grant_type': 'password',
+    #            'username': request.data['username'],
+    #            'password': request.data['password'],
+    #            'client_id': application.client_id,
+    #            'client_secret': application.client_secret,
+    #            }
+    #     auth_request = HttpRequest()
+    #     auth_request.method = "POST"
+    #     auth_request.POST = data
+    #     auth_request.content_type = "application/x-www-form-urlencoded"
+    #     req = TokenView.post(self, auth_request)
+    #     if req.status_code != 200:
+    #         return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
+
+    #     return Response({
+    #         "user": UserSerializer(user, context=self.get_serializer_context()).data,
+    #         "token": json.loads(req.content.decode('utf-8'))
+    #     })
+
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        application = Application.objects.get(name="Revibe First Party Application")
-        user = serializer.save()
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
-        data= {
-               'grant_type': 'password',
-               'username': request.data['username'],
-               'password': request.data['password'],
-               'client_id': application.client_id,
-               'client_secret': application.client_secret,
-               }
-        auth_request = HttpRequest()
-        auth_request.method = "POST"
-        auth_request.POST = data
-        auth_request.content_type = "application/x-www-form-urlencoded"
-        req = TokenView.post(self, auth_request)
-        if req.status_code != 200:
-            return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            
+            device = Device(
+                device_id = request.data['device_id'],
+                device_type = request.data['device_type'],
+                device_name = request.data['device_name']
+            )
+            device.save()
 
-        return Response({
-            "user": UserSerializer(user, context=self.get_serializer_context()).data,
-            "token": json.loads(req.content.decode('utf-8'))
-        })
+            application = Application.objects.get(name="Revibe First Party Application")
 
-class LoginAPI(generics.GenericAPIView, TokenView):
+            user=serializer.save()
+
+            expire = timezone.now() + datetime.timedelta(days=2)
+
+            scopes = ['first-party']
+            if device.device_type == 'browser':
+                scopes.append('artist')
+            scope = " ".join(scopes)
+
+            access_token = AccessToken(
+                user=user,
+                expires=expire,
+                token=common.generate_token(),
+                application=application,
+                scope=scope
+            )
+            access_token.save()
+            device.token = access_token
+            device.save()
+
+            refresh_token = RefreshToken(
+                user=user,
+                token=common.generate_token(),
+                application=application,
+                access_token=access_token
+            )
+            refresh_token.save()
+
+            data = {
+                "user": UserSerializer(user, context=self.get_serializer_context()).data,
+                "access_token": access_token.token,
+            }
+            if device.device_type != 'browser':
+                data.update({"refresh_token": refresh_token.token})
+            
+            return Response(data,status=status.HTTP_200_OK)
+
+        else:
+            return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+        return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = LoginAccountSerializer
 
     def post(self, request, *args, **kwargs):
+        print(request.data)
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        application = Application.objects.get(name="Revibe First Party Application")
-        user = serializer.validated_data
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
-        data= {
-               'grant_type': 'password',
-               'username': request.data['username'],
-               'password': request.data['password'],
-               'client_id': application.client_id,
-               'client_secret': application.client_secret
-               }
-        auth_request = HttpRequest()
-        auth_request.method = "POST"
-        auth_request.POST = data
-        auth_request.content_type = "application/x-www-form-urlencoded"
-        req = TokenView.post(self, auth_request)
-        if req.status_code != 200:
-            return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
-        return Response({
-            "user": UserSerializer(user, context=self.get_serializer_context()).data,
-            "token": json.loads(req.content.decode('utf-8'))
-        })
+        if serializer.is_valid():
+
+            try:
+                device = Device.objects.get(device_id=request.data['device_id'],device_type=request.data['device_type'],device_name=request.data['device_name'])
+            except (ObjectDoesNotExist):
+                device = Device(
+                    device_id = request.data['device_id'],
+                    device_type = request.data['device_type'],
+                    device_name = request.data['device_name']
+                )
+                device.save()
+            except Exception as e:
+                raise e
+            
+            tokens = AccessToken.objects.filter(token_device=device)
+            print(tokens)
+            for t in tokens:
+                t.delete()
+
+            application = Application.objects.get(name="Revibe First Party Application")
+            
+            user = serializer.validated_data
+
+            expire = timezone.now() + datetime.timedelta(days=2)
+
+            scopes = ["first-party"]
+            if device.device_type == 'browser':
+                scopes.append('artist')
+            scope = " ".join(scopes)
+            
+            access_token = AccessToken(
+                user=user,
+                expires=expire,
+                token=common.generate_token(),
+                application=application,
+                scope=scope
+            )
+            access_token.save()
+            device.token = access_token
+            device.save()
+
+            refresh_token = RefreshToken(
+                user=user,
+                token=common.generate_token(),
+                application=application,
+                access_token=access_token
+            )
+            refresh_token.save()
+
+            data = {
+                "user": UserSerializer(user, context=self.get_serializer_context()).data,
+                "access_token": access_token.token,
+            }
+            if device.device_type != 'browser':
+                data.update({"refresh_token": refresh_token.token})
+            
+            return Response(data,status=status.HTTP_200_OK)
+        
+        else:
+            return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+        
+        return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class RefreshTokenAPI(generics.GenericAPIView, TokenView):
     permission_classes = [permissions.AllowAny]
@@ -110,26 +211,18 @@ class RefreshTokenAPI(generics.GenericAPIView, TokenView):
         return Response(json.loads(req.content.decode('utf-8')))
 
 class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
-    permission_classes = [TokenHasScope]
-    required_scopes = []
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = AccessTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        application = Application.objects.get(name="Revibe First Party Application")
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
-        data= {
-               'token': request.data['access_token'],
-               'client_id': application.client_id,
-               'client_secret': application.client_secret
-               }
-        auth_request = HttpRequest()
-        auth_request.method = "POST"
-        auth_request.POST = data
-        auth_request.content_type = "application/x-www-form-urlencoded"
-        req = RevokeTokenView.post(self, auth_request)
-        if req.status_code != 200:
-            return Response(json.loads(req.content.decode('utf-8')), status=status.HTTP_400_BAD_REQUEST)
-        return Response({"status":"success", "code":200, "message": "Token has been revoked."})
+        token = AccessToken.objects.get(token=request.data['access_token'])
+        assert token.user == request.user, "Could not identify the current user"
+        device = token.token_device # maybe token.device?
+
+        token.delete()
+        device.delete()
+
+        return Response({"detail": "logout successful"}, status=status.HTTP_200_OK)
 
 class LogoutAllAPI(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]

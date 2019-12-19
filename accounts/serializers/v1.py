@@ -11,34 +11,49 @@ from accounts.models import *
 from content.models import Artist
 from music.models import Library
 
-class ProfileSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer): # TODO: do this right, please
     class Meta:
         model = Profile
         fields = ['country','image']
 
 
 class UserSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer(many=False)
+    profile = ProfileSerializer(many=False, required=False)
+    device_id = serializers.CharField(required=False)
+    device_type = serializers.CharField(required=False)
+    device_name = serializers.CharField(required=False)
     class Meta:
         model = CustomUser
         fields = [
             'first_name',
             'last_name',
             'username',
-            'password',
             'email',
             'profile',
+            'device_id',
+            'device_type',
+            'device_name',
+
+            # read-only
             'is_artist',
             'is_manager',
+
+            # write-only
+            'password',
         ]
         extra_kwargs = {
             'password': {'write_only': True},
             'is_artist': {'read_only': True},
             'is_manager': {'read_only': True},
-            'profile': {'required': False},
         }
 
     def create(self, validated_data):
+        remove = ['device_id', 'device_name','device_type']
+        data = validated_data
+        for key, value in validated_data:
+            if key not in remove:
+                data.update({key, value})
+        validated_data = data
         profile_data = validated_data.pop('profile')
         user = CustomUser.objects.create_user(**validated_data)
         user.save()
@@ -70,8 +85,12 @@ class UserPatchSerializer(serializers.ModelSerializer):
 class LoginAccountSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
+    device_id = serializers.CharField(required=True)
+    device_type = serializers.CharField(required=True)
+    device_name = serializers.CharField(required=True)
 
     def validate(self, data):
+        data = {"username": data['username'], "password": data['password']}
         user = authenticate(**data)
         if user and user.is_active:
             return user

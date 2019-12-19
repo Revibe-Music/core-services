@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from oauth2_provider.models import AbstractAccessToken
 
 
 class CustomUser(AbstractUser):
@@ -34,3 +35,17 @@ class ArtistProfile(models.Model):
 class Social(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='user_social')
     platform = models.CharField(max_length=255, null=True)
+
+
+class AccessTokenModel(AbstractAccessToken):
+    type_choices = [
+        ("phone", "Phone"),
+        ("desktop", "Desktop"),
+        ("browser", "Web Browser"),
+        ("tablet", "Tablet"),
+    ]
+
+    device_id = models.CharField(max_length=255, null=True, blank=True)
+    device_type = models.CharField(max_length=255, null=True, blank=True, choices=type_choices)
+    device = models.CharField(max_length=255, null=True, blank=True)
+

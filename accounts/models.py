@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from oauth2_provider.models import AbstractAccessToken
+# from oauth2_provider.models import AccessToken, AbstractAccessToken
 
 
 class CustomUser(AbstractUser):
@@ -37,15 +37,15 @@ class Social(models.Model):
     platform = models.CharField(max_length=255, null=True)
 
 
-class AccessTokenModel(AbstractAccessToken):
+class Device(models.Model):
     type_choices = [
         ("phone", "Phone"),
         ("desktop", "Desktop"),
         ("browser", "Web Browser"),
-        ("tablet", "Tablet"),
     ]
 
-    device_id = models.CharField(max_length=255, null=True, blank=True)
-    device_type = models.CharField(max_length=255, null=True, blank=True, choices=type_choices)
-    device = models.CharField(max_length=255, null=True, blank=True)
+    token = models.OneToOneField(settings.OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="token_device")
+    device_id = models.CharField(max_length=255, null=True, blank=False, unique=True)
+    device_type = models.CharField(max_length=255, null=True, blank=False, choices=type_choices)
+    device_name = models.CharField(max_length=255, null=True, blank=False)
 

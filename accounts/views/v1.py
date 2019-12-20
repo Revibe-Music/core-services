@@ -67,8 +67,6 @@ class RegistrationAPI(generics.GenericAPIView, TokenView):
                 scope=scope
             )
             access_token.save()
-            device.token = access_token
-            device.save()
 
             refresh_token = RefreshToken(
                 user=user,
@@ -77,6 +75,11 @@ class RegistrationAPI(generics.GenericAPIView, TokenView):
                 access_token=access_token
             )
             refresh_token.save()
+
+            access_token.source_refresh_token = refresh_token
+            access_token.save()
+            device.token = access_token
+            device.save()
 
             data = {
                 "user": UserSerializer(user, context=self.get_serializer_context()).data,
@@ -96,7 +99,6 @@ class LoginAPI(generics.GenericAPIView):
     serializer_class = LoginAccountSerializer
 
     def post(self, request, *args, **kwargs):
-        print(request.data)
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
 
@@ -113,9 +115,9 @@ class LoginAPI(generics.GenericAPIView):
                 raise e
             
             tokens = AccessToken.objects.filter(token_device=device)
-            print(tokens)
-            for t in tokens:
-                t.delete()
+            for at in tokens:
+                at.source_refresh_token.delete()
+                at.delete()
 
             application = Application.objects.get(name="Revibe First Party Application")
             
@@ -137,8 +139,6 @@ class LoginAPI(generics.GenericAPIView):
                 scope=scope
             )
             access_token.save()
-            device.token = access_token
-            device.save()
 
             refresh_token = RefreshToken(
                 user=user,
@@ -147,6 +147,11 @@ class LoginAPI(generics.GenericAPIView):
                 access_token=access_token
             )
             refresh_token.save()
+
+            access_token.source_refresh_token = refresh_token
+            access_token.save()
+            device.token = access_token
+            device.save()
 
             data = {
                 "user": UserSerializer(user, context=self.get_serializer_context()).data,
@@ -163,27 +168,22 @@ class LoginAPI(generics.GenericAPIView):
         return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class RefreshTokenAPI(generics.GenericAPIView, TokenView):
+class RefreshTokenAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = RefreshTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        application = Application.objects.get(name="Revibe First Party Application")
-        headers={"Content-Type": "application/x-www-form-urlencoded"}
-        data= {
-               'grant_type': 'refresh_token',
-               'refresh_token': request.data['refresh_token'],
-               'client_id': application.client_id,
-               'client_secret': application.client_secret
-               }
-        auth_request = HttpRequest()
-        auth_request.method = "POST"
-        auth_request.POST = data
-        auth_request.content_type = "application/x-www-form-urlencoded"
-        req = TokenView.post(self, auth_request)
-        if req.status_code != 200:
-            return Response(json.loads(req.content.decode('utf-8')), status=status.HTTP_400_BAD_REQUEST)
-        return Response(json.loads(req.content.decode('utf-8')))
+        refresh_token = RefreshToken.objects.get(token=request.data['refresh_token'])
+        access_token = refresh_token.access_token
+
+        access_token.token = common.generate_token()
+
+        time = 5 if access_token.token_device.device_type == 'browser' else 2
+        access_token.expires = access_token.expires + datetime.timedelta(hours=time)
+
+        access_token.save()
+
+        return Response({"access_token": access_token.token}, status=status.HTTP_200_OK)
 
 class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
     permission_classes = [permissions.IsAuthenticated]
@@ -194,6 +194,7 @@ class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
         assert token.user == request.user, "Could not identify the current user"
         device = token.token_device # maybe token.device?
 
+        token.refresh_token.delete()
         token.delete()
         device.delete()
 
@@ -204,9 +205,17 @@ class LogoutAllAPI(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         user = request.user
+
+        # delete all user's access tokens
         tokens = AccessToken.objects.filter(user=user)
         num = len(tokens)
         tokens.delete()
+
+        # extra check to catch hanging refresh tokens as well
+        tokens = RefreshToken.objects.filter(user=user)
+        num += len(tokens)
+        tokens.delete()
+
         return Response({"detail": "logout-all successful", "tokens deleted": num}, status=status.HTTP_200_OK)
 
 class SpotifyConnect(SocialConnectView):

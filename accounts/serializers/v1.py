@@ -143,6 +143,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
     # read only
     artist_id = serializers.ReadOnlyField(source='id')
     artist_uri = serializers.ReadOnlyField(source='uri')
+    ext = serializers.SerializerMethodField('iamge_extension', read_only=True)
     user = UserSerializer(source='artist_user', read_only=True)
     artist_profile = UserArtistProfileSerializer(read_only=True)
 
@@ -157,6 +158,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
             # read-only
             'artist_id',
             'artist_uri',
+            'ext',
             'user',
             'artist_profile',
 
@@ -165,11 +167,6 @@ class UserArtistSerializer(serializers.ModelSerializer):
         ]
     
     def create(self, validated_data, *args, **kwargs):
-        # request = self.context.get("request")
-        # user = request.user
-        # if not user:
-        #     raise Exception("Could not identify user")
-
         artist = Artist.objects.create(**validated_data)
         artist.save()
 
@@ -177,6 +174,10 @@ class UserArtistSerializer(serializers.ModelSerializer):
         profile.save()
 
         return artist
+    
+    def iamge_extension(self, obj):
+        ext = obj.image.name.split('.')[-1]
+        return ext
 
 class SocialTokenSerializer(serializers.ModelSerializer):
     platform = serializers.ReadOnlyField(source='app.name')

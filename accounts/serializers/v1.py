@@ -18,10 +18,21 @@ class ProfileSerializer(serializers.ModelSerializer): # TODO: do this right, ple
 
 
 class UserSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+    username = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
     profile = ProfileSerializer(many=False, required=False)
     device_id = serializers.CharField(required=False)
     device_type = serializers.CharField(required=False)
     device_name = serializers.CharField(required=False)
+
+    # read-only
+    is_artist = serializers.BooleanField(read_only=True)
+    is_manager = serializers.BooleanField(read_only=True)
+
+    # write-only
+    password = serializers.CharField(write_only=True, required=False)
     class Meta:
         model = CustomUser
         fields = [
@@ -41,11 +52,6 @@ class UserSerializer(serializers.ModelSerializer):
             # write-only
             'password',
         ]
-        extra_kwargs = {
-            'password': {'write_only': True},
-            'is_artist': {'read_only': True},
-            'is_manager': {'read_only': True},
-        }
 
     def create(self, validated_data):
         remove = ['device_id', 'device_name','device_type']
@@ -64,6 +70,19 @@ class UserSerializer(serializers.ModelSerializer):
             library.save()
         return user
     
+    def update(self, instance, validated_data, *args, **kwargs):
+
+        profile_data = validated_data.pop('profile', False)
+        if profile_data:
+            profile = Profile.objects.filter(user=instance).update(**profile_data)
+
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+
+        return instance
+
+
 class UserPatchSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(many=False, required=False)
     class Meta:

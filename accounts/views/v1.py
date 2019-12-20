@@ -596,14 +596,6 @@ class UserViewSet(generics.GenericAPIView):
         'PUT': [['ADMIN'],['first-party']],
         'DELETE': [['ADMIN'],['first-party']],
     }
-    
-    def get_serializer_class(self):
-        serializer_class = self.serializer_class
-
-        if self.request.method == "PATCH":
-            serializer_class = UserPatchSerializer
-        
-        return serializer_class
 
     def get(self, request, *args, **kwargs):
         return Response(UserSerializer(request.user, context=self.get_serializer_context()).data)

@@ -27,7 +27,7 @@ from content.models import Album, Song, SongContributor, AlbumContributor
 from content.serializers import v1 as content_ser_v1
 from music.serializers import v1 as music_ser_v1
 
-class RegistrationAPI(generics.GenericAPIView, TokenView):
+class RegistrationAPI(generics.GenericAPIView):
     """
     this works when application has following attributes:
     client type: confidential

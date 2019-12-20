@@ -85,7 +85,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     #OAuth Toolkit
-    'oauth2_provider.middleware.OAuth2TokenMiddleware',
+    'accounts.middleware.OAuth2TokenOrCookieMiddleware',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'

@@ -49,10 +49,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         remove = ['device_id', 'device_name','device_type']
-        data = validated_data
-        for key, value in validated_data:
+        data = {}
+        for key, value in validated_data.items():
             if key not in remove:
-                data.update({key, value})
+                data.update({key: value})
         validated_data = data
         profile_data = validated_data.pop('profile')
         user = CustomUser.objects.create_user(**validated_data)

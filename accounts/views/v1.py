@@ -111,6 +111,8 @@ class LoginAPI(generics.GenericAPIView):
                     device_name = request.data['device_name']
                 )
                 device.save()
+            except MultipleObjectsReturned:
+                device = Device.objects.filter(device_id=request.data['device_id'],device_type=request.data['device_type'],device_name=request.data['device_name'])[0]
             except Exception as e:
                 raise e
             
@@ -610,7 +612,9 @@ class UserViewSet(generics.GenericAPIView):
         partial = kwargs.pop('partial', False)
         instance = request.user
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-        return Response(serializer.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+        return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)

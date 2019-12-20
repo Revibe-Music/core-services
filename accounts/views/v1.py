@@ -37,32 +37,6 @@ class RegistrationAPI(generics.GenericAPIView, TokenView):
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
-    # def post(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     application = Application.objects.get(name="Revibe First Party Application")
-    #     user = serializer.save()
-    #     headers={"Content-Type": "application/x-www-form-urlencoded"}
-    #     data= {
-    #            'grant_type': 'password',
-    #            'username': request.data['username'],
-    #            'password': request.data['password'],
-    #            'client_id': application.client_id,
-    #            'client_secret': application.client_secret,
-    #            }
-    #     auth_request = HttpRequest()
-    #     auth_request.method = "POST"
-    #     auth_request.POST = data
-    #     auth_request.content_type = "application/x-www-form-urlencoded"
-    #     req = TokenView.post(self, auth_request)
-    #     if req.status_code != 200:
-    #         return Response(req.json(), status=status.HTTP_400_BAD_REQUEST)
-
-    #     return Response({
-    #         "user": UserSerializer(user, context=self.get_serializer_context()).data,
-    #         "token": json.loads(req.content.decode('utf-8'))
-    #     })
-
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():

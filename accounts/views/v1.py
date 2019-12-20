@@ -83,12 +83,19 @@ class RegistrationAPI(generics.GenericAPIView, TokenView):
 
             data = {
                 "user": UserSerializer(user, context=self.get_serializer_context()).data,
-                "access_token": access_token.token,
             }
-            if device.device_type != 'browser':
-                data.update({"refresh_token": refresh_token.token})
-            
-            return Response(data,status=status.HTTP_200_OK)
+
+            response = Response(status=status.HTTP_200_OK)
+            if device.device_type == 'browser':
+                response.set_cookie('revibe_access_token', access_token.token, httponly=True)
+                response.data = data
+            else:
+                data.update({
+                    "access_token": access_token.token,
+                    "refresh_token": refresh_token.token,
+                })
+                response.data = data
+            return response
 
         else:
             return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
@@ -157,12 +164,19 @@ class LoginAPI(generics.GenericAPIView):
 
             data = {
                 "user": UserSerializer(user, context=self.get_serializer_context()).data,
-                "access_token": access_token.token,
             }
-            if device.device_type != 'browser':
-                data.update({"refresh_token": refresh_token.token})
-            
-            return Response(data,status=status.HTTP_200_OK)
+
+            response = Response(status=status.HTTP_200_OK)
+            if device.device_type == 'browser':
+                response.set_cookie('revibe_access_token', access_token.token, httponly=True)
+                response.data = data
+            else:
+                data.update({
+                    "access_token": access_token.token,
+                    "refresh_token": refresh_token.token,
+                })
+                response.data = data
+            return response
         
         else:
             return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)

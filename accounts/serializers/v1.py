@@ -176,8 +176,10 @@ class UserArtistSerializer(serializers.ModelSerializer):
         return artist
     
     def iamge_extension(self, obj):
-        ext = obj.image.name.split('.')[-1]
-        return ext
+        if obj.image:
+            return obj.image.name.split('.')[-1]
+        else:
+            return False
 
 class SocialTokenSerializer(serializers.ModelSerializer):
     platform = serializers.ReadOnlyField(source='app.name')

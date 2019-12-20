@@ -147,7 +147,8 @@ class LoginAPI(generics.GenericAPIView):
             
             user = serializer.validated_data
 
-            expire = timezone.now() + datetime.timedelta(days=2)
+            time = 5 if device.device_type == 'browser' else 2
+            expire = timezone.now() + datetime.timedelta(hours=time)
 
             scopes = ["first-party"]
             if device.device_type == 'browser':
@@ -228,9 +229,11 @@ class LogoutAllAPI(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        application = Application.objects.get(name="Revibe First Party Application")
-        AccessToken.objects.filter(user=request.user).delete()
-        return Response({"status":"success", "code":200, "message": "All devices have been logged out."})
+        user = request.user
+        tokens = AccessToken.objects.filter(user=user)
+        num = len(tokens)
+        tokens.delete()
+        return Response({"detail": "logout-all successful", "tokens deleted": num}, status=status.HTTP_200_OK)
 
 class SpotifyConnect(SocialConnectView):
     """ Logs already authenticated user into Spotify account """

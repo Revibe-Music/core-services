@@ -579,7 +579,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             serializer = content_ser_v1.SongContributorSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return responses.CREATED(serializer)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
             return responses.DEFAULT_400_RESPONSE
@@ -630,7 +630,7 @@ class UserViewSet(generics.GenericAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return responses.UPDATED(serializer)
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         return responses.DEFAULT_400_RESPONSE

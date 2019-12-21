@@ -125,10 +125,15 @@ class RefreshTokenSerializer(serializers.Serializer):
 
 class UserArtistProfileSerializer(serializers.ModelSerializer):
     about_me = serializers.CharField(required=False)
+    country = serializers.CharField(required=False)
+    city = serializers.CharField(required=False)
+    zip_code = serializers.CharField(required=False)
+
     require_contribution_approval = serializers.BooleanField(required=False)
 
     # read-only
     profile_id = serializers.ReadOnlyField(source='id')
+
     class Meta:
         model = ArtistProfile
         fields = [
@@ -136,47 +141,73 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
 
             # profile fields
             'about_me',
+            'country',
+            'city',
+            'zip_code',
 
             # settings fields
             'require_contribution_approval',
         ]
 
 class UserArtistSerializer(serializers.ModelSerializer):
+    artist_profile = UserArtistProfileSerializer()
+    name = serializers.CharField(required=False)
+    platform = serializers.CharField(required=False)
+
     # read only
     artist_id = serializers.ReadOnlyField(source='id')
     artist_uri = serializers.ReadOnlyField(source='uri')
     ext = serializers.SerializerMethodField('iamge_extension', read_only=True)
     user = UserSerializer(source='artist_user', read_only=True)
-    artist_profile = UserArtistProfileSerializer(read_only=True)
 
     # write only
-    image_up = serializers.FileField(source='image', write_only=True, allow_null=True, required=False)
+    image = serializers.FileField(write_only=True, allow_null=True, required=False)
     class Meta:
         model = Artist
         fields = [
             'name',
             'platform',
+            'artist_profile',
 
             # read-only
             'artist_id',
             'artist_uri',
             'ext',
             'user',
-            'artist_profile',
 
             # write only
-            'image_up',
+            'image',
         ]
     
     def create(self, validated_data, *args, **kwargs):
-        artist = Artist.objects.create(**validated_data)
+        artist_profile_data = validated_data.pop('artist_profile', False)
+
+        artist = Artist(**validated_data)
         artist.save()
 
-        profile = ArtistProfile.objects.create(artist=artist)
+        if artist_profile_data:
+            profile = ArtistProfile(**artist_profile_data, artist=artist)
+        else:
+            profile = ArtistProfile(artist=artist)
         profile.save()
 
         return artist
     
+    def update(self, instance, validated_data, *args, **kwargs):
+        artist_profile_data = validated_data.pop('artist_profile', False)
+
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save
+
+        if artist_profile_data:
+            artist_profile = instance.artist_profile
+            for key, value in artist_profile_data.items():
+                setattr(artist_profile, key, value)
+            artist_profile.save()
+        
+        return instance
+
     def iamge_extension(self, obj):
         if obj.image:
             return obj.image.name.split('.')[-1]

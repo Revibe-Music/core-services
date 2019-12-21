@@ -28,6 +28,9 @@ class ArtistProfile(models.Model):
 
     # additional fields
     about_me = models.TextField(null=True, blank=True)
+    country = models.CharField(max_length=255, null=True, blank=True)
+    city = models.CharField(max_length=255, null=True, blank=True)
+    zip_code = models.CharField(max_length=255, null=True, blank=True)
 
     # account settings
     require_contribution_approval = models.BooleanField(null=False, blank=True, default=True)

@@ -338,7 +338,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserArtistSerializer
     permission_classes = [TokenOrSessionAuthentication]
-    required_alternate_scopes = {
+    required_alternate_scopes = { # TODO: add 'artist' along with 'first-party'
         'GET': [['ADMIN'],['first-party']],
         'POST': [['ADMIN'],['first-party']],
         'PATCH': [['ADMIN'],['first-party']],

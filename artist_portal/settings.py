@@ -314,6 +314,8 @@ if USE_S3:
 else:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    AWS_ACCESS_KEY_ID = None
+    AWS_SECRET_ACCESS_KEY = None
 
 STATIC_URL = '/static/'
 

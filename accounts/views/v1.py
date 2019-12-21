@@ -99,8 +99,8 @@ class RegistrationAPI(generics.GenericAPIView):
             return response
 
         else:
-            return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
-        return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+        return responses.DEFAULT_400_RESPONSE
 
 class LoginAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
@@ -180,9 +180,9 @@ class LoginAPI(generics.GenericAPIView):
             return response
         
         else:
-            return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         
-        return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+        return responses.DEFAULT_400_RESPONSE
 
 
 class RefreshTokenAPI(generics.GenericAPIView):
@@ -405,8 +405,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
-            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+            return responses.DEFAULT_400_RESPONSE
 
         elif request.method == 'PATCH':
             instance = album_queryset.get(pk=album_id)
@@ -420,9 +420,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
-            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
-        
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+            return responses.DEFAULT_400_RESPONSE
+
         elif request.method == 'DELETE':
             instance = album_queryset.get(pk=album_id)
 
@@ -436,7 +436,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         else:
-            return Response({"detail": "could no identify request type"}, status=status.HTTP_400_BAD_REQUEST)
+            return responses.NO_REQUEST_TYPE
 
     @action(detail=False, methods=['get','post','patch','delete'])
     def songs(self, request, *args, **kwargs):
@@ -465,8 +465,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
-            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+            return responses.DEFAULT_400_RESPONSE
 
         elif request.method == 'PATCH':
             instance = song_queryset.get(pk=song_id)
@@ -480,8 +480,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
-            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+            return responses.DEFAULT_400_RESPONSE
 
         elif request.method == 'DELETE':
             instance = song_queryset.get(pk=song_id)
@@ -496,7 +496,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         
         else:
-            return responses.DEFAULT_400_RESPONSE
+            return responses.NO_REQUEST_TYPE
 
     @action(detail=False)
     def contributions(self, request):
@@ -529,8 +529,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
-            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+            return responses.DEFAULT_400_RESPONSE
 
         elif request.method == 'PATCH':
             instance = albumcontribution_queryset.get(pk=contribution_id)
@@ -544,8 +544,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
-            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+            return responses.DEFAULT_400_RESPONSE
 
         elif request.method == 'DELETE':
             instance = albumcontribution_queryset.get(pk=contribution_id)
@@ -558,7 +558,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         else:
-            return responses.DEFAULT_400_RESPONSE
+            return responses.NO_REQUEST_TYPE
     
     @action(detail=False, url_path='contributions/songs', methods=['get','post','patch','delete'])
     def song_contributions(self, request, *args, **kwargs):
@@ -581,8 +581,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
-            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+            return responses.DEFAULT_400_RESPONSE
 
         elif request.method == 'PATCH':
             instance = full_queryset.get(pk=contribution_id)
@@ -595,8 +595,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
-            return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+            return responses.DEFAULT_400_RESPONSE
 
         elif request.method == 'DELETE':
             instance = full_queryset.get(pk=contribution_id)
@@ -608,7 +608,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         
         else:
-            return responses.DEFAULT_400_RESPONSE
+            return responses.NO_REQUEST_TYPE
 
 class UserViewSet(generics.GenericAPIView):
     serializer_class = UserSerializer
@@ -632,5 +632,5 @@ class UserViewSet(generics.GenericAPIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         return responses.DEFAULT_400_RESPONSE

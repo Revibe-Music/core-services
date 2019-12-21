@@ -100,7 +100,7 @@ class RegistrationAPI(generics.GenericAPIView):
 
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-        return responses.DEFAULT_400_RESPONSE
+        return responses.DEFAULT_400_RESPONSE()
 
 class LoginAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
@@ -182,7 +182,7 @@ class LoginAPI(generics.GenericAPIView):
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         
-        return responses.DEFAULT_400_RESPONSE
+        return responses.DEFAULT_400_RESPONSE()
 
 
 class RefreshTokenAPI(generics.GenericAPIView):
@@ -370,7 +370,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-        return responses.DEFAULT_400_RESPONSE
+        return responses.DEFAULT_400_RESPONSE()
 
     def patch(self, request, *args, **kwargs):
         instance = request.user.artist
@@ -380,7 +380,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return Response(serializer.data)
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-        return responses.DEFAULT_400_RESPONSE
+        return responses.DEFAULT_400_RESPONSE()
 
     @action(detail=False, methods=['get','post','patch','delete'])
     def albums(self, request, *args, **kwargs):
@@ -406,7 +406,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE
+            return responses.DEFAULT_400_RESPONSE()
 
         elif request.method == 'PATCH':
             instance = album_queryset.get(pk=album_id)
@@ -421,7 +421,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE
+            return responses.DEFAULT_400_RESPONSE()
 
         elif request.method == 'DELETE':
             instance = album_queryset.get(pk=album_id)
@@ -433,10 +433,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
             instance.is_deleted = True
             instance.is_displayed = False
             instance.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return responses.DELETED()
 
         else:
-            return responses.NO_REQUEST_TYPE
+            return responses.NO_REQUEST_TYPE()
 
     @action(detail=False, methods=['get','post','patch','delete'])
     def songs(self, request, *args, **kwargs):
@@ -466,7 +466,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE
+            return responses.DEFAULT_400_RESPONSE()
 
         elif request.method == 'PATCH':
             instance = song_queryset.get(pk=song_id)
@@ -481,7 +481,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE
+            return responses.DEFAULT_400_RESPONSE()
 
         elif request.method == 'DELETE':
             instance = song_queryset.get(pk=song_id)
@@ -493,10 +493,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
             instance.is_deleted = True
             instance.is_displayed = False
             instance.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return responses.DELETED()
         
         else:
-            return responses.NO_REQUEST_TYPE
+            return responses.NO_REQUEST_TYPE()
 
     @action(detail=False)
     def contributions(self, request):
@@ -530,7 +530,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE
+            return responses.DEFAULT_400_RESPONSE()
 
         elif request.method == 'PATCH':
             instance = albumcontribution_queryset.get(pk=contribution_id)
@@ -545,7 +545,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE
+            return responses.DEFAULT_400_RESPONSE()
 
         elif request.method == 'DELETE':
             instance = albumcontribution_queryset.get(pk=contribution_id)
@@ -555,10 +555,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return Response({"detail": "You are not authorized to delete this contribution"}, status=status.HTTP_403_FORBIDDEN)
 
             instance.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return resposnes.DELETED()
 
         else:
-            return responses.NO_REQUEST_TYPE
+            return responses.NO_REQUEST_TYPE()
     
     @action(detail=False, url_path='contributions/songs', methods=['get','post','patch','delete'])
     def song_contributions(self, request, *args, **kwargs):
@@ -582,7 +582,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return responses.CREATED(serializer)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE
+            return responses.DEFAULT_400_RESPONSE()
 
         elif request.method == 'PATCH':
             instance = full_queryset.get(pk=contribution_id)
@@ -596,7 +596,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE
+            return responses.DEFAULT_400_RESPONSE()
 
         elif request.method == 'DELETE':
             instance = full_queryset.get(pk=contribution_id)
@@ -605,10 +605,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return Response({"detail": "You are not authorized to delete this contribution"}, status=status.HTTP_403_FORBIDDEN)
 
             instance.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return responses.DELETED()
         
         else:
-            return responses.NO_REQUEST_TYPE
+            return responses.NO_REQUEST_TYPE()
 
 class UserViewSet(generics.GenericAPIView):
     serializer_class = UserSerializer
@@ -633,4 +633,4 @@ class UserViewSet(generics.GenericAPIView):
             return responses.UPDATED(serializer)
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-        return responses.DEFAULT_400_RESPONSE
+        return responses.DEFAULT_400_RESPONSE()

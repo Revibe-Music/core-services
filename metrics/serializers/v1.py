@@ -32,24 +32,37 @@ class DynamoDBSerializer:
     def save(self, *args, **kwargs):
         assert self.validated, "Must call is_valid"
 
-        instance = self.create(**self.data)
+        instance = self.create(self.data, *args, **kwargs)
         if not isinstance(instance, self.Meta.model):
             raise ValueError("Could not create row")
+        self.instance = instance
     
     def create(self, **validated_data):
-        instance = self.Meta.model(**validated_data) # don't think this will work but we'll find out
-        instance.save()
-        return instance
+        # instance = self.Meta.model(**validated_data) # don't think this will work but we'll find out
+        # instance.save()
+        # return instance
+        raise NotImplementedError("must implement '{}.create()'".format(self.__class__.__name__))
 
 class StreamSerializer(DynamoDBSerializer):
     class Meta:
         model = Stream
         fields = [
-            'song',
-            'user',
+            'song_id',
+            'user_id',
             'stream_duration',
             'is_downloaded',
             'is_saved',
             'device',
         ]
 
+    def create(self, validated_data, *args, **kwargs):
+        stream = self.Meta.model(
+            song_id=validated_data['song_id'],
+            user_id=validated_data['user_id'],
+            stream_duration=validated_data['stream_duration'],
+            is_downloaded=validated_data['is_downloaded'],
+            is_saved=validated_data['is_saved'],
+            device=validated_data['device']
+        )
+        stream.save()
+        return stream

@@ -28,6 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
     device_name = serializers.CharField(required=False)
 
     # read-only
+    user_id = serializers.ReadOnlyField(source='id')
     is_artist = serializers.BooleanField(read_only=True)
     is_manager = serializers.BooleanField(read_only=True)
 
@@ -36,6 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = [
+            'user_id',
             'first_name',
             'last_name',
             'username',

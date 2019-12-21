@@ -1,0 +1,1 @@
+ACCESS_TOKEN_COOKIE_NAME = "revibe_access_token"

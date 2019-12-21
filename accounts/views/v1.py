@@ -19,7 +19,7 @@ import requests
 import json
 
 from artist_portal.viewsets import GenericPlatformViewSet
-from artist_portal._helpers import responses
+from artist_portal._helpers import responses, const
 from artist_portal._errors.random import ValidationError
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
@@ -207,7 +207,8 @@ class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
     serializer_class = AccessTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        token = AccessToken.objects.get(token=request.data['access_token'])
+        token_location = request.data['access_token'] if ('access_token' in request.data.keys()) else request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME)
+        token = AccessToken.objects.get(token=token_location)
         assert token.user == request.user, "Could not identify the current user"
         device = token.token_device # maybe token.device?
 
@@ -368,8 +369,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
             request.user.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
-        return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+        return responses.DEFAULT_400_RESPONSE
 
     def patch(self, request, *args, **kwargs):
         instance = request.user.artist
@@ -378,8 +379,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
             serializer.save()
             return Response(serializer.data)
         else:
-            return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
-        return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+        return responses.DEFAULT_400_RESPONSE
 
     @action(detail=False, methods=['get','post','patch','delete'])
     def albums(self, request, *args, **kwargs):

@@ -3,6 +3,8 @@ from django.utils.cache import patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
 from oauth2_provider.models import AccessToken
 
+from artist_portal._helpers import const
+
 class OAuth2TokenOrCookieMiddleware(MiddlewareMixin):
     """
     Middleware for OAuth2 user authentication
@@ -26,8 +28,8 @@ class OAuth2TokenOrCookieMiddleware(MiddlewareMixin):
                 user = authenticate(request=request)
                 if user:
                     request.user = request._cached_user = user
-        elif hasattr(request.COOKIES, "revibe_access_token"):
-            token = AccessToken.objects.get(token=request.COOKIES.get("revibe_access_token"))
+        elif hasattr(request.COOKIES, const.ACCESS_TOKEN_COOKIE_NAME):
+            token = AccessToken.objects.get(token=request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME))
             if token.is_valid():
                 user = token.user
                 request.user = request._cached_user = user

@@ -10,15 +10,16 @@ from oauth2_provider.views import TokenView, RevokeTokenView
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope,TokenMatchesOASRequirements, TokenHasScope
 from oauth2_provider.models import Application, AccessToken, RefreshToken
 from oauthlib import common
+from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
 
 import datetime
 import requests
 import json
 
-from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
 from artist_portal.viewsets import GenericPlatformViewSet
+from artist_portal._helpers import responses
 from artist_portal._errors.random import ValidationError
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
@@ -494,7 +495,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         
         else:
-            return Response({"detail": "could no identify request type"}, status=status.HTTP_400_BAD_REQUEST)
+            return responses.DEFAULT_400_RESPONSE
 
     @action(detail=False)
     def contributions(self, request):
@@ -549,20 +550,20 @@ class UserArtistViewSet(GenericPlatformViewSet):
             instance = albumcontribution_queryset.get(pk=contribution_id)
 
             # check that the current artist is the album's uploading artist
-            if artist != instance.album.uploaded_by:
+            if (artist != instance.album.uploaded_by) or (artist != instnace.artist):
                 return Response({"detail": "You are not authorized to delete this contribution"}, status=status.HTTP_403_FORBIDDEN)
 
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         else:
-            return Response({"detail": "could no identify request type"}, status=status.HTTP_400_BAD_REQUEST)
+            return responses.DEFAULT_400_RESPONSE
     
     @action(detail=False, url_path='contributions/songs', methods=['get','post','patch','delete'])
     def song_contributions(self, request, *args, **kwargs):
         artist = request.user.artist
         songcontribution_queryset = self.platform.HiddenSongContributors.filter(artist=artist, primary_artist=False)
-        full_queryset = SongContributor.all_objects.all()
+        full_queryset = SongContributor.objects.all()
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['PATCH','DELETE']:
             contribution_id = request.data.pop('contribution_id')
@@ -599,14 +600,14 @@ class UserArtistViewSet(GenericPlatformViewSet):
         elif request.method == 'DELETE':
             instance = full_queryset.get(pk=contribution_id)
 
-            if artist != instance.song.uploaded_by:
+            if (artist != instance.song.uploaded_by) or (artist != instance.artist):
                 return Response({"detail": "You are not authorized to delete this contribution"}, status=status.HTTP_403_FORBIDDEN)
 
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         
         else:
-            return Response({"detail": "could no identify request type"}, status=status.HTTP_400_BAD_REQUEST)
+            return responses.DEFAULT_400_RESPONSE
 
 class UserViewSet(generics.GenericAPIView):
     serializer_class = UserSerializer
@@ -631,4 +632,4 @@ class UserViewSet(generics.GenericAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
-        return Response({"detail": "Issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+        return responses.DEFAULT_400_RESPONSE

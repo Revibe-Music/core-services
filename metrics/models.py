@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from datetime import datetime
 from pynamodb import models
 from pynamodb.attributes import (
@@ -9,6 +11,8 @@ class Stream(models.Model):
     class Meta:
         table_name = 'Stream'
         region = 'us-east-2'
+        aws_access_key_id = settings.AWS_ACCESS_KEY_ID
+        aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
 
     song = UnicodeAttribute(hash_key=True)
     user = UnicodeAttribute(range_key=True)

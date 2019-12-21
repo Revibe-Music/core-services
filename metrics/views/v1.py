@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import status
 from rest_framework.views import APIView
 
@@ -7,6 +8,8 @@ from metrics.serializers.v1 import *
 
 class StreamView(APIView):
     def post(self, request, *args, **kwargs):
+        if not settings.USE_S3:
+            return responses.DEFAULT_400_RESPONSE
         serializer = StreamSerializer(data=request.data, *args, **kwargs)
         if serializer.is_vaild():
             serializer.save()

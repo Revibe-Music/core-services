@@ -88,7 +88,7 @@ class RegistrationAPI(generics.GenericAPIView):
 
             response = Response(status=status.HTTP_200_OK)
             if device.device_type == 'browser':
-                response.set_cookie('revibe_access_token', access_token.token, httponly=True)
+                response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, access_token.token, httponly=True)
                 response.data = data
             else:
                 data.update({
@@ -169,7 +169,7 @@ class LoginAPI(generics.GenericAPIView):
 
             response = Response(status=status.HTTP_200_OK)
             if device.device_type == 'browser':
-                response.set_cookie('revibe_access_token', access_token.token, httponly=True)
+                response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, access_token.token, httponly=True)
                 response.data = data
             else:
                 data.update({

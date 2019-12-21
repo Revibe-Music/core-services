@@ -21,15 +21,15 @@ class Platform:
     def get_queries(self):
         p = self.__str__()
         self.Artists = Artist.objects.filter(platform=p)
-        self.Albums = Album.objects.filter(platform=p)
-        self.Songs = Song.objects.filter(platform=p)
-        self.AlbumContributors = AlbumContributor.objects.filter(album__platform=p)
-        self.SongContributors = SongContributor.objects.filter(song__platform=p)
+        self.Albums = Album.display_objects.filter(platform=p)
+        self.Songs = Song.display_objects.filter(platform=p)
+        self.AlbumContributors = AlbumContributor.display_objects.filter(album__platform=p)
+        self.SongContributors = SongContributor.display_objects.filter(song__platform=p)
         if self.__str__() == 'Revibe':
-            self.HiddenAlbums = Album.all_objects.filter(platform=p)
-            self.HiddenSongs = Song.all_objects.filter(platform=p)
-            self.HiddenAlbumContributions = AlbumContributor.all_objects.filter(album__platform=p)
-            self.HiddenSongContributors = SongContributor.all_objects.filter(song__platform=p)
+            self.HiddenAlbums = Album.hidden_objects.filter(platform=p)
+            self.HiddenSongs = Song.hidden_objects.filter(platform=p)
+            self.HiddenAlbumContributions = AlbumContributor.hidden_objects.filter(album__platform=p)
+            self.HiddenSongContributors = SongContributor.hidden_objects.filter(song__platform=p)
 
     def invalidate_revibe(self):
         if self.__class__.__name__ == 'Revibe':

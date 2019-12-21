@@ -31,6 +31,8 @@ class Artist(models.Model):
     image = models.FileField(upload_to=ext.rename_image, null=True, blank=True)
     platform = models.CharField(max_length=255, null=False, blank=False)
 
+    objects = models.Manager()
+
     def __str__(self):
         return "{}".format(self.name)
     
@@ -56,7 +58,7 @@ class Album(models.Model):
     is_displayed = models.BooleanField(null=False, blank=True, default=True)
     is_deleted = models.BooleanField(null=False, blank=True, default=False)
 
-
+    objects = models.Manager()
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="album_uploaded_by")
     contributors = models.ManyToManyField(Artist, through='AlbumContributor')
 
@@ -66,8 +68,9 @@ class Album(models.Model):
     def __repr__(self):
         return "<Album: {} {}>".format(self.name, self.id)
 
-    objects = NotHiddenNotDeletedManager()
-    all_objects = NotDeletedManager()
+    objects = models.Manager()
+    hidden_objects = NotDeletedManager()
+    display_objects = NotHiddenNotDeletedManager()
 
     class Meta:
         verbose_name = 'album'
@@ -85,9 +88,9 @@ class AlbumContributor(models.Model):
     last_changed = models.DateField(auto_now=True, null=True)
     primary_artist = models.BooleanField(null=False, blank=True, default=False)
 
-    objects = AlbumContributorManager()
-    all_objects = HiddenAlbumContributorManager()
-    display_objects = AlbumContributionDisplayManager()
+    objects = models.Manager()
+    hidden_objects = HiddenAlbumContributorManager()
+    display_objects = AlbumContributorDisplayManager()
 
     def __str__(self):
         return "'{}' with '{}' as {}".format(self.album, self.artist, self.contribution_type)
@@ -119,8 +122,9 @@ class Song(models.Model):
     contributors = models.ManyToManyField(Artist, through='SongContributor', related_name="song_contributors")
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="song_uploaded_by") # artist or user???
 
-    objects = NotHiddenNotDeletedManager()
-    all_objects = NotDeletedManager()
+    objects = models.Manager() # all objects
+    hidden_objects = NotDeletedManager() # objects that are not deleted
+    display_objects = NotHiddenNotDeletedManager() # objects that are not deleted and not hidden
 
     def __str__(self):
         return "{}".format(self.title)
@@ -144,9 +148,9 @@ class SongContributor(models.Model):
     last_changed = models.DateField(auto_now=True, null=True)
     primary_artist = models.BooleanField(null=False, blank=True, default=False)
 
-    objects = SongContributorManager()
-    all_objects = HiddenSongContributorManager()
-    display_objects = SongContributionDisplayManager()
+    objects = models.Manager()
+    hidden_objects = HiddenSongContributorManager()
+    display_objects = SongContributorDisplayManager()
 
     def __str__(self):
         return "'{}' with '{}' as {}".format(self.song, self.artist, self.contribution_type)

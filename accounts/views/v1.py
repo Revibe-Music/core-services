@@ -429,6 +429,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return Response({"detail": "You are not authorized to delete this album"}, status=status.HTTP_403_FORBIDDEN)
 
             instance.is_deleted = True
+            instance.is_displayed = False
             instance.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -439,12 +440,18 @@ class UserArtistViewSet(GenericPlatformViewSet):
     def songs(self, request, *args, **kwargs):
         artist = request.user.artist
         song_queryset = self.platform.HiddenSongs.filter(uploaded_by=artist)
+        album_queryset = self.platform.HiddenAlbums.filter(uploaded_by=artist)
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['PATCH','DELETE']:
             song_id = request.data.pop('song_id')
 
         if request.method == 'GET':
             songs = song_queryset
+
+            params = request.query_params
+            if hasattr(params, 'album_id'):
+                songs.filter(album=album_queryset.get(pk=params['album_id']))
+
             serializer = content_ser_v1.SongSerializer(songs, many=True)
             return Response(serializer.data)
 
@@ -482,6 +489,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return Response({"detail": "You are not authorized to edit this song"}, status=status.HTTP_403_FORBIDDEN)
 
             instance.is_deleted = True
+            instance.is_displayed = False
             instance.save()
             return Response(status=status.HTTP_204_NO_CONTENT)
         

@@ -65,15 +65,18 @@ class SongContributorSerializer(serializers.ModelSerializer):
         artist = Artist.objects.filter(platform='Revibe').get(pk=validated_data.pop('artist_id'))
         song = Song.objects.filter(platform='Revibe').get(pk=validated_data.pop('song_id'))
 
-        song_contrib = SongContributor.objects.create(**validated_data, artist=artist, song=song)
+        song_contrib = SongContributor(**validated_data, artist=artist, song=song)
+        song_contrib.save()
+
+        return song_contrib
 
 
 class AlbumContributorSerializer(serializers.ModelSerializer):
     artist_id = serializers.CharField(source='artist.id', required=False)
     album_id = serializers.CharField(source='album.id', required=False)
     contribution_type = serializers.CharField(required=True)
-    approved = serializers.BooleanField(required=False)
-    pending = serializers.BooleanField(required=False)
+    approved = serializers.BooleanField(required=False, default=True)
+    pending = serializers.BooleanField(required=False, default=False)
 
     # read-only
     contribution_id = serializers.ReadOnlyField(source='id')
@@ -100,10 +103,10 @@ class AlbumContributorSerializer(serializers.ModelSerializer):
         ]
     
     def create(self, validated_data):
-        artist = Artist.objects.filter(platform=Revibe).get(pk=validated_data.pop('artist_id'))
-        album = Album.objects.filter(platform=Revibe).get(pk=validated_data.pop('album_id'))
+        artist = Artist.objects.filter(platform='Revibe').get(pk=validated_data.pop('artist_id'))
+        album = Album.objects.filter(platform='Revibe').get(pk=validated_data.pop('album_id'))
 
-        album_contributor = AlbumContributor.objects.create(**validated_data, artist=artist, album=album)
+        album_contributor = AlbumContributor(**validated_data, artist=artist, album=album)
         album_contributor.save()
         
         return album_contributor
@@ -115,7 +118,7 @@ class AlbumSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     type = serializers.CharField(required=True)
     platform = serializers.CharField(required=False)
-    displayed = serializers.BooleanField(source='is_displayed', required=False)
+    is_displayed = serializers.BooleanField(required=False, default=True)
 
     # read-only
     artist = ArtistSerializer(source='album_uploaded_by', read_only=True)
@@ -132,7 +135,7 @@ class AlbumSerializer(serializers.ModelSerializer):
             'name',
             'type',
             'platform',
-            'displayed',
+            'is_displayed',
 
             # read-only
             'artist',
@@ -150,7 +153,7 @@ class AlbumSerializer(serializers.ModelSerializer):
         else:
             raise Exception("problem") # implement custom exception class
 
-        album = Album.objects.create(**validated_data, uploaded_by=artist)
+        album = Album(**validated_data, uploaded_by=artist)
         album.save()
 
         album_contrib = AlbumContributor.objects.create(artist=artist, album=album, contribution_type="Artist", primary_artist=True)
@@ -163,13 +166,13 @@ class SongSerializer(serializers.ModelSerializer):
     song_id = serializers.CharField(source='id', required=False)
     song_uri = serializers.CharField(source='uri', required=False)
     genre = serializers.CharField(required=False)
-    is_explicit = serializers.BooleanField(required=False)
-    displayed = serializers.BooleanField(required=False)
+    is_explicit = serializers.BooleanField(required=False, default=False)
+    is_displayed = serializers.BooleanField(required=False, default=True)
 
     # read-only
     artist = ArtistSerializer(source='song_uploaded_by', read_only=True)
     album = AlbumSerializer(read_only=True)
-    contributions = SongContributorSerializer(source='song_to_artist', many=True, read_only=True)
+    contributors = SongContributorSerializer(source='song_to_artist', many=True, read_only=True)
 
     # write-only
     album_id = serializers.CharField(write_only=True, required=True)
@@ -185,12 +188,12 @@ class SongSerializer(serializers.ModelSerializer):
             'genre',
             'platform',
             'is_explicit',
-            'displayed',
+            'is_displayed',
 
             # read-only
             'album',
             'artist',
-            'contributions',
+            'contributors',
 
             # write-only
             'album_id',
@@ -198,7 +201,7 @@ class SongSerializer(serializers.ModelSerializer):
         ]
     
     def create(self, validated_data):
-        album = get_object_or_404(Album.objects.all(), pk=validated_data.pop('album_id'))
+        album = Album.objects.get(pk=validated_data.pop('album_id'))
 
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
@@ -206,10 +209,12 @@ class SongSerializer(serializers.ModelSerializer):
         else:
             raise Exception("some issue") # TODO: custom exception later
 
-        song = Song.objects.create(**validated_data, uploaded_by=artist, album=album)
+        song = Song(**validated_data, uploaded_by=artist, album=album)
         song.save()
 
-        song_contrib = SongContributor.objects.create(artist=artist, song=song, contribution_type="Artist", primary_artist=True)
+        print("Creating contributor...")
+        song_contrib = SongContributor(artist=artist, song=song, contribution_type="Artist", primary_artist=True)
         song_contrib.save()
+        print(song_contrib)
 
         return song

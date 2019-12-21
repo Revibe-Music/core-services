@@ -449,8 +449,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
             songs = song_queryset
 
             params = request.query_params
-            if hasattr(params, 'album_id'):
-                songs.filter(album=album_queryset.get(pk=params['album_id']))
+            if 'album_id' in params.keys():
+                songs = songs.filter(album=album_queryset.get(pk=params['album_id']))
 
             serializer = content_ser_v1.SongSerializer(songs, many=True)
             return Response(serializer.data)

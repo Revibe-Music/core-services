@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from content.models import *
+from content.mixins import ContributionSerializerMixin
 
 
 # class ImageSerializer(serializers.ModelSerializer):
@@ -30,10 +31,10 @@ class ArtistSerializer(serializers.ModelSerializer):
         ]
 
 
-class SongContributorSerializer(serializers.ModelSerializer):
+class SongContributorSerializer(serializers.ModelSerializer, ContributionSerializerMixin):
     artist_id = serializers.CharField(source='artist.id', required=False)
     song_id = serializers.CharField(source='song.id', required=False)
-    contribution_type = serializers.CharField(required=True)
+    contribution_type = serializers.CharField(required=False)
     approved = serializers.BooleanField(required=False)
     pending = serializers.BooleanField(required=False)
 
@@ -66,12 +67,19 @@ class SongContributorSerializer(serializers.ModelSerializer):
         song = Song.objects.filter(platform='Revibe').get(pk=validated_data.pop('song_id'))
 
         song_contrib = SongContributor(**validated_data, artist=artist, song=song)
+
+        # change contribution based on account settings
+        artist_settings = self.get_account_settings(artist)
+        if artist_settings:
+            song_contrib.pending = artist_settings['pending']
+            song_contrib.approved = artist_settings['approved']
+
         song_contrib.save()
 
         return song_contrib
 
 
-class AlbumContributorSerializer(serializers.ModelSerializer):
+class AlbumContributorSerializer(serializers.ModelSerializer, ContributionSerializerMixin):
     artist_id = serializers.CharField(source='artist.id', required=False)
     album_id = serializers.CharField(source='album.id', required=False)
     contribution_type = serializers.CharField(required=True)
@@ -107,6 +115,12 @@ class AlbumContributorSerializer(serializers.ModelSerializer):
         album = Album.objects.filter(platform='Revibe').get(pk=validated_data.pop('album_id'))
 
         album_contributor = AlbumContributor(**validated_data, artist=artist, album=album)
+
+        artist_settings = self.get_account_settings(artist)
+        if artist_settings:
+            album_contributor.pending = artist_settings['pending']
+            album_contributor.approved = artist_settings['approved']
+
         album_contributor.save()
         
         return album_contributor

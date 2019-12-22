@@ -8,8 +8,18 @@ def DEFAULT_400_RESPONSE(*args, **kwargs):
 def NO_REQUEST_TYPE(*args, **kwargs):
     return Response({"detail": "could no identify request type"}, status=status.HTTP_400_BAD_REQUEST)
 
-def SERIALIZER_ERROR_RESPONSE(serializer=None, *args, **kwargs):
-    return Response(serializer.errors, status=status.HTTP_417_EXPECTATION_FAILED)
+def SERIALIZER_ERROR_RESPONSE(serializer=None, detail=None, *args, **kwargs):
+    response = Response(status=status.HTTP_417_EXPECTATION_FAILED)
+    if serializer:
+        response.data = serializer.errors
+    elif detail:
+        response.data = {"detail": detail}
+    return response
+
+def NOT_PERMITTED(detail=None, *args, **kwargs):
+    response = Response(status=status.HTTP_403_FORBIDDEN)
+    response.data = {"detail": detail} if detail else {"detail": "You are not authorized to make this request"}
+    return response
 
 def CREATED(serializer=None, *args, **kwargs):
     response = Response(status=status.HTTP_201_CREATED)

@@ -610,6 +610,43 @@ class UserArtistViewSet(GenericPlatformViewSet):
         else:
             return responses.NO_REQUEST_TYPE()
 
+    @action(detail=False, url_path="contributions/approve", methods=['post'])
+    def approve_contribution(self, request, *args, **kwargs):
+        """
+        Approves or denies song and album contributions.
+        """
+        artist = request.user.artist
+
+        # validate data
+        required_fields = ['content','contribution_id','action']
+        for field in required_fields:
+            if field not in request.data.keys():
+                return responses.SERIALIZER_ERROR_RESPONSE(detail="{} must be included in request data".format(field))
+        if request.data['action'].lower() not in ['approve','deny']:
+            return responses.SERIALIZER_ERROR_RESPONSE(detail="'action' must be either 'approve' or 'deny'")
+        approval = True if request.data['action'].lower() == 'approve' else False
+
+        if request.data['content'] == 'song':
+            model = SongContributor
+            serializer = content_ser_v1.SongContributorSerializer
+        elif request.data['content'] == 'album':
+            model = AlbumContributor
+            serializer = content_ser_v1.AlbumContributorSerializer
+        else:
+            return responses.SERIALIZER_ERROR_RESPONSE(detail="Field 'content' must be either 'song' or 'album'.")
+        
+        # get contribution and check request user against contribution artist
+        contribution = model.objects.get(pk=request.data['contribution_id'])
+        if not artist == contribution.artist:
+            return responses.NOT_PERMITTED(detail="You are not authorized to approve this contribution")
+        
+        # set instance data
+        contribution.pending = False
+        contribution.approved = approval
+        contribution.save()
+
+        return responses.UPDATED(serializer(instance=contribution))
+
 class UserViewSet(generics.GenericAPIView):
     serializer_class = UserSerializer
     permission_classes = [TokenOrSessionAuthentication]

@@ -397,8 +397,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
         artist = request.user.artist
         album_queryset = self.platform.HiddenAlbums.filter(uploaded_by=artist)
         kwargs['context'] = self.get_serializer_context()
+        if request.method != 'GET':
+            data = request.data.copy()
         if request.method in ['PATCH','DELETE']:
-            album_id = request.data.pop('album_id')
+            album_id = data.pop('album_id')
 
         if request.method == 'GET':
             albums = album_queryset
@@ -406,9 +408,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return Response(serializer.data)
         
         elif request.method == 'POST':
-            if 'platform' not in request.data.keys():
-                request.data['platform'] = str(self.platform)
-            serializer = content_ser_v1.AlbumSerializer(data=request.data, *args, **kwargs)
+            if 'platform' not in data.keys():
+                data['platform'] = str(self.platform)
+            serializer = content_ser_v1.AlbumSerializer(data=data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -423,7 +425,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if artist != instance.uploaded_by:
                 return Response({"detail": "You are not authorized to edit this album"}, status=status.HTTP_403_FORBIDDEN)
 
-            serializer = content_ser_v1.AlbumSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
+            serializer = content_ser_v1.AlbumSerializer(data=data, instance=instance, partial=True, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -453,7 +455,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         album_queryset = self.platform.HiddenAlbums.filter(uploaded_by=artist)
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['PATCH','DELETE']:
-            song_id = request.data.pop('song_id')
+            song_id = data.pop('song_id')
 
         if request.method == 'GET':
             songs = song_queryset
@@ -558,12 +560,13 @@ class UserArtistViewSet(GenericPlatformViewSet):
         elif request.method == 'DELETE':
             instance = albumcontribution_queryset.get(pk=contribution_id)
 
-            # check that the current artist is the album's uploading artist
-            if (artist != instance.album.uploaded_by) or (artist != instnace.artist):
-                return Response({"detail": "You are not authorized to delete this contribution"}, status=status.HTTP_403_FORBIDDEN)
-
-            instance.delete()
-            return resposnes.DELETED()
+            # ensure that the current artist is authorized to delete this contribution
+            permitted = [instance.artist, instance.album.uploaded_by]
+            if request.user.artist in permitted:
+                instance.delete()
+                return responses.DELETED()
+            else:
+                return responses.NOT_PERMITTED(detail="You are not authorized to delete this contribution")
 
         else:
             return responses.NO_REQUEST_TYPE()
@@ -609,11 +612,13 @@ class UserArtistViewSet(GenericPlatformViewSet):
         elif request.method == 'DELETE':
             instance = full_queryset.get(pk=contribution_id)
 
-            if (artist != instance.song.uploaded_by) or (artist != instance.artist):
-                return Response({"detail": "You are not authorized to delete this contribution"}, status=status.HTTP_403_FORBIDDEN)
-
-            instance.delete()
-            return responses.DELETED()
+            # check that the current artist is permitted to delete this contribution
+            permitted = [instance.artist, instance.song.uploaded_by]
+            if request.user.artist in permitted:
+                instance.delete()
+                return responses.DELETED()
+            else:
+                return responses.NOT_PERMITTED(detail="You are not authorized to delete this contribution")
         
         else:
             return responses.NO_REQUEST_TYPE()

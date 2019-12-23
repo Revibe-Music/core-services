@@ -17,6 +17,9 @@ class ArtistSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     platform = serializers.CharField(required=True)
 
+    # read-only
+    ext = serializers.SerializerMethodField('image_extension', read_only=True)
+
     # write-only
     image = serializers.FileField(write_only=True, required=False)
 
@@ -27,8 +30,19 @@ class ArtistSerializer(serializers.ModelSerializer):
             'artist_uri',
             'name',
             'platform',
+
+            # read-only
+            'ext',
+
+            # write-only
             'image',
         ]
+    
+    def image_extension(self, obj):
+        if obj.image:
+            return obj.image.name.split('.')[-1]
+        else:
+            return False
 
 
 class SongContributorSerializer(serializers.ModelSerializer, ContributionSerializerMixin):

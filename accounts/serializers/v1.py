@@ -157,7 +157,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
     # read only
     artist_id = serializers.ReadOnlyField(source='id')
     artist_uri = serializers.ReadOnlyField(source='uri')
-    ext = serializers.SerializerMethodField('iamge_extension', read_only=True)
+    ext = serializers.SerializerMethodField('image_extension', read_only=True)
     user = UserSerializer(source='artist_user', read_only=True)
 
     # write only
@@ -208,7 +208,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
         
         return instance
 
-    def iamge_extension(self, obj):
+    def image_extension(self, obj):
         if obj.image:
             return obj.image.name.split('.')[-1]
         else:

@@ -15,6 +15,7 @@ class DynamoDBSerializer:
         self.validate_data()
         if len(self.errors) == 0:
             self.validated = True
+            return True
         elif raise_exception:
             key = next(iter(self.errors))
             value = self.errors[key]

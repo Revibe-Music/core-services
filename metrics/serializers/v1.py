@@ -20,6 +20,7 @@ class DynamoDBSerializer:
             key = next(iter(self.errors))
             value = self.errors[key]
             raise Exception("Invalid data: {} - {}".format(key, value))
+        return False
 
 
     def validate_data(self, *args, **kwargs):

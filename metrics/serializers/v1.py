@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from content.models import Song
 from metrics.models import *
 
@@ -61,6 +63,7 @@ class StreamSerializer(DynamoDBSerializer):
     def create(self, validated_data, *args, **kwargs):
         song = Song.objects.get(pk=validated_data['song_id'])
         stream_percentage = int(validated_data['stream_duration']) / int(song.duration)
+        environment = "test" if settings.DEBUG else "production"
 
         stream = self.Meta.model(
             song_id = validated_data['song_id'],
@@ -69,7 +72,8 @@ class StreamSerializer(DynamoDBSerializer):
             stream_percentage = stream_percentage,
             is_downloaded = validated_data['is_downloaded'],
             is_saved = validated_data['is_saved'],
-            device = validated_data['device']
+            device = validated_data['device'],
+            environment = environment
         )
         stream.save()
 

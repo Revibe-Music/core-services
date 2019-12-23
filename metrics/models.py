@@ -22,3 +22,4 @@ class Stream(models.Model):
     is_downloaded = BooleanAttribute(default=False)
     is_saved = BooleanAttribute(default=False)
     device = UnicodeAttribute()
+    environment = UnicodeAttribute(default="production")

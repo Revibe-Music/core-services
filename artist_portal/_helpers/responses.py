@@ -1,37 +1,78 @@
-from rest_framework import status
+from rest_framework.status import *
 from rest_framework.response import Response
 
 
+# 1xx responses
+
+
+# 2xx responses
+
+def OK(serializer=None, detail=None, *args, **kwargs):
+    response = Response(status=HTTP_200_OK)
+    if serializer:
+        response.data = serializer.data
+    elif detail:
+        response.data = {"detail": detail}
+    return response
+
+def UPDATED(serializer=None, *args, **kwargs):
+    response = Response(status=HTTP_200_OK)
+    if serializer:
+        response.data = serializer.data
+    return response
+
+def CREATED(serializer=None, *args, **kwargs):
+    response = Response(status=HTTP_201_CREATED)
+    if serializer:
+        response.data = serializer.data
+    return response
+
+def DELETED(*args, **kwargs):
+    return Response(status=HTTP_204_NO_CONTENT)
+
+
+# 3xx responses
+
+
+# 4xx responses
+
 def DEFAULT_400_RESPONSE(*args, **kwargs):
-    return Response({"detail": "issue processing request, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({"detail": "issue processing request, please try again"}, status=HTTP_400_BAD_REQUEST)
 
 def NO_REQUEST_TYPE(*args, **kwargs):
-    return Response({"detail": "could no identify request type"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({"detail": "could no identify request type"}, status=HTTP_400_BAD_REQUEST)
+
+def UNAUTHORIZED(detail=None, *args, **kwargs):
+    response = Response(status=HTTP_401_UNAUTHORIZED)
+    detail = detail if detail else "could not identify the current user"
+    response.data = {"detail": detail}
+    return response
+
+def NOT_PERMITTED(detail=None, *args, **kwargs):
+    response = Response(status=HTTP_403_FORBIDDEN)
+    response.data = {"detail": detail} if detail else {"detail": "you are not authorized to make this request"}
+    return response
+
+def CONFLICT(detail=None, *args, **kwargs):
+    response = Response(status=HTTP_409_CONFLICT)
+    detail = detail if detail else "instance already exists"
+    response.data = {"detail": detail}
+    return response
 
 def SERIALIZER_ERROR_RESPONSE(serializer=None, detail=None, *args, **kwargs):
-    response = Response(status=status.HTTP_417_EXPECTATION_FAILED)
+    response = Response(status=HTTP_417_EXPECTATION_FAILED)
     if serializer:
         response.data = serializer.errors
     elif detail:
         response.data = {"detail": detail}
     return response
 
-def NOT_PERMITTED(detail=None, *args, **kwargs):
-    response = Response(status=status.HTTP_403_FORBIDDEN)
-    response.data = {"detail": detail} if detail else {"detail": "You are not authorized to make this request"}
+
+# 5xx responses
+
+def BAD_ENVIRONMENT(detail=None, *args, **kwargs):
+    response = Response(status=HTTP_503_SERVICE_UNAVAILABLE)
+    detail = detail if detail else "this functionality is only accessible in a cloud environment"
+    response.data = {"detail": detail}
     return response
 
-def CREATED(serializer=None, *args, **kwargs):
-    response = Response(status=status.HTTP_201_CREATED)
-    if serializer:
-        response.data = serializer.data
-    return response
-
-def UPDATED(serializer=None, *args, **kwargs):
-    response = Response(status=status.HTTP_200_OK)
-    if serializer:
-        response.data = serializer.data
-    return response
-
-def DELETED(*args, **kwargs):
-    return Response(status=status.HTTP_204_NO_CONTENT)

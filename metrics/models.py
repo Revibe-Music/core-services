@@ -6,11 +6,13 @@ from pynamodb.attributes import (
     UnicodeAttribute, NumberAttribute, UnicodeSetAttribute, UTCDateTimeAttribute, BooleanAttribute
 )
 
+from artist_portal._helpers import const
+
 
 class Stream(models.Model):
     class Meta:
-        table_name = 'Stream'
-        region = 'us-east-2'
+        table_name = const.STREAM_TABLE
+        region = const.AWS_REGION
         aws_access_key_id = settings.AWS_ACCESS_KEY_ID
         aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
 

@@ -12,7 +12,7 @@ class StreamView(APIView):
             print("Can only save data when in cloud environment")
             return responses.BAD_ENVIRONMENT()
         serializer = StreamSerializer(data=request.data, *args, **kwargs)
-        if serializer.is_vaild():
+        if serializer.is_valid():
             serializer.save()
             return responses.CREATED()
         else:

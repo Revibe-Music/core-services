@@ -1,3 +1,4 @@
+from content.models import Song
 from metrics.models import *
 
 
@@ -58,13 +59,18 @@ class StreamSerializer(DynamoDBSerializer):
         ]
 
     def create(self, validated_data, *args, **kwargs):
+        song = Song.objects.get(pk=validated_data['song_id'])
+        stream_percentage = int(validated_data['stream_duration']) / int(song.duration)
+
         stream = self.Meta.model(
-            song_id=validated_data['song_id'],
-            user_id=validated_data['user_id'],
-            stream_duration=validated_data['stream_duration'],
-            is_downloaded=validated_data['is_downloaded'],
-            is_saved=validated_data['is_saved'],
-            device=validated_data['device']
+            song_id = validated_data['song_id'],
+            user_id = validated_data['user_id'],
+            stream_duration = int(validated_data['stream_duration']),
+            stream_percentage = stream_percentage,
+            is_downloaded = validated_data['is_downloaded'],
+            is_saved = validated_data['is_saved'],
+            device = validated_data['device']
         )
         stream.save()
+
         return stream

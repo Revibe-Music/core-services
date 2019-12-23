@@ -10,6 +10,6 @@ router = routers.DefaultRouter()
 urlpatterns = [
 
     path("", include(router.urls)),
-    path("stream/", v1.StreamView.as_view(), "streams"),
+    path("stream/", v1.StreamView.as_view(), name="streams"),
 ]
 

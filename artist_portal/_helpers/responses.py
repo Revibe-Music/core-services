@@ -1,6 +1,8 @@
 from rest_framework.status import *
 from rest_framework.response import Response
 
+# from artist_portal._helpers import const # may need later
+
 
 # 1xx responses
 
@@ -69,6 +71,13 @@ def SERIALIZER_ERROR_RESPONSE(serializer=None, detail=None, *args, **kwargs):
 
 
 # 5xx responses
+
+def NOT_IMPLEMENTED(detail=None, *args, **kwargs):
+    response = Response(status=HTTP_501_NOT_IMPLEMENTED)
+    if not detail:
+        detail = "this functionality has not yet been built"
+    response.data = {"detail": detail}
+    return response
 
 def BAD_ENVIRONMENT(detail=None, *args, **kwargs):
     response = Response(status=HTTP_503_SERVICE_UNAVAILABLE)

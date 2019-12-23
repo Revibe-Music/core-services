@@ -355,17 +355,17 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
     def list(self, request):
         if not request.user.artist:
-            return Response({"detail": "could not identify the current user's artist profile"}, status=status.HTTP_401_UNAUTHORIZED)
+            return responses.UNAUTHORIZED(detail="could not identify the current artist")
 
-        artist = self.serializer_class(request.user.artist, context=self.get_serializer_context()).data
-        return Response(artist)
+        artist = self.serializer_class(request.user.artist, context=self.get_serializer_context())
+        return responses.OK(serializer=artist)
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
         kwargs['context'] = self.get_serializer_context()
         # check if user already has an artist object
         if request.user.artist != None:
-            return Response({"detail": "this user already has an artist account"}, status=status.HTTP_409_CONFLICT)        
+            return responses.CONFLICT(detail="this user already has an artist profile")
         
         # create the artist and attach to the user
         data['platform'] = 'Revibe'
@@ -375,7 +375,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             request.user.artist = artist
             request.user.is_artist = True
             request.user.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return responses.CREATED(serialier)
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         return responses.DEFAULT_400_RESPONSE()
@@ -385,7 +385,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         serializer = self.get_serializer(data=request.data, instance=instance, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return responses.UPDATED(serializer)
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         return responses.DEFAULT_400_RESPONSE()
@@ -405,7 +405,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         if request.method == 'GET':
             albums = album_queryset
             serializer = content_ser_v1.AlbumSerializer(albums, many=True)
-            return Response(serializer.data)
+            return responses.OK(serializer)
         
         elif request.method == 'POST':
             if 'platform' not in data.keys():
@@ -413,7 +413,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             serializer = content_ser_v1.AlbumSerializer(data=data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return responses.CREATED(serializer)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
             return responses.DEFAULT_400_RESPONSE()
@@ -423,12 +423,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             # ensure editing artist is the uploading artist
             if artist != instance.uploaded_by:
-                return Response({"detail": "You are not authorized to edit this album"}, status=status.HTTP_403_FORBIDDEN)
+                return responses.NOT_PERMITTED(detail="you are not permitted to edit this album")
 
             serializer = content_ser_v1.AlbumSerializer(data=data, instance=instance, partial=True, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return responses.UPDATED(serializer)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
             return responses.DEFAULT_400_RESPONSE()
@@ -438,7 +438,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             # ensure editing artist is the uploading artist
             if artist != instance.uploaded_by:
-                return Response({"detail": "You are not authorized to delete this album"}, status=status.HTTP_403_FORBIDDEN)
+                return responses.NOT_PERMITTED(detail="you are not permitted to delete this album")
 
             instance.is_deleted = True
             instance.is_displayed = False
@@ -599,7 +599,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             instance = full_queryset.get(pk=contribution_id)
 
             if artist != instance.song.uploaded_by:
-                return Response({"detail": "You are not authorized to edit this contribution"}, status=status.HTTP_403_FORBIDDEN)
+                return responses.NOT_PERMITTED(detail="you are not permitted to edit this contribution")
 
             serializer = content_ser_v1.SongContributorSerializer(instance=instance, data=data, partial=True, *args, **kwargs)
             if serializer.is_valid():
@@ -618,7 +618,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 instance.delete()
                 return responses.DELETED()
             else:
-                return responses.NOT_PERMITTED(detail="You are not authorized to delete this contribution")
+                return responses.NOT_PERMITTED(detail="you are not authorized to delete this contribution")
         
         else:
             return responses.NO_REQUEST_TYPE()

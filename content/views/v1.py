@@ -81,6 +81,9 @@ class SongViewSet(PlatformViewSet):
         "GET": [["ADMIN"],["first-party"]],
     }
 
+    def get_queryset(self):
+        return self.platform.Songs
+
 
 class MusicSearch(GenericPlatformViewSet):
     platform = 'Revibe'

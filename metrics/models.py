@@ -14,8 +14,8 @@ class Stream(models.Model):
         aws_access_key_id = settings.AWS_ACCESS_KEY_ID
         aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
 
-    song = UnicodeAttribute(hash_key=True)
-    user = UnicodeAttribute(range_key=True)
+    song_id = UnicodeAttribute(hash_key=True)
+    user_id = UnicodeAttribute()
     timestamp = UTCDateTimeAttribute(default=datetime.now)
     stream_duration = NumberAttribute()
     stream_percentage = NumberAttribute()

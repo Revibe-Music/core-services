@@ -44,11 +44,12 @@ class YouTube(Platform):
         'you Tube',
     ]
     
-    def save_album(self, data, artist=None):
-        album = super().save_album(data, artist=artist)
+    def save_album(self, data, artist, *args, **kwargs):
+        serializer, album = super().save_album(data, artist=artist)
+        assert album, "Error saving album"
         album.type = 'Single'
         album.save()
-        return album
+        return serializer, album
 
 
 class Spotify(Platform):

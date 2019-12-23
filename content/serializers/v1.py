@@ -226,9 +226,64 @@ class SongSerializer(serializers.ModelSerializer):
         song = Song(**validated_data, uploaded_by=artist, album=album)
         song.save()
 
-        print("Creating contributor...")
         song_contrib = SongContributor(artist=artist, song=song, contribution_type="Artist", primary_artist=True)
         song_contrib.save()
-        print(song_contrib)
 
         return song
+
+
+# Non-Revibe Content Serializers
+
+class OtherArtistSerializer(serializers.ModelSerializer):
+    artist_id = serializers.CharField(source='id', required=False)
+    artist_uri = serializers.CharField(source='uri', required=False)
+
+    class Meta:
+        model = Artist
+        fields = [
+            'artist_id',
+            'artist_uri',
+            'name',
+            'image',
+            'platform',
+        ]
+
+
+class OtherAlbumSerializer(serializers.ModelSerializer):
+    album_id = serializers.CharField(source='id', required=False)
+    artist_uri = serializers.CharField(source='uri', required=False)
+    uploaded_by = OtherArtistSerializer(read_only=True)
+
+    class Meta:
+        model = Album
+        fields = [
+            'album_id',
+            'album_uri',
+            'name',
+            'type',
+            'image_ref',
+            'platform',
+            'uploaded_by',
+        ]
+
+
+class OtherSongSerializer(serializers.ModelSerializer):
+    song_id = serializers.CharField(source='id', required=False)
+    song_uri = serializers.CharField(source='uri', required=False)
+    album = OtherAlbumSerializer(read_only=True)
+    uploaded_by = OtherArtistSerializer(read_only=True)
+
+    class Meta:
+        model = Song
+        fields = [
+            'song_id',
+            'song_uri',
+            'title',
+            'duration',
+            'genre',
+            'platform',
+            'is_explicit',
+            'album',
+            'uploaded_by',
+        ]
+

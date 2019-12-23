@@ -29,6 +29,7 @@ class Artist(models.Model):
     uri = models.CharField(max_length=255, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=255, null=False, blank=False)
     image = models.FileField(upload_to=ext.rename_image, null=True, blank=True)
+    image_reference = models.CharField(max_length=255, null=True, blank=True, default=None)
     platform = models.CharField(max_length=255, null=False, blank=False)
 
     objects = models.Manager()
@@ -50,6 +51,7 @@ class Album(models.Model):
     name = models.CharField(max_length=255, null=False)
     type = models.CharField(max_length=255, null=True, blank=True)
     image = models.FileField(upload_to=ext.rename_image, null=True, blank=True)
+    image_ref = models.CharField(max_length=255, null=True, blank=True, default=None)
     platform = models.CharField(max_length=255, null=False, blank=False)
 
     date_added = models.DateTimeField(auto_now_add=True, null=True, editable=False)

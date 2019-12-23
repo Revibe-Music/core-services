@@ -1,1 +1,6 @@
 ACCESS_TOKEN_COOKIE_NAME = "revibe_access_token"
+REVIBE_STRING = 'Revibe'
+YOUTUBE_STRING = 'YouTube'
+SPOTIFY_STRING = 'Spotify'
+APPLE_MUSIC_STRING = 'Apple'
+AMAZON_MUSIC_STRING = 'Amazon'

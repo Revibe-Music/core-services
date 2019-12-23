@@ -28,6 +28,26 @@ from content.models import Album, Song, SongContributor, AlbumContributor
 from content.serializers import v1 as content_ser_v1
 from music.serializers import v1 as music_ser_v1
 
+
+def get_device(data):
+    """
+    Takes in request data, spits out a device object
+    """
+    try:
+        device = Device.objects.get(device_id=data['device_id'],device_type=data['device_type'])
+    except ObjectDoesNotExist:
+        device = Device(
+            device_id = data['device_id'],
+            device_type = data['device_type'],
+            device_name = data['device_name']
+        )
+        device.save()
+    except MultipleObjectsReturned:
+        device = Device.objects.filter(device_id=data['device_id'],device_type=data['device_type'])[0]
+    except Exception as e:
+        raise e
+    return device
+
 class RegistrationAPI(generics.GenericAPIView):
     """
     this works when application has following attributes:
@@ -42,12 +62,7 @@ class RegistrationAPI(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             
-            device = Device(
-                device_id = request.data['device_id'],
-                device_type = request.data['device_type'],
-                device_name = request.data['device_name']
-            )
-            device.save()
+            device = get_device(request.data)
 
             application = Application.objects.get(name="Revibe First Party Application")
 
@@ -107,22 +122,14 @@ class LoginAPI(generics.GenericAPIView):
     serializer_class = LoginAccountSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        login_data = {
+            "username": request.data['username'],
+            "password": request.data['password'],
+        }
+        serializer = self.get_serializer(data=login_data)
         if serializer.is_valid():
 
-            try:
-                device = Device.objects.get(device_id=request.data['device_id'],device_type=request.data['device_type'],device_name=request.data['device_name'])
-            except (ObjectDoesNotExist):
-                device = Device(
-                    device_id = request.data['device_id'],
-                    device_type = request.data['device_type'],
-                    device_name = request.data['device_name']
-                )
-                device.save()
-            except MultipleObjectsReturned:
-                device = Device.objects.filter(device_id=request.data['device_id'],device_type=request.data['device_type'],device_name=request.data['device_name'])[0]
-            except Exception as e:
-                raise e
+            device = get_device(request.data)
             
             tokens = AccessToken.objects.filter(token_device=device)
             for at in tokens:
@@ -354,14 +361,15 @@ class UserArtistViewSet(GenericPlatformViewSet):
         return Response(artist)
 
     def create(self, request, *args, **kwargs):
+        data = request.data.copy()
         kwargs['context'] = self.get_serializer_context()
         # check if user already has an artist object
         if request.user.artist != None:
             return Response({"detail": "this user already has an artist account"}, status=status.HTTP_409_CONFLICT)        
         
         # create the artist and attach to the user
-        request.data['platform'] = 'Revibe'
-        serializer = self.serializer_class(data=request.data, *args, **kwargs)
+        data['platform'] = 'Revibe'
+        serializer = self.serializer_class(data=data, *args, **kwargs)
         if serializer.is_valid():
             artist = serializer.save()
             request.user.artist = artist

@@ -106,9 +106,9 @@ class UserPatchSerializer(serializers.ModelSerializer):
 class LoginAccountSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
-    device_id = serializers.CharField(required=True)
-    device_type = serializers.CharField(required=True)
-    device_name = serializers.CharField(required=True)
+    device_id = serializers.CharField(required=False)
+    device_type = serializers.CharField(required=False)
+    device_name = serializers.CharField(required=False)
 
     def validate(self, data):
         data = {"username": data['username'], "password": data['password']}
@@ -150,7 +150,7 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
         ]
 
 class UserArtistSerializer(serializers.ModelSerializer):
-    artist_profile = UserArtistProfileSerializer()
+    artist_profile = UserArtistProfileSerializer(required=False)
     name = serializers.CharField(required=False)
     platform = serializers.CharField(required=False)
 

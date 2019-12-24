@@ -3,8 +3,9 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from artist_portal._errors import random as errors, platforms as plt_er
 from artist_portal._helpers import const
 from content.models import *
+from content.serializers import v1 as content_ser_v1
 from music.models import *
-from music.serializers import v1 as ser_v1
+from music.serializers import v1 as music_ser_v1
 
 class Platform:
 
@@ -27,6 +28,9 @@ class Platform:
         self.Songs = Song.display_objects.filter(platform=p)
         self.AlbumContributors = AlbumContributor.display_objects.filter(album__platform=p)
         self.SongContributors = SongContributor.display_objects.filter(song__platform=p)
+
+        # Music queries
+
         if self.__str__() == 'Revibe':
             self.HiddenAlbums = Album.hidden_objects.filter(platform=p)
             self.HiddenSongs = Song.hidden_objects.filter(platform=p)
@@ -35,16 +39,23 @@ class Platform:
     
     def _get_serializers(self):
         if self.__str__() == const.REVIBE_STRING:
-            self.ArtistSerializer = ser_v1.ArtistSerializer
-            self.AlbumSerializer = ser_v1.AlbumSerializer
-            self.AlbumContributorSerializer = ser_v1.AlbumContributorSerializer
-            self.SongSerializer = ser_v1.SongSerializer
-            self.SongContributorSerializer = ser_v1.SongContributorSerializer
+            # Content Serializers
+            self.ArtistSerializer = content_ser_v1.ArtistSerializer
+            self.AlbumSerializer = content_ser_v1.AlbumSerializer
+            self.AlbumContributorSerializer = content_ser_v1.AlbumContributorSerializer
+            self.SongSerializer = content_ser_v1.SongSerializer
+            self.SongContributorSerializer = content_ser_v1.SongContributorSerializer
+
+            # Music Serializers
+            self.LibrarySerializer = music_ser_v1.LibrarySerializer
+            self.PlaylistSerializer = music_ser_v1.PlaylistSerializer
+            self.LibrarySongSerializer = music_ser_v1.LibrarySongSerializer
+            self.PlaylistSongSerializer = music_ser_v1.PlaylistSongSerializer
         else:
             self.ArtistSerializer = ser_v1.OtherArtistSerializer
             self.AlbumSerializer = ser_v1.OtherAlbumSerializer
             self.SongSerializer = ser_v1.OtherSongSerializer
-        
+
     def _invalidate_revibe(self):
         if self.__str__() == const.REVIBE_STRING:
             raise NotImplementedError("Class '{}' must define this method".format(self.__str__()))
@@ -59,7 +70,7 @@ class Platform:
             return (serializer, instance)
         else:
             good = False
-        
+
         return (serializer, instance) if good else (serializer, None)
 
     def save_album(self, data, artist, *args, **kwargs):

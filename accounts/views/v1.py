@@ -26,6 +26,7 @@ from accounts.models import *
 from accounts.serializers.v1 import *
 from content.models import Album, Song, SongContributor, AlbumContributor
 from content.serializers import v1 as content_ser_v1
+from music.models import *
 from music.serializers import v1 as music_ser_v1
 
 
@@ -48,6 +49,16 @@ def get_device(data):
         raise e
     return device
 
+def create_libraries(user):
+    assert isinstance(user, CustomUser), "must pass a user to 'create_libraries()'"
+    default_libraries = [const.REVIBE_STRING, const.YOUTUBE_STRING]
+    for def_lib in default_libraries:
+        Library.objects.create(platform=def_lib, user=user)
+    
+    # check that it worked
+    if len(Library.objects.filter(user=user)) < 2:
+        raise ValidationError("Error creating libraries")
+
 class RegistrationAPI(generics.GenericAPIView):
     """
     this works when application has following attributes:
@@ -67,6 +78,9 @@ class RegistrationAPI(generics.GenericAPIView):
             application = Application.objects.get(name="Revibe First Party Application")
 
             user=serializer.save()
+
+            # create default libraries
+            create_libraries(user)
 
             expire = timezone.now() + datetime.timedelta(days=2)
 

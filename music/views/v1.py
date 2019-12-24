@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
 
+from artist_portal._helpers import responses
 from artist_portal._helpers.debug import debug_print
 from artist_portal._helpers.platforms import get_platform, linked_platforms
 from accounts.permissions import TokenOrSessionAuthentication
@@ -47,32 +48,35 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-    
+        return responses.OK(serializer)
+
     @action(detail=False, methods=['get','post', 'delete'])
     def songs(self, request, *args, **kwargs):
         """
         """
 
         if request.method == 'GET':
-            return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+            return responses.NOT_IMPLEMENTED()
 
         elif request.method == 'POST':
             kwargs['context'] = self.get_serializer_context()
-            kwargs['version'] = self.get_version()
+            # kwargs['version'] = self.get_version()
             platform = get_platform(request.data['platform'])
-            debug_print(platform)
+            print(request.data)
 
-            serializer = platform().save_song_to_library(data=request.data, *args, **kwargs)
-            # serializer = BaseLibrarySongSerializer(data=request.data, *args, **kwargs)
-            # serializer.is_valid(raise_exception=True)
-            # serializer.save()
+            # serializer = platform().save_song_to_library(data=request.data, *args, **kwargs)
+            serializer = LibrarySongSerializer(data=request.data, *args, **kwargs)
+            if serializer.is_valid():
+                serializer.save()
 
-            # debug_print(serializer)
-            # debug_print(serializer.data)
-            
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
+                # debug_print(serializer)
+                # debug_print(serializer.data)
+
+                return responses.CREATED(serializer)
+            else:
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+            return responses.DEFAULT_400_RESPONSE()
+
         elif request.method == 'DELETE':
             kwargs['context'] = self.get_serializer_context()
             serializer = BaseLibrarySongSerializer(data=request.data, *args, **kwargs)

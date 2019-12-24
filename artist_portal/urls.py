@@ -19,7 +19,7 @@ from django.urls import path, include
 
 v1_urls = [
     path('account/', include('accounts.urls.v1')),
-    path('me/', include('music.urls.v1')),
+    path('music/', include('music.urls.v1')),
     path('content/', include('content.urls.v1')),
     path('metrics/', include('metrics.urls.v1')),
 ]

@@ -82,7 +82,8 @@ class RegistrationAPI(generics.GenericAPIView):
             # create default libraries
             create_libraries(user)
 
-            expire = timezone.now() + datetime.timedelta(days=2)
+            time = const.BROWSER_EXPIRY_TIME if device.device_type == 'browser' else const.DEFAULT_EXPIRY_TIME
+            expire = timezone.now() + datetime.timedelta(hours=time)
 
             scopes = ['first-party']
             if device.device_type == 'browser':
@@ -154,7 +155,7 @@ class LoginAPI(generics.GenericAPIView):
             
             user = serializer.validated_data
 
-            time = 5 if device.device_type == 'browser' else 2
+            time = const.BROWSER_EXPIRY_TIME if device.device_type == 'browser' else const.DEFAULT_EXPIRY_TIME
             expire = timezone.now() + datetime.timedelta(hours=time)
 
             scopes = ["first-party"]

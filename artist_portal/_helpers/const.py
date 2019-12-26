@@ -1,4 +1,6 @@
 ACCESS_TOKEN_COOKIE_NAME = "revibe_access_token"
+BROWSER_EXPIRY_TIME = 5 # hours
+DEFAULT_EXPIRY_TIME = 2 # hours
 
 REVIBE_STRING = 'Revibe'
 YOUTUBE_STRING = 'YouTube'

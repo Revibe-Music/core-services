@@ -235,7 +235,7 @@ class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
         if not token.user:
             return responses.UNAUTHORIZED(detail="could not identify the current user")
         elif token.user != request.user:
-            return responses.UNAUTHORIZED(detail="could not identify the current user as the owner of this token")
+            return responses.NOT_PERMITTED(detail="could not identify the current user as the owner of this token")
 
         device = token.token_device # maybe token.device?
 

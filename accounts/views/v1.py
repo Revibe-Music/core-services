@@ -230,14 +230,20 @@ class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
     def post(self, request, *args, **kwargs):
         token_location = request.data['access_token'] if ('access_token' in request.data.keys()) else request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME)
         token = AccessToken.objects.get(token=token_location)
-        assert token.user == request.user, "Could not identify the current user"
+
+        # send back an issue if server could not find the user
+        if not token.user:
+            return responses.UNAUTHORIZED(detail="could not identify the current user")
+        elif token.user != request.user:
+            return responses.UNAUTHORIZED(detail="could not identify the current user as the owner of this token")
+
         device = token.token_device # maybe token.device?
 
         token.refresh_token.delete()
         token.delete()
         device.delete()
 
-        return Response({"detail": "logout successful"}, status=status.HTTP_200_OK)
+        return responses.OK(detail="logout successful")
 
 class LogoutAllAPI(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]

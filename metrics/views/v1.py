@@ -7,10 +7,10 @@ from metrics.serializers.v1 import *
 
 class StreamView(APIView):
     def post(self, request, *args, **kwargs):
-        print("Saving stream data...")
+        # return an error when not running in the cloud
         if not settings.USE_S3:
-            print("Can only save data when in cloud environment")
             return responses.BAD_ENVIRONMENT()
+
         serializer = StreamSerializer(data=request.data, *args, **kwargs)
         if serializer.is_valid():
             serializer.save()

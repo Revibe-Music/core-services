@@ -379,7 +379,10 @@ class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
 
     def post(self, request, *args, **kwargs):
         token_location = request.data['access_token'] if ('access_token' in request.data.keys()) else request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME)
-        token = AccessToken.objects.get(token=token_location)
+        try:
+            token = AccessToken.objects.get(token=token_location)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # send back an issue if server could not find the user
         if not token.user:
@@ -387,11 +390,11 @@ class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
         elif token.user != request.user:
             return responses.NOT_PERMITTED(detail="could not identify the current user as the owner of this token")
 
-        device = token.token_device # maybe token.device?
+        if token.token_device:
+            token.token_device.delete()
 
         token.refresh_token.delete()
         token.delete()
-        device.delete()
 
         return responses.OK(detail="logout successful")
 

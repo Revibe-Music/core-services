@@ -70,7 +70,7 @@ def CONFLICT(detail=None, *args, **kwargs):
 def UNSUPPORTED_MEDIA_TYPE(detail=None, *args, **kwargs):
     response = Response(status=HTTP_415_UNSUPPORTED_MEDIA_TYPE)
     detail = detail if detail else "cannot accept this media type/format"
-    response.data = ("detail": detail)
+    response.data = {"detail": detail}
     return response
 
 def SERIALIZER_ERROR_RESPONSE(serializer=None, detail=None, *args, **kwargs):

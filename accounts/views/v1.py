@@ -59,6 +59,155 @@ def create_libraries(user):
     if len(Library.objects.filter(user=user)) < 2:
         raise ValidationError("Error creating libraries")
 
+class AuthenticationViewSet(viewsets.GenericViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [TokenOrSessionAuthentication]
+    required_alternate_scopes = {
+        'GET': [['ADMIN'],['first-party']],
+        'POST': [['ADMIN'],['first-party']],
+        'PATCH': [['ADMIN'],['first-party']],
+        'PUT': [['ADMIN'],['first-party']],
+        'DELETE': [['ADMIN'],['first-party']],
+    }
+
+    def __init__(*args, **kwargs):
+        super(AuthenticationViewSet, self).__init__(*args, **kwargs)
+        self.application = Application.objects.get(name=const.FIRST_PARTY_APPLICATION_NAME)
+
+    # helper functions
+    def get_device(self, data):
+        """
+        Takes in request data, spits out a device object
+        """
+        try:
+            device = Device.objects.get(device_id=data['device_id'],device_type=data['device_type'])
+        except ObjectDoesNotExist:
+            device = Device(
+                device_id = data['device_id'],
+                device_type = data['device_type'],
+                device_name = data['device_name']
+            )
+            device.save()
+        except MultipleObjectsReturned:
+            device = Device.objects.filter(device_id=data['device_id'],device_type=data['device_type'])[0]
+        except Exception as e:
+            raise e
+        return device
+    
+    def create_libraries(user):
+        """
+        Creates default libraries when creating an account, Revibe and YouTube
+        """
+        assert isinstance(user, CustomUser), "must pass a user to 'create_libraries()'"
+        default_libraries = [const.REVIBE_STRING, const.YOUTUBE_STRING]
+        for def_lib in default_libraries:
+            Library.objects.create(platform=def_lib, user=user)
+        
+        # check that it worked
+        if len(Library.objects.filter(user=user)) < 2:
+            raise ValidationError("Error creating libraries")
+
+    def revoke_tokens(self, device=None, user=None, all=False, *args, **kwargs):
+        assert bool(device) != bool(user), "can only pass a user or a device" # functions as an XOR operator
+        if device:
+            tokens = AccessToken.objects.filter(token_device=device)
+            for at in tokens:
+                at.source_refresh_token.delete()
+                at.delete()
+        elif user:
+            pass
+    
+    def get_expire_time(self, device, *args, **kwargs):
+        time = const.BROWSER_EXPIRY_TIME if device.device_type == 'browser' else const.DEFAULT_EXPIRY_TIME
+        return timezone.now() + datetime.timedelta(hours=time)
+    
+    def get_scopes(self, device, *args, **kwargs):
+        scopes = ["first-party"]
+        if device.device_type == 'browser':
+            scopes.append('artist')
+        return " ".join(scopes)
+    
+    def generate_tokens(self, device, user, *args, **kwargs):
+        access_token = AccessToken(
+            user=user,
+            token=common.generate_token(),
+            application=self.application,
+            scope=self.get_scopes(device),
+            expires=self.get_expire_time(device)
+        )
+        refresh_token = RefreshToken(
+            user=user,
+            token=common.generate_token(),
+            application=self.application,
+            access_token=access_token
+        )
+
+        access_token.save()
+        refresh_token.save()
+
+        access_token.source_refresh_token = refresh_token
+        access_token.save()
+
+        device.token = access_token
+        device.save()
+
+        return access_token, refresh_token
+
+    # remove all potential default functions
+    def list(self, request, *args, **kwargs):
+        return responses.NOT_IMPLEMENTED()
+    def retrieve(self, request, *args, **kwargs):
+        return responss.NOT_IMPLEMENTED()
+    def create(self ,request, *args, **kwargs):
+        return responses.NOT_IMPLEMENTED()
+    def update(self, request, *args, **kwargs):
+        return responses.NOT_IMPLEMENTED()
+    def destroy(self, request, *args, **kwargs):
+        return responses.NOT_IMPLEMENTED()
+
+    @action(detail=False, methods='post')
+    def login(self, request, *args, **kwargs):
+        login_data = {
+            "username": request.data['username'],
+            "password": request.data['password'],
+        }
+        kwargs['context'] = self.get_serializer_context()
+        serializer = LoginAccountSerializer(data=login_data)
+        if serializer.is_valid():
+
+            device = get_device(request.data)
+            self.revoke_tokens(device=device)
+
+            # prepare token fields
+            user = serializer.validated_data
+            expire = self.get_expire_time(device)
+            scope = self.get_scopes(device)
+
+            # create tokens
+            access_token, refresh_token = self.generate_tokens(device, user, *args, **kwargs)
+
+            data = {
+                "user": UserSerializer(user, context=self.get_serializer_context()).data,
+            }
+
+            response = Response(status=status.HTTP_200_OK)
+            if device.device_type == 'browser':
+                response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, access_token.token)
+                response.data = data
+            else:
+                data.update({
+                    "access_token": access_token.token,
+                    "refresh_token": refresh_token.token,
+                })
+                response.data = data
+            return response
+
+        else:
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+
+        return responses.DEFAULT_400_RESPONSE()
+
 class RegistrationAPI(generics.GenericAPIView):
     """
     this works when application has following attributes:
@@ -264,6 +413,8 @@ class LogoutAllAPI(generics.GenericAPIView):
 
         return Response({"detail": "logout-all successful", "tokens deleted": num}, status=status.HTTP_200_OK)
 
+# Linked Account Views
+
 class SpotifyConnect(SocialConnectView):
     """ Logs already authenticated user into Spotify account """
     adapter_class = SpotifyOAuth2Adapter
@@ -357,6 +508,8 @@ class UserLinkedAccounts(viewsets.ModelViewSet):
 #     #     # return Response({"error":"User has not logged into Spotify."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
 #     #
 #     #     # return Response(SocialTokenSerializer(request.user, context=self.get_serializer_context()).data)
+
+# Artist Account API Views
 
 class UserArtistViewSet(GenericPlatformViewSet):
     """

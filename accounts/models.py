@@ -22,6 +22,9 @@ class Profile(models.Model):
     # user settings fields
     allow_explicit = models.BooleanField(null=False, blank=True, default=True)
 
+    def __str__(self):
+        return "{}'s User Profile".format(self.user)
+
 class ArtistProfile(models.Model):
     id = models.AutoField(primary_key=True)
     artist = models.OneToOneField('content.artist', on_delete=models.CASCADE, related_name='artist_profile', null=False, blank=False)
@@ -34,6 +37,9 @@ class ArtistProfile(models.Model):
 
     # account settings
     require_contribution_approval = models.BooleanField(null=False, blank=True, default=True)
+
+    def __str__(self):
+        return "{}'s Artist Profile".format(self.artist)
 
 class Social(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='user_social')

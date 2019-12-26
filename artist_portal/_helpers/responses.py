@@ -50,6 +50,12 @@ def UNAUTHORIZED(detail=None, *args, **kwargs):
     response.data = {"detail": detail}
     return response
 
+def PAYMENT_REQUIRED(detail=None, *args, **kwargs):
+    response = Response(status=HTTP_402_PAYMENT_REQUIRED)
+    detail = detail if detail else "cannot access this feature without paid services"
+    response.data = {"detail": detail}
+    return Response
+
 def NOT_PERMITTED(detail=None, *args, **kwargs):
     response = Response(status=HTTP_403_FORBIDDEN)
     response.data = {"detail": detail} if detail else {"detail": "you are not authorized to make this request"}
@@ -59,6 +65,12 @@ def CONFLICT(detail=None, *args, **kwargs):
     response = Response(status=HTTP_409_CONFLICT)
     detail = detail if detail else "instance already exists"
     response.data = {"detail": detail}
+    return response
+
+def UNSUPPORTED_MEDIA_TYPE(detail=None, *args, **kwargs):
+    response = Response(status=HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+    detail = detail if detail else "cannot accept this media type/format"
+    response.data = ("detail": detail)
     return response
 
 def SERIALIZER_ERROR_RESPONSE(serializer=None, detail=None, *args, **kwargs):

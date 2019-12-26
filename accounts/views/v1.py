@@ -378,11 +378,26 @@ class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
     serializer_class = AccessTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        token_location = request.data['access_token'] if ('access_token' in request.data.keys()) else request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME)
         try:
+            token_location = request.data['access_token'] if ('access_token' in request.data.keys()) else request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME)
             token = AccessToken.objects.get(token=token_location)
         except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            data = {}
+            data['exception'] = str(e)
+
+            if 'access_token' in request.data.keys():
+                data['access_token_in_keys'] = True
+                data['access_token'] = request.data['access_token']
+            else:
+                data['access_token_in_keys'] = False
+                access_token_cookie = request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME, False)
+                if access_token_cookie:
+                    data['access_token_in_cookies'] = True
+                    data['access_token'] = access_token_cookie
+                else:
+                    data['access_token_in_cookies'] = False
+
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         # send back an issue if server could not find the user
         if not token.user:

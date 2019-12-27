@@ -63,7 +63,9 @@ class UserSerializer(serializers.ModelSerializer):
                 data.update({key: value})
         validated_data = data
         profile_data = validated_data.pop('profile')
-        user = CustomUser.objects.create_user(**validated_data)
+        password = validated_data.pop('password')
+        user = CustomUser.objects.create(**validated_data)
+        user.set_password(password)
         user.save()
         profile = Profile.objects.create(user=user, **profile_data)
         profile.save()

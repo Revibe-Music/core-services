@@ -154,6 +154,10 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
 
         return access_token, refresh_token
 
+    def set_cookies(self, response, access_token):
+        response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, access_token.token, samesite=None)
+        return response
+
     # remove all potential default functions
     def list(self, request, *args, **kwargs):
         return responses.NOT_IMPLEMENTED()

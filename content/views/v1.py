@@ -38,14 +38,14 @@ class ArtistViewset(PlatformViewSet):
     @action(detail=True)
     def album_contributions(self, request, pk=None):
         artist = self.get_object()
-        queryset = self.platform.AlbumContributors.filter(artist=artist)
+        queryset = self.platform.AlbumContributors.filter(artist=artist, primary_artist=False)
         serializer = ser_v1.AlbumContributorSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True)
     def song_contributions(self, request, pk=None):
         artist = self.get_object()
-        queryset = self.platform.SongContributors.filter(artist=artist)
+        queryset = self.platform.SongContributors.filter(artist=artist, primary_artist=False)
         serializer = ser_v1.SongContributorSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -68,7 +68,7 @@ class AlbumViewSet(PlatformViewSet):
     @action(detail=True)
     def songs(self, request, pk=None):
         album = self.get_object()
-        queryset = self.platform.Songs.filter(album=ablum)
+        queryset = self.platform.Songs.filter(album=album)
         serializer = ser_v1.SongSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

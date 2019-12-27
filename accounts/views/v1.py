@@ -384,6 +384,7 @@ class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
         except Exception as e:
             data = {}
             data['exception'] = str(e)
+            data['cookies'] = request.COOKIES
 
             if 'access_token' in request.data.keys():
                 data['access_token_in_keys'] = True

@@ -340,7 +340,8 @@ class LoginAPI(generics.GenericAPIView):
 
             response = Response(status=status.HTTP_200_OK)
             if device.device_type == 'browser':
-                response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, access_token.token)
+                response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, value=access_token.token, samesite=None)
+                data.update({"from browser": True})
                 response.data = data
             else:
                 data.update({

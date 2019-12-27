@@ -293,12 +293,14 @@ if USE_S3:
     DEFAULT_FILE_STORAGE = 'artist_portal.storage_backends.MediaStorage' # custom storage settings
     # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage' # default storage settings
 
+    _log_level = 'DEBUG' if DEBUG else 'INFO' 
+
     LOGGING = {
         'version': 1,
         'disable_existing_loggers': False,
         'handlers': {
             'file': {
-                'level': 'DEBUG',
+                'level': _log_level,
                 'class': 'logging.FileHandler',
                 'filename': '/opt/python/log/django.log',
             },
@@ -306,7 +308,7 @@ if USE_S3:
         'loggers': {
             'django': {
                 'handlers': ['file'],
-                'level': 'DEBUG',
+                'level': '_log_level',
                 'propagate': True,
             },
         },

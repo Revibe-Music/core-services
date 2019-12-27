@@ -36,9 +36,11 @@ class OAuth2TokenOrCookieMiddleware(MiddlewareMixin):
             """
             use of cookies for browser applications has been discontinued
             """
-            logger.critical(request.COOKIES)
-            token = AccessToken.objects.get(token=request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME))
-            if token.is_valid():
+            logger.debug(request.COOKIES)
+            # token = AccessToken.objects.get(token=request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME))
+            tokens = AccessToken.objects.filter(token=request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME))
+            token = tokens[0] if len(tokens) > 0 else None
+            if token and token.is_valid():
                 user = token.user
                 request.user = request._cached_user = user
 

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.db import IntegrityError
 from django.http import HttpRequest
 from django.utils import timesince
 from rest_framework import viewsets, permissions, generics, status
@@ -281,7 +282,10 @@ class RegistrationAPI(generics.GenericAPIView):
 
             application = Application.objects.get(name="Revibe First Party Application")
 
-            user=serializer.save()
+            try:
+                user=serializer.save()
+            except IntegrityError as err:
+                return responses.CONFLICT(detail=err)
 
             # create default libraries
             create_libraries(user)

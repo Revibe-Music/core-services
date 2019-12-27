@@ -308,7 +308,7 @@ if USE_S3:
         'loggers': {
             'django': {
                 'handlers': ['file'],
-                'level': '_log_level',
+                'level': _log_level,
                 'propagate': True,
             },
         },

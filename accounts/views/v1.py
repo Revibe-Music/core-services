@@ -155,7 +155,7 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
         return access_token, refresh_token
 
     def set_cookies(self, response, access_token):
-        response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, access_token.token, samesite=None)
+        response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, access_token.token, samesite=None, path="/")
         return response
 
     # remove all potential default functions
@@ -344,7 +344,7 @@ class LoginAPI(generics.GenericAPIView):
 
             response = Response(status=status.HTTP_200_OK)
             if device.device_type == 'browser':
-                response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, value=access_token.token, samesite=None)
+                response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, value=access_token.token, samesite=None, path="/")
                 data.update({"from browser": True})
                 response.data = data
             else:

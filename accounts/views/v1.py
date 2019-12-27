@@ -15,8 +15,9 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
 
 import datetime
-import requests
+import logging
 import json
+import requests
 
 from artist_portal.viewsets import GenericPlatformViewSet
 from artist_portal._helpers import responses, const
@@ -29,6 +30,8 @@ from content.serializers import v1 as content_ser_v1
 from music.models import *
 from music.serializers import v1 as music_ser_v1
 
+
+logger = logging.getLogger(__name__)
 
 def get_device(data):
     """
@@ -99,16 +102,20 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
         """
         Creates default libraries when creating an account, Revibe and YouTube
         """
+        logger.info("Creating default libraries...")
         assert isinstance(user, CustomUser), "must pass a user to 'create_libraries()'"
         default_libraries = [const.REVIBE_STRING, const.YOUTUBE_STRING]
         for def_lib in default_libraries:
             Library.objects.create(platform=def_lib, user=user)
-        
+
         # check that it worked
-        if len(Library.objects.filter(user=user)) < 2:
+        num_created = len(Library.objects.filter(user=user))
+        if num_created < len(default_libraries):
+            logger.error("Error creating libraries: only created {}, should have created {}.".format(num_created, len(default_libraries)))
             raise ValidationError("Error creating libraries")
 
     def revoke_tokens(self, device=None, user=None, all=False, *args, **kwargs):
+        logger.info("Revoking old tokens...")
         assert bool(device) != bool(user), "can only pass a user or a device" # functions as an XOR operator
         if device:
             tokens = AccessToken.objects.filter(token_device=device)
@@ -129,6 +136,7 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
         return " ".join(scopes)
     
     def generate_tokens(self, device, user, *args, **kwargs):
+        logger.info("Generating tokens...")
         access_token = AccessToken(
             user=user,
             token=common.generate_token(),
@@ -152,6 +160,7 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
         device.token = access_token
         device.save()
 
+        logger.info("Tokens successfully created!")
         return access_token, refresh_token
 
     def set_cookies(self, response, access_token):

@@ -7,6 +7,7 @@ from administration.views import v1
 
 router = routers.DefaultRouter()
 router.register('forms', v1.FormViewSet, 'forms')
+router.register('company', v1.CompanyViewSet, 'company')
 
 urlpatterns = [
 

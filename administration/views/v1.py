@@ -1,10 +1,14 @@
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.response import Response
 
+from accounts import models as acc_models
 from accounts.permissions import TokenOrSessionAuthentication
 from administration.models import *
 from administration.serializers import v1 as adm_ser_v1
+from artist_portal.viewsets import GenericPlatformViewSet
 from artist_portal._helpers import responses
+from content import models as cnt_models
 
 import logging
 
@@ -29,4 +33,36 @@ class FormViewSet(viewsets.GenericViewSet):
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         return responses.NO_REQUEST_TYPE()
-        
+
+
+class CompanyViewSet(GenericPlatformViewSet):
+    platform = 'Revibe'
+    queryset = ContactForm.objects.all()
+    serializer_class = adm_ser_v1.ContactFormSerializer
+    permission_classes = [TokenOrSessionAuthentication]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"]]
+    }
+
+    @action(detail=False, methods=['get'], url_path='basic-metrics')
+    def basic_metrics(self, request, *args, **kwargs):
+        data = {}
+        data['Users'] = {}
+        data['Artists'] = {}
+        data['Albums'] = {}
+        data['Songs'] = {}
+
+        data['Users']['Count'] = acc_models.CustomUser.objects.count()
+
+        data['Artists']['Count'] = cnt_models.Artist.objects.filter(platform='Revibe').count()
+
+        data['Albums']['Displayed'] = self.platform.Albums.count()
+        data['Albums']['Hidden'] = self.platform.HiddenAlbums.count()
+        data['Albums']['All'] = cnt_models.Album.objects.count()
+
+        data['Songs']['Displayed'] = self.platform.Songs.count()
+        data['Songs']['Hidden'] = self.platform.HiddenSongs.count()
+        data['Songs']['All'] = cnt_models.Song.objects.count()
+
+        return Response(data, status=status.HTTP_200_OK)
+

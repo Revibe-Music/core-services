@@ -32,17 +32,17 @@ class OAuth2TokenOrCookieMiddleware(MiddlewareMixin):
                 user = authenticate(request=request)
                 if user:
                     request.user = request._cached_user = user
-        elif const.ACCESS_TOKEN_COOKIE_NAME in request.COOKIES.keys():
-            """
-            use of cookies for browser applications has been discontinued
-            """
-            logger.debug(request.COOKIES)
-            # token = AccessToken.objects.get(token=request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME))
-            tokens = AccessToken.objects.filter(token=request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME))
-            token = tokens[0] if len(tokens) > 0 else None
-            if token and token.is_valid():
-                user = token.user
-                request.user = request._cached_user = user
+        # elif const.ACCESS_TOKEN_COOKIE_NAME in request.COOKIES.keys():
+        #     """
+        #     use of cookies for browser applications has been discontinued
+        #     """
+        #     logger.debug(request.COOKIES)
+        #     # token = AccessToken.objects.get(token=request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME))
+        #     tokens = AccessToken.objects.filter(token=request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME))
+        #     token = tokens[0] if len(tokens) > 0 else None
+        #     if token and token.is_valid():
+        #         user = token.user
+        #         request.user = request._cached_user = user
 
     def process_response(self, request, response):
         patch_vary_headers(response, ("Authorization",))

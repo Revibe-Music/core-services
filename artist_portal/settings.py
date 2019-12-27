@@ -51,9 +51,10 @@ INSTALLED_APPS = [
 
     # my apps
     'accounts',
-    'music',
     'content',
+    'music',
     'metrics',
+    'administration',
 
     # installed apps
     'rest_framework',

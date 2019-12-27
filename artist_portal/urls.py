@@ -22,6 +22,7 @@ v1_urls = [
     path('music/', include('music.urls.v1')),
     path('content/', include('content.urls.v1')),
     path('metrics/', include('metrics.urls.v1')),
+    path('administration/', include('administration.urls.v1')),
 ]
 
 admin_path = 'admin/' if settings.DEBUG else '68t9gui2btw4gfesvd89yiugh2354rw/'

@@ -193,19 +193,12 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
 
             data = {
                 "user": UserSerializer(user, context=self.get_serializer_context()).data,
+                "access_token": access_token.token,
             }
+            if device.device_type != 'browser':
+                data.update({"refresh_token": refresh_token.token})
 
-            response = Response(status=status.HTTP_200_OK)
-            if device.device_type == 'browser':
-                response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, access_token.token)
-                response.data = data
-            else:
-                data.update({
-                    "access_token": access_token.token,
-                    "refresh_token": refresh_token.token,
-                })
-                response.data = data
-            return response
+            return Response(data, status=status.HTTP_200_OK)
 
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
@@ -267,19 +260,13 @@ class RegistrationAPI(generics.GenericAPIView):
 
             data = {
                 "user": UserSerializer(user, context=self.get_serializer_context()).data,
+                "access_token": access_token.token,
             }
 
-            response = Response(status=status.HTTP_200_OK)
-            if device.device_type == 'browser':
-                response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, access_token.token)
-                response.data = data
-            else:
-                data.update({
-                    "access_token": access_token.token,
-                    "refresh_token": refresh_token.token,
-                })
-                response.data = data
-            return response
+            if device.device_type != 'browser':
+                data.update({"refresh_token": refresh_token.token})
+
+            return Response(data, status=status.HTTP_200_OK)
 
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
@@ -340,20 +327,13 @@ class LoginAPI(generics.GenericAPIView):
 
             data = {
                 "user": UserSerializer(user, context=self.get_serializer_context()).data,
+                "access_token": access_token.token,
             }
 
-            response = Response(status=status.HTTP_200_OK)
-            if device.device_type == 'browser':
-                response.set_cookie(const.ACCESS_TOKEN_COOKIE_NAME, value=access_token.token, samesite=None, path="/")
-                data.update({"from browser": True})
-                response.data = data
-            else:
-                data.update({
-                    "access_token": access_token.token,
-                    "refresh_token": refresh_token.token,
-                })
-                response.data = data
-            return response
+            if device.device_type != 'browser':
+                data.update({"refresh_token": refresh_token.token})
+
+            return Response(data, status=status.HTTP_200_OK)
         
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
@@ -384,8 +364,7 @@ class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
 
     def post(self, request, *args, **kwargs):
         try:
-            token_location = request.data['access_token'] if ('access_token' in request.data.keys()) else request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME)
-            token = AccessToken.objects.get(token=token_location)
+            token = AccessToken.objects.get(token=request.data['access_token'])
         except Exception as e:
             data = {}
             data['exception'] = str(e)

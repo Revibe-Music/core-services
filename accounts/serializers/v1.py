@@ -130,6 +130,8 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
     zip_code = serializers.CharField(required=False)
 
     require_contribution_approval = serializers.BooleanField(required=False)
+    share_data_with_contributors = serializers.BooleanField(required=False)
+    share_advanced_data_with_contributors = serializers.BooleanField(required=False)
 
     # read-only
     profile_id = serializers.ReadOnlyField(source='id')

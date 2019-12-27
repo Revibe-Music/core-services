@@ -149,6 +149,8 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
 
             # settings fields
             'require_contribution_approval',
+            'share_data_with_contributors',
+            'share_advanced_data_with_contributors',
         ]
 
 class UserArtistSerializer(serializers.ModelSerializer):

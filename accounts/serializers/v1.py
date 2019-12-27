@@ -198,7 +198,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
 
         for key, value in validated_data.items():
             setattr(instance, key, value)
-        instance.save
+        instance.save()
 
         if artist_profile_data:
             artist_profile = instance.artist_profile

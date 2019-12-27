@@ -216,6 +216,53 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
 
         return responses.DEFAULT_400_RESPONSE()
 
+    @action(detail=False, methods=['post'], url_path='refresh-token')
+    def refresh_token(self, request, *args, **kwargs):
+        refresh_token = RefreshToken.objects.get(token=request.data['refresh_token'])
+        access_token = refresh_token.access_token
+
+        access_token.token = common.generate_token()
+
+        access_token.expires = self.get_expire_time(access_token.token_device)
+
+        access_token.save()
+
+        return Response({"access_token": access_token.token}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'])
+    def logout(self, request, *args, **kwargs):
+        token = AccessToken.objects.get(token=request.data['access_token'])
+
+        # send back an issue if server could not find the user
+        if not token.user:
+            return responses.UNAUTHORIZED(detail="could not identify the current user")
+        elif token.user != request.user:
+            return responses.NOT_PERMITTED(detail="could not identify the current user as the owner of this token")
+
+        if token.token_device:
+            token.token_device.delete()
+
+        token.refresh_token.delete()
+        token.delete()
+
+        return responses.OK(detail="logout successful")
+
+    @action(detail=False, methods=['post'], url_path='logout-all')
+    def logout_all(self, request, *args, **kwargs):
+        user = request.user
+
+        # delete all user's access tokens
+        tokens = AccessToken.objects.filter(user=user)
+        num = len(tokens)
+        tokens.delete()
+
+        # extra check to catch hanging refresh tokens as well
+        tokens = RefreshToken.objects.filter(user=user)
+        num += len(tokens)
+        tokens.delete()
+
+        return Response({"detail": "logout-all successful", "tokens deleted": num}, status=status.HTTP_200_OK)
+
 class RegistrationAPI(generics.GenericAPIView):
     """
     this works when application has following attributes:

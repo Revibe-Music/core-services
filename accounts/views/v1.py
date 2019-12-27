@@ -129,10 +129,12 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
         time = const.BROWSER_EXPIRY_TIME if device.device_type == 'browser' else const.DEFAULT_EXPIRY_TIME
         return timezone.now() + datetime.timedelta(hours=time)
     
-    def get_scopes(self, device, *args, **kwargs):
+    def get_scopes(self, device, user, *args, **kwargs):
         scopes = ["first-party"]
         if device.device_type == 'browser':
             scopes.append('artist')
+        if user.is_staff:
+            scopes.append("ADMIN")
         return " ".join(scopes)
     
     def generate_tokens(self, device, user, *args, **kwargs):
@@ -195,7 +197,7 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
             # prepare token fields
             user = serializer.validated_data
             expire = self.get_expire_time(device)
-            scope = self.get_scopes(device)
+            scope = self.get_scopes(device, user)
 
             # create tokens
             access_token, refresh_token = self.generate_tokens(device, user, *args, **kwargs)

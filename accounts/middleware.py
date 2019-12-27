@@ -3,7 +3,11 @@ from django.utils.cache import patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
 from oauth2_provider.models import AccessToken
 
+import logging
+
 from artist_portal._helpers import const
+
+logger = logging.getLogger(__name__)
 
 class OAuth2TokenOrCookieMiddleware(MiddlewareMixin):
     """
@@ -28,14 +32,15 @@ class OAuth2TokenOrCookieMiddleware(MiddlewareMixin):
                 user = authenticate(request=request)
                 if user:
                     request.user = request._cached_user = user
-        # elif const.ACCESS_TOKEN_COOKIE_NAME in request.COOKIES.keys():
-        #     """
-        #     use of cookies for browser applications has been discontinued
-        #     """
-        #     token = AccessToken.objects.get(token=request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME))
-        #     if token.is_valid():
-        #         user = token.user
-        #         request.user = request._cached_user = user
+        elif const.ACCESS_TOKEN_COOKIE_NAME in request.COOKIES.keys():
+            """
+            use of cookies for browser applications has been discontinued
+            """
+            logger.critical(request.COOKIES)
+            token = AccessToken.objects.get(token=request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME))
+            if token.is_valid():
+                user = token.user
+                request.user = request._cached_user = user
 
     def process_response(self, request, response):
         patch_vary_headers(response, ("Authorization",))

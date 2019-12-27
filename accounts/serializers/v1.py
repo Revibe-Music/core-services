@@ -127,6 +127,7 @@ class RefreshTokenSerializer(serializers.Serializer):
 
 class UserArtistProfileSerializer(serializers.ModelSerializer):
     about_me = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
     country = serializers.CharField(required=False)
     city = serializers.CharField(required=False)
     zip_code = serializers.CharField(required=False)
@@ -145,6 +146,7 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
 
             # profile fields
             'about_me',
+            'email',
             'country',
             'city',
             'zip_code',

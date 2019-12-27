@@ -19,6 +19,7 @@ class Profile(models.Model):
     country = models.CharField('Country', max_length=255, null=True, blank=True)
     dob = models.DateField('Date of Birth', null=True, blank=True)
     image = models.FileField("Profile Picture", upload_to='images/profiles', null=True, blank=True)
+
     # user settings fields
     allow_explicit = models.BooleanField(null=False, blank=True, default=True)
 
@@ -30,9 +31,10 @@ class ArtistProfile(models.Model):
     artist = models.OneToOneField('content.artist', on_delete=models.CASCADE, related_name='artist_profile', null=False, blank=False)
 
     # additional fields
+    email = models.EmailField(null=True, blank=True)
     about_me = models.TextField(null=True, blank=True)
-    country = models.CharField(max_length=255, null=True, blank=True)
     city = models.CharField(max_length=255, null=True, blank=True)
+    country = models.CharField(max_length=255, null=True, blank=True)
     zip_code = models.CharField(max_length=255, null=True, blank=True)
 
     # account settings

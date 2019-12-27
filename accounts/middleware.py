@@ -28,7 +28,7 @@ class OAuth2TokenOrCookieMiddleware(MiddlewareMixin):
                 user = authenticate(request=request)
                 if user:
                     request.user = request._cached_user = user
-        elif hasattr(request.COOKIES, const.ACCESS_TOKEN_COOKIE_NAME):
+        elif const.ACCESS_TOKEN_COOKIE_NAME in request.COOKIES.keys():
             token = AccessToken.objects.get(token=request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME))
             if token.is_valid():
                 user = token.user

@@ -17,7 +17,7 @@ class Stream(models.Model):
         aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
 
     song_id = UnicodeAttribute(hash_key=True)
-    user_id = UnicodeAttribute()
+    user_id = UnicodeAttribute() # default 'opt-out' written in serializer
     timestamp = UTCDateTimeAttribute(default=datetime.now)
     stream_duration = NumberAttribute()
     stream_percentage = NumberAttribute()

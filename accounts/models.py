@@ -23,6 +23,12 @@ class Profile(models.Model):
     # user settings fields
     allow_explicit = models.BooleanField(null=False, blank=True, default=True)
 
+    # privacy settings
+    allow_listening_data = models.BooleanField(null=False, blank=True, default=True)
+
+    # notification settings
+    allow_email_marketing = models.BooleanField(null=False, blank=True, default=True)
+
     def __str__(self):
         return "{}'s User Profile".format(self.user)
 

@@ -41,6 +41,7 @@ class DynamoDBSerializer:
         if not isinstance(instance, self.Meta.model):
             raise ValueError("Could not create row")
         self.instance = instance
+        return instance
     
     def create(self, **validated_data):
         # instance = self.Meta.model(**validated_data) # don't think this will work but we'll find out
@@ -61,15 +62,13 @@ class StreamSerializer(DynamoDBSerializer):
         ]
 
     def create(self, validated_data, *args, **kwargs):
-        song = Song.objects.get(pk=validated_data['song_id'])
-        stream_percentage = int(validated_data['stream_duration']) / int(song.duration)
         environment = "test" if settings.DEBUG else "production"
 
         stream = self.Meta.model(
             song_id = validated_data['song_id'],
-            user_id = validated_data['user_id'],
+            user_id = validated_data['user_id'] if validated_data['user_id'] else 'opt-out',
             stream_duration = int(validated_data['stream_duration']),
-            stream_percentage = stream_percentage,
+            stream_percentage = validated_data['stream_percentage'],
             is_downloaded = validated_data['is_downloaded'],
             is_saved = validated_data['is_saved'],
             device = validated_data['device'],

@@ -1,6 +1,6 @@
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from oauth2_provider.models import Application
 
 import logging
@@ -15,6 +15,16 @@ def create_application():
         Application.objects.create(client_type="confidential", authorization_grant_type="password", name="Revibe First Party Application")
     except:
         pass
+
+def create_test_user():
+    client = APIClient()
+    try:
+        user = CustomUser.objects.create_user(username="johnsnow", password="password")
+        user.profile = Profile.objects.create(country="US")
+    except:
+        user = CustomUser.objects.get(username="johnsnow")
+    login = client.post(reverse('login'), {"username": "johnsnow","password": "password","device_id": "1234567890","device_name": "Django Test Case","device_type": "browser",}, format="json")
+    return user, login.data['access_token']
 
 class TestRegister(APITestCase):
     def setUp(self):
@@ -63,12 +73,19 @@ class TestLogin(APITestCase):
 class TestUserAccount(APITestCase):
     def setUp(self):
         create_application()
-        self.user = CustomUser.objects.create_user(username="johnsnow", password="password")
-        login = self.client.post(reverse('login'), {"username": "johnsnow","password": "password","device_id": "1234567890","device_name": "Django Test Case","device_type": "browser",}, format="json")
-        self.access_token = login.data['access_token']
+        self.user, self.access_token = create_test_user()
         self.headers = {"Authorization": "Bearer {}".format(self.access_token)}
     
     def test_get_profile(self):
         url = reverse('profile')
         response = self.client.get(url, **self.headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+    
+    def test_edit_profile(self):
+        url = reverse('profile')
+        data = {"first_name": "John", "last_name": "Snow"}
+        response = self.client.patch(url, data, format="json", **self.headers)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['first_name'], "John")
+

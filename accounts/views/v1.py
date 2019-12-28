@@ -704,7 +704,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         elif request.method == 'POST':
             if 'platform' not in request.data.keys():
+                _mutable = request.data._mutable
+                request.data._mutable = True
                 request.data['platform'] = str(self.platform)
+                request.data._mutable = _mutable
             serializer = content_ser_v1.SongSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()

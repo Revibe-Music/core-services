@@ -640,6 +640,20 @@ class UserArtistViewSet(GenericPlatformViewSet):
         if request.method == 'GET':
             albums = album_queryset
             serializer = content_ser_v1.AlbumSerializer(albums, many=True)
+
+            # attach the number of streams in running in the cloud
+            if settings.USE_S3:
+                data = serializer.data
+
+                # attach the data to the serializer data
+                env = 'test' if settings.DEBUG else 'production'
+                for album in serializer.data:
+                    album_object = Album.objects.get(id=album['album_id'])
+                    album['total_streams'] = 0
+                    for song in album_object.song_set:
+                        album['total_streams'] += Stream.count(song.id, Stream.environment == env)
+                return Response(data, status=status.HTTP_200_OK)
+
             return responses.OK(serializer)
         
         elif request.method == 'POST':

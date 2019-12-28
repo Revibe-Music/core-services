@@ -28,6 +28,7 @@ from accounts.models import *
 from accounts.serializers.v1 import *
 from content.models import Album, Song, SongContributor, AlbumContributor
 from content.serializers import v1 as content_ser_v1
+from metrics.models import Stream
 from music.models import *
 from music.serializers import v1 as music_ser_v1
 
@@ -698,7 +699,26 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if 'album_id' in params.keys():
                 songs = songs.filter(album=album_queryset.get(pk=params['album_id']))
 
+            # get the serialized data
             serializer = content_ser_v1.SongSerializer(songs, many=True)
+
+            # attach the number of streams in running in the cloud
+            if settings.USE_S3:
+                # retrieve data from DynamoDB
+                song_ids = [(song.id) for song in songs]
+                streams = Stream.batch_get(song_ids) # makes the DynamoDB call
+
+                # attach the data to the serializer data
+                _mutable = serializer.data._mutable
+                serializer.data._mutable = True
+                for song in serializer.data:
+                    count = 0
+                    for stream in streams:
+                        if stream.song_id == song.song_id:
+                            count += 1
+                    song['total_listeners'] = str(count)
+                serializer.data._mutable = _mutable
+
             return Response(serializer.data)
 
         elif request.method == 'POST':

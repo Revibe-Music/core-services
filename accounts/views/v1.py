@@ -705,17 +705,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
             # attach the number of streams in running in the cloud
             if settings.USE_S3:
                 data = serializer.data
-                # retrieve data from DynamoDB
-                song_ids = [(song.id) for song in songs]
-                streams = Stream.batch_get(song_ids) # makes the DynamoDB call
 
                 # attach the data to the serializer data
                 for song in serializer.data:
-                    count = 0
-                    for stream in streams:
-                        if stream.song_id == song.song_id:
-                            count += 1
-                    song['total_streams'] = str(count)
+                    song['total_streams'] = Stream.count(song['song_id'])
                 return Response(data, status=status.HTTP_200_OK)
 
             return Response(serializer.data)

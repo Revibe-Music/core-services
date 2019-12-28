@@ -650,7 +650,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 for album in serializer.data:
                     album_object = Album.objects.get(id=album['album_id'])
                     album['total_streams'] = 0
-                    for song in album_object.song_set:
+                    for song in album_object.song_set.all():
                         album['total_streams'] += Stream.count(song.id, Stream.environment == env)
                 return Response(data, status=status.HTTP_200_OK)
 

@@ -349,7 +349,6 @@ class LoginAPI(generics.GenericAPIView):
             application = Application.objects.get(name="Revibe First Party Application")
             
             user = serializer.validated_data
-            print(user)
 
             time = const.BROWSER_EXPIRY_TIME if device.device_type == 'browser' else const.DEFAULT_EXPIRY_TIME
             expire = timezone.now() + datetime.timedelta(hours=time)

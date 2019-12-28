@@ -66,16 +66,9 @@ def create_libraries(user):
 class AuthenticationViewSet(viewsets.GenericViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [TokenOrSessionAuthentication]
-    required_alternate_scopes = {
-        'GET': [['ADMIN'],['first-party']],
-        'POST': [['ADMIN'],['first-party']],
-        'PATCH': [['ADMIN'],['first-party']],
-        'PUT': [['ADMIN'],['first-party']],
-        'DELETE': [['ADMIN'],['first-party']],
-    }
+    permission_classes = [permissions.AllowAny]
 
-    def __init__(*args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(AuthenticationViewSet, self).__init__(*args, **kwargs)
         self.application = Application.objects.get(name=const.FIRST_PARTY_APPLICATION_NAME)
 
@@ -99,7 +92,7 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
             raise e
         return device
     
-    def create_libraries(user):
+    def create_libraries(self, user):
         """
         Creates default libraries when creating an account, Revibe and YouTube
         """
@@ -364,6 +357,8 @@ class LoginAPI(generics.GenericAPIView):
             scopes = ["first-party"]
             if device.device_type == 'browser':
                 scopes.append('artist')
+            if user.is_staff:
+                scopes.append("ADMIN")
             scope = " ".join(scopes)
             
             access_token = AccessToken(

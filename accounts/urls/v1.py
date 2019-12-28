@@ -5,8 +5,9 @@ from accounts.views import v1, v1_reference
 # from knox import views as knox_views
 
 router = routers.DefaultRouter()
-router.register("linked-accounts", v1.UserLinkedAccounts, 'linked_accounts')
+# router.register("user", v1.AuthenticationViewSet, "user")
 router.register("artist", v1.UserArtistViewSet, "artist") # artist portal ONLY
+router.register("linked-accounts", v1.UserLinkedAccounts, 'linked_accounts')
 
 
 # artist_urls = [

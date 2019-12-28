@@ -707,8 +707,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 data = serializer.data
 
                 # attach the data to the serializer data
+                env = 'test' if settings.DEBUG else 'production'
                 for song in serializer.data:
-                    song['total_streams'] = Stream.count(song['song_id'])
+                    song['total_streams'] = Stream.count(song['song_id'], Stream.environment == env)
                 return Response(data, status=status.HTTP_200_OK)
 
             return Response(serializer.data)

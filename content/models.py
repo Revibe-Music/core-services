@@ -54,8 +54,8 @@ class Album(models.Model):
     image_ref = models.CharField(max_length=255, null=True, blank=True, default=None)
     platform = models.CharField(max_length=255, null=False, blank=False)
 
-    date_added = models.DateTimeField(auto_now_add=True, null=True, editable=False)
-    last_changed = models.DateTimeField(auto_now=True, null=True)
+    uploaded_date = models.DateField(auto_now_add=True, null=True, editable=False)
+    last_changed = models.DateField(auto_now=True, null=True)
     date_published = models.DateField(null=True, blank=True, default=now)
     is_displayed = models.BooleanField(null=False, blank=True, default=True)
     is_deleted = models.BooleanField(null=False, blank=True, default=False)

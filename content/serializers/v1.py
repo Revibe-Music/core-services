@@ -151,6 +151,8 @@ class AlbumSerializer(serializers.ModelSerializer):
     # read-only
     artist = ArtistSerializer(source='album_uploaded_by', read_only=True)
     contributors = AlbumContributorSerializer(source='album_to_artist', many=True, read_only=True)
+    uploaded_date = serializers.DateField(read_only=True)
+    last_changed = serializers.DateField(read_only=True)
 
     # write-only
     image = serializers.FileField(write_only=True, required=False)
@@ -168,6 +170,8 @@ class AlbumSerializer(serializers.ModelSerializer):
             # read-only
             'artist',
             'contributors',
+            'uploaded_date',
+            'last_changed',
 
             # write-only
             'image',
@@ -201,6 +205,8 @@ class SongSerializer(serializers.ModelSerializer):
     artist = ArtistSerializer(source='song_uploaded_by', read_only=True)
     album = AlbumSerializer(read_only=True)
     contributors = SongContributorSerializer(source='song_to_artist', many=True, read_only=True)
+    uploaded_date = serializers.DateField(read_only=True)
+    last_changed = serializers.DateField(read_only=True)
 
     # write-only
     album_id = serializers.CharField(write_only=True, required=True)
@@ -222,6 +228,8 @@ class SongSerializer(serializers.ModelSerializer):
             'album',
             'artist',
             'contributors',
+            'uploaded_date',
+            'last_changed',
 
             # write-only
             'album_id',

@@ -655,7 +655,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return Response(data, status=status.HTTP_200_OK)
 
             return responses.OK(serializer)
-        
+
         elif request.method == 'POST':
             if 'platform' not in data.keys():
                 data['platform'] = str(self.platform)

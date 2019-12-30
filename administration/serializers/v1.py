@@ -55,4 +55,5 @@ class UserMetricsSerializer(serializers.ModelSerializer):
             'last_name',
             'last_login',
             'is_staff',
+            'date_joined',
         ]

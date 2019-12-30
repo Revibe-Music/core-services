@@ -30,6 +30,22 @@ def create_test_user():
     login = client.post(reverse('login'), {"username": "johnsnow","password": "password","device_id": "1234567890","device_name": "Django Test Case","device_type": "phone",}, format="json")
     return user, login.data['access_token'], login.data['refresh_token']
 
+def create_artist_test_user():
+    client = APIClient()
+    try:
+        user = CustomUser.objects.create_user(username="johnartist", password="password")
+        profile = Profile.objects.create(country="US", user=user)
+        profile.save()
+        user.save()
+    except IntegrityError as ie:
+        user = CustomUser.objects.get(username="johnartist")
+    except Exception as e:
+        raise(e)
+    login = client.post(reverse('login'), {"username": "johnartist","password": "password","device_id": "1234567890","device_name": "Django Test Case","device_type": "browser",}, format="json")
+    return user, login.data['access_token']
+
+# -----------------------------------------------------------------------------
+
 class TestRegister(APITestCase):
     def setUp(self):
         create_application()
@@ -116,3 +132,22 @@ class TestUserAccount(APITestCase):
         # reset self's access token, in case the other requests come after
         if response.data['access_token'] != self.access_token:
             self.access_token = response.data['access_token']
+
+
+# class TestRegisterArtist(APITestCase):
+#     def setUp(self):
+#         create_application()
+#         self.user, self.access_token = create_artist_test_user()
+    
+#     def _get_headers(self):
+#         return {"Authorization": "Bearer {}".format(self.access_token)}
+
+#     def test_register_artist(self):
+#         url = reverse('user_artist')
+#         data = {
+#             'name': "Artist Test Register",
+#             "image": None
+#         }
+#         response = self.client.post(url, data, format="json", **self._get_headers())
+
+#         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

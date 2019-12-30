@@ -9,7 +9,8 @@ from rest_framework.response import Response
 
 # 2xx responses
 
-def OK(serializer=None, detail=None, *args, **kwargs):
+def OK(serializer=None, detail=None, data=None, *args, **kwargs):
+    assert not (serializer and data), "cannot have both a serializer and data in a request"
     response = Response(status=HTTP_200_OK)
     if serializer:
         response.data = serializer.data
@@ -23,10 +24,13 @@ def UPDATED(serializer=None, *args, **kwargs):
         response.data = serializer.data
     return response
 
-def CREATED(serializer=None, *args, **kwargs):
+def CREATED(serializer=None, data=None, *args, **kwargs):
+    assert not (serializer and data), "cannot have both a serializer and data in a request"
     response = Response(status=HTTP_201_CREATED)
     if serializer:
         response.data = serializer.data
+    elif data:
+        response.data = data
     return response
 
 def DELETED(*args, **kwargs):

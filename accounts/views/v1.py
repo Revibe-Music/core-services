@@ -620,9 +620,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
         serializer = self.get_serializer(data=request.data, instance=instance, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return responses.UPDATED(serializer)
+            return responses.UPDATED(serializer=serializer)
         else:
-            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
         return responses.DEFAULT_400_RESPONSE()
 
     @action(detail=False, methods=['get','post','patch','delete'])

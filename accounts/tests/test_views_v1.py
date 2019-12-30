@@ -6,7 +6,7 @@ from oauth2_provider.models import Application
 import logging
 logger = logging.getLogger(__name__)
 
-from accounts.models import CustomUser
+from accounts.models import CustomUser, Profile
 
 # -----------------------------------------------------------------------------
 
@@ -20,11 +20,15 @@ def create_test_user():
     client = APIClient()
     try:
         user = CustomUser.objects.create_user(username="johnsnow", password="password")
-        user.profile = Profile.objects.create(country="US")
-    except:
+        profile = Profile.objects.create(country="US", user=user)
+        profile.save()
+        user.save()
+    except IntegrityError as ie:
         user = CustomUser.objects.get(username="johnsnow")
-    login = client.post(reverse('login'), {"username": "johnsnow","password": "password","device_id": "1234567890","device_name": "Django Test Case","device_type": "browser",}, format="json")
-    return user, login.data['access_token']
+    except Exception as e:
+        raise(e)
+    login = client.post(reverse('login'), {"username": "johnsnow","password": "password","device_id": "1234567890","device_name": "Django Test Case","device_type": "phone",}, format="json")
+    return user, login.data['access_token'], login.data['refresh_token']
 
 class TestRegister(APITestCase):
     def setUp(self):
@@ -73,19 +77,33 @@ class TestLogin(APITestCase):
 class TestUserAccount(APITestCase):
     def setUp(self):
         create_application()
-        self.user, self.access_token = create_test_user()
-        self.headers = {"Authorization": "Bearer {}".format(self.access_token)}
-    
+        self.user, self.access_token, self.refresh_token = create_test_user()
+
+    def _get_headers(self):
+        return {"Authorization": "Bearer {}".format(self.access_token)}
+
     def test_get_profile(self):
         url = reverse('profile')
-        response = self.client.get(url, **self.headers)
+        response = self.client.get(url, **self._get_headers())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_edit_profile(self):
         url = reverse('profile')
-        data = {"first_name": "John", "last_name": "Snow"}
-        response = self.client.patch(url, data, format="json", **self.headers)
+        data = {"first_name": "John", "last_name": "Snow", "profile": {"country": "extremely cool country!"}}
+        response = self.client.patch(url, data, format="json", **self._get_headers())
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['first_name'], "John")
+        self.assertEqual(response.data['profile']['country'], 'extremely cool country!')
 
+    def test_refresh_token(self):
+        url = reverse('refresh-token')
+        data = {"refresh_token": self.refresh_token}
+        response = self.client.post(url, data, format="json", **self._get_headers())
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertNotEqual(response.data['access_token'], self.access_token)
+
+        # reset self's access token, in case the other requests come after
+        if response.data['access_token'] != self.access_token:
+            self.access_token = response.data['access_token']

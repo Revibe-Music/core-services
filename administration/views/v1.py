@@ -24,7 +24,7 @@ class FormViewSet(viewsets.GenericViewSet):
         "POST": [["ADMIN"],["first-party"]],
     }
 
-    @action(detail=False, methods=['post'], url_path="contact-form")
+    @action(detail=False, methods=['post'], url_path="contact-form", url_name="contact-form")
     def contact_form(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():

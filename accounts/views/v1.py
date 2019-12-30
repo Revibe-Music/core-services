@@ -610,7 +610,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             request.user.artist = artist
             request.user.is_artist = True
             request.user.save()
-            return responses.CREATED(serialier)
+            return responses.CREATED(serializer)
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         return responses.DEFAULT_400_RESPONSE()

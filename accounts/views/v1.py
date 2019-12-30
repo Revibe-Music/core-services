@@ -632,10 +632,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
         artist = request.user.artist
         album_queryset = self.platform.HiddenAlbums.filter(uploaded_by=artist)
         kwargs['context'] = self.get_serializer_context()
-        if request.method != 'GET':
-            data = request.data.copy()
         if request.method in ['PATCH','DELETE']:
-            album_id = data.pop('album_id')
+            album_id = request.data.pop('album_id')
 
         if request.method == 'GET':
             albums = album_queryset
@@ -657,9 +655,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.OK(serializer)
 
         elif request.method == 'POST':
-            if 'platform' not in data.keys():
-                data['platform'] = str(self.platform)
-            serializer = content_ser_v1.AlbumSerializer(data=data, *args, **kwargs)
+            if 'platform' not in request.data.keys():
+                _mutable = request.data._mutable
+                request.data._mutable = True
+                request.data['platform'] = str(self.platform)
+                request.data._mutable = _mutable
+            serializer = content_ser_v1.AlbumSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
                 return responses.CREATED(serializer)
@@ -674,7 +675,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if artist != instance.uploaded_by:
                 return responses.NOT_PERMITTED(detail="you are not permitted to edit this album")
 
-            serializer = content_ser_v1.AlbumSerializer(data=data, instance=instance, partial=True, *args, **kwargs)
+            serializer = content_ser_v1.AlbumSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
                 return responses.UPDATED(serializer)

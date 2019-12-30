@@ -279,7 +279,7 @@ class RegistrationAPI(generics.GenericAPIView):
             try:
                 user=serializer.save()
             except IntegrityError as err:
-                return responses.CONFLICT(detail=err)
+                return responses.CONFLICT(detail=str(err))
 
             # create default libraries
             create_libraries(user)

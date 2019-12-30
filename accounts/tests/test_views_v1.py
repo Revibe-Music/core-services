@@ -86,7 +86,16 @@ class TestUserAccount(APITestCase):
         url = reverse('profile')
         response = self.client.get(url, **self._get_headers())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-    
+
+        expected_fields = ['first_name','last_name','username','email','profile','is_artist','is_manager']
+        expected_profile_fields = ['country','allow_explicit','allow_listening_data','allow_email_marketing']
+
+        for field in expected_fields:
+            assert field in response.data.keys(), "Expected {} in response fields".format(field)
+        
+        for profile_field in expected_profile_fields:
+            assert profile_field in response.data['profile'].keys(), "Expected {} in response profile fields".format(profile_field)
+
     def test_edit_profile(self):
         url = reverse('profile')
         data = {"first_name": "John", "last_name": "Snow", "profile": {"country": "extremely cool country!"}}

@@ -12,9 +12,18 @@ from content.models import Artist
 from music.models import Library
 
 class ProfileSerializer(serializers.ModelSerializer): # TODO: do this right, please
+    allow_explicit = serializers.BooleanField(required=False)
+    allow_listening_data = serializers.BooleanField(required=False)
+    allow_email_marketing = serializers.BooleanField(required=False)
     class Meta:
         model = Profile
-        fields = ['country','image']
+        fields = [
+            'country',
+            'image',
+            'allow_explicit',
+            'allow_listening_data',
+            'allow_email_marketing',
+        ]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -23,6 +32,8 @@ class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=False)
     email = serializers.EmailField(required=False)
     profile = ProfileSerializer(many=False, required=False)
+
+
     device_id = serializers.CharField(required=False)
     device_type = serializers.CharField(required=False)
     device_name = serializers.CharField(required=False)
@@ -34,6 +45,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     # write-only
     password = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = CustomUser
         fields = [
@@ -43,6 +55,8 @@ class UserSerializer(serializers.ModelSerializer):
             'username',
             'email',
             'profile',
+
+
             'device_id',
             'device_type',
             'device_name',

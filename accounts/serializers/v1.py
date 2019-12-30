@@ -186,7 +186,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
     image = serializers.FileField(write_only=True, allow_null=True, required=False)
 
     about_me = serializers.CharField(source="artist_profile.about_me", required=False, write_only=True)
-    email = serializers.EmailField(source="artist_profile.email", required=False, write_only=True)
+    email = serializers.CharField(source="artist_profile.email", required=False, write_only=True)
     country = serializers.CharField(source="artist_profile.country", required=False, write_only=True)
     city = serializers.CharField(source="artist_profile.city", required=False, write_only=True)
     zip_code = serializers.CharField(source="artist_profile.zip_code", required=False, write_only=True)

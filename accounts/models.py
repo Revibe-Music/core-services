@@ -37,7 +37,7 @@ class ArtistProfile(models.Model):
     artist = models.OneToOneField('content.artist', on_delete=models.CASCADE, related_name='artist_profile', null=False, blank=False)
 
     # additional fields
-    email = models.EmailField(null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
     about_me = models.TextField(null=True, blank=True)
     city = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255, null=True, blank=True)

@@ -172,7 +172,6 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
         ]
 
 class UserArtistSerializer(serializers.ModelSerializer):
-    artist_profile = UserArtistProfileSerializer(required=False)
     name = serializers.CharField(required=False)
     platform = serializers.CharField(required=False)
 
@@ -180,25 +179,49 @@ class UserArtistSerializer(serializers.ModelSerializer):
     artist_id = serializers.ReadOnlyField(source='id')
     artist_uri = serializers.ReadOnlyField(source='uri')
     ext = serializers.SerializerMethodField('image_extension', read_only=True)
+    artist_profile = UserArtistProfileSerializer(required=False, read_only=True)
     user = UserSerializer(source='artist_user', read_only=True)
 
     # write only
     image = serializers.FileField(write_only=True, allow_null=True, required=False)
+
+    about_me = serializers.CharField(source="artist_profile.about_me", required=False, write_only=True)
+    email = serializers.EmailField(source="artist_profile.email", required=False, write_only=True)
+    country = serializers.CharField(source="artist_profile.country", required=False, write_only=True)
+    city = serializers.CharField(source="artist_profile.city", required=False, write_only=True)
+    zip_code = serializers.CharField(source="artist_profile.zip_code", required=False, write_only=True)
+
+    require_contribution_approval = serializers.BooleanField(source="artist_profile.require_contribution_approval", required=False, write_only=True)
+    share_data_with_contributors = serializers.BooleanField(source="artist_profile.share_data_with_contributors", required=False, write_only=True)
+    share_advanced_data_with_contributors = serializers.BooleanField(source="artist_profile.share_advanced_data_with_contributors", required=False, write_only=True)
+
     class Meta:
         model = Artist
         fields = [
             'name',
             'platform',
-            'artist_profile',
 
             # read-only
             'artist_id',
             'artist_uri',
             'ext',
+            'artist_profile',
             'user',
 
             # write only
             'image',
+
+            # profile fields
+            'about_me',
+            'email',
+            'country',
+            'city',
+            'zip_code',
+
+            # profile settings fields
+            'require_contribution_approval',
+            'share_data_with_contributors',
+            'share_advanced_data_with_contributors',
         ]
     
     def create(self, validated_data, *args, **kwargs):

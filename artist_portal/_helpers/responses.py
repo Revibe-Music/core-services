@@ -16,6 +16,8 @@ def OK(serializer=None, detail=None, data=None, *args, **kwargs):
         response.data = serializer.data
     elif detail:
         response.data = {"detail": detail}
+    elif data:
+        response.data = data
     return response
 
 def UPDATED(serializer=None, *args, **kwargs):

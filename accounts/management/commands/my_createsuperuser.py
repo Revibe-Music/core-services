@@ -6,8 +6,10 @@ from accounts.models import CustomUser
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        if not CustomUser.objects.filter(username="admin").exists():
-            CustomUser.objects.create_superuser("admin", "admin@admin.com", "admin")
+        username = 'admin' if settings.DEBUG else 'fjfnoswIvwoloNWFnw'
+        password = 'admin' if settings.DEBUG else '03f2mawfv-02qmrpI(FJO#ia;fo4i3nrf89anoda9'
+        if not CustomUser.objects.filter(username=username).exists():
+            CustomUser.objects.create_superuser(username, "admin@admin.com", password)
             if settings.DEBUG:
                 print("<User: 'admin'> user created")
         elif settings.DEBUG:

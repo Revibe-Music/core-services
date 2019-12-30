@@ -46,6 +46,7 @@ class UserMetricsSerializer(serializers.ModelSerializer):
     last_name = serializers.ReadOnlyField()
     last_login = serializers.ReadOnlyField()
     is_staff = serializers.ReadOnlyField()
+    date_joined = serializers.ReadOnlyField()
 
     class Meta:
         model = acc_models.CustomUser

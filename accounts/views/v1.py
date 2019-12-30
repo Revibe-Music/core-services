@@ -655,11 +655,16 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.OK(serializer)
 
         elif request.method == 'POST':
+            # default album platform to 'Revibe'
             if 'platform' not in request.data.keys():
-                _mutable = request.data._mutable
-                request.data._mutable = True
-                request.data['platform'] = str(self.platform)
-                request.data._mutable = _mutable
+                try:
+                    _mutable = request.data._mutable
+                    request.data._mutable = True
+                    request.data['platform'] = str(self.platform)
+                    request.data._mutable = _mutable
+                except TypeError as e:
+                    return responses.PROGRAM_ERROR()
+
             serializer = content_ser_v1.AlbumSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()

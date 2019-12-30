@@ -1,5 +1,6 @@
-from rest_framework.status import *
 from rest_framework.response import Response
+
+from artist_portal._helpers.status import *
 
 # from artist_portal._helpers import const # may need later
 
@@ -101,5 +102,11 @@ def BAD_ENVIRONMENT(detail=None, *args, **kwargs):
     response = Response(status=HTTP_503_SERVICE_UNAVAILABLE)
     detail = detail if detail else "this functionality is only accessible in a cloud environment"
     response.data = {"detail": detail}
+    return response
+
+def PROGRAM_ERROR(detail=None, *args, **kwargs):
+    response = Response(status=HTTP_512_PROGRAM_ERROR)
+    detail = detail if detail else "Programatic error, please contact a system administrator for assistance"
+    resonse.data = {"detail": detail}
     return response
 

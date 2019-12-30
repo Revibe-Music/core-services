@@ -2,6 +2,9 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+import logging
+logger = logging.getLogger(__name__)
+
 from accounts import models as acc_models
 from accounts.permissions import TokenOrSessionAuthentication
 from administration.models import *
@@ -10,10 +13,7 @@ from artist_portal.viewsets import GenericPlatformViewSet
 from artist_portal._helpers import responses
 from content import models as cnt_models
 
-import logging
-
-logger = logging.getLogger(__name__)
-
+# -----------------------------------------------------------------------------
 
 class FormViewSet(viewsets.GenericViewSet):
     queryset = ContactForm.objects.all()
@@ -66,3 +66,15 @@ class CompanyViewSet(GenericPlatformViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['get'], url_path='user-metrics', url_name="user_metrics")
+    def user_metrics(self, request, *args, **kwargs):
+        queryset = acc_models.CustomUser.objects.all()
+        serializer_class = adm_ser_v1.UserMetricsSerializer
+
+        data = {}
+        data['User Count'] = queryset.count()
+
+        serializer = serializer_class(queryset, many=True)
+        data['Users'] = serializer.data
+
+        return responses.OK(data=data)

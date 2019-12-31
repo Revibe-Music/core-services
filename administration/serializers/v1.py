@@ -70,7 +70,7 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
     ext = serializers.SerializerMethodField('image_ext', read_only=True)
     name = serializers.ReadOnlyField()
     date_joined = serializers.ReadOnlyField()
-    user_id = serializers.SerializerMethodField('user_id', read_only=True)
+    user_id = serializers.SerializerMethodField('get_user_id', read_only=True)
 
     class Meta:
         model = cnt_models.Artist
@@ -89,7 +89,7 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
         else:
             return None
     
-    def user_id(self, obj):
+    def get_user_id(self, obj):
         if hasattr(obj, 'artist_user'):
             return obj.artist_user.id
         else:

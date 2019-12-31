@@ -8,7 +8,7 @@ from accounts.serializers.v1 import UserSerializer
 from administration.models import *
 from content import models as cnt_models
 
-# ------
+# -----------------------------------------------------------------------------
 
 class ContactFormSerializer(serializers.ModelSerializer):
 
@@ -49,7 +49,6 @@ class UserMetricsSerializer(serializers.ModelSerializer):
     last_login = serializers.ReadOnlyField()
     is_staff = serializers.ReadOnlyField()
     date_joined = serializers.ReadOnlyField()
-    artist_id = serializers.SerializerMethodField('artist_id', read_only=True)
 
     class Meta:
         model = acc_models.CustomUser
@@ -63,12 +62,6 @@ class UserMetricsSerializer(serializers.ModelSerializer):
             'date_joined',
             'artist_id',
         ]
-    
-    def artist_id(self, obj):
-        if hasattr(obj, 'artist_user'):
-            return obj.artist_user.id
-        else:
-            return None
 
 
 class ArtistMetricsSerializer(serializers.ModelSerializer):
@@ -77,6 +70,7 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
     ext = serializers.SerializerMethodField('image_ext', read_only=True)
     name = serializers.ReadOnlyField()
     date_joined = serializers.ReadOnlyField()
+    user_id = serializers.SerializerMethodField('user_id', read_only=True)
 
     class Meta:
         model = cnt_models.Artist
@@ -86,11 +80,18 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
             'ext',
             'name',
             'date_joined',
+            'user_id',
         ]
     
     def image_ext(self, obj):
         if obj.image:
             return obj.image.name.split('.')[-1]
+        else:
+            return None
+    
+    def user_id(self, obj):
+        if hasattr(obj, 'artist_user'):
+            return obj.artist_user.id
         else:
             return None
 

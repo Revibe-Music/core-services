@@ -6,6 +6,7 @@ logger = logging.getLogger(__name__)
 from accounts import models as acc_models
 from accounts.serializers.v1 import UserSerializer
 from administration.models import *
+from content import models as cnt_models
 
 # ------
 
@@ -41,6 +42,7 @@ class ContactFormSerializer(serializers.ModelSerializer):
 
 
 class UserMetricsSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
     username = serializers.ReadOnlyField()
     first_name = serializers.ReadOnlyField()
     last_name = serializers.ReadOnlyField()
@@ -51,6 +53,7 @@ class UserMetricsSerializer(serializers.ModelSerializer):
     class Meta:
         model = acc_models.CustomUser
         fields = [
+            'id',
             'username',
             'first_name',
             'last_name',
@@ -58,3 +61,34 @@ class UserMetricsSerializer(serializers.ModelSerializer):
             'is_staff',
             'date_joined',
         ]
+
+
+class ArtistMetricsSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField()
+    uri = serializers.ReadOnlyField()
+    ext = serializers.SerializerMethodField('image_ext', read_only=True)
+    name = serializers.ReadOnlyField()
+    user_id = serializers.SerializerMethodField('get_user_id', read_only=True)
+
+    class Meta:
+        model = cnt_models.Artist
+        fields = [
+            'id',
+            'uri',
+            'ext',
+            'name',
+            'user_id',
+        ]
+    
+    def image_ext(self, obj):
+        if obj.image:
+            return obj.image.name.split('.')[-1]
+        else:
+            return None
+    
+    def get_user_id(self, obj):
+        if obj.artist_user:
+            return obj.artist_user.id
+        else:
+            return None
+

@@ -66,7 +66,20 @@ class ArtistUserMixin:
 
 class SuperUserMixin:
     def _get_superuser(self):
-        pass
+        try:
+            user = CustomUser.objects.create_superuser("admin","admin@admin.com","admin")
+            profile = Profile.objects.create(user=user)
+            user.is_staff = True
+            user.save()
+            profile.save()
+        except IntegrityError as ie:
+            user = CustomUser.objects.get(username="admin")
+        except Exception as e:
+            raise e
+
+        login = self.client.post(reverse('login'), {"username": "admin","password": "admin","device_id": "1234567890admin","device_name": "Django Test Case","device_type": "browser",}, format="json")
+        self.superuser = user
+        self.access_token = login.data['access_token']
 
 
 class AuthorizedAPITestCase(

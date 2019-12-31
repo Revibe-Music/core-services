@@ -44,7 +44,7 @@ class CompanyViewSet(GenericPlatformViewSet):
         "GET": [["ADMIN"]]
     }
 
-    @action(detail=False, methods=['get'], url_path='basic-metrics')
+    @action(detail=False, methods=['get'], url_path='basic-metrics', url_name="basic-metrics")
     def basic_metrics(self, request, *args, **kwargs):
         data = {}
         data['Users'] = {}
@@ -66,7 +66,7 @@ class CompanyViewSet(GenericPlatformViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['get'], url_path='user-metrics', url_name="user_metrics")
+    @action(detail=False, methods=['get'], url_path='user-metrics', url_name="user-metrics")
     def user_metrics(self, request, *args, **kwargs):
         queryset = acc_models.CustomUser.objects.all()
         serializer_class = adm_ser_v1.UserMetricsSerializer
@@ -76,5 +76,18 @@ class CompanyViewSet(GenericPlatformViewSet):
 
         serializer = serializer_class(queryset, many=True)
         data['Users'] = serializer.data
+
+        return responses.OK(data=data)
+    
+    @action(detail=False, methods=['get'], url_path="artist-metrics", url_name="artist-metrics")
+    def artist_metrics(self, request, *args, **kwargs):
+        queryset = cnt_models.Artist.objects.filter(platform='Revibe')
+        serializer_class = adm_ser_v1.ArtistMetricsSerializer
+
+        data = {}
+        data['Artist Count'] = queryset.count()
+
+        serializer = serializer_class(queryset, many=True)
+        data['Artists'] = serializer.data
 
         return responses.OK(data=data)

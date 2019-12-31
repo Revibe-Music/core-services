@@ -95,3 +95,37 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
         else:
             return None
 
+
+class AlbumMetricsSerializer(serializers.ModelSerializer):
+
+    ext = serializers.SerializerMethodField('image_ext', read_only=True)
+    artist_id = serializers.SerializerMethodField('get_artist_id', read_only=True)
+
+    class Meta:
+        model = cnt_models.Album
+        fields = [
+            'id',
+            'uri',
+            'ext',
+            'name',
+            'type',
+            'uploaded_date',
+            'last_changed',
+            'date_published',
+            'is_displayed',
+            'is_deleted',
+            'artist_id',
+        ]
+
+    def image_ext(self, obj):
+        if obj.image:
+            return obj.image.name.split('.')[-1]
+        else:
+            return None
+    
+    def get_artist_id(self, obj):
+        if hasattr(obj, 'uploaded_by'):
+            return obj.uploaded_by.id
+        else:
+            return None
+

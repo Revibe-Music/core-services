@@ -91,3 +91,17 @@ class CompanyViewSet(GenericPlatformViewSet):
         data['Artists'] = serializer.data
 
         return responses.OK(data=data)
+
+    @action(detail=False, methods=['get'], url_path="album-metrics", url_name="album-metrics")
+    def album_metrics(self, request, *args, **kwargs):
+        queryset = cnt_models.Album.objects.all()
+        serializer_class = adm_ser_v1.AlbumMetricsSerializer
+
+        data = {}
+        data['Album Count'] = queryset.count()
+
+        serializer = serializer_class(queryset, many=True)
+        data['Albums'] = serializer.data
+
+        return responses.OK(data=data)
+

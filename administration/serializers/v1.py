@@ -22,7 +22,7 @@ class ContactFormSerializer(serializers.ModelSerializer):
     assigned_to = serializers.BooleanField(read_only=True)
 
     # write-only
-    user_id = serializers.CharField(required=True, write_only=True)
+    user_id = serializers.CharField(required=False, write_only=True)
 
     class Meta:
         model = ContactForm

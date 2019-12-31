@@ -1,5 +1,8 @@
 from rest_framework.response import Response
 
+from logging import getLogger
+logger = getLogger(__name__)
+
 from artist_portal._helpers.status import *
 
 # from artist_portal._helpers import const # may need later
@@ -104,7 +107,10 @@ def BAD_ENVIRONMENT(detail=None, *args, **kwargs):
     response.data = {"detail": detail}
     return response
 
-def PROGRAM_ERROR(detail=None, *args, **kwargs):
+def PROGRAM_ERROR(detail=None, exception=None, *args, **kwargs):
+    if exception:
+        logger.error(exception)
+
     response = Response(status=HTTP_512_PROGRAM_ERROR)
     detail = detail if detail else "Programatic error, please contact a system administrator for assistance"
     resonse.data = {"detail": detail}

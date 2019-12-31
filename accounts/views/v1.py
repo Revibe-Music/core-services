@@ -16,9 +16,11 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
 
 import datetime
-import logging
 import json
 import requests
+
+from logging import getLogger
+logger = getLogger(__name__)
 
 from artist_portal.viewsets import GenericPlatformViewSet
 from artist_portal._helpers import responses, const
@@ -32,8 +34,7 @@ from metrics.models import Stream
 from music.models import *
 from music.serializers import v1 as music_ser_v1
 
-
-logger = logging.getLogger(__name__)
+# -----------------------------------------------------------------------------
 
 def get_device(data):
     """

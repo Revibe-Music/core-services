@@ -68,6 +68,7 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
     uri = serializers.ReadOnlyField()
     ext = serializers.SerializerMethodField('image_ext', read_only=True)
     name = serializers.ReadOnlyField()
+    date_joined = serializers.ReadOnlyField()
     user_id = serializers.SerializerMethodField('get_user_id', read_only=True)
 
     class Meta:
@@ -77,6 +78,7 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
             'uri',
             'ext',
             'name',
+            'date_joined',
             'user_id',
         ]
     

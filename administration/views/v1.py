@@ -1,4 +1,4 @@
-from rest_framework import status, viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -18,7 +18,7 @@ from content import models as cnt_models
 class FormViewSet(viewsets.GenericViewSet):
     queryset = ContactForm.objects.all()
     serializer_class = adm_ser_v1.ContactFormSerializer
-    permission_classes = [TokenOrSessionAuthentication]
+    permission_classes = [permissions.AllowAny]
     required_alternate_scopes = {
         "GET": [["ADMIN"]],
         "POST": [["ADMIN"],["first-party"]],

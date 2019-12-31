@@ -141,7 +141,7 @@ class RefreshTokenSerializer(serializers.Serializer):
 
 class UserArtistProfileSerializer(serializers.ModelSerializer):
     about_me = serializers.CharField(required=False)
-    email = serializers.EmailField(required=False)
+    email = serializers.CharField(required=False)
     country = serializers.CharField(required=False)
     city = serializers.CharField(required=False)
     zip_code = serializers.CharField(required=False)
@@ -179,7 +179,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
     artist_id = serializers.ReadOnlyField(source='id')
     artist_uri = serializers.ReadOnlyField(source='uri')
     ext = serializers.SerializerMethodField('image_extension', read_only=True)
-    artist_profile = UserArtistProfileSerializer(required=False, read_only=True)
+    artist_profile = UserArtistProfileSerializer(read_only=True)
     user = UserSerializer(source='artist_user', read_only=True)
 
     # write only
@@ -223,6 +223,19 @@ class UserArtistSerializer(serializers.ModelSerializer):
             'share_data_with_contributors',
             'share_advanced_data_with_contributors',
         ]
+    
+    def _get_artist_profile_fields(self):
+        fields = [
+            'about_me',
+            'email',
+            'country',
+            'city',
+            'zip_code',
+            'require_contribution_approval',
+            'share_data_with_contributors',
+            'share_advanced_data_with_contributors',
+        ]
+        return fields
     
     def create(self, validated_data, *args, **kwargs):
         artist_profile_data = validated_data.pop('artist_profile', False)

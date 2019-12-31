@@ -381,6 +381,8 @@ class LoginAPI(generics.GenericAPIView):
             device.token = access_token
             device.save()
 
+            user.last_login = datetime.datetime.now()
+
             data = {
                 "user": UserSerializer(user, context=self.get_serializer_context()).data,
                 "access_token": access_token.token,
@@ -411,6 +413,9 @@ class RefreshTokenAPI(generics.GenericAPIView):
         access_token.expires = access_token.expires + datetime.timedelta(hours=time)
 
         access_token.save()
+
+        user = access_token.user
+        user.last_login = datetime.datetime.now()
 
         return Response({"access_token": access_token.token}, status=status.HTTP_200_OK)
 

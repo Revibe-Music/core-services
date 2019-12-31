@@ -596,24 +596,27 @@ class UserArtistViewSet(GenericPlatformViewSet):
         return responses.OK(serializer=artist)
 
     def create(self, request, *args, **kwargs):
-        data = request.data.copy()
-        kwargs['context'] = self.get_serializer_context()
-        # check if user already has an artist object
-        if request.user.artist != None:
-            return responses.CONFLICT(detail="this user already has an artist profile")
-        
-        # create the artist and attach to the user
-        data['platform'] = 'Revibe'
-        serializer = self.serializer_class(data=data, *args, **kwargs)
-        if serializer.is_valid():
-            artist = serializer.save()
-            request.user.artist = artist
-            request.user.is_artist = True
-            request.user.save()
-            return responses.CREATED(serializer)
-        else:
-            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-        return responses.DEFAULT_400_RESPONSE()
+        try:
+            data = request.data.copy()
+            kwargs['context'] = self.get_serializer_context()
+            # check if user already has an artist object
+            if request.user.artist != None:
+                return responses.CONFLICT(detail="this user already has an artist profile")
+            
+            # create the artist and attach to the user
+            data['platform'] = 'Revibe'
+            serializer = self.serializer_class(data=data, *args, **kwargs)
+            if serializer.is_valid():
+                artist = serializer.save()
+                request.user.artist = artist
+                request.user.is_artist = True
+                request.user.save()
+                return responses.CREATED(serializer)
+            else:
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+            return responses.DEFAULT_400_RESPONSE()
+        except Exception as e:
+            return responses.PROGRAM_ERROR(detail=str(e))
 
     def patch(self, request, *args, **kwargs):
         instance = request.user.artist
@@ -674,19 +677,22 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.DEFAULT_400_RESPONSE()
 
         elif request.method == 'PATCH':
-            instance = album_queryset.get(pk=album_id)
+            try:
+                instance = album_queryset.get(pk=album_id)
 
-            # ensure editing artist is the uploading artist
-            if artist != instance.uploaded_by:
-                return responses.NOT_PERMITTED(detail="you are not permitted to edit this album")
+                # ensure editing artist is the uploading artist
+                if artist != instance.uploaded_by:
+                    return responses.NOT_PERMITTED(detail="you are not permitted to edit this album")
 
-            serializer = content_ser_v1.AlbumSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
-            if serializer.is_valid():
-                serializer.save()
-                return responses.UPDATED(serializer)
-            else:
-                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE()
+                serializer = content_ser_v1.AlbumSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
+                if serializer.is_valid():
+                    serializer.save()
+                    return responses.UPDATED(serializer)
+                else:
+                    return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+                return responses.DEFAULT_400_RESPONSE()
+            except Exception as e:
+                return responses.PROGRAM_ERROR(detail=str(e))
 
         elif request.method == 'DELETE':
             instance = album_queryset.get(pk=album_id)
@@ -695,9 +701,17 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if artist != instance.uploaded_by:
                 return responses.NOT_PERMITTED(detail="you are not permitted to delete this album")
 
+            # set the album to 'is_deleted'
             instance.is_deleted = True
             instance.is_displayed = False
             instance.save()
+
+            # set all songs to 'is_deleted'
+            for song in instance.song_set.all():
+                song.is_deleted = True
+                song.is_displayed = False
+                song.save()
+
             return responses.DELETED()
 
         else:

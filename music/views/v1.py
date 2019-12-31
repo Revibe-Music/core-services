@@ -50,7 +50,7 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
         serializer = self.get_serializer(queryset, many=True)
         return responses.OK(serializer)
 
-    @action(detail=False, methods=['get','post', 'delete'])
+    @action(detail=False, methods=['get','post', 'delete'], url_name='songs')
     def songs(self, request, *args, **kwargs):
         """
         """
@@ -62,16 +62,11 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
             kwargs['context'] = self.get_serializer_context()
             # kwargs['version'] = self.get_version()
             platform = get_platform(request.data['platform'])
-            print(request.data)
 
             # serializer = platform().save_song_to_library(data=request.data, *args, **kwargs)
             serializer = LibrarySongSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
-
-                # debug_print(serializer)
-                # debug_print(serializer.data)
-
                 return responses.CREATED(serializer)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)

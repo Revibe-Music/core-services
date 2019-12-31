@@ -1,3 +1,4 @@
+from django.db.utils import IntegrityError
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from oauth2_provider.models import Application
@@ -19,10 +20,19 @@ class AuthorizedUserMixin:
     def _get_user(self):
         client = APIClient()
         try:
-            user = CustomUser.objects.create_user(username="johnsnow", password="password")
-            profile = Profile.objects.create(country="US", user=user)
-            profile.save()
-            user.save()
+            # user = CustomUser.objects.create_user(username="johnsnow", password="password")
+            # profile = Profile.objects.create(country="US", user=user)
+            # profile.save()
+            # user.save()
+            response = self.client.post(reverse('register'), {
+                "username": "johnsnow",
+                "password": "password",
+                "device_id": "1234567983hg4890",
+                "device_type": "browser",
+                "device_name": "Django Test Case",
+                "profile": {},
+            }, format="json")
+            user = CustomUser.objects.get(username=response.data['user']['username'])
         except IntegrityError as ie:
             user = CustomUser.objects.get(username="johnsnow")
         except Exception as e:
@@ -106,7 +116,7 @@ class CreateContentMixin:
     def _create_song(self):
         artist = self.artist if hasattr(self, 'artist') else self._create_artist()
         album = self.album if hasattr(self, 'album') else self._create_album()
-        self.song = Song.objects.create(title="Test Song Content", genre="Hip Hop", album=album, uploaded_by=artist)
+        self.song = Song.objects.create(title="Test Song Content", genre="Hip Hop", album=album, uploaded_by=artist, platform="Revibe")
         SongContributor.objects.create(artist=artist, song=self.song, contribution_type="Artist", primary_artist=True)
         return self.song
 

@@ -282,9 +282,6 @@ class RegistrationAPI(generics.GenericAPIView):
             except IntegrityError as err:
                 return responses.CONFLICT(detail=str(err))
 
-            # create default libraries
-            create_libraries(user)
-
             time = const.BROWSER_EXPIRY_TIME if device.device_type == 'browser' else const.DEFAULT_EXPIRY_TIME
             expire = timezone.now() + datetime.timedelta(hours=time)
 

@@ -81,8 +81,6 @@ class LibrarySongSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Error retrieving user's {} library".format(platform))
         
         library = libraries[0]
-        if settings.DEBUG:
-            print(library)
         
         return library
     

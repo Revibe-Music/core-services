@@ -74,14 +74,14 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
 
         elif request.method == 'DELETE':
             kwargs['context'] = self.get_serializer_context()
-            serializer = BaseLibrarySongSerializer(data=request.data, *args, **kwargs)
-            serializer.is_valid(raise_exception=True)
-            serializer.delete(data=request.data)
-            
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
+            serializer = LibrarySongSerializer(data=request.data, *args, **kwargs)
+            if serializer.is_valid():
+                serializer.delete(data=request.data)
+                return responses.DELETED()
+            else:
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return responses.DEFAULT_400_RESPONSE()
     
     @action(detail=False, methods=['get','post', 'delete'])
     def albums(self, request, *args, **kwargs):
@@ -89,11 +89,7 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
         # get the album from the ID if it's not a GET request
         album = None
         if request.method != 'GET':
-            if settings.DEBUG:
-                print(request.data)
             album = get_object_or_404(Album.objects.all(), pk=request.data['album_id'])
-            if settings.DEBUG:
-                print(album)
 
             kwargs['context'] = self.get_serializer_context()
 
@@ -104,7 +100,7 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
         elif request.method == 'POST':
             # add all songs to the library
             for song in album.song_set.all():
-                serializer = BaseLibrarySongSerializer(data={'song_id': song.id}, *args, **kwargs)
+                serializer = LibrarySongSerializer(data={'song_id': song.id}, *args, **kwargs)
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
 
@@ -114,7 +110,7 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
             # delete all songs from the library
             for song in album.song_set.all():
                 data = {'song_id': song.id}
-                serializer = BaseLibrarySongSerializer(data=data, *args, **kwargs)
+                serializer = LibrarySongSerializer(data=data, *args, **kwargs)
                 serializer.is_valid(raise_exception=True)
                 serializer.delete(data=data)
             

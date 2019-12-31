@@ -114,14 +114,11 @@ class LibrarySongSerializer(serializers.ModelSerializer):
         
         library = self.get_library(platform)
 
-        lib_song = LibrarySongs.objects.filter(library=library, song=song)
+        lib_song = LibrarySong.objects.filter(library=library, song=song)
         if len(lib_song) != 1:
             raise serializers.ValidationError("error retrieving song from library")
         lib_song = lib_song[0]
 
-        if settings.DEBUG:
-            print(lib_song)
-        
         lib_song.delete()
 
 class PlaylistSongSerializer(serializers.ModelSerializer):

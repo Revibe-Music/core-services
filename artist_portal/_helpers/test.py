@@ -15,6 +15,9 @@ class TestStatusMixin:
     
     def assert201(self, arg1):
         self.assertEqual(arg1, status.HTTP_201_CREATED)
+    
+    def assert204(self, arg1):
+        self.assertEqual(arg1, status.HTTP_204_NO_CONTENT)
 
 class BaseRevibeTestMixin:
     def _get_application(self):

@@ -47,6 +47,9 @@ class TestPlaylists(AuthorizedContentAPITestCase):
         self._get_application()
         self._get_user()
         self._create_song()
+
+        self.added_songs = False
+        self.created_playlist = False
     
     def test_playlist_list(self):
         url = reverse('playlist-list')
@@ -72,9 +75,11 @@ class TestPlaylists(AuthorizedContentAPITestCase):
         self.assert201(response.status_code)
         self.assertEqual(response.data['name'], name)
         self.assertEqual(Playlist.objects.count(), playlists_before+1)
+
+        self.created_playlist = True
     
     def test_add_song(self):
-        if Playlist.objects.count() < 1:
+        if not self.created_playlist:
             self.test_create_playlist()
         assert Playlist.objects.count() >= 1, "could not find any playlists to add to"
         playlist_id = Playlist.objects.all()[0].id
@@ -89,4 +94,27 @@ class TestPlaylists(AuthorizedContentAPITestCase):
         response = self.client.post(url, data, format="json", **self._get_headers())
         self.assert201(response.status_code)
         self.assertEqual(playlist_songs_before + 1, len(Playlist.objects.get(id=playlist_id).songs.all()))
+
+        self.added_songs = True
+
+    def test_delete_song(self):
+        if not self.added_songs:
+            self.test_add_song()
+        assert Playlist.objects.count() >= 1, "could not find any playlists to delete songs from"
+        playlist = Playlist.objects.filter(user=self.user)[0]
+        assert len(playlist.songs.all()) > 0, "could not find any songs to delete"
+        playlist_songs_before = len(playlist.songs.all())
+
+        song_id = playlist.songs.all()[0].id
+
+        url = reverse('playlist-songs')
+        data = {
+            "playlist_id": playlist.id,
+            "song_id": song_id
+        }
+
+        response = self.client.delete(url, data, format="json", **self._get_headers())
+        self.assert204(response.status_code)
+        self.assertEqual(playlist_songs_before - 1, len(Playlist.objects.get(id=playlist.id).songs.all()))
+
 

@@ -146,13 +146,13 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         kwargs['context'] = self.get_serializer_context()
 
         if request.method == 'POST':
-            serializer = BasePlaylistSongSerializer(data=request.data, *args, **kwargs)
+            serializer = PlaylistSongSerializer(data=request.data, *args, **kwargs)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         elif request.method == 'DELETE':
-            serializer = BasePlaylistSongSerializer(data=request.data, *args, **kwargs)
+            serializer = PlaylistSongSerializer(data=request.data, *args, **kwargs)
             serializer.is_valid(raise_exception=True)
             serializer.delete(data=request.data, *args, **kwargs)
 

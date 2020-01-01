@@ -155,16 +155,12 @@ class PlaylistSongSerializer(serializers.ModelSerializer):
 
         song = get_object_or_404(Song.objects.all(), pk=song_id) # needs to be changed later to save other platform's songs
         playlist = get_object_or_404(user_playlists, pk=playlist_id)
-        debug_print(song)
-        debug_print(playlist)
         
-        debug_print(playlist.songs.all())
         if song in playlist.songs.all():
-            return PlaylistSongs.objects.filter(playlist=playlist, song=song)[0]
+            return PlaylistSong.objects.filter(playlist=playlist, song=song)[0]
 
-        ps = PlaylistSongs.objects.create(playlist=playlist, song=song)
+        ps = PlaylistSong.objects.create(playlist=playlist, song=song)
         ps.save()
-        debug_print(ps)
 
         return ps
     
@@ -179,8 +175,7 @@ class PlaylistSongSerializer(serializers.ModelSerializer):
         debug_print(song)
         debug_print(playlist)
 
-        ps = PlaylistSongs.objects.filter(playlist=playlist, song=song)
-        debug_print(ps)
+        ps = PlaylistSong.objects.filter(playlist=playlist, song=song)
         if (len(ps) == 0) or (len(ps) > 1):
             raise serializers.ValidationError("Error finding song in playlist: found {} songs.".format(len(ps)))
         else:

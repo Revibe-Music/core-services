@@ -5,6 +5,8 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 from oauth2_provider.models import Application
 
+import unittest
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -39,19 +41,57 @@ class TestContactForms(AuthorizedAPITestCase):
 
 
 class TestCompanyViews(AuthorizedAPITestCase):
+    help = "Tests the CompanyViewSet functions in the Administration namespace"
+
     def setUp(self):
         self._get_application()
         self._get_user()
         self._get_superuser()
     
+    def test_user_data(self):
+        url = reverse('company-user-metrics')
+
+        # proper authentication
+        response = self.client.get(url, format="json", **self._get_headers(sper=True))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(type(response.data), dict)
+        self.assertEqual(type(response.data['User Count']), int)
+        self.assertEqual(type(response.data['Users']), ReturnList)
+
+        # improper authentication
+        with self.assertRaises(PermissionError) as context:
+            broken = self.client.get(url, format="json", **self._get_headers())
+        self.assertTrue("You do not have access for this request type" in str(context.exception))
+    
     def test_artist_data(self):
         url = reverse('company-artist-metrics')
-        response = self.client.get(url, format="json", **self._get_headers())
 
+        # proper authentication
+        response = self.client.get(url, format="json", **self._get_headers(sper=True))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # check response types
         self.assertEqual(type(response.data), dict)
         self.assertEqual(type(response.data['Artist Count']), int, msg="Did not return an Artist count as an integer")
         self.assertEqual(type(response.data['Artists']), ReturnList, msg="Did not return Artists in a serializer list format")
+
+        # improper authentication
+        with self.assertRaises(PermissionError) as context:
+            broken = self.client.get(url, format="json", **self._get_headers())
+        self.assertTrue("You do not have access for this request type" in str(context.exception))
+
+    def test_album_data(self):
+        url = reverse('company-album-metrics')
+        
+        # proper authentication
+        response = self.client.get(url, format="json", **self._get_headers(sper=True))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(type(response.data), dict)
+        self.assertEqual(type(response.data['Album Count']), int)
+        self.assertEqual(type(response.data['Albums']), ReturnList)
+
+        # improper authentication
+        with self.assertRaises(PermissionError) as context:
+            broken = self.client.get(url, format="json", **self._get_headers())
+        self.assertTrue("You do not have access for this request type" in str(context.exception))
+
+
 

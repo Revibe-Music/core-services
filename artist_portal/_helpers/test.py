@@ -3,8 +3,18 @@ from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from oauth2_provider.models import Application
 
+from artist_portal._helpers import status
 from accounts.models import CustomUser, Profile, ArtistProfile
 from content.models import *
+
+# -----------------------------------------------------------------------------
+
+class TestStatusMixin:
+    def assert200(self, arg1):
+        self.assertEqual(arg1, status.HTTP_200_OK)
+    
+    def assert201(self, arg1):
+        self.assertEqual(arg1, status.HTTP_201_CREATED)
 
 class BaseRevibeTestMixin:
     def _get_application(self):
@@ -13,8 +23,13 @@ class BaseRevibeTestMixin:
             except Exception as e:
                 raise e
 
-    def _get_headers(self):
-        return {"Authorization": "Bearer {}".format(self.access_token)}
+    def _get_headers(self, sper=False, artist=False):
+        token = self.access_token
+        if sper:
+            token = self.super_access_token
+        elif artist:
+            token = self.artist_access_token
+        return {"Authorization": "Bearer {}".format(token)}
 
 class AuthorizedUserMixin:
     def _get_user(self):
@@ -72,7 +87,7 @@ class ArtistUserMixin:
 
         login = client.post(reverse('login'), {"username": "johnartist","password": "password","device_id": "1234567890","device_name": "Django Test Case","device_type": "browser",}, format="json")
         self.artist_user = user
-        self.access_token = login.data['access_token']
+        self.artist_access_token = login.data['access_token']
 
 class SuperUserMixin:
     def _get_superuser(self):
@@ -89,11 +104,11 @@ class SuperUserMixin:
 
         login = self.client.post(reverse('login'), {"username": "admin","password": "admin","device_id": "1234567890admin","device_name": "Django Test Case","device_type": "browser",}, format="json")
         self.superuser = user
-        self.access_token = login.data['access_token']
+        self.super_access_token = login.data['access_token']
 
 
 class AuthorizedAPITestCase(
-    APITestCase, BaseRevibeTestMixin, AuthorizedUserMixin, SuperUserMixin, ArtistUserMixin
+    APITestCase, BaseRevibeTestMixin, AuthorizedUserMixin, SuperUserMixin, ArtistUserMixin, TestStatusMixin
 ):
     """
     Combines functionality of multiple header and authorization classes

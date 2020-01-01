@@ -8,3 +8,6 @@ https://medium.com/@manibatra23/setting-up-amazon-s3-bucket-for-serving-django-s
 
 For deploying to AWS:
 https://realpython.com/deploying-a-django-app-and-postgresql-to-aws-elastic-beanstalk/
+
+Testing:
+https://www.django-rest-framework.org/api-guide/routers/#api-guide

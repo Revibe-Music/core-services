@@ -21,28 +21,28 @@ class ArtistViewset(PlatformViewSet):
     def get_queryset(self):
         return self.platform.Artists
 
-    @action(detail=True)
+    @action(detail=True, url_name="cnt-artist-albums")
     def albums(self, request, pk=None):
         artist = self.get_object()
         queryset = self.platform.Albums.filter(uploaded_by=artist)
         serializer = ser_v1.AlbumSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True)
+    @action(detail=True, url_name="cnt-artist-songs")
     def songs(self, request, pk=None):
         artist = self.get_object()
         queryset = self.platform.Songs.filter(uploaded_by=artist)
         serializer = ser_v1.SongSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True)
+    @action(detail=True, url_name="cnt-artist-album-contributions")
     def album_contributions(self, request, pk=None):
         artist = self.get_object()
         queryset = self.platform.AlbumContributors.filter(artist=artist, primary_artist=False)
         serializer = ser_v1.AlbumContributorSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True)
+    @action(detail=True, url_name="cnt-artist-song-contributions")
     def song_contributions(self, request, pk=None):
         artist = self.get_object()
         queryset = self.platform.SongContributors.filter(artist=artist, primary_artist=False)

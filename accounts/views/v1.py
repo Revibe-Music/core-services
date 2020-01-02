@@ -648,6 +648,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 request.data._mutable = True
                 album_id = request.data.pop('album_id')
                 request.data._mutable = _mutable
+            assert album_id, "could not get an album ID"
 
         if request.method == 'GET':
             albums = album_queryset
@@ -689,7 +690,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         elif request.method == 'PATCH':
             try:
-                instance = Album.objects.get(id=album_id)
+                try:
+                    instance = Album.objects.get(id=album_id)
+                except Exception:
+                    return responess.PROGRAM_ERROR(detail=f"{album_id}")
 
                 # ensure editing artist is the uploading artist
                 if artist != instance.uploaded_by:

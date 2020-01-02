@@ -1,7 +1,3 @@
-<!--
-author: Jordan Prechac
--->
-
 # Revibe API
 Welcome to the Revibe API repository.
 

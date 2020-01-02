@@ -693,7 +693,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 try:
                     instance = Album.objects.get(id=album_id)
                 except Exception:
-                    return responess.PROGRAM_ERROR(detail=f"{album_id}")
+                    return responses.PROGRAM_ERROR(detail=f"{album_id}")
 
                 # ensure editing artist is the uploading artist
                 if artist != instance.uploaded_by:

@@ -143,8 +143,8 @@ class AlbumContributorSerializer(serializers.ModelSerializer, ContributionSerial
 class AlbumSerializer(serializers.ModelSerializer):
     album_id = serializers.CharField(source='id', required=False)
     album_uri = serializers.CharField(source='uri', required=False)
-    name = serializers.CharField(required=True)
-    type = serializers.CharField(required=True)
+    name = serializers.CharField(required=False)
+    type = serializers.CharField(required=False)
     platform = serializers.CharField(required=False)
     is_displayed = serializers.BooleanField(required=False, default=True)
 

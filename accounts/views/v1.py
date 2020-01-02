@@ -641,7 +641,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
         album_queryset = self.platform.HiddenAlbums.filter(uploaded_by=artist)
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['PATCH','DELETE']:
+            _mutable = request.data._mutable
+            request.data._mutable = True
             album_id = request.data.pop('album_id')
+            request.data._mutable = _mutable
 
         if request.method == 'GET':
             albums = album_queryset

@@ -66,7 +66,7 @@ class AlbumViewSet(PlatformViewSet):
         return self.platform.Albums
     
     @action(detail=True)
-    def songs(self, request, pk=None):
+    def songs(self, request, pk=None, url_name="album-songs"):
         album = self.get_object()
         queryset = self.platform.Songs.filter(album=album)
         serializer = ser_v1.SongSerializer(queryset, many=True)

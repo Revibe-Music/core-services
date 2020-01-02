@@ -97,3 +97,57 @@ class TestSongs(AuthorizedContentAPITestCase):
         self.assert200(response.status_code)
         self.assertEqual(type(response.data), ReturnList)
 
+
+class TestSearch(AuthorizedContentAPITestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._create_song()
+    
+    def _get_url(self, **params):
+        base = "/v1/content/search/"
+        if params:
+            start = True
+            for key, value in params.items():
+                connector = "?" if start else "&"
+                base += f"{connector}{key}={value}"
+                start = False
+        return base
+
+    def test_search(self):
+        """
+        Proper use of the search feature
+        """
+        url = self._get_url(**{"text":"Test"})
+
+        response = self.client.get(url, format="json", **self._get_headers())
+        self.assert200(response.status_code)
+        self.assertEqual(type(response.data), dict)
+        self.assertEqual(len(response.data.keys()), 3)
+        for key, value in response.data.items():
+            self.assertTrue(key in ['songs','albums','artists'], msg=f"{key} is not in response data keys")
+            self.assertEqual(type(value), ReturnList)
+        
+    def test_search_with_selection(self):
+        url = self._get_url(**{"text":"Test", "type":"songs"})
+
+        response = self.client.get(url, format="json", **self._get_headers())
+        self.assert200(response.status_code)
+        self.assertEqual(type(response.data), dict)
+        self.assertEqual(len(response.data), 1)
+        for key, value in response.data.items():
+            self.assertEqual(key, "songs")
+            self.assertEqual(type(value), ReturnList)
+
+    def test_search_no_text(self):
+        url = self._get_url()
+
+        response = self.client.get(url, format="json", **self._get_headers())
+        self.assertEqual(response.status_code, status.HTTP_417_EXPECTATION_FAILED)
+
+    def test_search_bad_selection(self):
+        url = self._get_url(**{"text":"Test", "type":"UH_OH_SPAGHETTIO"})
+
+        response = self.client.get(url, format="json", **self._get_headers())
+        self.assertEqual(response.status_code, status.HTTP_417_EXPECTATION_FAILED)
+

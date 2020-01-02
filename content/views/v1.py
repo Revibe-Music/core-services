@@ -104,7 +104,7 @@ class MusicSearch(GenericPlatformViewSet):
         t = params.get('type', False)
         if t:
             if t not in ['songs','albums','artists']:
-                return Response({'error': "parameter 'type' must be 'songs', 'albums', or 'artists'."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': "parameter 'type' must be 'songs', 'albums', or 'artists'."}, status=status.HTTP_417_EXPECTATION_FAILED)
 
         if (t == 'songs') or (not t):
             result['songs'] = ser_v1.SongSerializer(self.platform.Songs.filter(title__icontains=text), many=True).data

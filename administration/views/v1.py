@@ -10,7 +10,7 @@ from accounts.permissions import TokenOrSessionAuthentication
 from administration.models import *
 from administration.serializers import v1 as adm_ser_v1
 from artist_portal.viewsets import GenericPlatformViewSet
-from artist_portal._helpers import responses
+from artist_portal._helpers import const, responses
 from content import models as cnt_models
 
 # -----------------------------------------------------------------------------
@@ -81,7 +81,7 @@ class CompanyViewSet(GenericPlatformViewSet):
     
     @action(detail=False, methods=['get'], url_path="artist-metrics", url_name="artist-metrics")
     def artist_metrics(self, request, *args, **kwargs):
-        queryset = cnt_models.Artist.objects.filter(platform='Revibe')
+        queryset = cnt_models.Artist.objects.filter(platform=const.REVIBE_STRING)
         serializer_class = adm_ser_v1.ArtistMetricsSerializer
 
         data = {}
@@ -94,7 +94,7 @@ class CompanyViewSet(GenericPlatformViewSet):
 
     @action(detail=False, methods=['get'], url_path="album-metrics", url_name="album-metrics")
     def album_metrics(self, request, *args, **kwargs):
-        queryset = cnt_models.Album.objects.all()
+        queryset = cnt_models.Album.objects.filter(platform=const.REVIBE_STRING)
         serializer_class = adm_ser_v1.AlbumMetricsSerializer
 
         data = {}
@@ -102,6 +102,19 @@ class CompanyViewSet(GenericPlatformViewSet):
 
         serializer = serializer_class(queryset, many=True)
         data['Albums'] = serializer.data
+
+        return responses.OK(data=data)
+    
+    @action(detail=False, methods=['get'], url_path='song-metrics', url_name="song-metrics")
+    def song_metrics(self, request, *args, **kwargs):
+        queryset = cnt_models.Song.objects.filter(platform=const.REVIBE_STRING)
+        serializer_class = adm_ser_v1.SongMetricsSerializer
+
+        data = {}
+        data['Song Count'] = queryset.count()
+
+        serializer = serializer_class(queryset, many=True)
+        data['Songs'] = serializer.data
 
         return responses.OK(data=data)
 

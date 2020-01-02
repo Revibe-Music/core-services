@@ -124,8 +124,41 @@ class AlbumMetricsSerializer(serializers.ModelSerializer):
             return None
     
     def get_artist_id(self, obj):
-        if hasattr(obj, 'uploaded_by'):
+        if hasattr(obj, 'uploaded_by') and (obj.uploaded_by != None):
             return obj.uploaded_by.id
+        else:
+            return None
+
+
+class SongMetricsSerializer(serializers.ModelSerializer):
+
+    ext = serializers.SerializerMethodField('get_ext', read_only=True)
+    album_id = serializers.ReadOnlyField(source='album.id')
+    artist_id = serializers.ReadOnlyField(source='uploaded_by.id')
+
+    class Meta:
+        model = cnt_models.Song
+        fields = [
+            'id',
+            'uri',
+            'ext',
+            'title',
+            'genre',
+            'duration',
+            'is_explicit',
+
+            'is_displayed',
+            'is_deleted',
+            'last_changed',
+            'uploaded_date',
+
+            'album_id',
+            'artist_id',
+        ]
+    
+    def get_ext(self, obj):
+        if hasattr(obj, 'file') and (obj.file != None):
+            return obj.file.name.split('.')[-1]
         else:
             return None
 

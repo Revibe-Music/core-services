@@ -32,7 +32,7 @@ class Artist(models.Model):
     image_reference = models.CharField(max_length=255, null=True, blank=True, default=None)
     platform = models.CharField(max_length=255, null=False, blank=False)
 
-    date_joined = models.DateField(auto_now_add=True, null=True, blank=True, editable=False)
+    date_joined = models.DateTimeField(auto_now_add=True, null=True, blank=True, editable=False)
 
     objects = models.Manager()
 

@@ -12,7 +12,9 @@ logger = logging.getLogger(__name__)
 
 from accounts.models import CustomUser, Profile
 from administration.models import ContactForm
+from artist_portal._helpers import const
 from artist_portal._helpers.test import AuthorizedAPITestCase
+from content.models import Artist, Album, Song
 
 # -----------------------------------------------------------------------------
 
@@ -72,6 +74,8 @@ class TestCompanyViews(AuthorizedAPITestCase):
         self.assertEqual(type(response.data), dict)
         self.assertEqual(type(response.data['Artist Count']), int, msg="Did not return an Artist count as an integer")
         self.assertEqual(type(response.data['Artists']), ReturnList, msg="Did not return Artists in a serializer list format")
+        self.assertEqual(len(response.data['Artists']), Artist.objects.filter(platform=const.REVIBE_STRING).count(), msg="Response data list does not contain all revibe artists")
+        self.assertEqual(len(response.data['Artists']), response.data['Artist Count'], msg="Response data list length does not equal response count")
 
         # improper authentication
         with self.assertRaises(PermissionError) as context:
@@ -87,11 +91,29 @@ class TestCompanyViews(AuthorizedAPITestCase):
         self.assertEqual(type(response.data), dict)
         self.assertEqual(type(response.data['Album Count']), int)
         self.assertEqual(type(response.data['Albums']), ReturnList)
+        self.assertEqual(len(response.data['Albums']), Album.objects.filter(platform=const.REVIBE_STRING).count())
 
         # improper authentication
         with self.assertRaises(PermissionError) as context:
             broken = self.client.get(url, format="json", **self._get_headers())
         self.assertTrue("You do not have access for this request type" in str(context.exception))
+    
+    def test_song_data(self):
+        url = reverse('company-song-metrics')
+
+        # proper authentication
+        response = self.client.get(url, format="json", **self._get_headers(sper=True))
+        self.assert200(response.status_code)
+        self.assertEqual(type(response.data), dict)
+        self.assertEqual(type(response.data['Song Count']), int)
+        self.assertEqual(type(response.data['Songs']), ReturnList)
+        self.assertEqual(len(response.data['Songs']), Song.objects.filter(platform=const.REVIBE_STRING).count(), "Response data list does not contain all revibe songs")
+        self.assertEqual(len(response.data['Songs']), response.data['Song Count'], msg="Response data length does not equal response song count")
+
+        # improper authentication
+        with self.assertRaises(PermissionError) as context:
+            broken = self.client.get(url, format="json", **self._get_headers())
+        self.assertTrue("You do not have access for this request type" in str(context.exception), msg="Song Metrics endpoint does not restrict to only Revibe staff")
 
 
 

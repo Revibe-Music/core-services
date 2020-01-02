@@ -84,3 +84,16 @@ class TestAlbums(AuthorizedContentAPITestCase):
         self.assertEqual(len(response.data), cnt_models.Album.objects.get(id=self.album.id).song_set.filter(is_displayed=True, is_deleted=False).count(), msg="Response data length is not all album songs")
 
 
+class TestSongs(AuthorizedContentAPITestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._create_song()
+    
+    def test_song_list(self):
+        url = reverse('song-list')
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        self.assert200(response.status_code)
+        self.assertEqual(type(response.data), ReturnList)
+

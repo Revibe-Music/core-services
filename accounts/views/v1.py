@@ -689,7 +689,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         elif request.method == 'PATCH':
             try:
-                instance = album_queryset.get(pk=album_id)
+                instance = Album.objects.get(id=album_id)
 
                 # ensure editing artist is the uploading artist
                 if artist != instance.uploaded_by:
@@ -706,7 +706,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return responses.PROGRAM_ERROR(detail=str(e))
 
         elif request.method == 'DELETE':
-            instance = album_queryset.get(pk=album_id)
+            instance = Album.objects.get(pk=album_id)
 
             # ensure editing artist is the uploading artist
             if artist != instance.uploaded_by:

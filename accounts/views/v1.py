@@ -600,31 +600,28 @@ class UserArtistViewSet(GenericPlatformViewSet):
         return responses.OK(serializer=artist)
 
     def create(self, request, *args, **kwargs):
-        try:
-            kwargs['context'] = self.get_serializer_context()
-            # check if user already has an artist object
-            if request.user.artist != None:
-                return responses.CONFLICT(detail="this user already has an artist profile")
-            
-            # set data platform
-            if 'platform' not in request.data.keys():
-                _mutable = request.data._mutable
-                request.data._mutable = True
-                request.data['platform'] = 'Revibe'
-                request.data._mutable = _mutable
-            # create the artist and attach to the user
-            serializer = self.serializer_class(data=request.data, *args, **kwargs)
-            if serializer.is_valid():
-                artist = serializer.save()
-                request.user.artist = artist
-                request.user.is_artist = True
-                request.user.save()
-                return responses.CREATED(serializer)
-            else:
-                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE()
-        except Exception as e:
-            return responses.PROGRAM_ERROR(detail=str(e))
+        kwargs['context'] = self.get_serializer_context()
+        # check if user already has an artist object
+        if request.user.artist != None:
+            return responses.CONFLICT(detail="this user already has an artist profile")
+        
+        # set data platform
+        if 'platform' not in request.data.keys():
+            _mutable = request.data._mutable
+            request.data._mutable = True
+            request.data['platform'] = 'Revibe'
+            request.data._mutable = _mutable
+        # create the artist and attach to the user
+        serializer = self.serializer_class(data=request.data, *args, **kwargs)
+        if serializer.is_valid():
+            artist = serializer.save()
+            request.user.artist = artist
+            request.user.is_artist = True
+            request.user.save()
+            return responses.CREATED(serializer)
+        else:
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+        return responses.DEFAULT_400_RESPONSE()
 
     def patch(self, request, *args, **kwargs):
         instance = request.user.artist

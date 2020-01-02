@@ -5,7 +5,17 @@ logger = getLogger(__name__)
 
 from revibe._helpers.status import *
 
-# from artist_portal._helpers import const # may need later
+# from revibe._helpers import const # may need later
+
+def log_request(response, request_code):
+    """
+    Logs a response objects to DynamoDB
+    """
+    # new = Requests(
+    #     status_code=response.status_code,
+    #     request = request_code
+    # )
+    pass
 
 
 # 1xx responses

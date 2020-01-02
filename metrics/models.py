@@ -25,3 +25,15 @@ class Stream(models.Model):
     is_saved = BooleanAttribute(default=False)
     device = UnicodeAttribute()
     environment = UnicodeAttribute(default="production")
+
+
+class Request(models.Model):
+    class Meta:
+        table_name = const.REQUEST_TABLE
+        region = const.AWS_REGION
+        aws_access_key_id = settings.AWS_ACCESS_KEY_ID
+        aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+    
+    status_code = NumberAttribute()
+    request_code = UnicodeAttribute()
+

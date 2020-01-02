@@ -39,10 +39,10 @@ class ArtistSerializer(serializers.ModelSerializer):
         ]
     
     def image_extension(self, obj):
-        if obj.image:
+        if hasattr(obj, 'image') and obj.image != None:
             return obj.image.name.split('.')[-1]
         else:
-            return False
+            return None
 
 
 class SongContributorSerializer(serializers.ModelSerializer, ContributionSerializerMixin):
@@ -149,6 +149,7 @@ class AlbumSerializer(serializers.ModelSerializer):
     is_displayed = serializers.BooleanField(required=False, default=True)
 
     # read-only
+    ext = serializers.SerializerMethodField('get_ext', read_only=True)
     artist = ArtistSerializer(source='album_uploaded_by', read_only=True)
     contributors = AlbumContributorSerializer(source='album_to_artist', many=True, read_only=True)
     uploaded_date = serializers.DateField(read_only=True)
@@ -168,6 +169,7 @@ class AlbumSerializer(serializers.ModelSerializer):
             'is_displayed',
 
             # read-only
+            'ext',
             'artist',
             'contributors',
             'uploaded_date',
@@ -192,6 +194,12 @@ class AlbumSerializer(serializers.ModelSerializer):
         album_contrib.save()
 
         return album
+
+    def get_ext(self, obj):
+        if hasattr(obj, "image") and (obj.image != None):
+            return obj.image.name.split('.')[-1]
+        else:
+            return None
 
 
 class SongSerializer(serializers.ModelSerializer):

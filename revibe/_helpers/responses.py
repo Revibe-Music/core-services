@@ -123,6 +123,6 @@ def PROGRAM_ERROR(detail=None, exception=None, *args, **kwargs):
 
     response = Response(status=HTTP_512_PROGRAM_ERROR)
     detail = detail if detail else "Programatic error, please contact a system administrator for assistance"
-    resonse.data = {"detail": detail}
+    response.data = {"detail": detail}
     return response
 

@@ -601,15 +601,19 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            data = request.data.copy()
             kwargs['context'] = self.get_serializer_context()
             # check if user already has an artist object
             if request.user.artist != None:
                 return responses.CONFLICT(detail="this user already has an artist profile")
             
+            # set data platform
+            if 'platform' not in request.data.keys():
+                _mutable = request.data._mutable
+                request.data._mutable = True
+                request.data['platform'] = 'Revibe'
+                request.data._mutable = _mutable
             # create the artist and attach to the user
-            data['platform'] = 'Revibe'
-            serializer = self.serializer_class(data=data, *args, **kwargs)
+            serializer = self.serializer_class(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 artist = serializer.save()
                 request.user.artist = artist

@@ -693,23 +693,15 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         elif request.method == 'PATCH':
             try:
-                try:
-                    instance = Album.objects.get(id=album_id)
-                except Exception:
-                    return responses.PROGRAM_ERROR(detail=f"{album_id}")
+                instance = Album.objects.get(id=album_id)
 
                 # ensure editing artist is the uploading artist
                 if artist != instance.uploaded_by:
                     return responses.NOT_PERMITTED(detail="you are not permitted to edit this album")
 
-                if 'image' in request.data.keys():
-                    old_image = instance.image
                 serializer = content_ser_v1.AlbumSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
                 if serializer.is_valid():
                     serializer.save()
-                    if 'image' in request.data.keys():
-                        new_image = Album.objects.get(id=album_id)
-                        assert new_image != old_image, f"I don't think the images reset...? New: {new_image}. Old: {old_image}"
                     return responses.UPDATED(serializer)
                 else:
                     return responses.SERIALIZER_ERROR_RESPONSE(serializer)

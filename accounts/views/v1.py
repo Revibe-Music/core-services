@@ -649,6 +649,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 album_id = request.data.pop('album_id')
                 request.data._mutable = _mutable
             assert album_id, "could not get an album ID"
+            if type(album_id) == list:
+                album_id = album_id[0]
+            assert type(album_id) == str, f"album_id is not a string, got type {type(album_id)}"
 
         if request.method == 'GET':
             albums = album_queryset

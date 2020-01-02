@@ -34,20 +34,19 @@ All parts of this API follow a set of rules that dictate things like code organi
 *Some stuff about views and some stuff about viewsets...*
 
 ### Status Codes
-<!-- This section should be replicated in published documentation -->
 
-###### 1xx- Informational:
+1xx- Informational:
 - *no convention*
 
-###### 2xx Successful:
+2xx Successful:
 - 200 OK - default, request processed successfully
 - 201 Created - successfully created an object/instance
 - 204 No Content - object/instance successfully deleted
 
-###### 3xx Redirection:
+3xx Redirection:
 - *no convention*
 
-###### 4xx Client Error:
+4xx Client Error:
 - 400 Bad Request - default, returned if no other 4xx error was applicable
 - 401 Unauthorized - could not identify the current user
 - 402 Payment Required - the requested feature is a payed-only feature and cannot be access with the access level of the current user
@@ -57,7 +56,7 @@ All parts of this API follow a set of rules that dictate things like code organi
 - 415 Unsupported Media Type - the sent file is of an invalid type and cannot be accepted by the server
 - 417 Expectation Failed - The sent data is invalid, response *should* contain the error information
 
-###### 5xx - Server Error:
+5xx - Server Error:
 - 500 Internal Server Error: this response will **NEVER** be sent intentionally, this will only be sent when an unknown server error occurs.
 - 501 Not Implemented: the requested functionality has not yet been built, but the endpoint infrastructure has been put in place
 - 503 Service Unavailable - the requested endpoint cannot be reached in the current environment, this is usually an indication that some kind of AWS resource is only accessible while running the app in the cloud.

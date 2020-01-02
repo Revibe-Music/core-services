@@ -5,7 +5,7 @@ from oauth2_provider.models import AccessToken
 
 import logging
 
-from artist_portal._helpers import const
+from revibe._helpers import const
 
 logger = logging.getLogger(__name__)
 

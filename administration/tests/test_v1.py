@@ -10,10 +10,11 @@ import unittest
 import logging
 logger = logging.getLogger(__name__)
 
+from revibe._helpers import const
+from revibe._helpers.test import AuthorizedAPITestCase
+
 from accounts.models import CustomUser, Profile
 from administration.models import ContactForm
-from artist_portal._helpers import const
-from artist_portal._helpers.test import AuthorizedAPITestCase
 from content.models import Artist, Album, Song
 
 # -----------------------------------------------------------------------------

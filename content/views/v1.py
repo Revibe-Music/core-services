@@ -2,8 +2,9 @@ from rest_framework import views, viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from artist_portal.viewsets import *
-from artist_portal._helpers.platforms import get_platform
+from revibe.viewsets import *
+from revibe._helpers.platforms import get_platform
+
 from accounts.permissions import TokenOrSessionAuthentication
 from content.mixins import V1Mixin
 from content.models import *

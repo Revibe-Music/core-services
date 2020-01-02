@@ -1,7 +1,8 @@
 from django.conf import settings
 from rest_framework.views import APIView
 
-from artist_portal._helpers import responses
+from revibe._helpers import responses
+
 from metrics.serializers.v1 import *
 
 

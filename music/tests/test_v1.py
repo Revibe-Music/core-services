@@ -4,8 +4,9 @@ from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 from logging import getLogger
 logger = getLogger(__name__)
 
-from artist_portal._helpers import status
-from artist_portal._helpers.test import AuthorizedContentAPITestCase
+from revibe._helpers import status
+from revibe._helpers.test import AuthorizedContentAPITestCase
+
 from music.models import Library, Playlist
 
 # -----------------------------------------------------------------------------

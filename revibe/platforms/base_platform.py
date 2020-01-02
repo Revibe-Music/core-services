@@ -1,7 +1,7 @@
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
-from artist_portal._errors import random as errors, platforms as plt_er
-from artist_portal._helpers import const
+from revibe._errors import random as errors, platforms as plt_er
+from revibe._helpers import const
 from content.models import *
 from content.serializers import v1 as content_ser_v1
 from music.models import *

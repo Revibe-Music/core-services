@@ -6,8 +6,8 @@ from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 from logging import getLogger
 logger = getLogger(__name__)
 
-from artist_portal._helpers import const
-from artist_portal._helpers.test import AuthorizedAPITestCase, AuthorizedContentAPITestCase
+from revibe._helpers import const
+from revibe._helpers.test import AuthorizedAPITestCase, AuthorizedContentAPITestCase
 from content import models as cnt_models
 
 # -----------------------------------------------------------------------------

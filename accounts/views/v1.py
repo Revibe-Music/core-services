@@ -22,9 +22,10 @@ import requests
 from logging import getLogger
 logger = getLogger(__name__)
 
-from artist_portal.viewsets import GenericPlatformViewSet
-from artist_portal._helpers import responses, const
-from artist_portal._errors.random import ValidationError
+from revibe.viewsets import GenericPlatformViewSet
+from revibe._helpers import responses, const
+from revibe._errors.random import ValidationError
+
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *

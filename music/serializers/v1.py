@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from artist_portal._helpers.debug import debug_print
+from revibe._helpers.debug import debug_print
+
 from accounts.models import ArtistProfile
 from content.models import *
 from content.serializers.v1 import *

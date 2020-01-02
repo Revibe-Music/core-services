@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from logging import getLogger
 logger = getLogger(__name__)
 
-from artist_portal._helpers.status import *
+from revibe._helpers.status import *
 
 # from artist_portal._helpers import const # may need later
 

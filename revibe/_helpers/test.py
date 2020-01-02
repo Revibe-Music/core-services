@@ -3,7 +3,8 @@ from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from oauth2_provider.models import Application
 
-from artist_portal._helpers import status
+from revibe._helpers import status
+
 from accounts.models import CustomUser, Profile, ArtistProfile
 from content.models import *
 

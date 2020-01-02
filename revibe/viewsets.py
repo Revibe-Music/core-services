@@ -1,6 +1,6 @@
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
-from artist_portal._helpers.platforms import get_platform
+from revibe._helpers.platforms import get_platform
 
 class PlatformViewSet(ModelViewSet):
     def __init__(self, *args, **kwargs):

@@ -1,5 +1,5 @@
-from artist_portal.platforms.platforms import *
-from artist_portal._errors.platforms import PlatformNotFoundError
+from revibe.platforms.platforms import *
+from revibe._errors.platforms import PlatformNotFoundError
 
 linked_platforms = [
     Revibe,

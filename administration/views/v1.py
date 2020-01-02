@@ -5,12 +5,13 @@ from rest_framework.response import Response
 import logging
 logger = logging.getLogger(__name__)
 
+from revibe.viewsets import GenericPlatformViewSet
+from revibe._helpers import const, responses
+
 from accounts import models as acc_models
 from accounts.permissions import TokenOrSessionAuthentication
 from administration.models import *
 from administration.serializers import v1 as adm_ser_v1
-from artist_portal.viewsets import GenericPlatformViewSet
-from artist_portal._helpers import const, responses
 from content import models as cnt_models
 
 # -----------------------------------------------------------------------------

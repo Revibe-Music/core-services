@@ -6,7 +6,7 @@ from pynamodb.attributes import (
     UnicodeAttribute, NumberAttribute, UnicodeSetAttribute, UTCDateTimeAttribute, BooleanAttribute
 )
 
-from artist_portal._helpers import const
+from revibe._helpers import const
 
 
 class Stream(models.Model):

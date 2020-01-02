@@ -1,5 +1,6 @@
-from artist_portal.platforms.base_platform import Platform
-from artist_portal._helpers.versions import Version
+from revibe.platforms.base_platform import Platform
+from revibe._helpers.versions import Version
+
 from content.models import *
 from content.serializers import v1 as content_ser_v1
 from music.serializers import v1 as ser_v1

@@ -5,9 +5,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
 
-from artist_portal._helpers import responses
-from artist_portal._helpers.debug import debug_print
-from artist_portal._helpers.platforms import get_platform, linked_platforms
+from revibe._helpers import responses
+from revibe._helpers.debug import debug_print
+from revibe._helpers.platforms import get_platform, linked_platforms
+
 from accounts.permissions import TokenOrSessionAuthentication
 from content.serializers.v1 import *
 from music.mixins import Version1Mixin

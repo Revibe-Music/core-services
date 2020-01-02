@@ -28,7 +28,7 @@ v1_urls = [
 admin_path = 'admin/' if settings.DEBUG else '68t9gui2btw4gfesvd89yiugh2354rw/'
 
 urlpatterns = [
-    path(admin_path, admin.site.urls),
+    path(admin_path, admin.site.urls, name="admin"),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('v1/', include(v1_urls)),
 ]

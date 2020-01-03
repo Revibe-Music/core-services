@@ -1,11 +1,11 @@
-
+import random
 
 class ProductionRouter:
     """
     https://docs.djangoproject.com/en/3.0/topics/db/multi-db/
     """
     def db_for_read(self, model, **hints):
-        return 'read'
+        return random.choice(['read', 'write'])
     
     def db_for_write(self, model, **hints):
         return 'write'

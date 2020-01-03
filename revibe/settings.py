@@ -131,9 +131,10 @@ if 'RDS_DB_NAME' in os.environ:
             }
         }
     else: # production environment
+        # DATABASE_ROUTERS = ['revibe.router.Router', ]
         DATABASES = {
-            'default': {},
-            'write': {
+            # 'default': {},
+            'default': {
                 'ENGINE': 'django.db.backends.mysql',
                 'NAME': os.environ['RDS_DB_NAME'],
                 'USER': os.environ['RDS_USERNAME'],
@@ -144,19 +145,18 @@ if 'RDS_DB_NAME' in os.environ:
                     "init_command": "SET sql_mode='STRICT_TRANS_TABLES'"
                 },
             },
-            'read': {
-                'ENGINE': 'django.db.backends.mysql',
-                'NAME': os.environ['RDS_DB_NAME'],
-                'USER': os.environ['RDS_USERNAME'],
-                'PASSWORD': os.environ['RDS_PASSWORD'],
-                'HOST': os.environ['RDS_READ_HOSTNAME'],
-                'PORT': os.environ['RDS_PORT'],
-                'OPTIONS': {
-                    "init_command": "SET sql_mode='STRICT_TRANS_TABLES'"
-                },
-            }
+            # 'read': {
+            #     'ENGINE': 'django.db.backends.mysql',
+            #     'NAME': os.environ['RDS_DB_NAME'],
+            #     'USER': os.environ['RDS_USERNAME'],
+            #     'PASSWORD': os.environ['RDS_PASSWORD'],
+            #     'HOST': os.environ['RDS_READ_HOSTNAME'],
+            #     'PORT': os.environ['RDS_PORT'],
+            #     'OPTIONS': {
+            #         "init_command": "SET sql_mode='STRICT_TRANS_TABLES'"
+            #     },
+            # }
         }
-        DATABASE_ROUTERS = ['revibe.router.ProductionRouter']
 else:
     DATABASES = {
         'default': {

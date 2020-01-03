@@ -143,7 +143,7 @@ if 'RDS_DB_NAME' in os.environ:
             },
             'read': {
                 'ENGINE': 'django.db.backends.mysql',
-                'NAME': os.environ['RDS_DB_NAME'],
+                'NAME': 'sys' #os.environ['RDS_DB_NAME'],
                 'USER': os.environ['RDS_USERNAME'],
                 'PASSWORD': os.environ['RDS_PASSWORD'],
                 'HOST': os.environ['RDS_READ_HOSTNAME'],

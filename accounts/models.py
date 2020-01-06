@@ -56,15 +56,15 @@ class Social(models.Model):
     platform = models.CharField(max_length=255, null=True)
 
 
-class Device(models.Model):
-    type_choices = [
-        ("phone", "Phone"),
-        ("desktop", "Desktop"),
-        ("browser", "Web Browser"),
-    ]
+# class Device(models.Model):
+#     type_choices = [
+#         ("phone", "Phone"),
+#         ("desktop", "Desktop"),
+#         ("browser", "Web Browser"),
+#     ]
 
-    token = models.OneToOneField(settings.OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="token_device")
-    device_id = models.CharField(max_length=255, null=True, blank=False, unique=True)
-    device_type = models.CharField(max_length=255, null=True, blank=False, choices=type_choices)
-    device_name = models.CharField(max_length=255, null=True, blank=False)
+#     token = models.OneToOneField(settings.OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="token_device")
+#     device_id = models.CharField(max_length=255, null=True, blank=False, unique=True)
+#     device_type = models.CharField(max_length=255, null=True, blank=False, choices=type_choices)
+#     device_name = models.CharField(max_length=255, null=True, blank=False)
 

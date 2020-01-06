@@ -31,6 +31,4 @@ urlpatterns = [
     path('spotify-refresh/', v1.SpotifyRefresh.as_view()),
     path('spotify-logout/', v1.SpotifyLogout.as_view()),
     path('artist', v1.UserArtistViewSet, name='user_artist'),
-    # path("linked-accounts/", views.UserLinkedAccounts.as_view()),
-    # path("artist/", include(artist_urls), name="artist_account"),
 ]

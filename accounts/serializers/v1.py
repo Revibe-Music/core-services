@@ -146,9 +146,9 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
     city = serializers.CharField(required=False)
     zip_code = serializers.CharField(required=False)
 
-    require_contribution_approval = serializers.BooleanField(required=False)
-    share_data_with_contributors = serializers.BooleanField(required=False)
-    share_advanced_data_with_contributors = serializers.BooleanField(required=False)
+    require_contribution_approval = serializers.BooleanField(required=False, default=True)
+    share_data_with_contributors = serializers.BooleanField(required=False, default=True)
+    share_advanced_data_with_contributors = serializers.BooleanField(required=False, default=False)
 
     # read-only
     profile_id = serializers.ReadOnlyField(source='id')

@@ -41,7 +41,7 @@ ALLOWED_HOSTS = [
     '.revibe.com',
     # '.compute-1.amazonaws.com', # allows viewing of instances directly
     '.elasticbeanstalk.com',
-    '7623rwqey8ufdshbij.com',
+    '7623rwqey8ufdshbij.com', # Custom agent to allow for health checks
 ]
 if (not DEBUG) and ('USE_S3' in os.environ):
     ALLOWED_HOSTS.append(getHostIP())

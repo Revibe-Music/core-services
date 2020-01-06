@@ -804,7 +804,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
             contribution_id = request.data['contribution_id']
 
         if request.method == 'GET':
-            albums = self.platform.HiddenAlbums.filter(contributors=artist)
+            # get all the contributions to albums that aren't the ones this artist uploaded
+            contrib_albums = AlbumContributor.objects.filter(primary_artist=False, artist=artist)
+
+            # get the unique albums that contain this artist as a contributor
+            albums = list(set([ac.album for ac in contrib_albums if ac.album.is_deleted == False]))
+
             album_serializer = content_ser_v1.AlbumSerializer(albums, many=True)
             return Response(album_serializer.data)
         
@@ -856,9 +861,13 @@ class UserArtistViewSet(GenericPlatformViewSet):
             contribution_id = request.data.pop('contribution_id')
 
         if request.method == 'GET':
-            songs = songcontribution_queryset
-            song_serializer = content_ser_v1.SongContributorSerializer(songs, many=True, *args, **kwargs)
+            # get the list of contributions that belong to this artist
+            contrib_songs = SongContributor.objects.filter(primary_artist=False, artist=artist)
 
+            # get the list of unique songs that have have one of the contributors in the last list
+            songs = list(set([sc.song for sc in contrib_songs if sc.song.is_deleted==False]))
+
+            song_serializer = content_ser_v1.SongContributorSerializer(songs, many=True, *args, **kwargs)
             return Response(song_serializer.data)
 
         elif request.method == 'POST':

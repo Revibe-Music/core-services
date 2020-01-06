@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 import sys
 
+from logging import getLogger
+logger = getLogger(__name__)
+
 from revibe.environment.network import getHostIP
 
 # -----------------------------------------------------------------------------
@@ -34,11 +37,14 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     'api.revibe.tech',
+    '.revibe.tech',
+    '.revibe.com',
     # '.compute-1.amazonaws.com', # allows viewing of instances directly
     '.elasticbeanstalk.com',
 ]
 if (not DEBUG) and ('USE_S3' in os.environ):
     ALLOWED_HOSTS.append(getHostIP())
+    logger.info("Added host IP address to ALLOWED_HOSTS")
 
 
 # Application definition

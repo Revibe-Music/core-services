@@ -867,7 +867,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             # get the list of unique songs that have have one of the contributors in the last list
             songs = list(set([sc.song for sc in contrib_songs if sc.song.is_deleted==False]))
 
-            song_serializer = content_ser_v1.SongContributorSerializer(songs, many=True, *args, **kwargs)
+            song_serializer = content_ser_v1.SongSerializer(songs, many=True, *args, **kwargs)
             return Response(song_serializer.data)
 
         elif request.method == 'POST':

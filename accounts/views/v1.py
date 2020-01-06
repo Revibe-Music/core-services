@@ -804,8 +804,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
             contribution_id = request.data['contribution_id']
 
         if request.method == 'GET':
-            albums = albumcontribution_queryset
-            album_serializer = content_ser_v1.AlbumContributorSerializer(albums, many=True)
+            albums = self.platform.HiddenAlbums.filter(contributors=artist)
+            album_serializer = content_ser_v1.AlbumSerializer(albums, many=True)
             return Response(album_serializer.data)
         
         if request.method == 'POST':

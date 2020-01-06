@@ -17,6 +17,13 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 
+from logging import getLogger
+logger = getLogger(__name__)
+
+from administration.views import base
+
+# -----------------------------------------------------------------------------
+
 v1_urls = [
     path('account/', include('accounts.urls.v1')),
     path('music/', include('music.urls.v1')),
@@ -28,6 +35,7 @@ v1_urls = [
 admin_path = 'admin/' if settings.DEBUG else '68t9gui2btw4gfesvd89yiugh2354rw/'
 
 urlpatterns = [
+    path('', base.home, name="home"),
     path(admin_path, admin.site.urls, name="admin"),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('v1/', include(v1_urls)),

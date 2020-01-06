@@ -70,7 +70,7 @@ class UserSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        remove = ['device_id', 'device_name','device_type']
+        remove = ['device_type',]
         data = {}
         for key, value in validated_data.items():
             if key not in remove:

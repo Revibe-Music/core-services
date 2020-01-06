@@ -273,8 +273,8 @@ class RegistrationAPI(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            
-            device = get_device(request.data)
+
+            device = request.data['device_type']
 
             application = Application.objects.get(name="Revibe First Party Application")
 
@@ -283,11 +283,11 @@ class RegistrationAPI(generics.GenericAPIView):
             except IntegrityError as err:
                 return responses.CONFLICT(detail=str(err))
 
-            time = const.BROWSER_EXPIRY_TIME if device.device_type == 'browser' else const.DEFAULT_EXPIRY_TIME
+            time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME
             expire = timezone.now() + datetime.timedelta(hours=time)
 
             scopes = ['first-party']
-            if device.device_type == 'browser':
+            if device == 'browser':
                 scopes.append('artist')
             scope = " ".join(scopes)
 
@@ -310,15 +310,13 @@ class RegistrationAPI(generics.GenericAPIView):
 
             access_token.source_refresh_token = refresh_token
             access_token.save()
-            device.token = access_token
-            device.save()
 
             data = {
                 "user": UserSerializer(user, context=self.get_serializer_context()).data,
                 "access_token": access_token.token,
             }
 
-            if device.device_type != 'browser':
+            if device != 'browser':
                 data.update({"refresh_token": refresh_token.token})
 
             return Response(data, status=status.HTTP_200_OK)
@@ -339,27 +337,28 @@ class LoginAPI(generics.GenericAPIView):
         serializer = self.get_serializer(data=login_data)
         if serializer.is_valid():
 
-            device = get_device(request.data)
-            
-            tokens = AccessToken.objects.filter(token_device=device)
-            for at in tokens:
-                at.source_refresh_token.delete()
-                at.delete()
-
-            application = Application.objects.get(name="Revibe First Party Application")
+            device = request.data['device_type']
             
             user = serializer.validated_data
 
-            time = const.BROWSER_EXPIRY_TIME if device.device_type == 'browser' else const.DEFAULT_EXPIRY_TIME
-            expire = timezone.now() + datetime.timedelta(hours=time)
-
             scopes = ["first-party"]
-            if device.device_type == 'browser':
+            if device == 'browser':
                 scopes.append('artist')
             if user.is_staff:
                 scopes.append("ADMIN")
             scope = " ".join(scopes)
-            
+
+            tokens = AccessToken.objects.filter(user=user)
+            for at in tokens:
+                if at.scope == scope:
+                    at.source_refresh_token.delete()
+                    at.delete()
+
+            application = Application.objects.get(name="Revibe First Party Application")
+
+            time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME
+            expire = timezone.now() + datetime.timedelta(hours=time)
+
             access_token = AccessToken(
                 user=user,
                 expires=expire,
@@ -379,8 +378,6 @@ class LoginAPI(generics.GenericAPIView):
 
             access_token.source_refresh_token = refresh_token
             access_token.save()
-            device.token = access_token
-            device.save()
 
             user.last_login = datetime.datetime.now()
 
@@ -389,11 +386,11 @@ class LoginAPI(generics.GenericAPIView):
                 "access_token": access_token.token,
             }
 
-            if device.device_type != 'browser':
+            if device != 'browser':
                 data.update({"refresh_token": refresh_token.token})
 
             return Response(data, status=status.HTTP_200_OK)
-        
+
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         
@@ -410,7 +407,8 @@ class RefreshTokenAPI(generics.GenericAPIView):
 
         access_token.token = common.generate_token()
 
-        time = 5 if access_token.token_device.device_type == 'browser' else 2
+        device = request.data['device_type']
+        time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME
         access_token.expires = access_token.expires + datetime.timedelta(hours=time)
 
         access_token.save()
@@ -425,35 +423,13 @@ class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
     serializer_class = AccessTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        try:
-            token = AccessToken.objects.get(token=request.data['access_token'])
-        except Exception as e:
-            data = {}
-            data['exception'] = str(e)
-            data['cookies'] = request.COOKIES
-
-            if 'access_token' in request.data.keys():
-                data['access_token_in_keys'] = True
-                data['access_token'] = request.data['access_token']
-            else:
-                data['access_token_in_keys'] = False
-                access_token_cookie = request.COOKIES.get(const.ACCESS_TOKEN_COOKIE_NAME, False)
-                if access_token_cookie:
-                    data['access_token_in_cookies'] = True
-                    data['access_token'] = access_token_cookie
-                else:
-                    data['access_token_in_cookies'] = False
-
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        token = AccessToken.objects.get(token=request.data['access_token'])
 
         # send back an issue if server could not find the user
         if not token.user:
             return responses.UNAUTHORIZED(detail="could not identify the current user")
         elif token.user != request.user:
             return responses.NOT_PERMITTED(detail="could not identify the current user as the owner of this token")
-
-        if token.token_device:
-            token.token_device.delete()
 
         token.refresh_token.delete()
         token.delete()

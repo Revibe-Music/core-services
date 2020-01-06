@@ -77,8 +77,10 @@ class SongContributorSerializer(serializers.ModelSerializer, ContributionSeriali
         ]
     
     def create(self, validated_data):
-        artist = Artist.objects.filter(platform='Revibe').get(pk=validated_data.pop('artist_id'))
-        song = Song.objects.filter(platform='Revibe').get(pk=validated_data.pop('song_id'))
+        artist = validated_data.pop('artist')
+        song = validated_data.pop('song')
+        artist = Artist.objects.filter(platform='Revibe').get(pk=artist['id'])
+        song = Song.objects.filter(platform='Revibe').get(pk=song['id'])
 
         song_contrib = SongContributor(**validated_data, artist=artist, song=song)
 

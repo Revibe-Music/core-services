@@ -18,6 +18,7 @@ class ProfileSerializer(serializers.ModelSerializer): # TODO: do this right, ple
     class Meta:
         model = Profile
         fields = [
+            'email',
             'country',
             'image',
             'allow_explicit',
@@ -30,7 +31,6 @@ class UserSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(required=False)
     last_name = serializers.CharField(required=False)
     username = serializers.CharField(required=False)
-    email = serializers.EmailField(required=False)
     profile = ProfileSerializer(many=False, required=False)
 
 
@@ -53,7 +53,6 @@ class UserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'username',
-            'email',
             'profile',
 
 

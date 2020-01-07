@@ -23,6 +23,6 @@ def home(request):
 
     TODO: build this out into a series of checks for application health.
     """
-    if 2+2 != 4:
-        return responses.PROGRAM_ERROR()
+    # check database connection
+    # ...
     return responses.OK()

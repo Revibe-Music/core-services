@@ -225,6 +225,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
             'require_contribution_approval',
             'share_data_with_contributors',
             'share_advanced_data_with_contributors',
+            'allow_contributors_to_edit_contributions',
         ]
     
     def _get_artist_profile_fields(self):

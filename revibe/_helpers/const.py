@@ -21,4 +21,6 @@ AMAZON_MUSIC_STRING = 'Amazon'
 AWS_REGION = 'us-east-2'
 STREAM_TABLE = 'Stream'
 REQUEST_TABLE = 'Request'
+WRITE_DATABASE_NAME = 'default'
+READ_DATABASE_NAME = 'read'
 

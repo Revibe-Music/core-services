@@ -146,6 +146,17 @@ if 'RDS_DB_NAME' in os.environ:
     else: # production environment
         DATABASE_ROUTERS = ['revibe.router.ProductionRouter', ]
         DATABASES = {
+            # The production environment defines 2 databases, 'default' and 'read'.
+            # 
+            # The 'default' database is the Aurora Write database instance, it just
+            # can't be called 'write' because Django is stupid.
+            # 
+            # The 'read' database sets up the cluster endpoint for all the Reader databases,
+            # Aurora will automatically balance the load across all read-replicas so we don't
+            # have to. In the future, probably around when it becomes worthwhile to have a second
+            # read-replica, we should remove the 'default' database as a read option in the
+            # router.
+            # (written 07 Jan, 2020)
             'default': {
                 'ENGINE': 'django.db.backends.mysql',
                 'NAME': os.environ['RDS_DB_NAME'],

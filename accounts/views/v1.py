@@ -276,14 +276,20 @@ class RegistrationAPI(generics.GenericAPIView):
         username = request.data['username']
         email = request.data.get('email', None)
 
+        errors = {}
         # check if username already exists
         if not validation.check_username(username):
+            errors['username'] = []
             err = f"Username '{username}' already exists.'"
-            return responses.SERIALIZER_ERROR_RESPONSE(detail=err)
-        
+            errors['username'].append(err)
+
         if email and (not validation.check_email(email)):
+            errors['email'] = []
             err = f"A user with email '{email}' already exists."
-            return responses.SERIALIZER_ERROR_RESPONSE(detail=err)
+            errors['email'].append(err)
+        
+        if errors != {}:
+            return responses.SERIALIZER_ERROR_RESPONSE(data=errors)
 
         # run registration
         serializer = self.get_serializer(data=request.data)

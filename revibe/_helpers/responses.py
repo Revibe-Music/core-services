@@ -93,12 +93,15 @@ def UNSUPPORTED_MEDIA_TYPE(detail=None, *args, **kwargs):
     response.data = {"detail": detail}
     return response
 
-def SERIALIZER_ERROR_RESPONSE(serializer=None, detail=None, *args, **kwargs):
+def SERIALIZER_ERROR_RESPONSE(serializer=None, detail=None, data=None, *args, **kwargs):
     response = Response(status=HTTP_417_EXPECTATION_FAILED)
     if serializer:
         response.data = serializer.errors
     elif detail:
         response.data = {"detail": detail}
+    elif data:
+        assert type(data) == dict, "param 'data' must be a dictionary"
+        response.data = data
     return response
 
 

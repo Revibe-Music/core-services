@@ -17,6 +17,7 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 from revibe.environment.network import getHostIP
+from revibe._helpers import const
 
 # -----------------------------------------------------------------------------
 
@@ -157,7 +158,7 @@ if 'RDS_DB_NAME' in os.environ:
             # read-replica, we should remove the 'default' database as a read option in the
             # router.
             # (written 07 Jan, 2020)
-            'default': {
+            const.WRITE_DATABASE_NAME: { # write
                 'ENGINE': 'django.db.backends.mysql',
                 'NAME': os.environ['RDS_DB_NAME'],
                 'USER': os.environ['RDS_USERNAME'],
@@ -168,7 +169,7 @@ if 'RDS_DB_NAME' in os.environ:
                     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
                 },
             },
-            'read': {
+            const.READ_DATABASE_NAME: { # read
                 'ENGINE': 'django.db.backends.mysql',
                 'NAME': os.environ['RDS_DB_NAME'],
                 'USER': os.environ['RDS_USERNAME'],

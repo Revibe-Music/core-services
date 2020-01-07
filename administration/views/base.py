@@ -1,3 +1,8 @@
+"""
+Author: Jordan Prechac
+Created: 06 Jan, 2020
+"""
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
@@ -11,4 +16,13 @@ from revibe._helpers import responses
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def home(request):
+    """
+    This is the health-check endpoint. The AWS Elastic Load Balancer (Target
+    Group) will check this endpoint for a 200 response to determine application
+    health.
+
+    TODO: build this out into a series of checks for application health.
+    """
+    if 2+2 != 4:
+        return responses.PROGRAM_ERROR()
     return responses.OK()

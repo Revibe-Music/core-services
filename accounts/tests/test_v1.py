@@ -63,8 +63,8 @@ class TestUserAccount(RevibeTestCase):
         response = self.client.get(url, **self._get_headers())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        expected_fields = ['first_name','last_name','username','email','profile','is_artist','is_manager']
-        expected_profile_fields = ['country','allow_explicit','allow_listening_data','allow_email_marketing']
+        expected_fields = ['first_name','last_name','username','profile','is_artist','is_manager']
+        expected_profile_fields = ['email','country','allow_explicit','allow_listening_data','allow_email_marketing']
 
         for field in expected_fields:
             assert field in response.data.keys(), "Expected {} in response fields".format(field)

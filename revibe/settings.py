@@ -146,7 +146,7 @@ if 'RDS_DB_NAME' in os.environ:
     else: # production environment
         DATABASE_ROUTERS = ['revibe.router.ProductionRouter', ]
         DATABASES = {
-            # 'default': {},
+            'default': {},
             'write': {
                 'ENGINE': 'django.db.backends.mysql',
                 'NAME': os.environ['RDS_DB_NAME'],

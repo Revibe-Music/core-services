@@ -29,6 +29,7 @@ from revibe._errors.random import ValidationError
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *
+from accounts._helpers import validation
 from content.models import Album, Song, SongContributor, AlbumContributor
 from content.serializers import v1 as content_ser_v1
 from metrics.models import Stream
@@ -271,6 +272,20 @@ class RegistrationAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
+        # check expectations
+        username = request.data['username']
+        email = request.data.get('email', None)
+
+        # check if username already exists
+        if not validation.check_username(username):
+            err = f"Username '{username}' already exists.'"
+            return responses.SERIALIZER_ERROR_RESPONSE(detail=err)
+        
+        if email and (not validation.check_email(email)):
+            err = f"A user with email '{email}' already exists."
+            return responses.SERIALIZER_ERROR_RESPONSE(detail=err)
+
+        # run registration
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
 

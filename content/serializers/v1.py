@@ -152,7 +152,7 @@ class AlbumSerializer(serializers.ModelSerializer):
 
     # read-only
     ext = serializers.SerializerMethodField('get_ext', read_only=True)
-    artist = ArtistSerializer(source='album_uploaded_by', read_only=True)
+    uploaded_by = ArtistSerializer(read_only=True)
     contributors = AlbumContributorSerializer(source='album_to_artist', many=True, read_only=True)
     uploaded_date = serializers.DateField(read_only=True)
     last_changed = serializers.DateField(read_only=True)
@@ -172,7 +172,7 @@ class AlbumSerializer(serializers.ModelSerializer):
 
             # read-only
             'ext',
-            'artist',
+            'uploaded_by',
             'contributors',
             'uploaded_date',
             'last_changed',
@@ -212,7 +212,7 @@ class SongSerializer(serializers.ModelSerializer):
     is_displayed = serializers.BooleanField(required=False, default=True)
 
     # read-only
-    artist = ArtistSerializer(source='song_uploaded_by', read_only=True)
+    uploaded_by = ArtistSerializer(read_only=True)
     album = AlbumSerializer(read_only=True)
     contributors = SongContributorSerializer(source='song_to_artist', many=True, read_only=True)
     uploaded_date = serializers.DateField(read_only=True)
@@ -236,7 +236,7 @@ class SongSerializer(serializers.ModelSerializer):
 
             # read-only
             'album',
-            'artist',
+            'uploaded_by',
             'contributors',
             'uploaded_date',
             'last_changed',

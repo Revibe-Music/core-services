@@ -825,14 +825,14 @@ class UserArtistViewSet(GenericPlatformViewSet):
         elif request.method == 'PATCH':
             instance = albumcontribution_queryset.get(pk=contribution_id)
 
-            # check that the current artist is the album's uploading artist
+            # check permissions and settings
             if artist != instance.album.uploaded_by:
-                return Response({"detail": "You are not authorized to edit this contribution"}, status=status.HTTP_403_FORBIDDEN)
+                return responses.NOT_PERMITTED(detail="you are not permitted to edit this contribution")
 
             serializer = BaseAlbumContributorSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return responess.OK(seriailzer=serializer)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
             return responses.DEFAULT_400_RESPONSE()
@@ -882,6 +882,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         elif request.method == 'PATCH':
             instance = full_queryset.get(pk=contribution_id)
 
+            # check permissions and settings
             if artist != instance.song.uploaded_by:
                 return responses.NOT_PERMITTED(detail="you are not permitted to edit this contribution")
 

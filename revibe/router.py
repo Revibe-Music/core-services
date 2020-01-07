@@ -1,14 +1,16 @@
 import random
 
+# -----------------------------------------------------------------------------
+
 class ProductionRouter:
     """
     https://docs.djangoproject.com/en/3.0/topics/db/multi-db/
     """
     def db_for_read(self, model, **hints):
-        return random.choice(['read', 'write'])
-    
+        return random.choice(['read', 'default'])
+
     def db_for_write(self, model, **hints):
-        return 'write'
+        return 'default'
 
     def allow_relation(self, obj1, obj2, **hints):
         return True

@@ -5,14 +5,14 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 from revibe._helpers import status
-from revibe._helpers.test import AuthorizedContentAPITestCase
+from revibe._helpers.test import RevibeTestCase
 
 from music.models import Library, Playlist
 
 # -----------------------------------------------------------------------------
 
 
-class TestLibrary(AuthorizedContentAPITestCase):
+class TestLibrary(RevibeTestCase):
     def setUp(self):
         self._get_application()
         self._get_user()
@@ -43,7 +43,7 @@ class TestLibrary(AuthorizedContentAPITestCase):
         self.assertTrue(str(self.song.id) == str(library.songs.all()[0].id)) # have to cast ID's as strings, the object ID's come back as UUIID and str, respectively
 
 
-class TestPlaylists(AuthorizedContentAPITestCase):
+class TestPlaylists(RevibeTestCase):
     def setUp(self):
         self._get_application()
         self._get_user()

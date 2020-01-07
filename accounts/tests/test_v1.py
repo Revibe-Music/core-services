@@ -1,54 +1,20 @@
 from django.urls import reverse
-from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from oauth2_provider.models import Application
 
 import logging
 logger = logging.getLogger(__name__)
 
+from revibe._helpers.test import RevibeTestCase
+from revibe._helpers import status
+
 from accounts.models import CustomUser, Profile
 
 # -----------------------------------------------------------------------------
 
-def create_application():
-    try:
-        Application.objects.create(client_type="confidential", authorization_grant_type="password", name="Revibe First Party Application")
-    except:
-        pass
-
-def create_test_user():
-    client = APIClient()
-    try:
-        user = CustomUser.objects.create_user(username="johnsnow", password="password")
-        profile = Profile.objects.create(country="US", user=user)
-        profile.save()
-        user.save()
-    except IntegrityError as ie:
-        user = CustomUser.objects.get(username="johnsnow")
-    except Exception as e:
-        raise(e)
-    login = client.post(reverse('login'), {"username": "johnsnow","password": "password","device_id": "1234567890","device_name": "Django Test Case","device_type": "phone",}, format="json")
-    return user, login.data['access_token'], login.data['refresh_token']
-
-def create_artist_test_user():
-    client = APIClient()
-    try:
-        user = CustomUser.objects.create_user(username="johnartist", password="password")
-        profile = Profile.objects.create(country="US", user=user)
-        profile.save()
-        user.save()
-    except IntegrityError as ie:
-        user = CustomUser.objects.get(username="johnartist")
-    except Exception as e:
-        raise(e)
-    login = client.post(reverse('login'), {"username": "johnartist","password": "password","device_id": "1234567890","device_name": "Django Test Case","device_type": "browser",}, format="json")
-    return user, login.data['access_token']
-
-# -----------------------------------------------------------------------------
-
-class TestRegister(APITestCase):
+class TestRegister(RevibeTestCase):
     def setUp(self):
-        create_application()
+        self._get_application()
 
     def test_register(self):
         """
@@ -59,44 +25,38 @@ class TestRegister(APITestCase):
         data = {
             "username": "testing_username",
             "password": "testing_password",
-            "device_id": "1234567890",
             "device_type": "browser",
-            "device_name": "Django Test Case",
             "profile": {},
         }
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(CustomUser.objects.count(), 1)
         self.assertEqual(CustomUser.objects.get(username=data['username']).username, data['username'])
 
-class TestLogin(APITestCase):
+
+class TestLogin(RevibeTestCase):
     def setUp(self):
-        create_application()
-        self.user = CustomUser.objects.create_user(username="johndoe", password="password")
+        self._get_application()
+        self._get_user()
+        CustomUser.objects.create_user("login","login@login.com","password")
 
     def test_login(self):
         url = reverse('login')
         data = {
-            "username": "johndoe",
+            "username": "login",
             "password": "password",
-            "device_id": "1234567890",
-            "device_name": "Django Test Case",
             "device_type": "browser",
         }
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['user']['username'], "johndoe")
+        self.assertEqual(response.data['user']['username'], data['username'])
         assert 'access_token' in response.data.keys(), "No Access Token returned"
         assert 'refresh_token' not in response.data.keys(), "Refresh Token was returned"
 
 
-class TestUserAccount(APITestCase):
+class TestUserAccount(RevibeTestCase):
     def setUp(self):
-        create_application()
-        self.user, self.access_token, self.refresh_token = create_test_user()
-
-    def _get_headers(self):
-        return {"Authorization": "Bearer {}".format(self.access_token)}
+        self._get_application()
+        self._get_user()
 
     def test_get_profile(self):
         url = reverse('profile')
@@ -123,15 +83,27 @@ class TestUserAccount(APITestCase):
 
     def test_refresh_token(self):
         url = reverse('refresh-token')
-        data = {"refresh_token": self.refresh_token}
+        data = {
+            "refresh_token": self.refresh_token,
+            "device_type":"phone"
+        }
         response = self.client.post(url, data, format="json", **self._get_headers())
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert200(response.status_code)
         self.assertNotEqual(response.data['access_token'], self.access_token)
 
         # reset self's access token, in case the other requests come after
         if response.data['access_token'] != self.access_token:
             self.access_token = response.data['access_token']
+    
+    def test_refresh_token_bad(self):
+        url = reverse('refresh-token')
+        data = {
+            "refresh_token": self.refresh_token,
+        }
+        response = self.client.post(url, data, format="json", **self._get_headers())
+
+        self.assertEqual(response.status_code, status.HTTP_417_EXPECTATION_FAILED)
 
 
 # class TestRegisterArtist(APITestCase):

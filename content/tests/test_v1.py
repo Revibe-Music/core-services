@@ -7,12 +7,12 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 from revibe._helpers import const
-from revibe._helpers.test import AuthorizedAPITestCase, AuthorizedContentAPITestCase
+from revibe._helpers.test import RevibeTestCase
 from content import models as cnt_models
 
 # -----------------------------------------------------------------------------
 
-class TestArtists(AuthorizedContentAPITestCase):
+class TestArtists(RevibeTestCase):
     def setUp(self):
         self._get_application()
         self._get_user()
@@ -53,7 +53,7 @@ class TestArtists(AuthorizedContentAPITestCase):
         self.assertEqual(len(response.data), cnt_models.Song.objects.filter(uploaded_by=self.artist, is_displayed=True, is_deleted=False).count(), msg="Artist songs not returning as much data as it should be")
 
 
-class TestAlbums(AuthorizedContentAPITestCase):
+class TestAlbums(RevibeTestCase):
     def setUp(self):
         self._get_application()
         self._get_user()
@@ -84,7 +84,7 @@ class TestAlbums(AuthorizedContentAPITestCase):
         self.assertEqual(len(response.data), cnt_models.Album.objects.get(id=self.album.id).song_set.filter(is_displayed=True, is_deleted=False).count(), msg="Response data length is not all album songs")
 
 
-class TestSongs(AuthorizedContentAPITestCase):
+class TestSongs(RevibeTestCase):
     def setUp(self):
         self._get_application()
         self._get_user()
@@ -98,7 +98,7 @@ class TestSongs(AuthorizedContentAPITestCase):
         self.assertEqual(type(response.data), ReturnList)
 
 
-class TestSearch(AuthorizedContentAPITestCase):
+class TestSearch(RevibeTestCase):
     def setUp(self):
         self._get_application()
         self._get_user()

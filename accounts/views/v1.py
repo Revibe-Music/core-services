@@ -402,6 +402,18 @@ class RefreshTokenAPI(generics.GenericAPIView):
     serializer_class = RefreshTokenSerializer
 
     def post(self, request, *args, **kwargs):
+        # check expectations
+        required_fields = ['refresh_token','device_type']
+        for key in request.data.keys():
+            if key not in required_fields:
+                err = f"Unexpected field: {key} in request data."
+                return responses.SERIALIZER_ERROR_RESPONSE(detail=err)
+        for field in required_fields:
+            if field not in request.data.keys():
+                err = f"Missing field: {field} in request data."
+                return responses.SERIALIZER_ERROR_RESPONSE(detail=err)
+
+        # get tokens
         refresh_token = RefreshToken.objects.get(token=request.data['refresh_token'])
         access_token = refresh_token.access_token
 

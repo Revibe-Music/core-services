@@ -1,3 +1,8 @@
+"""
+Author: Jordan Prechac
+Created: 07 Jan, 2020
+"""
+
 from django.db.utils import IntegrityError
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
@@ -9,6 +14,7 @@ from accounts.models import CustomUser, Profile, ArtistProfile
 from content.models import *
 
 # -----------------------------------------------------------------------------
+# mixins
 
 class TestStatusMixin:
     def assert200(self, arg1):
@@ -19,6 +25,7 @@ class TestStatusMixin:
     
     def assert204(self, arg1):
         self.assertEqual(arg1, status.HTTP_204_NO_CONTENT)
+
 
 class BaseRevibeTestMixin:
     def _get_application(self):
@@ -35,6 +42,7 @@ class BaseRevibeTestMixin:
             token = self.artist_access_token
         return {"Authorization": "Bearer {}".format(token)}
 
+
 class AuthorizedUserMixin:
     def _get_user(self):
         client = APIClient()
@@ -46,9 +54,7 @@ class AuthorizedUserMixin:
             response = self.client.post(reverse('register'), {
                 "username": "johnsnow",
                 "password": "password",
-                "device_id": "1234567983hg4890",
                 "device_type": "browser",
-                "device_name": "Django Test Case",
                 "profile": {},
             }, format="json")
             user = CustomUser.objects.get(username=response.data['user']['username'])
@@ -56,10 +62,11 @@ class AuthorizedUserMixin:
             user = CustomUser.objects.get(username="johnsnow")
         except Exception as e:
             raise(e)
-        login = client.post(reverse('login'), {"username": "johnsnow","password": "password","device_id": "1234567890","device_name": "Django Test Case","device_type": "phone",}, format="json")
+        login = client.post(reverse('login'), {"username": "johnsnow","password": "password","device_type": "phone",}, format="json")
         self.user = user
         self.access_token = login.data['access_token']
         self.refresh_token = login.data['refresh_token']
+
 
 class ArtistUserMixin:
     def _get_artist_user(self):
@@ -89,9 +96,10 @@ class ArtistUserMixin:
             except Exception as e:
                 raise e
 
-        login = client.post(reverse('login'), {"username": "johnartist","password": "password","device_id": "1234567890","device_name": "Django Test Case","device_type": "browser",}, format="json")
+        login = client.post(reverse('login'), {"username": "johnartist","password": "password","device_type": "browser",}, format="json")
         self.artist_user = user
         self.artist_access_token = login.data['access_token']
+
 
 class SuperUserMixin:
     def _get_superuser(self):
@@ -106,22 +114,12 @@ class SuperUserMixin:
         except Exception as e:
             raise e
 
-        login = self.client.post(reverse('login'), {"username": "admin","password": "admin","device_id": "1234567890admin","device_name": "Django Test Case","device_type": "browser",}, format="json")
+        login = self.client.post(reverse('login'), {"username": "admin","password": "admin","device_type": "browser",}, format="json")
         self.superuser = user
         self.super_access_token = login.data['access_token']
 
 
-class AuthorizedAPITestCase(
-    APITestCase, BaseRevibeTestMixin, AuthorizedUserMixin, SuperUserMixin, ArtistUserMixin, TestStatusMixin
-):
-    """
-    Combines functionality of multiple header and authorization classes
-    """
-    pass
-
-
-# content-specific mixins
-class CreateContentMixin:
+class ContentMixin:
     def _create_artist(self):
         self.artist = Artist.objects.create(name="Test Artist Content", platform="Revibe")
         return self.artist
@@ -139,11 +137,46 @@ class CreateContentMixin:
         SongContributor.objects.create(artist=artist, song=self.song, contribution_type="Artist", primary_artist=True)
         return self.song
 
-class AuthorizedContentAPITestCase(
-    AuthorizedAPITestCase, CreateContentMixin
+
+class MusicMixin:
+    pass
+
+
+class AdministrationMixin:
+    pass
+
+
+class MetricsMixin:
+    pass
+
+
+# -----------------------------------------------------------------------------
+# classes
+
+class BaseRevibeTestCase(
+    APITestCase, BaseRevibeTestMixin, TestStatusMixin
 ):
     """
-    Combines the base Authorized Test Case class with the content-creation functionality. 
+    Basis for all of our Test Cases
+    Provides the basis for getting applications for tokens and the status code checks for most requests.
+    """
+    pass
+
+
+class AuthorizedAPITestCase(
+    BaseRevibeTestCase, AuthorizedUserMixin, SuperUserMixin, ArtistUserMixin
+):
+    """
+    Builds on the basic BaseRevibeTestCase functionality by adding authentication methods.
+    """
+    pass
+
+
+class RevibeTestCase(
+    AuthorizedAPITestCase, ContentMixin, MusicMixin, AdministrationMixin, MetricsMixin
+):
+    """
+    Combines the Authentication functionality with objects from each of the apps.
     """
     pass
 

@@ -47,6 +47,7 @@ class ArtistProfile(models.Model):
     require_contribution_approval = models.BooleanField(null=False, blank=True, default=True)
     share_data_with_contributors = models.BooleanField(null=False, blank=True, default=True)
     share_advanced_data_with_contributors = models.BooleanField(null=False, blank=True, default=False)
+    allow_contributors_to_edit_contributions = models.BooleanField(null=False, blank=True, default=False)
 
     def __str__(self):
         return "{}'s Artist Profile".format(self.artist)

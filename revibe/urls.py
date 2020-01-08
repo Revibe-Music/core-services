@@ -35,8 +35,9 @@ v1_urls = [
 admin_path = 'admin/' if settings.DEBUG else '68t9gui2btw4gfesvd89yiugh2354rw/'
 
 urlpatterns = [
-    path('hc/', base.home, name="health_check"),
     path(admin_path, admin.site.urls, name="admin"),
+    path('jet/', include('jet.urls', namespace="jet")),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('hc/', base.home, name="health_check"),
     path('v1/', include(v1_urls)),
 ]

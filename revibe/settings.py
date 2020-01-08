@@ -55,6 +55,9 @@ INSTALLED_APPS = [
     # cors stuff
     'corsheaders',
 
+    # django jet admin portal
+    'jet',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -386,3 +389,11 @@ CORS_ALLOW_CREDENTIALS = True
 
 # all_auth settings
 ACCOUNT_EMAIL_REQUIRED = False
+
+# django-jet settings
+JET_DEFAULT_THEME = 'default'
+JET_THEMES = {
+    'theme': 'default',
+    'color': '#8e36a6',
+    'title': 'Revibe Classic'
+}

@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from revibe.viewsets import *
-from revibe._helpers import const
+from revibe._helpers import const, responses
 from revibe._helpers.platforms import get_platform
 
 from accounts.permissions import TokenOrSessionAuthentication
@@ -275,3 +275,42 @@ class MusicSearch(GenericPlatformViewSet):
     
     def search_playlists(self, text, *args, **kwargs):
         pass
+
+    
+    @action(detail=False, methods=['get'], url_path="artists", url_name="search-artists")
+    def artsits(self, request, *args, **kwargs):
+        """
+        Special endpoint just for artists to be able to search other artsists
+        when adding contributors.
+        """
+        params = request.query_params
+
+        if 'text' not in params:
+            return responses.SERIALIZER_ERROR_RESPONSE(detail="missing parameter 'text'.")
+        text = params['text']
+
+        artists = self.exclusive_artist_search(text)
+        serializer = ser_v1.ArtistSerializer(artists, many=True)
+
+        return responses.OK(serializer=serializer)
+
+    def exclusive_artist_search(self, text, *args, **kwargs):
+        assert (text) and (text != " "), "method 'exclusive_artist_search' requires a search value."
+        limit = const.SEARCH_LIMIT
+        # perform search
+        if len(text) == 1:
+            # artist name begins with the search value
+            artists = self.platform.Artists.filter(name__istartswith=text).distinct()
+        else:
+            # artist name is exactly the search value
+            artists = self.platform.Artists.filter(name__iexact=text).distinct()
+            if artists.count() >= limit:
+                return artists[:limit]
+            
+            # artist name contains the search value
+            artists = artists | self.platform.Artists.filter(name__icontains=text).distinct()
+            artists = artists.distinct()
+            if artists.count() >= limit:
+                return artists[:limit]
+            
+        return artists[:limit]

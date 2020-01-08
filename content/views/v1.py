@@ -187,17 +187,56 @@ class MusicSearch(GenericPlatformViewSet):
 
     def search_albums(self, text, *args, **kwargs):
         assert text, "method 'search_albums' requires a search value."
+        limit = const.SEARCH_LIMIT
 
-        # filter albums
-        albums = self.platform.Albums.filter(
-            Q(name__icontains=text) | 
-            Q(uploaded_by__name__icontains=text) |
-            # filter by contained songs
-            Q(song__title__icontains=text) |
-            Q(song__genre__icontains=text)
-        ).distinct()
+        # album name is exactly search value
+        albums = self.platform.Albums.filter(name__iexact=text).distinct()
+        if albums.count() >= limit:
+            return albums[:limit]
 
-        return albums
+        # uploaded by name is exactly search value
+        albums = albums | self.platform.Albums.filter(uploaded_by__name__iexact=text).distinct()
+        albums = albums.distinct()
+        if albums.count() > limit:
+            return albums[:limit]
+        
+        # album contributor name is exactly search value
+        albums = albums | self.platform.Albums.filter(contributors__name__iexact=text).distinct()
+        albums = albums.distinct()
+        if albums.count() > limit:
+            return albums[:limit]
+        
+        # album has a song with a title that is exactly the search value
+        albums = albums | self.platform.Albums.filter(song__title__iexact=text).distinct()
+        albums = albums.distinct()
+        if albums.count() > limit:
+            return album[:limit]
+        
+        # albums name contains the search value
+        albums = albums | self.platform.Albums.filter(name__icontains=text).distinct()
+        albums = albums.distinct()
+        if albums.count() > limit:
+            return album[:limit]
+        
+        # uploaded by name contains the search value
+        albums = albums | self.platform.Albums.filter(uploaded_by__name__icontains=text).distinct()
+        albums = albums.distinct()
+        if albums.count() > limit:
+            return album[:limit]
+        
+        # album contributor name contains the search value
+        albums = albums | self.platform.Albums.filter(contributors__name__icontains=text).distinct()
+        albums = albums.distinct()
+        if albums.count() > limit:
+            return album[:limit]
+
+        # album song title contains the search value
+        albums = albums | self.platform.Albums.filter(song__title__icontains=text).distinct()
+        albums = albums.distinct()
+        if albums.count() > limit:
+            return album[:limit]
+
+        return albums[:limit]
     
     def search_artists(self, text, *args, **kwargs):
         assert text, "method 'search_artists' requires a search value."

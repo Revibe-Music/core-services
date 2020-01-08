@@ -3,8 +3,9 @@ from rest_framework import serializers
 import logging
 logger = logging.getLogger(__name__)
 
+from revibe._errors.random import ValidationError
+
 from accounts import models as acc_models
-from accounts.serializers.v1 import UserSerializer
 from administration.models import *
 from content import models as cnt_models
 
@@ -17,12 +18,14 @@ class ContactFormSerializer(serializers.ModelSerializer):
 
     # read-only
     id = serializers.IntegerField(read_only=True)
-    user = UserSerializer(read_only=True)
     resolved = serializers.BooleanField(read_only=True)
     assigned_to = serializers.BooleanField(read_only=True)
 
     # write-only
     user_id = serializers.CharField(required=False, write_only=True)
+    first_name = serializers.CharField(required=False, write_only=True)
+    last_name = serializers.CharField(required=False, write_only=True)
+    email = serializers.CharField(required=False, write_only=True)
 
     class Meta:
         model = ContactForm
@@ -32,13 +35,48 @@ class ContactFormSerializer(serializers.ModelSerializer):
 
             # read-only
             'id',
-            'user',
             'resolved',
             'assigned_to',
 
             # write-only
-            'user_id'
+            'user_id',
+            'first_name',
+            'last_name',
+            'email',
         ]
+    
+    def create(self, validated_data, *args, **kwargs):
+        contact_form_data = {
+            'subject':validated_data['subject'],
+            'message':validated_data['message'],
+        }
+
+        # check that some form of personal identifier is in the form
+        name_fields = ['first_name','last_name','email']
+        name_data = True
+        for f in name_fields:
+            if f not in validated_data.keys():
+                name_data = False
+        
+        # raise exception if the data does not have a user or name fields
+        if not (('user_id' in validated_data.keys()) or name_data):
+            raise ValidationError("Contact form must contain some form of identifiable information: \
+                user_id, or name and email ")
+
+        if 'user_id' in validated_data.keys():
+            user = acc_models.CustomUser.objects.get(id=validated_data['user_id'])
+            contact_form_data['user'] = user
+        else:
+            contact_form_data['first_name'] = validated_data['first_name']
+            contact_form_data['last_name'] = validated_data['last_name']
+            contact_form_data['email'] = validated_data['email']
+        
+        contact_form = ContactForm(**contact_form_data)
+        contact_form.save()
+
+        logger.info("Contact form created.")
+
+        return contact_form
 
 
 class UserMetricsSerializer(serializers.ModelSerializer):

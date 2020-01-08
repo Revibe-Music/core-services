@@ -2,18 +2,21 @@ from django.db import models
 
 from uuid import uuid1
 
-
-# Create your models here.
+# -----------------------------------------------------------------------------
 
 class ContactForm(models.Model):
 
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey('accounts.CustomUser', on_delete=models.SET_NULL, null=True, blank=True)
-    subject = models.CharField(max_length=255, null=True, blank=True)
-    message = models.TextField(null=False, blank=False)
+    first_name = models.CharField("First Name", max_length=255, null=True, blank=True)
+    last_name = models.CharField("Last Name", max_length=255, null=True, blank=True)
+    email = models.CharField("Email", max_length=255, null=True, blank=True)
+    subject = models.CharField("Contact form subject / type of request", max_length=255, null=True, blank=True) # going to be used as 'type'
+    message = models.TextField("Message", null=False, blank=False)
 
-    resolved = models.BooleanField(null=False, blank=False, default=False)
-    assigned_to = models.CharField(max_length=255, null=True, blank=True)
+    # administrative fields
+    resolved = models.BooleanField("Indicates if the request/issue has been resolved or not", null=False, blank=False, default=False)
+    assigned_to = models.CharField("Revibe staff member it's assigned to", max_length=255, null=True, blank=True)
 
     def __str__(self):
         if self.resolved:

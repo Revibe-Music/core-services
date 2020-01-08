@@ -6,6 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from revibe.viewsets import GenericPlatformViewSet
+from revibe._errors.random import ValidationError
 from revibe._helpers import const, responses
 
 from accounts import models as acc_models
@@ -29,7 +30,10 @@ class FormViewSet(viewsets.GenericViewSet):
     def contact_form(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            try:
+                serializer.save()
+            except ValidationError as err:
+                return responses.SERIALIZER_ERROR_RESPONSE(detail=str(err))
             return responses.CREATED(serializer)
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)

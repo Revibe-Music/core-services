@@ -27,7 +27,7 @@ class TestContactForms(AuthorizedAPITestCase):
     def _get_headers(self):
         return {"Authorization": "Bearer {}".format(self.access_token)}
 
-    def test_submit_contact_form(self):
+    def test_submit_contact_form_user_id(self):
         url = reverse('forms-contact-form')
         data = {
             "subject": "Message Subject",
@@ -37,10 +37,36 @@ class TestContactForms(AuthorizedAPITestCase):
         response = self.client.post(url, data, format="json", **self._get_headers())
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        expected_fields = ['subject','message','id','user','resolved','assigned_to']
+        expected_fields = ['subject','message','id','resolved','assigned_to']
         for field in expected_fields:
             assert field in response.data.keys(), "Expected {} in response fields".format(field)
         self.assertEqual(ContactForm.objects.count(), 1)
+    
+    def test_submit_contact_form_name_email(self):
+        url = reverse('forms-contact-form')
+        data = {
+            "subject":"Issue",
+            "message":"Make this shit work, fam!",
+            "first_name":"John",
+            "last_name":"Doe",
+            "email":"john@doe.com",
+        }
+        response = self.client.post(url, data, format="json", **self._get_headers())
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        expected_fields = ['subject','message','id','resolved','assigned_to']
+        for field in expected_fields:
+            self.assertTrue(field in response.data.keys(), msg="Expected {} in response fields.".format(field))
+    
+    def test_submit_contact_form_fail(self):
+        url = reverse('forms-contact-form')
+        data = {
+            "subject":"Uh oh",
+            "message":"This won't work"
+        }
+        response = self.client.post(url, data, format="json", **self._get_headers())
+
+        self.assertEqual(response.status_code, status.HTTP_417_EXPECTATION_FAILED)
 
 
 class TestCompanyViews(AuthorizedAPITestCase):

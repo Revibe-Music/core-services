@@ -24,3 +24,6 @@ REQUEST_TABLE = 'Request'
 WRITE_DATABASE_NAME = 'default'
 READ_DATABASE_NAME = 'read'
 
+# query constants
+SEARCH_LIMIT = 50
+

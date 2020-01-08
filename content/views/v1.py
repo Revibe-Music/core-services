@@ -4,12 +4,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from revibe.viewsets import *
+from revibe._helpers import const
 from revibe._helpers.platforms import get_platform
 
 from accounts.permissions import TokenOrSessionAuthentication
 from content.mixins import V1Mixin
 from content.models import *
 from content.serializers import v1 as ser_v1
+
+# -----------------------------------------------------------------------------
 
 
 class ArtistViewset(PlatformViewSet):
@@ -119,17 +122,69 @@ class MusicSearch(GenericPlatformViewSet):
     
     def search_songs(self, text, *args, **kwargs):
         assert text, "method 'search_songs' requires a search value."
+        limit = const.SEARCH_LIMIT
 
-        # filter songs
-        songs = self.platform.Songs.filter(
-            Q(title__icontains=text) | 
-            Q(album__name__icontains=text) |
-            Q(uploaded_by__name__icontains=text) |
-            Q(genre__icontains=text)
-        ).distinct()
+        # song title is exactly search value
+        songs = self.platform.Songs.filter(Q(title__iexact=text)).distinct()
+        if len(songs) >= limit:
+            return songs[:limit]
+        
+        # artist name is exactly search value
+        songs | self.platform.Songs.filter(Q(uploaded_by__name__iexact=text)).distinct()
+        songs = songs.distinct()
+        if len(songs) >= limit:
+            return songs[:limit]
+        
+        # song contributor name is exactly search value
+        songs | self.platform.Songs.filter(Q(contributors__name__iexact=text)).distinct()
+        songs = songs.distinct()
+        if len(songs) >= limit:
+            return songs[:limit]
 
-        return songs
-    
+        # album name is exactly search value
+        songs | self.platform.Songs.filter(Q(album__name__iexact=text)).distinct()
+        songs = songs.distinct()
+        if len(songs) >= limit:
+            return songs[:limit]
+        
+        # title contains search value
+        songs | self.platform.Songs.filter(Q(title__icontains=text)).distinct()
+        songs = songs.distinct()
+        if len(songs) >= limit:
+            return songs[:limit]
+        
+        # uploading artist name contains search value
+        songs | self.platform.Songs.filter(Q(uploaded_by__name__icontains=text)).distinct()
+        songs = songs.distinct()
+        if len(songs) >= limit:
+            return songs[:limit]
+        
+        # contributing artists name contains search value
+        songs | self.platform.Songs.filter(Q(contributors__name__icontains=text)).distinct()
+        songs = songs.distinct()
+        if len(songs) >= limit:
+            return songs[:limit]
+        
+        # album name contains search value
+        songs | self.platform.Songs.filter(Q(album__name__icontains=text)).distinct()
+        songs = songs.distinct()
+        if len(songs) >= limit:
+            return songs[:limit]
+        
+        # album contributors name is exactly search value
+        songs | self.platform.Songs.filter(Q(album__contributors__name__iexact=text)).distinct()
+        songs = songs.distinct()
+        if len(songs) >= limit:
+            return songs[:limit]
+
+        # album contributors name contains search value
+        songs | self.platform.Songs.filter(Q(album__contributors__name__icontains=text)).distinct()
+        songs = songs.distinct()
+        if len(songs) >= limit:
+            return songs[:limit]
+
+        return songs[:limit]
+
     def search_albums(self, text, *args, **kwargs):
         assert text, "method 'search_albums' requires a search value."
 
@@ -158,3 +213,6 @@ class MusicSearch(GenericPlatformViewSet):
         ).distinct()
 
         return artists
+    
+    def search_playlists(self, text, *args, **kwargs):
+        pass

@@ -146,6 +146,7 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
     zip_code = serializers.CharField(required=False)
 
     require_contribution_approval = serializers.BooleanField(required=False, default=True)
+    require_contribution_approval_on_edit = serializers.BooleanField(required=False, default=True)
     share_data_with_contributors = serializers.BooleanField(required=False, default=True)
     share_advanced_data_with_contributors = serializers.BooleanField(required=False, default=False)
     allow_contributors_to_edit_contributions = serializers.BooleanField(required=False, default=False)
@@ -167,6 +168,7 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
 
             # settings fields
             'require_contribution_approval',
+            'require_contribution_approval_on_edit',
             'share_data_with_contributors',
             'share_advanced_data_with_contributors',
             'allow_contributors_to_edit_contributions',
@@ -193,9 +195,10 @@ class UserArtistSerializer(serializers.ModelSerializer):
     zip_code = serializers.CharField(source="artist_profile.zip_code", required=False, write_only=True)
 
     require_contribution_approval = serializers.BooleanField(source="artist_profile.require_contribution_approval", required=False, write_only=True)
+    require_contribution_approval_on_edit = serializers.BooleanField(source="artist_profile.require_contribution_approval_on_edit", required=False, write_only=True)
     share_data_with_contributors = serializers.BooleanField(source="artist_profile.share_data_with_contributors", required=False, write_only=True)
     share_advanced_data_with_contributors = serializers.BooleanField(source="artist_profile.share_advanced_data_with_contributors", required=False, write_only=True)
-    allow_contributors_to_edit_contributions = serializers.BooleanField(source="artist_profile.allow_contributors_to_edit_contributions", required=False, default=False)
+    allow_contributors_to_edit_contributions = serializers.BooleanField(source="artist_profile.allow_contributors_to_edit_contributions", required=False, write_only=True, default=False)
 
     class Meta:
         model = Artist
@@ -222,6 +225,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
 
             # profile settings fields
             'require_contribution_approval',
+            'require_contribution_approval_on_edit',
             'share_data_with_contributors',
             'share_advanced_data_with_contributors',
             'allow_contributors_to_edit_contributions',

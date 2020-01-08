@@ -46,6 +46,7 @@ class ArtistProfile(models.Model):
 
     # account settings
     require_contribution_approval = models.BooleanField(null=False, blank=True, default=True)
+    require_contribution_approval_on_edit = models.BooleanField(null=False, blank=True, default=True)
     share_data_with_contributors = models.BooleanField(null=False, blank=True, default=True)
     share_advanced_data_with_contributors = models.BooleanField(null=False, blank=True, default=False)
     allow_contributors_to_edit_contributions = models.BooleanField(null=False, blank=True, default=False)

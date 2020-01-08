@@ -17,6 +17,9 @@ Each type of content has it's own search hierarchy for returning objects.
 
 The Artist search hierarchy is:
 1. Artists whose name is exactly the search value.
+2. Artists with an Album or Song with a name/title that is exactly the search value.
+3. Artists whose name contains the search value.
+4. Artists with an Album or Song that contains the search value. 
 
 ##### Special Artist Search
 

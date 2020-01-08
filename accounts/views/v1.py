@@ -920,7 +920,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if artist != instance.song.uploaded_by:
                 return responses.NOT_PERMITTED(detail="you are not permitted to edit this contribution")
 
-            serializer = content_ser_v1.SongContributorSerializer(instance=instance, data=data, partial=True, *args, **kwargs)
+            serializer = content_ser_v1.SongContributorSerializer(instance=instance, data=request.data, partial=True, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)

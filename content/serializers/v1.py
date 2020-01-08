@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
+from revibe._errors.network import ProgramError
+
 from content.models import *
 from content.mixins import ContributionSerializerMixin
 
@@ -85,14 +87,26 @@ class SongContributorSerializer(serializers.ModelSerializer, ContributionSeriali
         song_contrib = SongContributor(**validated_data, artist=artist, song=song)
 
         # change contribution based on account settings
-        artist_settings = self.get_account_settings(artist)
-        if artist_settings:
-            song_contrib.pending = artist_settings['pending']
-            song_contrib.approved = artist_settings['approved']
+        artist_settings = self.get_account_settings(artist, create=True)
+        song_contrib.pending = artist_settings['pending']
+        song_contrib.approved = artist_settings['approved']
 
         song_contrib.save()
 
         return song_contrib
+    
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        if not hasattr(instance, 'artist'):
+            raise ProgramError("Could not find the artist of this contribution")
+        
+        artist = instance.artist
+        artist_settings = self.get_account_settings(artist, update=True)
+        instance.pending = artist_settings['pending']
+        instance.approved = artist_settings['approved']
+        instance.save()
+
+        return instance
 
 
 class AlbumContributorSerializer(serializers.ModelSerializer, ContributionSerializerMixin):
@@ -132,14 +146,26 @@ class AlbumContributorSerializer(serializers.ModelSerializer, ContributionSerial
 
         album_contributor = AlbumContributor(**validated_data, artist=artist, album=album)
 
-        artist_settings = self.get_account_settings(artist)
-        if artist_settings:
-            album_contributor.pending = artist_settings['pending']
-            album_contributor.approved = artist_settings['approved']
+        artist_settings = self.get_account_settings(artist, create=True)
+        album_contributor.pending = artist_settings['pending']
+        album_contributor.approved = artist_settings['approved']
 
         album_contributor.save()
-        
+
         return album_contributor
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        if not hasattr(instance, 'artist'):
+            raise ProgramError("Could not find the artist of this contribution")
+
+        artist = instance.artist
+        artist_settings = self.get_account_settings(artist, update=True)
+        instance.pending = artist_settings['pending']
+        instance.approved = artist_settings['approved']
+        instance.save()
+
+        return instance
 
 
 class AlbumSerializer(serializers.ModelSerializer):

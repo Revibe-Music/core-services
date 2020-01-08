@@ -126,61 +126,61 @@ class MusicSearch(GenericPlatformViewSet):
 
         # song title is exactly search value
         songs = self.platform.Songs.filter(title__iexact=text).distinct()
-        if len(songs) >= limit:
+        if songs.count() >= limit:
             return songs[:limit]
         
         # artist name is exactly search value
-        songs | self.platform.Songs.filter(uploaded_by__name__iexact=text).distinct()
+        songs = songs | self.platform.Songs.filter(uploaded_by__name__iexact=text).distinct()
         songs = songs.distinct()
-        if len(songs) >= limit:
+        if songs.count() >= limit:
             return songs[:limit]
         
         # song contributor name is exactly search value
-        songs | self.platform.Songs.filter(contributors__name__iexact=text).distinct()
+        songs = songs | self.platform.Songs.filter(contributors__name__iexact=text).distinct()
         songs = songs.distinct()
-        if len(songs) >= limit:
+        if songs.count() >= limit:
             return songs[:limit]
 
         # album name is exactly search value
-        songs | self.platform.Songs.filter(album__name__iexact=text).distinct()
+        songs = songs | self.platform.Songs.filter(album__name__iexact=text).distinct()
         songs = songs.distinct()
-        if len(songs) >= limit:
+        if songs.count() >= limit:
             return songs[:limit]
         
         # title contains search value
-        songs | self.platform.Songs.filter(title__icontains=text).distinct()
+        songs = songs | self.platform.Songs.filter(title__icontains=text).distinct()
         songs = songs.distinct()
-        if len(songs) >= limit:
+        if songs.count() >= limit:
             return songs[:limit]
         
         # uploading artist name contains search value
-        songs | self.platform.Songs.filter(uploaded_by__name__icontains=text).distinct()
+        songs = songs | self.platform.Songs.filter(uploaded_by__name__icontains=text).distinct()
         songs = songs.distinct()
-        if len(songs) >= limit:
+        if songs.count() >= limit:
             return songs[:limit]
         
         # contributing artists name contains search value
-        songs | self.platform.Songs.filter(contributors__name__icontains=text).distinct()
+        songs = songs | self.platform.Songs.filter(contributors__name__icontains=text).distinct()
         songs = songs.distinct()
-        if len(songs) >= limit:
+        if songs.count() >= limit:
             return songs[:limit]
         
         # album name contains search value
-        songs | self.platform.Songs.filter(album__name__icontains=text).distinct()
+        songs = songs | self.platform.Songs.filter(album__name__icontains=text).distinct()
         songs = songs.distinct()
-        if len(songs) >= limit:
+        if songs.count() >= limit:
             return songs[:limit]
         
         # album contributors name is exactly search value
-        songs | self.platform.Songs.filter(album__contributors__name__iexact=text).distinct()
+        songs = songs | self.platform.Songs.filter(album__contributors__name__iexact=text).distinct()
         songs = songs.distinct()
-        if len(songs) >= limit:
+        if songs.count() >= limit:
             return songs[:limit]
 
         # album contributors name contains search value
-        songs | self.platform.Songs.filter(album__contributors__name__icontains=text).distinct()
+        songs = songs | self.platform.Songs.filter(album__contributors__name__icontains=text).distinct()
         songs = songs.distinct()
-        if len(songs) >= limit:
+        if songs.count() >= limit:
             return songs[:limit]
 
         return songs[:limit]

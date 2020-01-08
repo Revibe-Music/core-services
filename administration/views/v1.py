@@ -123,3 +123,15 @@ class CompanyViewSet(GenericPlatformViewSet):
 
         return responses.OK(data=data)
 
+    @action(detail=False, methods=['get'], url_path="contact-form-metrics", url_name="contact-form-metrics")
+    def contact_form_metrics(self, request, *args, **kwargs):
+        queryset = ContactForm.objects.all()
+        serializer_class = adm_ser_v1.ContactFormMetricsSerializer
+
+        data = {}
+        data['Contact Form Count'] = queryset.count()
+
+        serializer = serializer_class(queryset, many=True)
+        data['Contact Forms'] = serializer.data
+
+        return responses.OK(data=data)

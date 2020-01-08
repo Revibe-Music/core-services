@@ -142,5 +142,18 @@ class TestCompanyViews(AuthorizedAPITestCase):
             broken = self.client.get(url, format="json", **self._get_headers())
         self.assertTrue("You do not have access for this request type" in str(context.exception), msg="Song Metrics endpoint does not restrict to only Revibe staff")
 
+    def test_contact_form_data(self):
+        url = reverse('company-contact-form-metrics')
 
+        response = self.client.get(url, format="json", **self._get_headers(sper=True))
+        self.assert200(response.status_code)
+        self.assertEqual(type(response.data), dict)
+        self.assertEqual(type(response.data['Contact Form Count']), int)
+        self.assertEqual(type(response.data['Contact Forms']), ReturnList)
+        self.assertEqual(len(response.data['Contact Forms']), ContactForm.objects.count(), msg="Response does not contain all contact forms")
+        self.assertEqual(len(response.data['Contact Forms']), response.data['Contact Form Count'], msg="Response data length does not equal response count")
+
+        with self.assertRaises(PermissionError) as context:
+            broken = self.client.get(url, format="json", **self._get_headers())
+        self.assertTrue("You do not have access for this request type" in str(context.exception), msg="Contact Form Metrics endpoint does not restrict to only Revibe staff")
 

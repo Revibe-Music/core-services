@@ -200,3 +200,26 @@ class SongMetricsSerializer(serializers.ModelSerializer):
         else:
             return None
 
+
+class ContactFormMetricsSerializer(serializers.ModelSerializer):
+    user_id = serializers.ReadOnlyField(source='user.id')
+    name = serializers.SerializerMethodField('get_name', read_only=True)
+
+    class Meta:
+        model = ContactForm
+        fields = [
+            'id',
+            'user_id',
+            'name',
+            'email',
+            'subject',
+            'message',
+            'resolved',
+            'assigned_to',
+        ]
+
+    def get_name(self, obj):
+        string = obj.first_name if obj.first_name != None else None
+        if obj.last_name != None:
+            string += " {}".format(obj.last_name)
+        return string

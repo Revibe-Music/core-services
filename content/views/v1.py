@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import views, viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -108,10 +109,52 @@ class MusicSearch(GenericPlatformViewSet):
                 return Response({'error': "parameter 'type' must be 'songs', 'albums', or 'artists'."}, status=status.HTTP_417_EXPECTATION_FAILED)
 
         if (t == 'songs') or (not t):
-            result['songs'] = ser_v1.SongSerializer(self.platform.Songs.filter(title__icontains=text), many=True).data
+            result['songs'] = ser_v1.SongSerializer(self.search_songs(text), many=True).data
         if (t == 'albums') or (not t):
-            result['albums'] = ser_v1.AlbumSerializer(self.platform.Albums.filter(name__icontains=text), many=True).data
+            result['albums'] = ser_v1.AlbumSerializer(self.search_albums(text), many=True).data
         if (t == 'artists') or (not t):
-            result['artists'] = ser_v1.ArtistSerializer(self.platform.Artists.filter(name__icontains=text), many=True).data
+            result['artists'] = ser_v1.ArtistSerializer(self.search_artists(text), many=True).data
 
         return Response(result ,status=status.HTTP_200_OK)
+    
+    def search_songs(self, text, *args, **kwargs):
+        assert text, "method 'search_songs' requires a search value."
+
+        # filter songs
+        songs = self.platform.Songs.filter(
+            Q(title__icontains=text) | 
+            Q(album__name__icontains=text) |
+            Q(uploaded_by__name__icontains=text) |
+            Q(genre__icontains=text)
+        ).distinct()
+
+        return songs
+    
+    def search_albums(self, text, *args, **kwargs):
+        assert text, "method 'search_albums' requires a search value."
+
+        # filter albums
+        albums = self.platform.Albums.filter(
+            Q(name__icontains=text) | 
+            Q(uploaded_by__name__icontains=text) |
+            # filter by contained songs
+            Q(song__title__icontains=text) |
+            Q(song__genre__icontains=text)
+        ).distinct()
+
+        return albums
+    
+    def search_artists(self, text, *args, **kwargs):
+        assert text, "method 'search_artists' requires a search value."
+
+        # filter artists
+        artists = self.platform.Artists.filter(
+            Q(name__icontains=text) |
+            # filter by uploaded albums
+            Q(album__name__icontains=text) |
+            # filter by uploaded songs
+            Q(song_uploaded_by__title__icontains=text) |
+            Q(song_uploaded_by__genre__icontains=text)
+        ).distinct()
+
+        return artists

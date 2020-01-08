@@ -240,18 +240,38 @@ class MusicSearch(GenericPlatformViewSet):
     
     def search_artists(self, text, *args, **kwargs):
         assert text, "method 'search_artists' requires a search value."
+        limit = const.SEARCH_LIMIT
 
-        # filter artists
-        artists = self.platform.Artists.filter(
-            Q(name__icontains=text) |
-            # filter by uploaded albums
-            Q(album__name__icontains=text) |
-            # filter by uploaded songs
-            Q(song_uploaded_by__title__icontains=text) |
-            Q(song_uploaded_by__genre__icontains=text)
+        # artsit name is exactly the search value
+        artists = self.platform.Artists.filter(name__iexact=text).distinct()
+        if artists.count() > limit:
+            return artists[:limit]
+        
+        # album or song is exactly the search value
+        artists = artists | self.platform.Artists.filter(
+            Q(song_uploaded_by__title__iexact=text) |
+            Q(album__name__iexact=text)
         ).distinct()
+        artists = artists.distinct()
+        if artists.count() > limit:
+            return artsits[:limit]
+        
+        # artsit name contains the search value
+        artists = artists | self.platform.Artists.filter(name__icontains=text).distinct()
+        artists = artists.distinct()
+        if artists.count() > limit:
+            return artists[:limit]
+        
+        # album or song contains the search value
+        artists = artists | self.platform.Artists.filter(
+            Q(song_uploaded_by__title__icontains=text) |
+            Q(album__name__icontains=text)
+        ).distinct()
+        artists = artists.distinct()
+        if artists.count() > limit:
+            return artists[:limit]
 
-        return artists
+        return artists[:limit]
     
     def search_playlists(self, text, *args, **kwargs):
         pass

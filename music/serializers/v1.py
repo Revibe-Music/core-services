@@ -8,6 +8,7 @@ from content.models import *
 from content.serializers.v1 import *
 from music.models import *
 
+# -----------------------------------------------------------------------------
 
 class LibrarySerializer(serializers.ModelSerializer):
     platform = serializers.CharField(read_only=True)
@@ -39,8 +40,6 @@ class PlaylistSerializer(serializers.ModelSerializer):
     def create(self, validated_data, *args, **kwargs):
         user = self.get_user()
 
-        if settings.DEBUG:
-            print(validated_data)
         name = validated_data['name']
 
         # check that this user does not have a playlist with this name already
@@ -173,8 +172,6 @@ class PlaylistSongSerializer(serializers.ModelSerializer):
 
         song = get_object_or_404(Song.objects.all(), pk=data['song_id'])
         playlist = get_object_or_404(Playlist.objects.filter(user=user), pk=data['playlist_id'])
-        debug_print(song)
-        debug_print(playlist)
 
         ps = PlaylistSong.objects.filter(playlist=playlist, song=song)
         if (len(ps) == 0) or (len(ps) > 1):

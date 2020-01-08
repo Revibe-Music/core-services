@@ -213,6 +213,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'EXCEPTION_HANDLER': 'revibe._errors.handler.custom_exception_hanlder'
 }
 
 ### Specify the authentication backends ###

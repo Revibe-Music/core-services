@@ -5,6 +5,7 @@ from django.http import HttpRequest
 from django.utils import timesince
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_auth.registration.views import SocialConnectView
 from oauth2_provider.views import TokenView, RevokeTokenView
@@ -23,8 +24,8 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 from revibe.viewsets import GenericPlatformViewSet
+from revibe._errors.network import ConflictError
 from revibe._helpers import responses, const
-from revibe._errors.random import ValidationError
 
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
@@ -289,7 +290,7 @@ class RegistrationAPI(generics.GenericAPIView):
             errors['email'].append(err)
         
         if errors != {}:
-            return responses.SERIALIZER_ERROR_RESPONSE(data=errors)
+            raise ConflictError(detail=errors)
 
         # run registration
         serializer = self.get_serializer(data=request.data)

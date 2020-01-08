@@ -5,6 +5,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
 
+from logging import getLogger
+logger = getLogger(__name__)
+
 from revibe._helpers import responses
 from revibe._helpers.debug import debug_print
 from revibe._helpers.platforms import get_platform, linked_platforms
@@ -15,6 +18,7 @@ from music.mixins import Version1Mixin
 from music.models import *
 from music.serializers.v1 import *
 
+# -----------------------------------------------------------------------------
 
 class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
     serializer_class = LibrarySerializer
@@ -138,10 +142,21 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+        if serializer.is_valid():
+            serializer.save()
+            return responses.CREATED(serializer=serializer)
+        else:
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
+        return responses.DEFAULT_400_RESPONSE()
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.user != instance.user:
+            return responses.NOT_PERMITTED()
+
+        self.perform_destroy(instance)
+        return responses.DELETED()
+
     @action(detail=False, methods=['post', 'delete'])
     def songs(self, request, pk=None, *args, **kwargs):        
         kwargs['context'] = self.get_serializer_context()

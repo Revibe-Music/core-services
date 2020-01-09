@@ -2,13 +2,13 @@ from django.shortcuts import get_object_or_404
 from rest_framework import views, viewsets, permissions as perm, generics, status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
 
 from logging import getLogger
 logger = getLogger(__name__)
 
+from revibe.pagination import CustomLimitOffsetPagination
 from revibe._errors import data, network
 from revibe._helpers import responses
 from revibe._helpers.debug import debug_print
@@ -24,7 +24,7 @@ from music.serializers.v1 import *
 
 class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
     serializer_class = LibrarySerializer
-    pagination_class = LimitOffsetPagination # commented because of sub-class
+    pagination_class = CustomLimitOffsetPagination
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
@@ -49,11 +49,6 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
                 if library in platform.strings:
                     queryset = queryset.filter(platform=platform())
                     break
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
         return responses.OK(serializer)
@@ -149,7 +144,7 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
 
 class PlaylistViewSet(viewsets.ModelViewSet):
     serializer_class = PlaylistSerializer
-    pagination_class = LimitOffsetPagination
+    pagination_class = CustomLimitOffsetPagination
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],

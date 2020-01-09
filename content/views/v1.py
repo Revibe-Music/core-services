@@ -3,6 +3,7 @@ from rest_framework import views, viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from revibe.pagination import CustomLimitOffsetPagination
 from revibe.viewsets import *
 from revibe._helpers import const, responses
 from revibe._helpers.platforms import get_platform
@@ -18,6 +19,7 @@ from content.serializers import v1 as ser_v1
 class ArtistViewset(PlatformViewSet):
     platform = 'Revibe'
     serializer_class = ser_v1.ArtistSerializer
+    pagination_class = CustomLimitOffsetPagination
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
@@ -30,6 +32,12 @@ class ArtistViewset(PlatformViewSet):
     def albums(self, request, pk=None):
         artist = self.get_object()
         queryset = self.platform.Albums.filter(uploaded_by=artist)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ser_v1.AlbumSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = ser_v1.AlbumSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -37,6 +45,12 @@ class ArtistViewset(PlatformViewSet):
     def songs(self, request, pk=None):
         artist = self.get_object()
         queryset = self.platform.Songs.filter(uploaded_by=artist)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ser_v1.SongSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = ser_v1.SongSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -44,6 +58,12 @@ class ArtistViewset(PlatformViewSet):
     def album_contributions(self, request, pk=None):
         artist = self.get_object()
         queryset = self.platform.AlbumContributors.filter(artist=artist, primary_artist=False)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ser_v1.AlbumContributorSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = ser_v1.AlbumContributorSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -51,6 +71,12 @@ class ArtistViewset(PlatformViewSet):
     def song_contributions(self, request, pk=None):
         artist = self.get_object()
         queryset = self.platform.SongContributors.filter(artist=artist, primary_artist=False)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ser_v1.SongContributorSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = ser_v1.SongContributorSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

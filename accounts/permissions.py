@@ -1,7 +1,10 @@
 from django.core.exceptions import ImproperlyConfigured
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import BasePermission
 from oauth2_provider.settings import oauth2_settings
+
+from revibe._errors import auth, permissions
+
+# -----------------------------------------------------------------------------
 
 class TokenOrSessionAuthentication(BasePermission):
 
@@ -19,9 +22,9 @@ class TokenOrSessionAuthentication(BasePermission):
                 for alt in required_alternate_scopes[m]:
                     if token.is_valid(alt):
                         return True
-            raise PermissionError("You do not have access for this request type")
+            raise permissions.PermissionError("You do not have access for this request type")
 
-        raise PermissionError("Could not identify a session or a request access token")
+        raise auth.NoAuthenticationError("Could not identify a session or a request access token")
 
     def get_scopes(self, request, view):
         try:

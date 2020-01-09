@@ -10,7 +10,7 @@ from revibe._errors.random import ValidationError
 from revibe._helpers import const, responses
 
 from accounts import models as acc_models
-from accounts.permissions import TokenOrSessionAuthentication
+from accounts.permissions import TokenOrSessionAuthentication, AdminOnlyTokenPermissions
 from administration.models import *
 from administration.serializers import v1 as adm_ser_v1
 from content import models as cnt_models
@@ -44,7 +44,7 @@ class CompanyViewSet(GenericPlatformViewSet):
     platform = 'Revibe'
     queryset = ContactForm.objects.all()
     serializer_class = adm_ser_v1.ContactFormSerializer
-    permission_classes = [TokenOrSessionAuthentication]
+    permission_classes = [AdminOnlyTokenPermissions]
     required_alternate_scopes = {
         "GET": [["ADMIN"]]
     }

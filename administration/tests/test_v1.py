@@ -10,6 +10,7 @@ import unittest
 import logging
 logger = logging.getLogger(__name__)
 
+from revibe._errors import auth, permissions
 from revibe._helpers import const
 from revibe._helpers.test import AuthorizedAPITestCase
 
@@ -58,7 +59,7 @@ class TestContactForms(AuthorizedAPITestCase):
         for field in expected_fields:
             self.assertTrue(field in response.data.keys(), msg="Expected {} in response fields.".format(field))
     
-    def test_submit_contact_form_fail(self):
+    def test_submit_contact_form_auth(self):
         url = reverse('forms-contact-form')
         data = {
             "subject":"Uh oh",
@@ -66,6 +67,15 @@ class TestContactForms(AuthorizedAPITestCase):
         }
         response = self.client.post(url, data, format="json", **self._get_headers())
 
+        self.assert201(response.status_code)
+    
+    def test_submit_contact_form_fali(self):
+        url = reverse('forms-contact-form')
+        data = {
+            "subject":"Uh oh",
+            "message":"This won't work"
+        }
+        response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_417_EXPECTATION_FAILED)
 
 
@@ -88,9 +98,8 @@ class TestCompanyViews(AuthorizedAPITestCase):
         self.assertEqual(type(response.data['Users']), ReturnList)
 
         # improper authentication
-        with self.assertRaises(PermissionError) as context:
-            broken = self.client.get(url, format="json", **self._get_headers())
-        self.assertTrue("You do not have access for this request type" in str(context.exception))
+        broken = self.client.get(url, format="json", **self._get_headers())
+        self.assertEqual(broken.status_code, status.HTTP_417_EXPECTATION_FAILED)
     
     def test_artist_data(self):
         url = reverse('company-artist-metrics')
@@ -105,9 +114,8 @@ class TestCompanyViews(AuthorizedAPITestCase):
         self.assertEqual(len(response.data['Artists']), response.data['Artist Count'], msg="Response data list length does not equal response count")
 
         # improper authentication
-        with self.assertRaises(PermissionError) as context:
-            broken = self.client.get(url, format="json", **self._get_headers())
-        self.assertTrue("You do not have access for this request type" in str(context.exception))
+        broken = self.client.get(url, format="json", **self._get_headers())
+        self.assertEqual(broken.status_code, status.HTTP_417_EXPECTATION_FAILED)
 
     def test_album_data(self):
         url = reverse('company-album-metrics')
@@ -121,9 +129,8 @@ class TestCompanyViews(AuthorizedAPITestCase):
         self.assertEqual(len(response.data['Albums']), Album.objects.filter(platform=const.REVIBE_STRING).count())
 
         # improper authentication
-        with self.assertRaises(PermissionError) as context:
-            broken = self.client.get(url, format="json", **self._get_headers())
-        self.assertTrue("You do not have access for this request type" in str(context.exception))
+        broken = self.client.get(url, format="json", **self._get_headers())
+        self.assertEqual(broken.status_code, status.HTTP_417_EXPECTATION_FAILED)
     
     def test_song_data(self):
         url = reverse('company-song-metrics')
@@ -138,9 +145,8 @@ class TestCompanyViews(AuthorizedAPITestCase):
         self.assertEqual(len(response.data['Songs']), response.data['Song Count'], msg="Response data length does not equal response song count")
 
         # improper authentication
-        with self.assertRaises(PermissionError) as context:
-            broken = self.client.get(url, format="json", **self._get_headers())
-        self.assertTrue("You do not have access for this request type" in str(context.exception), msg="Song Metrics endpoint does not restrict to only Revibe staff")
+        broken = self.client.get(url, format="json", **self._get_headers())
+        self.assertEqual(broken.status_code, status.HTTP_417_EXPECTATION_FAILED)
 
     def test_contact_form_data(self):
         url = reverse('company-contact-form-metrics')
@@ -153,7 +159,6 @@ class TestCompanyViews(AuthorizedAPITestCase):
         self.assertEqual(len(response.data['Contact Forms']), ContactForm.objects.count(), msg="Response does not contain all contact forms")
         self.assertEqual(len(response.data['Contact Forms']), response.data['Contact Form Count'], msg="Response data length does not equal response count")
 
-        with self.assertRaises(PermissionError) as context:
-            broken = self.client.get(url, format="json", **self._get_headers())
-        self.assertTrue("You do not have access for this request type" in str(context.exception), msg="Contact Form Metrics endpoint does not restrict to only Revibe staff")
+        broken = self.client.get(url, format="json", **self._get_headers())
+        self.assertEqual(broken.status_code, status.HTTP_417_EXPECTATION_FAILED, msg="Contact Form Metrics endpoint does not restrict to only Revibe staff")
 

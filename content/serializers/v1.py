@@ -141,8 +141,10 @@ class AlbumContributorSerializer(serializers.ModelSerializer, ContributionSerial
         ]
     
     def create(self, validated_data):
-        artist = Artist.objects.filter(platform='Revibe').get(pk=validated_data.pop('artist_id'))
-        album = Album.objects.filter(platform='Revibe').get(pk=validated_data.pop('album_id'))
+        artist = validated_data.pop('artist')
+        album = validated_data.pop('album')
+        artist = Artist.objects.filter(platform='Revibe').get(pk=artist['id'])
+        album = Album.objects.filter(platform='Revibe').get(pk=album['id'])
 
         album_contributor = AlbumContributor(**validated_data, artist=artist, album=album)
 

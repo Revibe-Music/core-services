@@ -58,13 +58,20 @@ class ContactFormSerializer(serializers.ModelSerializer):
             if f not in validated_data.keys():
                 name_data = False
         
+        user_id = validated_data.get('user_id', None)
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            user = request.user
+        if user != None and not user.is_anonymous:
+            user_id = user.id
+        
         # raise exception if the data does not have a user or name fields
-        if not (('user_id' in validated_data.keys()) or name_data):
+        if not (bool(user_id) or name_data):
             raise ValidationError("Contact form must contain some form of identifiable information: \
                 user_id, or name and email ")
 
-        if 'user_id' in validated_data.keys():
-            user = acc_models.CustomUser.objects.get(id=validated_data['user_id'])
+        if bool(user_id):
+            user = acc_models.CustomUser.objects.get(id=user_id)
             contact_form_data['user'] = user
         else:
             contact_form_data['first_name'] = validated_data['first_name']

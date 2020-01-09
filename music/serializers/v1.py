@@ -12,12 +12,13 @@ from music.models import *
 
 class LibrarySerializer(serializers.ModelSerializer):
     platform = serializers.CharField(read_only=True)
-    songs = SongSerializer(many=True, read_only=True)
+    # songs = SongSerializer(many=True, read_only=True)
     class Meta:
         model = Library
         fields = [
+            'id',
             'platform',
-            'songs',
+            # 'songs',
         ]
 
 class PlaylistSerializer(serializers.ModelSerializer):

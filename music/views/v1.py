@@ -2,12 +2,14 @@ from django.shortcuts import get_object_or_404
 from rest_framework import views, viewsets, permissions as perm, generics, status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from oauth2_provider.contrib.rest_framework import *
 
 from logging import getLogger
 logger = getLogger(__name__)
 
+from revibe._errors import data, network
 from revibe._helpers import responses
 from revibe._helpers.debug import debug_print
 from revibe._helpers.platforms import get_platform, linked_platforms
@@ -22,6 +24,7 @@ from music.serializers.v1 import *
 
 class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
     serializer_class = LibrarySerializer
+    pagination_class = LimitOffsetPagination # commented because of sub-class
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
@@ -61,7 +64,27 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
         """
 
         if request.method == 'GET':
-            return responses.NOT_IMPLEMENTED()
+            params = request.query_params
+
+            # parameter 'platform' required in request
+            if 'platform' not in params:# and 'id' not in params:
+                raise data.ParameterMissingError("parameter 'paltform' not found, please check the docs for request requirements")
+            platform = params['platform']
+
+            library = self.get_queryset().filter(platform=platform)
+            if library.count() != 1:
+                raise network.NotFoundError()
+            library = library[0]
+
+            songs = library.songs
+            page = self.paginate_queryset(songs)
+            if page is not None:
+                serializer = SongSerializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+            
+            serializer = SongSerializer(songs, many=True)
+            return responses.OK(serializer=serializer)
+
 
         elif request.method == 'POST':
             kwargs['context'] = self.get_serializer_context()

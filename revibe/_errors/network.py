@@ -16,10 +16,22 @@ class UnauthorizedError(APIException):
     default_detail = "Could not identify a user, please re-authenticate and try again"
     default_code = 'unauthorized'
 
+
+class NotFoundError(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    default_detail = "Could not find the specified resource, please try again"
+    default_code = 'not_found'
+
+
 class ConflictError(APIException):
     status_code = status.HTTP_409_CONFLICT
     default_detail = "The request cannot be completed because of a data conflic, please try again"
     default_code = 'conflict'
+
+class ExpectationFailedError(APIException):
+    status_code = status.HTTP_417_EXPECTATION_FAILED
+    default_detail = "Missing data, please check the docs and try again"
+    default_code = "expectation_failed"
 
 # ...
 

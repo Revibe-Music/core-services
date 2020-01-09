@@ -145,11 +145,11 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
     city = serializers.CharField(required=False)
     zip_code = serializers.CharField(required=False)
 
-    require_contribution_approval = serializers.BooleanField(required=False, default=True)
-    require_contribution_approval_on_edit = serializers.BooleanField(required=False, default=True)
-    share_data_with_contributors = serializers.BooleanField(required=False, default=True)
-    share_advanced_data_with_contributors = serializers.BooleanField(required=False, default=False)
-    allow_contributors_to_edit_contributions = serializers.BooleanField(required=False, default=False)
+    require_contribution_approval = serializers.BooleanField(required=False)
+    require_contribution_approval_on_edit = serializers.BooleanField(required=False)
+    share_data_with_contributors = serializers.BooleanField(required=False)
+    share_advanced_data_with_contributors = serializers.BooleanField(required=False)
+    allow_contributors_to_edit_contributions = serializers.BooleanField(required=False)
 
     # read-only
     profile_id = serializers.ReadOnlyField(source='id')
@@ -194,11 +194,11 @@ class UserArtistSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source="artist_profile.city", required=False, write_only=True)
     zip_code = serializers.CharField(source="artist_profile.zip_code", required=False, write_only=True)
 
-    require_contribution_approval = serializers.BooleanField(source="artist_profile.require_contribution_approval", required=False, default=True, write_only=True)
-    require_contribution_approval_on_edit = serializers.BooleanField(source="artist_profile.require_contribution_approval_on_edit", required=False, default=True, write_only=True)
-    share_data_with_contributors = serializers.BooleanField(source="artist_profile.share_data_with_contributors", required=False, default=True, write_only=True)
-    share_advanced_data_with_contributors = serializers.BooleanField(source="artist_profile.share_advanced_data_with_contributors", required=False, default=False, write_only=True)
-    allow_contributors_to_edit_contributions = serializers.BooleanField(source="artist_profile.allow_contributors_to_edit_contributions", required=False, default=False, write_only=True)
+    require_contribution_approval = serializers.BooleanField(source="artist_profile.require_contribution_approval", write_only=True)
+    require_contribution_approval_on_edit = serializers.BooleanField(source="artist_profile.require_contribution_approval_on_edit", write_only=True)
+    share_data_with_contributors = serializers.BooleanField(source="artist_profile.share_data_with_contributors", write_only=True)
+    share_advanced_data_with_contributors = serializers.BooleanField(source="artist_profile.share_advanced_data_with_contributors", write_only=True)
+    allow_contributors_to_edit_contributions = serializers.BooleanField(source="artist_profile.allow_contributors_to_edit_contributions", write_only=True)
 
     class Meta:
         model = Artist

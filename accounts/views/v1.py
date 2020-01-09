@@ -635,7 +635,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
     def patch(self, request, *args, **kwargs):
         instance = request.user.artist
-        serializer = self.get_serializer(data=request.data, instance=instance)
+        serializer = self.get_serializer(data=request.data, instance=instance, partial=True)
         if serializer.is_valid():
             serializer.save()
             return responses.UPDATED(serializer=serializer)

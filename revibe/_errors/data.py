@@ -10,3 +10,7 @@ from revibe._helpers import const, status
 
 class ParameterMissingError(network.ExpectationFailedError):
     default_detail = "missing paramter, please check the docs for request requirements"
+
+
+class SerializerValidationError(network.ExpectationFailedError):
+    default_detail = "misc. serializer error, please try again"

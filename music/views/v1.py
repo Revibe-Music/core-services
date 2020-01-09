@@ -91,7 +91,7 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
             # kwargs['version'] = self.get_version()
             platform = get_platform(request.data['platform'])
 
-            # serializer = platform().save_song_to_library(data=request.data, *args, **kwargs)
+            # serializer = platform.save_song_to_library(data=request.data, *args, **kwargs)
             serializer = LibrarySongSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()

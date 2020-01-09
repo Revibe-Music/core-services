@@ -3,7 +3,10 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.translation import gettext_lazy as _
 # from oauth2_provider.models import AccessToken, AbstractAccessToken
+
+# -----------------------------------------------------------------------------
 
 
 class CustomUser(AbstractUser):
@@ -50,6 +53,10 @@ class ArtistProfile(models.Model):
     share_data_with_contributors = models.BooleanField(null=False, blank=True, default=True)
     share_advanced_data_with_contributors = models.BooleanField(null=False, blank=True, default=False)
     allow_contributors_to_edit_contributions = models.BooleanField(null=False, blank=True, default=False)
+    hide_all_content = models.BooleanField(
+        _("Hide all artist's content from appearing in the Revibe app, and prevents the artist from being added as a contributor."),
+        null=False, blank=True, default=False
+    )
 
     def __str__(self):
         return "{}'s Artist Profile".format(self.artist)

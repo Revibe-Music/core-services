@@ -292,11 +292,15 @@ class SongSerializer(serializers.ModelSerializer):
         return song
 
 
+# -----------------------------------------------------------------------------
 # Non-Revibe Content Serializers
 
 class OtherArtistSerializer(serializers.ModelSerializer):
     artist_id = serializers.CharField(source='id', required=False)
     artist_uri = serializers.CharField(source='uri', required=False)
+
+    # read-only
+    
 
     class Meta:
         model = Artist

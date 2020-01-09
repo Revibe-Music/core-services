@@ -10,5 +10,5 @@ linked_platforms = [
 def get_platform(string):
     for platform in linked_platforms:
         if string in platform.strings:
-            return platform
+            return platform()
     raise PlatformNotFoundError("Could not determine the platform based on the input {}".format(string))

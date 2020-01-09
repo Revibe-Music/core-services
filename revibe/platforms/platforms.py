@@ -1,9 +1,17 @@
+from rest_framework.serializers import ValidationError
+
+from logging import getLogger
+logger = getLogger(__name__)
+
 from revibe.platforms.base_platform import Platform
+from revibe._errors import data, versions
 from revibe._helpers.versions import Version
 
 from content.models import *
 from content.serializers import v1 as content_ser_v1
 from music.serializers import v1 as ser_v1
+
+# -----------------------------------------------------------------------------
 
 class Revibe(Platform):
     strings = [
@@ -18,10 +26,13 @@ class Revibe(Platform):
         version = kwargs.pop('version', Version().latest)
 
         if version == 'v1':
-            serializer = ser_v1.BaseLibrarySongSerializer(data=data, *args, **kwargs)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return serializer
+            serializer = ser_v1.LibrarySongSerializer(data=data, *args, **kwargs)
+            if serializer.is_valid():
+                serializer.save()
+                return serializer
+            raise data.SerializerValidationError(serializer.errors)
+        
+        raise versions.VersionError("Could not identify the required API version")
     
     def destroy(self, instance):
         if isinstance(instance, (Song, Album)):

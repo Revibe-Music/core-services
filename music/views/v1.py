@@ -68,7 +68,7 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
 
             # parameter 'platform' required in request
             if 'platform' not in params:# and 'id' not in params:
-                raise data.ParameterMissingError("parameter 'paltform' not found, please check the docs for request requirements")
+                raise data.ParameterMissingError("parameter 'platform' not found, please check the docs for request requirements")
             platform = params['platform']
 
             library = self.get_queryset().filter(platform=platform)
@@ -149,6 +149,7 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
 
 class PlaylistViewSet(viewsets.ModelViewSet):
     serializer_class = PlaylistSerializer
+    pagination_class = LimitOffsetPagination
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
@@ -180,11 +181,32 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return responses.DELETED()
 
-    @action(detail=False, methods=['post', 'delete'])
+    @action(detail=False, methods=['get','post', 'delete'])
     def songs(self, request, pk=None, *args, **kwargs):        
         kwargs['context'] = self.get_serializer_context()
 
-        if request.method == 'POST':
+        if request.method == 'GET':
+            params = request.query_params
+
+            if 'playlist_id' not in params:
+                raise data.ParameterMissingError("parameter 'playlist_id' not found, please check the docs for request requirements")
+            platform = params['playlist_id']
+
+            playlist = self.get_queryset().filter(id=params['playlist_id'])
+            if playlist.count() != 1:
+                raise network.NotFoundError()
+            playlist = playlist[0]
+
+            songs = playlist.songs.all()
+            page = self.paginate_queryset(songs)
+            if page is not None:
+                serializer = SongSerializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+            
+            serializer = SongSerializer(songs, many=True)
+            return responses.OK(serializer=serializer)
+
+        elif request.method == 'POST':
             serializer = PlaylistSongSerializer(data=request.data, *args, **kwargs)
             serializer.is_valid(raise_exception=True)
             serializer.save()

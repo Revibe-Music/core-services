@@ -22,14 +22,14 @@ class LibrarySerializer(serializers.ModelSerializer):
         ]
 
 class PlaylistSerializer(serializers.ModelSerializer):
-    songs = SongSerializer(many=True, read_only=True)
+    # songs = SongSerializer(many=True, read_only=True)
     # write-only fields
     class Meta:
         model = Playlist
         fields = [
             'id',
             'name',
-            'songs',
+            # 'songs',
         ]
     
     def get_user(self):

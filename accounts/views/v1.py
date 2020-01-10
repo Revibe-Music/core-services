@@ -657,11 +657,11 @@ class UserArtistViewSet(GenericPlatformViewSet):
     def get_current_artist(self, request):
         # check that the request has a user
         if not request.user:
-            raise AccountNotFound()
+            raise AccountNotFound() # 401
 
         # check that the user has an artist account
         if not request.user.artist:
-            raise NotArtistError()
+            raise NotArtistError() # 403
 
         # double check that the artist has an artist profile
         artist = request.user.artist

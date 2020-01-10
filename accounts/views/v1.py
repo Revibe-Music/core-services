@@ -312,7 +312,8 @@ class RegistrationAPI(generics.GenericAPIView):
                 try:
                     campaign = Campaign.objects.get(uri=params['cid'])
                     user.profile.campaign = campaign
-                except Exception:
+                    user.profile.save()
+                except Exception as e:
                     pass
 
             time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME

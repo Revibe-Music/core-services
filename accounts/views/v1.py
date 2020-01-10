@@ -614,11 +614,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
         'DELETE': [['ADMIN'],['first-party']],
     }
 
-    def list(self, request):
-        if not request.user.artist:
-            return responses.UNAUTHORIZED(detail="could not identify the current artist")
+    def list(self, request, *args, **kwargs):
+        artist = self.get_current_artist(request)
 
-        artist = self.serializer_class(request.user.artist, context=self.get_serializer_context())
+        artist = self.serializer_class(artist, context=self.get_serializer_context())
         return responses.OK(serializer=artist)
 
     def create(self, request, *args, **kwargs):
@@ -646,7 +645,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         return responses.DEFAULT_400_RESPONSE()
 
     def patch(self, request, *args, **kwargs):
-        instance = request.user.artist
+        instance = self.get_current_artist(request)
         serializer = self.get_serializer(data=request.data, instance=instance, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -671,7 +670,6 @@ class UserArtistViewSet(GenericPlatformViewSet):
             artist_profile.save()
 
         return artist
-
 
     @action(detail=False, methods=['get','post','patch','delete'])
     def albums(self, request, *args, **kwargs):

@@ -192,6 +192,26 @@ class TestArtistAccount(RevibeTestCase):
         new_artist = Artist.objects.get(id=response.data['artist_id'])
         self.artist_user = new_artist.artist_user
 
-        self.assertEqual(new_artist.name, data['name'], "Database did not update with new name")
+        self.assertEqual(
+            new_artist.name, data['name'],
+            msg="Database did not update with new name"
+        )
 
+    def test_get_artist_profile(self):
+        url = reverse('artistaccount-list')
+        response = self.client.get(url, format="json", **self._get_headers(artist=True))
+
+        self.assert200(response, msg=_("Response code is not 200"))
+        self.assertEqual(
+            type(response.data), ReturnDict,
+            msg="Response is not of the correct type"
+        )
+        self.assertTrue(
+            'artist_profile' in response.data.keys(),
+            msg="Returned artist does not contain an artist profile"
+        )
+        self.assertEqual(
+            str(response.data['artist_id']), str(self.artist_user.artist.id),
+            msg="The artist returned is not the authenticated artist"
+        )
 

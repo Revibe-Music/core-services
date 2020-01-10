@@ -12,27 +12,54 @@ from django.utils.translation import gettext_lazy as _
 class CustomUser(AbstractUser):
     artist = models.OneToOneField('content.artist', on_delete=models.SET_NULL, related_name='artist_user', null=True, blank=True)
     manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
-    is_artist = models.BooleanField('Artist Flag', null=False, blank=True, default=False)
-    is_manager = models.BooleanField('Manager Flag', null=False, blank=True, default=False)
+    is_artist = models.BooleanField(
+        'Flag that indicates this user has an Artist Profile',
+        null=False, blank=True, default=False
+    )
+    is_manager = models.BooleanField(
+        'Flag that indicates this user is a manager of an artist', 
+        null=False, blank=True, default=False
+    )
 
 class Profile(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
-    email = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    email = models.CharField(
+        "User's email address",
+        max_length=255, null=True, blank=True, unique=True
+    )
     campaign = models.ForeignKey('administration.Campaign', on_delete=models.SET_NULL, null=True, blank=True, default=None)
 
-    country = models.CharField('Country', max_length=255, null=True, blank=True)
-    dob = models.DateField('Date of Birth', null=True, blank=True)
-    image = models.FileField("Profile Picture", upload_to='images/profiles', null=True, blank=True)
+    country = models.CharField(
+        'Country',
+        max_length=255, null=True, blank=True
+    )
+    dob = models.DateField(
+        'Date of Birth',
+        null=True, blank=True
+    )
+    image = models.FileField(
+        "Profile Picture",
+        upload_to='images/profiles', null=True, blank=True
+    )
 
     # user settings fields
-    allow_explicit = models.BooleanField(null=False, blank=True, default=True)
+    allow_explicit = models.BooleanField(
+        "Allow the user to listen to explicit content",
+        null=False, blank=True, default=True
+    )
 
     # privacy settings
-    allow_listening_data = models.BooleanField(null=False, blank=True, default=True)
+    allow_listening_data = models.BooleanField(
+        "Allow this user to be linked to the recorded listening data",
+        null=False, blank=True, default=True
+    )
 
     # notification settings
-    allow_email_marketing = models.BooleanField(null=False, blank=True, default=True)
+    allow_email_marketing = models.BooleanField(
+        "Allow Revibe to send email to the user for marketing purposes",
+        null=False, blank=True, default=True
+    )
 
     def __str__(self):
         return "{}'s User Profile".format(self.user)
@@ -49,13 +76,28 @@ class ArtistProfile(models.Model):
     zip_code = models.CharField(max_length=255, null=True, blank=True)
 
     # account settings
-    require_contribution_approval = models.BooleanField(null=False, blank=True, default=True)
-    require_contribution_approval_on_edit = models.BooleanField(null=False, blank=True, default=True)
-    share_data_with_contributors = models.BooleanField(null=False, blank=True, default=True)
-    share_advanced_data_with_contributors = models.BooleanField(null=False, blank=True, default=False)
-    allow_contributors_to_edit_contributions = models.BooleanField(null=False, blank=True, default=False)
+    require_contribution_approval = models.BooleanField(
+        "Require that all new contributions must be approved by the artist",
+        null=False, blank=True, default=True
+    )
+    require_contribution_approval_on_edit = models.BooleanField(
+        "Require that all changes to contributions must be re-approved by the artist",
+        null=False, blank=True, default=True
+    )
+    share_data_with_contributors = models.BooleanField(
+        "Allow streaming data to be shared with contributors to uploaded content",
+        null=False, blank=True, default=True
+    )
+    share_advanced_data_with_contributors = models.BooleanField(
+        "Allow advanced streaming data to be shared with contributors to uploaded content",
+        null=False, blank=True, default=False
+    )
+    allow_contributors_to_edit_contributions = models.BooleanField(
+        "Allow contributors to edit their contributions to content", # can delete contributions regardless
+        null=False, blank=True, default=False
+    )
     hide_all_content = models.BooleanField(
-        _("Hide all artist's content from appearing in the Revibe app, and prevents the artist from being added as a contributor."),
+        "Hide all artist's content from appearing in the Revibe app, and prevents the artist from being added as a contributor.",
         null=False, blank=True, default=False
     )
 

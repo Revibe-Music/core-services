@@ -60,6 +60,9 @@ class TestStatusMixin:
     def assert400(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 400)
     
+    def assert403(self, arg1, *args, **kwargs):
+        self._assert_status_code(arg1, 403)
+    
     def assert409(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 409)
 

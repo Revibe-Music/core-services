@@ -1,6 +1,8 @@
 from django.urls import reverse
 from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 
+from collections import OrderedDict
+
 from logging import getLogger
 logger = getLogger(__name__)
 
@@ -57,10 +59,12 @@ class TestPlaylists(RevibeTestCase):
 
         response = self.client.get(url, format="json", **self._get_headers())
         self.assert200(response.status_code)
-        self.assertEqual(type(response.data), ReturnList)
-        self.assertEqual(len(response.data), len(Playlist.objects.filter(user=self.user)))
-        if len(response.data) > 0:
-            for playlist in response.data:
+
+        results = response.data['results']
+        self.assertEqual(type(results), ReturnList)
+        self.assertEqual(len(results), len(Playlist.objects.filter(user=self.user)))
+        if len(results) > 0:
+            for playlist in results:
                 self.assertEqual(str(self.user.id), str(playlist.user.id), msg="Returned a playlist that didn't belong to the current user")
 
     def test_create_playlist(self):

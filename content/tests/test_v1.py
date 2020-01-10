@@ -3,6 +3,8 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 
+from collections import OrderedDict
+
 from logging import getLogger
 logger = getLogger(__name__)
 
@@ -25,9 +27,13 @@ class TestArtists(RevibeTestCase):
         response = self.client.get(url, format="json", **self._get_headers())
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), cnt_models.Artist.objects.filter(platform=const.REVIBE_STRING).count())
-        self.assertEqual(type(response.data), ReturnList)
-    
+        self.assertEqual(len(response.data['results']), cnt_models.Artist.objects.filter(platform=const.REVIBE_STRING).count())
+        self.assertEqual(type(response.data['results']), ReturnList)
+
+        # pagination
+        self.assertEqual(len(response.data), 4)
+        self.assertEqual(type(response.data), OrderedDict)
+
     def test_artist_details(self):
         url = reverse('artist-detail', args=[self.artist.id])
         response = self.client.get(url, format="json", **self._get_headers())
@@ -41,16 +47,16 @@ class TestArtists(RevibeTestCase):
         response = self.client.get(url, format="json", **self._get_headers())
 
         self.assert200(response.status_code)
-        self.assertEqual(type(response.data), ReturnList)
-        self.assertEqual(len(response.data), cnt_models.Album.objects.filter(uploaded_by=self.artist, is_displayed=True, is_deleted=False).count())
+        self.assertEqual(type(response.data['results']), ReturnList)
+        self.assertEqual(len(response.data['results']), cnt_models.Album.objects.filter(uploaded_by=self.artist, is_displayed=True, is_deleted=False).count())
 
     def test_artist_songs(self):
         url = reverse('artist-cnt-artist-songs', args=[self.artist.id])
         response = self.client.get(url, format="json", **self._get_headers())
 
         self.assert200(response.status_code)
-        self.assertEqual(type(response.data), ReturnList, msg="Artist songs not returned in correct format")
-        self.assertEqual(len(response.data), cnt_models.Song.objects.filter(uploaded_by=self.artist, is_displayed=True, is_deleted=False).count(), msg="Artist songs not returning as much data as it should be")
+        self.assertEqual(type(response.data['results']), ReturnList, msg="Artist songs not returned in correct format")
+        self.assertEqual(len(response.data['results']), cnt_models.Song.objects.filter(uploaded_by=self.artist, is_displayed=True, is_deleted=False).count(), msg="Artist songs not returning as much data as it should be")
 
 
 class TestAlbums(RevibeTestCase):

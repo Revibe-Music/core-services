@@ -99,7 +99,7 @@ class TestCompanyViews(AuthorizedAPITestCase):
 
         # improper authentication
         broken = self.client.get(url, format="json", **self._get_headers())
-        self.assertEqual(broken.status_code, status.HTTP_417_EXPECTATION_FAILED)
+        self.assert403(broken)
     
     def test_artist_data(self):
         url = reverse('company-artist-metrics')
@@ -115,7 +115,7 @@ class TestCompanyViews(AuthorizedAPITestCase):
 
         # improper authentication
         broken = self.client.get(url, format="json", **self._get_headers())
-        self.assertEqual(broken.status_code, status.HTTP_417_EXPECTATION_FAILED)
+        self.assert403(broken)
 
     def test_album_data(self):
         url = reverse('company-album-metrics')
@@ -130,7 +130,7 @@ class TestCompanyViews(AuthorizedAPITestCase):
 
         # improper authentication
         broken = self.client.get(url, format="json", **self._get_headers())
-        self.assertEqual(broken.status_code, status.HTTP_417_EXPECTATION_FAILED)
+        self.assert403(broken)
     
     def test_song_data(self):
         url = reverse('company-song-metrics')
@@ -146,7 +146,7 @@ class TestCompanyViews(AuthorizedAPITestCase):
 
         # improper authentication
         broken = self.client.get(url, format="json", **self._get_headers())
-        self.assertEqual(broken.status_code, status.HTTP_417_EXPECTATION_FAILED)
+        self.assert403(broken)
 
     def test_contact_form_data(self):
         url = reverse('company-contact-form-metrics')
@@ -160,5 +160,5 @@ class TestCompanyViews(AuthorizedAPITestCase):
         self.assertEqual(len(response.data['Contact Forms']), response.data['Contact Form Count'], msg="Response data length does not equal response count")
 
         broken = self.client.get(url, format="json", **self._get_headers())
-        self.assertEqual(broken.status_code, status.HTTP_417_EXPECTATION_FAILED, msg="Contact Form Metrics endpoint does not restrict to only Revibe staff")
+        self.assert403(broken, msg="Contact Form Metrics endpoint does not restrict to only Revibe staff")
 

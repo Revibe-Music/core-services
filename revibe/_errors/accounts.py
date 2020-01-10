@@ -1,5 +1,6 @@
 from rest_framework.exceptions import APIException
 
+from revibe._errors import network
 from revibe._helpers import status
 
 # -----------------------------------------------------------------------------
@@ -8,6 +9,9 @@ class AccountError(APIException):
     status_code = status.HTTP_409_CONFLICT
     default_detail = "The request could not be completed, please try again"
     default_code = 'conflict'
+
+class NotArtistError(network.ForbiddenError):
+    default_detail = "Could not identify the current artist"
 
 class ProfileNotFoundError(APIException):
     status_code = status.HTTP_404_NOT_FOUND

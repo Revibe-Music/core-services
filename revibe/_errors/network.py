@@ -17,6 +17,12 @@ class UnauthorizedError(APIException):
     default_code = 'unauthorized'
 
 
+class ForbiddenError(APIException):
+    status_code = status.HTTP_403_FORBIDDEN
+    default_detail = "You are not permitted to perform the current action"
+    default_code = "forbidden"
+
+
 class NotFoundError(APIException):
     status_code = status.HTTP_404_NOT_FOUND
     default_detail = "Could not find the specified resource, please try again"

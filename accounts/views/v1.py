@@ -24,6 +24,7 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 from revibe.viewsets import GenericPlatformViewSet
+from revibe._errors.accounts import NotArtistError
 from revibe._errors.network import ConflictError
 from revibe._helpers import responses, const
 
@@ -658,7 +659,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
     def albums(self, request, *args, **kwargs):
         """
         """
-        artist = request.user.artist
+        # get the current artist
+        if request.user.artist:
+            artist = request.user.artist
+        else:
+            raise NotArtistError()
+
         album_queryset = self.platform.HiddenAlbums.filter(uploaded_by=artist)
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['PATCH','DELETE']:

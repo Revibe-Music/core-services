@@ -276,6 +276,17 @@ class TestArtistAlbums(RevibeTestCase):
         self.uploaded = True
         self.album_id = response.data['album_id']
 
+    def test_upload_album_not_artist(self):
+        data = {
+            "Name":"Not gonna matter",
+            "image":self.generate_album_image(),
+            "type":"nonexistent"
+        }
+        response = self.client.post(self.url, data, format="multipart", **self._get_headers())
+
+        # validate response
+        self.assert403(response)
+
     def test_get_albums(self):
         response = self.client.get(self.url, format="json", **self._get_headers(artist=True))
 

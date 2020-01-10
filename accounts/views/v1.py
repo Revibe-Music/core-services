@@ -24,7 +24,7 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 from revibe.viewsets import GenericPlatformViewSet
-from revibe._errors.accounts import NotArtistError
+from revibe._errors.accounts import AccountNotFound, NotArtistError
 from revibe._errors.network import ConflictError
 from revibe._helpers import responses, const
 
@@ -655,15 +655,30 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
         return responses.DEFAULT_400_RESPONSE()
 
+    def get_current_artist(self, request):
+        # check that the request has a user
+        if not request.user:
+            raise AccountNotFound()
+
+        # check that the user has an artist account
+        if not request.user.artist:
+            raise NotArtistError()
+
+        # double check that the artist has an artist profile
+        artist = request.user.artist
+        if not artist.artist_profile:
+            artist_profile = ArtistProfile.objects.create(artist=artist)
+            artist_profile.save()
+
+        return artist
+
+
     @action(detail=False, methods=['get','post','patch','delete'])
     def albums(self, request, *args, **kwargs):
         """
         """
         # get the current artist
-        if request.user.artist:
-            artist = request.user.artist
-        else:
-            raise NotArtistError()
+        artist = self.get_current_artist(request)
 
         album_queryset = self.platform.HiddenAlbums.filter(uploaded_by=artist)
         kwargs['context'] = self.get_serializer_context()
@@ -761,7 +776,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
     @action(detail=False, methods=['get','post','patch','delete'])
     def songs(self, request, *args, **kwargs):
-        artist = request.user.artist
+        artist = self.get_current_artist(request)
+
         song_queryset = self.platform.HiddenSongs.filter(uploaded_by=artist)
         album_queryset = self.platform.HiddenAlbums.filter(uploaded_by=artist)
         kwargs['context'] = self.get_serializer_context()
@@ -831,12 +847,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
             instance.save()
             return responses.DELETED()
         
-        else:
-            return responses.NO_REQUEST_TYPE()
+        return responses.NO_REQUEST_TYPE()
 
     @action(detail=False)
     def contributions(self, request):
-        artist = request.user.artist
+        artist = self.get_current_artist(request)
+
         songs = self.platform.HiddenSongContributors.filter(artist=artist, primary_artist=False)
         albums = self.platform.HiddenAlbumContributions.filter(artist=artist, primary_artist=False, album__is_displayed=True)
         song_serializer = content_ser_v1.SongContributorSerializer(songs, many=True)
@@ -848,7 +864,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
     
     @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums')
     def album_contributions(self, request, *args, **kwargs):
-        artist = request.user.artist
+        artist = self.get_current_artist(request)
+
         albumcontribution_queryset = self.platform.HiddenAlbumContributions.filter(artist=artist, primary_artist=False)
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['PATCH','DELETE']:
@@ -904,7 +921,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
     
     @action(detail=False, url_path='contributions/songs', methods=['get','post','patch','delete'])
     def song_contributions(self, request, *args, **kwargs):
-        artist = request.user.artist
+        artist = self.get_current_artist(request)
+
         songcontribution_queryset = self.platform.HiddenSongContributors.filter(artist=artist, primary_artist=False)
         full_queryset = SongContributor.objects.all()
         kwargs['context'] = self.get_serializer_context()
@@ -964,7 +982,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         """
         Approves or denies song and album contributions.
         """
-        artist = request.user.artist
+        artist = self.get_current_artist(request)
 
         # validate data
         required_fields = ['content','contribution_id','action']

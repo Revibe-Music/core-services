@@ -10,6 +10,11 @@ class AccountError(APIException):
     default_detail = "The request could not be completed, please try again"
     default_code = 'conflict'
 
+
+class AccountNotFound(network.UnauthorizedError):
+    default_detail = "Could not identify the current user, please try again"
+
+
 class NotArtistError(network.ForbiddenError):
     default_detail = "Could not identify the current artist"
 

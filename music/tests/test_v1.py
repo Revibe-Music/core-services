@@ -53,7 +53,7 @@ class TestPlaylists(RevibeTestCase):
 
         self.added_songs = False
         self.created_playlist = False
-    
+
     def test_playlist_list(self):
         url = reverse('playlist-list')
 

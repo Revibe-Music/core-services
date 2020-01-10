@@ -245,15 +245,15 @@ class UserArtistSerializer(serializers.ModelSerializer):
         return fields
     
     def create(self, validated_data, *args, **kwargs):
+        print(validated_data)
         artist_profile_data = validated_data.pop('artist_profile', False)
 
         artist = Artist.objects.create(**validated_data)
         artist.save()
 
-        if artist_profile_data:
-            profile = ArtistProfile.objects.create(**artist_profile_data, artist=artist)
-        else:
-            profile = ArtistProfile.objects.create(artist=artist)
+        profile = ArtistProfile.objects.create(artist=artist)
+        if 'email' in artist_profile_data.keys():
+            profile.email = artist_profile_data['email']
         profile.save()
 
         return artist

@@ -247,13 +247,13 @@ class UserArtistSerializer(serializers.ModelSerializer):
     def create(self, validated_data, *args, **kwargs):
         artist_profile_data = validated_data.pop('artist_profile', False)
 
-        artist = Artist(**validated_data)
+        artist = Artist.objects.create(**validated_data)
         artist.save()
 
         if artist_profile_data:
-            profile = ArtistProfile(**artist_profile_data, artist=artist)
+            profile = ArtistProfile.objects.create(**artist_profile_data, artist=artist)
         else:
-            profile = ArtistProfile(artist=artist)
+            profile = ArtistProfile.objects.create(artist=artist)
         profile.save()
 
         return artist

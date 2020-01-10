@@ -158,6 +158,23 @@ class TestArtistAccount(RevibeTestCase):
         created_artist = Artist.objects.get(id=response.data['artist_id'])
         self.assertEqual(self.temp_user, created_artist.artist_user)
         self.assertEqual(created_artist.artist_profile.require_contribution_approval, True, "Require contribution approval did not default correctly")
+    
+    def test_register_artist_user_already_has_artist(self):
+        """
+        Test if a user that already has an artist account can register a new
+        artist.
+
+        Should fail.
+        """
+        url = reverse('artistaccount-list')
+        data = {
+            "name":"Shouldn't work",
+            "image":self.generate_artist_iamge()
+        }
+        response = self.client.post(url, data, format="multipart",**self._get_headers(artist=True))
+
+        self.assert409(response)
+
 
     def test_edit_artist_profile(self):
         url = reverse('artistaccount-list')

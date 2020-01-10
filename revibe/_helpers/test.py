@@ -17,14 +17,51 @@ from content.models import *
 # mixins
 
 class TestStatusMixin:
-    def assert200(self, arg1):
-        self.assertEqual(arg1, status.HTTP_200_OK)
+    def _get_code(self, arg1):
+        """
+        Allows test cases to send a status code or the response object to all
+        assert status code methods.
+        """
+        # check if sent a status code directly
+        if type(arg1) == int:
+            return arg1
+        # check if sent a response with a valid status code
+        elif type(arg1.status_code) == int:
+            return arg1.status_code
+        # check if the status code was somehow sent as some other object that \
+        # can be cast as a string
+        else:
+            try:
+                return int(arg1)
+            except ValueError:
+                pass
+
+        raise ValueError(f"Could not find a status code in object: {arg1}")
+
+    def _assert_status_code(self, arg, status, *args, **kwargs):
+        """
+        Where the magic happens...
+        Makes sure it has an integer from the response and does the comparison.
+        """
+        arg = self._get_code(arg)
+        self.assertEqual(arg, status, *args, **kwargs)
+
+    # 2xx
+    def assert200(self, arg1, *args, **kwargs):
+        self._assert_status_code(arg1, 200)
+
+    def assert201(self, arg1, *args, **kwargs):
+        self._assert_status_code(arg1, 201)
+
+    def assert204(self, arg1, *args, **kwargs):
+        self._assert_status_code(arg1, 204)
     
-    def assert201(self, arg1):
-        self.assertEqual(arg1, status.HTTP_201_CREATED)
+    # 4xx
+    def assert400(self, arg1, *args, **kwargs):
+        self._assert_status_code(arg1, 400)
     
-    def assert204(self, arg1):
-        self.assertEqual(arg1, status.HTTP_204_NO_CONTENT)
+    def assert409(self, arg1, *args, **kwargs):
+        self._assert_status_code(arg1, 409)
 
 
 class BaseRevibeTestMixin:

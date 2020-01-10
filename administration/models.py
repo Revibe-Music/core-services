@@ -30,7 +30,7 @@ class ContactForm(models.Model):
 
 
 class Campaign(models.Model):
-    uri = models.CharField(max_length=255, null=False, blank=False, editable=False, unique=True, default=uuid1)
+    uri = models.CharField(max_length=255, null=False, blank=False, unique=True, default=uuid1)
     name = models.CharField(max_length=255, null=False, blank=False)
     budget = models.IntegerField(null=False, blank=False)
     spent = models.IntegerField(null=True, blank=True)

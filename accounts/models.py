@@ -19,6 +19,7 @@ class Profile(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
     email = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    campaign = models.ForeignKey('administration.Campaign', on_delete=models.SET_NULL, null=True, blank=True, default=None)
 
     country = models.CharField('Country', max_length=255, null=True, blank=True)
     dob = models.DateField('Date of Birth', null=True, blank=True)

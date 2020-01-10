@@ -31,6 +31,7 @@ from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *
 from accounts._helpers import validation
+from administration.models import Campaign
 from content.models import Album, Song, SongContributor, AlbumContributor
 from content.serializers import v1 as content_ser_v1
 from metrics.models import Stream
@@ -304,6 +305,15 @@ class RegistrationAPI(generics.GenericAPIView):
                 user=serializer.save()
             except IntegrityError as err:
                 return responses.CONFLICT(detail=str(err))
+            
+            # check query params for campaign info
+            params = request.query_params
+            if 'cid' in params:
+                try:
+                    campaign = Campaign.objects.get(uri=params['cid'])
+                    user.profile.campaign = campaign
+                except Exception:
+                    pass
 
             time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME
             expire = timezone.now() + datetime.timedelta(hours=time)

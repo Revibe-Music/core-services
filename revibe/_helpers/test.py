@@ -34,12 +34,14 @@ class BaseRevibeTestMixin:
             except Exception as e:
                 raise e
 
-    def _get_headers(self, sper=False, artist=False):
+    def _get_headers(self, sper=False, artist=False, other=None):
         token = self.access_token
         if sper:
             token = self.super_access_token
         elif artist:
             token = self.artist_access_token
+        elif other is not None:
+            token = other
         return {"Authorization": "Bearer {}".format(token)}
 
 

@@ -6,7 +6,7 @@ from accounts.views import v1, v1_reference
 
 router = routers.DefaultRouter()
 # router.register("user", v1.AuthenticationViewSet, "user")
-router.register("artist", v1.UserArtistViewSet, "artist") # artist portal ONLY
+router.register("artist", v1.UserArtistViewSet, "artistaccount") # artist portal ONLY
 router.register("linked-accounts", v1.UserLinkedAccounts, 'linked_accounts')
 
 
@@ -30,5 +30,5 @@ urlpatterns = [
     path('spotify-authentication/', v1.SpotifyConnect.as_view()),
     path('spotify-refresh/', v1.SpotifyRefresh.as_view()),
     path('spotify-logout/', v1.SpotifyLogout.as_view()),
-    path('artist', v1.UserArtistViewSet, name='user_artist'),
+    # path('artist', v1.UserArtistViewSet, name='user_artist'),
 ]

@@ -245,7 +245,6 @@ class UserArtistSerializer(serializers.ModelSerializer):
         return fields
     
     def create(self, validated_data, *args, **kwargs):
-        print(validated_data)
         artist_profile_data = validated_data.pop('artist_profile', False)
 
         artist = Artist.objects.create(**validated_data)

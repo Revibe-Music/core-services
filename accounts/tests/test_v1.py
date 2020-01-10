@@ -1,6 +1,10 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
-from oauth2_provider.models import Application
+from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
+
+import io
+import os
+from PIL import Image
 
 import logging
 logger = logging.getLogger(__name__)
@@ -9,6 +13,7 @@ from revibe._helpers.test import RevibeTestCase
 from revibe._helpers import status
 
 from accounts.models import CustomUser, Profile
+from content.models import Artist
 
 # -----------------------------------------------------------------------------
 
@@ -106,20 +111,70 @@ class TestUserAccount(RevibeTestCase):
         self.assertEqual(response.status_code, status.HTTP_417_EXPECTATION_FAILED)
 
 
-# class TestRegisterArtist(APITestCase):
-#     def setUp(self):
-#         create_application()
-#         self.user, self.access_token = create_artist_test_user()
-    
-#     def _get_headers(self):
-#         return {"Authorization": "Bearer {}".format(self.access_token)}
+class TestArtistAccount(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._get_artist_user()
 
-#     def test_register_artist(self):
-#         url = reverse('user_artist')
-#         data = {
-#             'name': "Artist Test Register",
-#             "image": None
-#         }
-#         response = self.client.post(url, data, format="json", **self._get_headers())
+    def generate_artist_user(self):
+        # create the user to become an artist
+        user = CustomUser.objects.create_user("artist","artist@artist.com","artist")
+        user_profile = Profile.objects.create(user=user)
+        user.save()
+        user_profile.save()
 
-#         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        url = reverse('login')
+        data = {"username":"artist","password":"artist","device_type":"browser"}
+        response = self.client.post(url, data, format="json")
+        self.temp_user = user
+        self.temp_access_token = response.data['access_token']
+
+    def generate_artist_iamge(self):
+        file = io.BytesIO()
+        image = Image.new('RGBA', size=(100, 100), color=(155, 0, 0))
+        image.save(file, 'png')
+        file.name = 'test.png'
+        file.seek(0)
+        return file
+
+    def test_register_artsit(self):
+        self.generate_artist_user()
+        # send the response
+        url = reverse('artistaccount-list')
+        data = {
+            "name":"Test Register Artist",
+            "image": self.generate_artist_iamge()
+        }
+        response = self.client.post(url, data, format="multipart", **self._get_headers(other=self.temp_access_token))
+
+        # tests
+        self.assert201(response.status_code)
+        self.assertEqual(type(response.data), ReturnDict, msg="Response was not in the correct format")
+        self.assertTrue('artist_profile' in response.data.keys(), msg="Response did not contain an 'Artist Profile' object")
+        self.assertTrue('user' in response.data.keys(), msg="Response did not contain a 'User' object")
+        self.assertTrue('profile' in response.data['user'].keys(), msg="Artist's 'User' object did contain a profile")
+
+        created_artist = Artist.objects.get(id=response.data['artist_id'])
+        self.assertEqual(self.temp_user, created_artist.artist_user)
+        self.assertEqual(created_artist.artist_profile.require_contribution_approval, True, "Require contribution approval did not default correctly")
+
+    def test_edit_artist_profile(self):
+        url = reverse('artistaccount-list')
+        data = {
+            "name":"Very New Name, Not The Same Name At All",
+            "image":self.generate_artist_iamge()
+        }
+        response = self.client.patch(url, data, format="multipart", **self._get_headers(artist=True))
+
+        self.assert200(response.status_code)
+        self.assertEqual(type(response.data), ReturnDict)
+        self.assertEqual(response.data['artist_id'], str(self.artist_user.artist.id))
+        self.assertNotEqual(response.data['name'], self.artist_user.artist.name, "New name is the same as old name")
+        # update self.artist_user
+        new_artist = Artist.objects.get(id=response.data['artist_id'])
+        self.artist_user = new_artist.artist_user
+
+        self.assertEqual(new_artist.name, data['name'], "Database did not update with new name")
+
+

@@ -70,13 +70,17 @@ All requests in the API have a unique string identifier, called the **Request Co
 
 Revibe's API was created with evolution in mind, so the URL configuration has been built to allow for easy versioning in the future. The leading component of every endpoint is the version number; so when we begin developing new endpoints for existing features, old versions of Revibe applications can continue to work on the older endpoints without inhibiting continuing support and development.
 
-## File Layout
+## Other
 
-### Import Statements
+### File Layout
+
+#### Import Statements
 
 The imports for python files are separated into blocks to make it easier to
 read. The blocks are: anything Django/DRF related, other python modules, the
 logger, anything from the *revibe* module, and anything from any other API app.
+
+### Tests
 
 # Authors
 

@@ -13,7 +13,7 @@ from revibe._helpers.test import RevibeTestCase
 from revibe._helpers import status
 
 from accounts.models import CustomUser, Profile
-from content.models import Artist
+from content.models import Artist, Album
 
 # -----------------------------------------------------------------------------
 
@@ -175,7 +175,6 @@ class TestArtistAccount(RevibeTestCase):
 
         self.assert409(response)
 
-
     def test_edit_artist_profile(self):
         url = reverse('artistaccount-list')
         data = {
@@ -185,9 +184,19 @@ class TestArtistAccount(RevibeTestCase):
         response = self.client.patch(url, data, format="multipart", **self._get_headers(artist=True))
 
         self.assert200(response.status_code)
-        self.assertEqual(type(response.data), ReturnDict)
-        self.assertEqual(response.data['artist_id'], str(self.artist_user.artist.id))
-        self.assertNotEqual(response.data['name'], self.artist_user.artist.name, "New name is the same as old name")
+        self.assertEqual(
+            type(response.data), ReturnDict,
+            msg="Response is not in the correct format"
+        )
+        self.assertEqual(
+            response.data['artist_id'], str(self.artist_user.artist.id),
+            msg="Updated artist is not the authenticated artist"
+        )
+        self.assertNotEqual(
+            response.data['name'], self.artist_user.artist.name,
+            msg="New name is the same as old name"
+        )
+
         # update self.artist_user
         new_artist = Artist.objects.get(id=response.data['artist_id'])
         self.artist_user = new_artist.artist_user
@@ -201,7 +210,7 @@ class TestArtistAccount(RevibeTestCase):
         url = reverse('artistaccount-list')
         response = self.client.get(url, format="json", **self._get_headers(artist=True))
 
-        self.assert200(response, msg=_("Response code is not 200"))
+        self.assert200(response)
         self.assertEqual(
             type(response.data), ReturnDict,
             msg="Response is not of the correct type"
@@ -214,4 +223,250 @@ class TestArtistAccount(RevibeTestCase):
             str(response.data['artist_id']), str(self.artist_user.artist.id),
             msg="The artist returned is not the authenticated artist"
         )
+
+
+class TestArtistAlbums(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._get_artist_user()
+        self._create_song()
+        self.url = reverse('artistaccount-albums')
+
+        # state variables
+        self.uploaded = False
+        self.edited = False
+    
+    def generate_album_image(self):
+        file = io.BytesIO()
+        image = Image.new('RGBA', (100,100), color=(155,0,0))
+        image.save(file, 'png')
+        file.name = 'test.png'
+        file.seek(0)
+        return file
+
+    def test_upload_album(self):
+        data = {
+            "name": "The Test Album",
+            "image": self.generate_album_image(),
+            "type":"Album",
+        }
+        response = self.client.post(self.url, data, format="multipart", **self._get_headers(artist=True))
+
+        self.assert201(response)
+        self.assertReturnDict(response)
+        self.assertTrue(
+            'contributors' in response.data.keys(),
+            msg="response did not contain a 'contributors' list"
+        )
+        self.assertEqual(
+            len(response.data['contributors']), 1,
+            msg="'contributors' list did not contain the correct number of objects"
+        )
+        self.assertEqual(
+            response.data['uploaded_by']['artist_id'], str(self.artist_user.artist.id),
+            msg="Current artist is not the album's uploading artist"
+        )
+        self.assertEqual(
+            response.data['uploaded_by']['artist_id'], response.data['contributors'][0]['artist_id'],
+            msg="Uploading artist ID is not the contributor's artist ID"
+        )
+
+        # set state variables
+        self.uploaded = True
+        self.album_id = response.data['album_id']
+
+    def test_get_albums(self):
+        response = self.client.get(self.url, format="json", **self._get_headers(artist=True))
+
+        self.assert200(response)
+        self.assertReturnList(response)
+        for album in response.data:
+            self.assertEqual(
+                album['uploaded_by'], str(self.artist_user.artist.id),
+                msg="Not all returned albums were uploaded by the current artist"
+            )
+
+    def test_edit_album(self):
+        # validate album was uploaded
+        if not self.uploaded:
+            self.test_upload_album()
+        if not self.uploaded:
+            self.fail(msg="'test_upload_album' failed, cannot edit an album")
+
+        # send request
+        data = {
+            "album_id": self.album_id,
+            "name":"Much better name now"
+        }
+        response = self.client.patch(self.url, data, format="multipart", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            response.data['album_id'], self.album_id,
+            msg="Returned album is not the one that was sent (ID check)"
+        )
+
+        # check that all sent fields updated in db
+        album = Album.objects.get(id=response.data['album_id'])
+        for key, value in data.items():
+            if not key == 'album_id':
+                self.assertEqual(
+                    value, getattr(album, key),
+                    msg=f"{key} did not update correctly in database"
+                )
+
+        # update state variables
+        self.edited = True
+
+    def test_delete_album(self):
+        # validate that album has been edited
+        if not self.edited:
+            self.test_edit_album()
+        if not self.edited:
+            self.fail("could not verify that album has been edited, cannot delete")
+        
+        # send response
+        data = {
+            "album_id": self.album_id,
+        }
+        response = self.client.delete(self.url, data, format="json", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert204(response)
+
+        self.assertTrue(
+            Album.objects.get(id=self.album_id).is_deleted,
+            msg="Did not set album 'is_deleted' to True"
+        )
+        for song in Album.objects.get(id=self.album_id).song_set.all():
+            self.assertTrue(
+                song.is_deleted,
+                msg=f"Album song '{song}.is_deleted' was not set to True"
+            )
+
+
+class TestArtistSongs(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._get_artist_user()
+        self._create_album()
+        album = Album.objects.create(name="The Best Album", uploaded_by=self.artist_user.artist)
+        album.save()
+
+    def test_upload_song(self):
+        pass
+
+    def test_edit_song(self):
+        pass
+    
+    def test_get_songs(self):
+        pass
+
+    def test_delete_song(self):
+        pass
+
+
+class TestArtistAlbumContribution(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._get_artist_user()
+        self._create_song()
+
+    def test_add_album_contribution(self):
+        """
+        Add album contribution to an album this artist uploaded
+        """
+        pass
+
+    def test_edit_album_contribution(self):
+        """
+        Edit an album contribution to an album this artist uploaded
+        """
+        pass
+
+    def test_edit_album_contribution_not_uploader(self):
+        """
+        Edit an album contribution to an album this artist did not upload
+        """
+        pass
+
+    def test_get_album_contributions(self):
+        """
+        Get album contributions
+        """
+        pass
+
+    def test_delete_album_contribution(self):
+        """
+        Delete a contribution on a album this artist uploaded
+        """
+        pass
+
+    def test_delete_album_contribution_not_uploader(self):
+        """
+        Delete a contribution on an album this artist did not upload
+        """
+        pass
+    
+    def test_approve_album_contribution(self):
+        """
+        Approve a contribution
+        """
+        pass
+
+
+class TestArtistSongContributions(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._get_artist_user()
+        self._create_song()
+    
+    def test_add_song_contribution(self):
+        """
+        Add song contribution to a song this artist uploaded
+        """
+        pass
+
+    def test_edit_song_contribution(self):
+        """
+        Edit a song contribution on a song this artist uploaded
+        """
+        pass
+
+    def test_edit_song_contribution_not_uploader(self):
+        """
+        Edit a song contribution on a song this artist did not upload
+        """
+        pass
+    
+    def test_get_song_contribution(self):
+        """
+        Get song contributions
+        """
+        pass
+
+    def test_delete_song_contribution(self):
+        """
+        Delete a contribution on a song this artist uploaded
+        """
+        pass
+
+    def test_delete_song_contribution_not_uploader(self):
+        """
+        Delete a contribution on a song this artist did not upload
+        """
+        pass
+
+    def test_approve_song_contribution(self):
+        """
+        Approve a contribution
+        """
+        pass
+
 

@@ -6,6 +6,7 @@ Created: 07 Jan, 2020
 from django.db.utils import IntegrityError
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
+from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 from oauth2_provider.models import Application
 
 from revibe._helpers import status
@@ -43,6 +44,9 @@ class TestStatusMixin:
         Where the magic happens...
         Makes sure it has an integer from the response and does the comparison.
         """
+        if 'msg' not in kwargs.keys():
+            kwargs['msg'] = f"Response status code is not {status}"
+
         arg = self._get_code(arg)
         self.assertEqual(arg, status, *args, **kwargs)
 
@@ -65,6 +69,31 @@ class TestStatusMixin:
     
     def assert409(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 409)
+
+
+class TestTypeMixin:
+    def _get_response_data_type(self, obj):
+        if hasattr(obj, 'data'):
+            # return type of response.data
+            return type(obj.data)
+        else:
+            # return type of data from response.data
+            return type(obj)
+
+    def assertReturnDict(self, arg, *args, **kwargs):
+        self.assertEqual(
+            self._get_response_data_type(arg), ReturnDict, *args, **kwargs
+        )
+    def assertReturnList(self, arg, *args, **kwargs):
+        self.assertEqual(
+            self._get_response_data_type(arg), ReturnList, *args, **kwargs
+        )
+    
+    def _perform_assertion(self, arg, check, *args, **kwargs):
+        if 'msg' not in kwargs.keys():
+            kwargs['msg'] = "{} is not of type {}".format(str(arg), str(check))
+        
+        self.assertEqual(arg, check)
 
 
 class BaseRevibeTestMixin:
@@ -196,7 +225,7 @@ class MetricsMixin:
 # classes
 
 class BaseRevibeTestCase(
-    APITestCase, BaseRevibeTestMixin, TestStatusMixin
+    APITestCase, BaseRevibeTestMixin, TestStatusMixin, TestTypeMixin
 ):
     """
     Basis for all of our Test Cases

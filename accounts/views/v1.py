@@ -742,7 +742,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 serializer = content_ser_v1.AlbumSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
                 if serializer.is_valid():
                     serializer.save()
-                    return responses.UPDATED(serializer)
+                    return responses.UPDATED(serializer=serializer)
                 else:
                     return responses.SERIALIZER_ERROR_RESPONSE(serializer)
                 return responses.DEFAULT_400_RESPONSE()
@@ -780,7 +780,17 @@ class UserArtistViewSet(GenericPlatformViewSet):
         album_queryset = self.platform.HiddenAlbums.filter(uploaded_by=artist)
         kwargs['context'] = self.get_serializer_context()
         if request.method in ['PATCH','DELETE']:
-            song_id = request.data.pop('song_id')
+            try:
+                song_id = request.data.pop('song_id')
+            except AttributeError:
+                _mutable = request.data._mutable
+                request.data._mutable = True
+                song_id = request.data.pop('song_id')
+                request.data._mutable = _mutable
+            assert song_id, "could not get a song ID"
+            if type(song_id) == list:
+                song_id = song_id[0]
+            assert type(song_id) == str, f"song_id is not a string, got type {type(album_id)}"
 
         if request.method == 'GET':
             songs = song_queryset
@@ -828,7 +838,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             serializer = content_ser_v1.SongSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return responses.UPDATED(serializer=serializer)
             else:
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer)
             return responses.DEFAULT_400_RESPONSE()

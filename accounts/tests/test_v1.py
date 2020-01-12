@@ -13,7 +13,7 @@ from revibe._helpers.test import RevibeTestCase
 from revibe._helpers import status
 
 from accounts.models import CustomUser, Profile
-from content.models import Artist, Album
+from content.models import Artist, Album, Song
 
 # -----------------------------------------------------------------------------
 
@@ -349,19 +349,178 @@ class TestArtistSongs(RevibeTestCase):
         self._get_user()
         self._get_artist_user()
         self._create_album()
+        self.url = reverse('artistaccount-songs')
         album = Album.objects.create(name="The Best Album", uploaded_by=self.artist_user.artist)
         album.save()
+        self.song_album = album
+
+        # state variables
+        self.song_uploaded = False
+        self.song_edited = False
 
     def test_upload_song(self):
-        pass
+        """
+        Upload a song from the current artist
+        """
+        data = {
+            "title": "New Song!",
+            "file":self.generate_image(),
+            "duration":"180",
+            "genre":"Country",
+            "album_id":str(self.song_album.id)
+        }
+        response = self.client.post(self.url, data, format="multipart", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert201(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            response.data['album']['album_id'], str(self.song_album.id),
+            msg="Returned album id is not the sent album id"
+        )
+
+        # update state variables
+        self.song_uploaded = True
+        self.song_id = response.data['song_id']
+    
+    def test_upload_song_not_artist(self):
+        """
+        Test uploading a song when the user is not an artist
+
+        Should fail
+        """
+        data = {
+            "title":"not gonna upload",
+            "file":self.generate_image(),
+            "duration":"200",
+            "album_id":str(self.song_album.id)
+        }
+        response = self.client.post(self.url, data, format="multipart", **self._get_headers())
+
+        # validate response
+        self.assert403(response)
+
+    def test_upload_song_not_authenticated(self):
+        """
+        Upload a song when the request is not authenticated.
+
+        Should fail
+        """
+        data = {
+            "title":"not gonna work again",
+            "file":self.generate_image(),
+            "duration":"310",
+            "album_id":str(self.song_album.id)
+        }
+        response = self.client.post(self.url, data, format="multipart")
+
+        # validate response
+        self.assert401(response)
 
     def test_edit_song(self):
-        pass
-    
-    def test_get_songs(self):
+        """
+        Edit a song that has been uploaded
+        """
+        # pre-request validations
+        if not self.song_uploaded == True:
+            self.test_upload_song()
+        if not self.song_uploaded == True:
+            self.fail("Could not verify that a song was uploaded, cannot edit a non-existent song")
+        old_title = Song.objects.get(id=self.song_id).title
+        
+        # send request
+        data = {
+            "song_id": self.song_id,
+            "title":"New Title!"
+        }
+        response = self.client.patch(self.url, data, format="multipart", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            response.data['song_id'], self.song_id,
+            msg="Returned song is not the song that was uploaded"
+        )
+        self.assertEqual(
+            response.data['title'], data['title'],
+            msg="Returned title is not the same as the sent title"
+        )
+        self.assertEqual(
+            response.data['title'], Song.objects.get(id=self.song_id).title,
+            msg="Sent data was not saved to the database"
+        )
+        if 'title' in data.keys():
+            self.assertNotEqual(
+                old_title, response.data['title'],
+                msg="Old title is the same as the new title"
+            )
+
+        # update state variables
+        self.song_edited = True
+
+    def test_edit_song_not_artist(self):
+        """
+        Test editing a song when not logged in as an artist
+        """
+        # pre-request validation
+        if not self.song_uploaded:
+            self.test_upload_song()
+        if not self.song_uploaded:
+            self.fail("could not validate that a song was uploaded")
+        # send request
+        data = {
+            "song_id": self.song_id,
+            "title":"Not an artist"
+        }
+        response = self.client.patch(self.url, data, format="multipart", **self._get_headers())
+
+        # validate request
+        self.assert403(response)
+
+    def test_edit_song_not_uploader(self): # not written, don't have a second artist yet
+        """
+        Edit a song that was not uploaded by the person editing the song
+        """
         pass
 
+    def test_get_songs(self):
+        # validate pre-request requirements
+        if not self.song_uploaded == True:
+            self.test_upload_song()
+        if not self.song_uploaded == True:
+            self.fail("Could not verify that a song was uploaded")
+        
+        # send request
+        response = self.client.get(self.url, format="json", **self._get_headers(artist=True))
+
+        # validate request
+        self.assert200(response)
+
     def test_delete_song(self):
+        """
+        Delete a song that this artist did upload
+        """
+        # pre-request validation
+        if not self.song_edited:
+            self.test_edit_song()
+        if not self.song_edited:
+            self.fail("Could not validate that the song had yet been edited")
+        
+        # send request
+        data = {
+            "song_id": self.song_id
+        }
+        response = self.client.delete(self.url, data, format="json", **self._get_headers(artist=True))
+
+        # vaidate response
+        self.assert204(response)
+
+    def test_delete_song_not_uploader(self):
+        """
+        Delete a song when not the one who uploaded that song
+        Expect a 403
+        """
         pass
 
 

@@ -130,21 +130,13 @@ class TestArtistAccount(RevibeTestCase):
         self.temp_user = user
         self.temp_access_token = response.data['access_token']
 
-    def generate_artist_iamge(self):
-        file = io.BytesIO()
-        image = Image.new('RGBA', size=(100, 100), color=(155, 0, 0))
-        image.save(file, 'png')
-        file.name = 'test.png'
-        file.seek(0)
-        return file
-
     def test_register_artsit(self):
         self.generate_artist_user()
         # send the response
         url = reverse('artistaccount-list')
         data = {
             "name":"Test Register Artist",
-            "image": self.generate_artist_iamge()
+            "image": self.generate_image()
         }
         response = self.client.post(url, data, format="multipart", **self._get_headers(other=self.temp_access_token))
 
@@ -169,7 +161,7 @@ class TestArtistAccount(RevibeTestCase):
         url = reverse('artistaccount-list')
         data = {
             "name":"Shouldn't work",
-            "image":self.generate_artist_iamge()
+            "image":self.generate_image()
         }
         response = self.client.post(url, data, format="multipart",**self._get_headers(artist=True))
 
@@ -179,7 +171,7 @@ class TestArtistAccount(RevibeTestCase):
         url = reverse('artistaccount-list')
         data = {
             "name":"Very New Name, Not The Same Name At All",
-            "image":self.generate_artist_iamge()
+            "image":self.generate_image()
         }
         response = self.client.patch(url, data, format="multipart", **self._get_headers(artist=True))
 
@@ -236,19 +228,11 @@ class TestArtistAlbums(RevibeTestCase):
         # state variables
         self.uploaded = False
         self.edited = False
-    
-    def generate_album_image(self):
-        file = io.BytesIO()
-        image = Image.new('RGBA', (100,100), color=(155,0,0))
-        image.save(file, 'png')
-        file.name = 'test.png'
-        file.seek(0)
-        return file
 
     def test_upload_album(self):
         data = {
             "name": "The Test Album",
-            "image": self.generate_album_image(),
+            "image": self.generate_image(),
             "type":"Album",
         }
         response = self.client.post(self.url, data, format="multipart", **self._get_headers(artist=True))
@@ -279,7 +263,7 @@ class TestArtistAlbums(RevibeTestCase):
     def test_upload_album_not_artist(self):
         data = {
             "Name":"Not gonna matter",
-            "image":self.generate_album_image(),
+            "image":self.generate_image(),
             "type":"nonexistent"
         }
         response = self.client.post(self.url, data, format="multipart", **self._get_headers())

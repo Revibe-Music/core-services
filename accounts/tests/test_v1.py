@@ -378,6 +378,11 @@ class TestArtistSongs(RevibeTestCase):
             response.data['album']['album_id'], str(self.song_album.id),
             msg="Returned album id is not the sent album id"
         )
+        song = Song.objects.get(id=response.data['song_id'])
+        self.assertEqual(
+            song.is_deleted, False,
+            msg="The uploaded song was deleted by default"
+        )
 
         # update state variables
         self.song_uploaded = True
@@ -496,6 +501,13 @@ class TestArtistSongs(RevibeTestCase):
 
         # validate request
         self.assert200(response)
+        self.assertReturnList(response)
+
+        artist = Artist.objects.get(id=response.data[0]['uploaded_by']['artist_id'])
+        self.assertEqual(
+            len(response.data), Song.hidden_objects.filter(uploaded_by=artist).count(),
+            msg="Did not return all of the artist's songs"
+        )
 
     def test_delete_song(self):
         """
@@ -516,7 +528,7 @@ class TestArtistSongs(RevibeTestCase):
         # vaidate response
         self.assert204(response)
 
-    def test_delete_song_not_uploader(self):
+    def test_delete_song_not_uploader(self): # can't test, don't have second artist account set up
         """
         Delete a song when not the one who uploaded that song
         Expect a 403

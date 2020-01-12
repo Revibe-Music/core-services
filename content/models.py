@@ -127,7 +127,7 @@ class Song(models.Model):
 
     objects = models.Manager() # all objects
     hidden_objects = NotDeletedManager() # objects that are not deleted
-    display_objects = NotHiddenNotDeletedManager() # objects that are not deleted and not hidden
+    display_objects = SongNotHiddenNotDeletedManager() # objects that are not deleted and not hidden and album is not hidden or deleted
 
     def __str__(self):
         return "{}".format(self.title)

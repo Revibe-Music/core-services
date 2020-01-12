@@ -6,6 +6,11 @@ class NotHiddenNotDeletedManager(models.Manager):
         return super(NotHiddenNotDeletedManager, self).get_queryset().filter(is_displayed=True, is_deleted=False)
 
 
+class SongNotHiddenNotDeletedManager(NotHiddenNotDeletedManager):
+    def get_queryset(self):
+        return super(SongNotHiddenNotDeletedManager, self).get_queryset().filter(album__is_displayed=True, album__is_deleted=False)
+
+
 class NotDeletedManager(models.Manager):
     def get_queryset(self):
         return super(NotDeletedManager, self).get_queryset().filter(is_deleted=False)

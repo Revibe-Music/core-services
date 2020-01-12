@@ -20,6 +20,8 @@ class ContactFormSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     resolved = serializers.BooleanField(read_only=True)
     assigned_to = serializers.BooleanField(read_only=True)
+    date_created = serializers.ReadOnlyField()
+    last_changed = serializers.ReadOnlyField()
 
     # write-only
     user_id = serializers.CharField(required=False, write_only=True)
@@ -37,6 +39,8 @@ class ContactFormSerializer(serializers.ModelSerializer):
             'id',
             'resolved',
             'assigned_to',
+            'date_created',
+            'last_changed',
 
             # write-only
             'user_id',

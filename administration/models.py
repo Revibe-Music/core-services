@@ -17,6 +17,8 @@ class ContactForm(models.Model):
     # administrative fields
     resolved = models.BooleanField("Indicates if the request/issue has been resolved or not", null=False, blank=False, default=False)
     assigned_to = models.CharField("Revibe staff member it's assigned to", max_length=255, null=True, blank=True)
+    date_created = models.DateTimeField("When the form was submitted", auto_now_add=True, null=True)
+    last_changed = models.DateTimeField("Last time the form was edited", auto_now=True, null=True)
 
     def __str__(self):
         if self.resolved:

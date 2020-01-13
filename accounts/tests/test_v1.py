@@ -278,7 +278,7 @@ class TestArtistAlbums(RevibeTestCase):
         self.assertReturnList(response)
         for album in response.data:
             self.assertEqual(
-                album['uploaded_by'], str(self.artist_user.artist.id),
+                album['uploaded_by']['artist_id'], str(self.artist_user.artist.id),
                 msg="Not all returned albums were uploaded by the current artist"
             )
 
@@ -541,18 +541,36 @@ class TestArtistAlbumContribution(RevibeTestCase):
         self._get_application()
         self._get_user()
         self._get_artist_user()
+        self._get_second_artist_user()
         self._create_song()
+        self.url = reverse('artistaccount-album_contributions')
+
+        _album = Album.objects.create(name="917834520", uploaded_by=self.artist, platform="Revibe")
+        _album.save()
+        self.album_id = _album.id
 
     def test_add_album_contribution(self):
         """
         Add album contribution to an album this artist uploaded
         """
-        pass
+        data = {
+            "artist_id": str(self.artist2.id),
+            "album_id": str(self.album_id),
+            "contribution_type": "Artist"
+        }
+        response = self.client.post(self.url, data, format="json", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert201(response)
+        self.assertReturnDict(response)
 
     def test_edit_album_contribution(self):
         """
         Edit an album contribution to an album this artist uploaded
         """
+        data = {
+            "contribution_id": ''
+        }
         pass
 
     def test_edit_album_contribution_not_uploader(self):
@@ -565,7 +583,16 @@ class TestArtistAlbumContribution(RevibeTestCase):
         """
         Get album contributions
         """
-        pass
+        response = self.client.get(self.url, format="json", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnList(response)
+        for contrib in response.data:
+            self.assertEqual(
+                contrib['artist_id'], self.artist.id,
+                msg="Not all contributions returned are this artist's contributions"
+            )
 
     def test_delete_album_contribution(self):
         """

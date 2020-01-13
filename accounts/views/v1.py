@@ -870,7 +870,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             'albums': album_serializer.data
         })
     
-    @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums')
+    @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums', url_name="album_contributions")
     def album_contributions(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
 

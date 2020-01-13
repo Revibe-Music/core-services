@@ -167,12 +167,12 @@ class ArtistUserMixin:
         except IntegrityError as ie:
             user = CustomUser.objects.get(username="johnartist")
         except Exception as e:
-            raise(e)
+            raise e
 
         # create the user's artist
         if not user.artist:
             try:
-                artist = Artist.objects.create(name="Testing Artist")
+                artist = Artist.objects.create(name="Testing Artist", platform="Revibe")
 
                 artist_profile = ArtistProfile.objects.create(country="Fake Country", city="Fake City", artist=artist)
                 artist_profile.save()
@@ -184,7 +184,42 @@ class ArtistUserMixin:
 
         login = client.post(reverse('login'), {"username": "johnartist","password": "password","device_type": "browser",}, format="json")
         self.artist_user = user
+        self.artist = artist
         self.artist_access_token = login.data['access_token']
+    
+    def _get_second_artist_user(self):
+        client = APIClient()
+
+        # create the user
+        try:
+            user = CustomUser.objects.create_user(username="artist2",password="password")
+            profile = Profile.objects.create(country="US", user=user)
+            profile.save()
+            user.save()
+        except IntegrityError as ie:
+            user = CustomUser.objects.get(username="artist2")
+        except Exception as e:
+            raise e
+    
+        # create the artist
+        if not user.artist:
+            try:
+                artist = Artist.objects.create(name="Second Artist", platform="Revibe")
+
+                artist_profile = ArtistProfile.objects.create(country="Fake", artist=artist)
+                artist_profile.save()
+                artist.save()
+
+                user.artist = artist
+                user.is_artist = True
+                user.save()
+            except Exception as e:
+                raise e
+        
+        login = client.post(reverse('login'), {"username":"artist2", "password":"password","device_type":"browser"}, format="json")
+        self.artist_user2 = user
+        self.artist2 = artist
+        self.artist_access_token2 = login.data['access_token']
 
 
 class SuperUserMixin:
@@ -207,21 +242,21 @@ class SuperUserMixin:
 
 class ContentMixin:
     def _create_artist(self):
-        self.artist = Artist.objects.create(name="Test Artist Content", platform="Revibe")
-        return self.artist
+        self.content_artist = Artist.objects.create(name="Test Artist Content", platform="Revibe")
+        return self.content_artist
 
     def _create_album(self):
-        artist = self.artist if hasattr(self, 'artist') else self._create_artist()
-        self.album = Album.objects.create(name="Test Album Content", platform="Revibe", uploaded_by=artist)
-        AlbumContributor.objects.create(artist=artist, album=self.album, contribution_type="Artist", primary_artist=True)
-        return self.album
+        artist = self.content_artist if hasattr(self, 'content_artist') else self._create_artist()
+        self.content_album = Album.objects.create(name="Test Album Content", platform="Revibe", uploaded_by=artist)
+        AlbumContributor.objects.create(artist=artist, album=self.content_album, contribution_type="Artist", primary_artist=True)
+        return self.content_album
     
     def _create_song(self):
-        artist = self.artist if hasattr(self, 'artist') else self._create_artist()
-        album = self.album if hasattr(self, 'album') else self._create_album()
-        self.song = Song.objects.create(title="Test Song Content", genre="Hip Hop", album=album, uploaded_by=artist, platform="Revibe")
-        SongContributor.objects.create(artist=artist, song=self.song, contribution_type="Artist", primary_artist=True)
-        return self.song
+        artist = self.content_artist if hasattr(self, 'content_artist') else self._create_artist()
+        album = self.content_album if hasattr(self, 'content_album') else self._create_album()
+        self.content_song = Song.objects.create(title="Test Song Content", genre="Hip Hop", album=album, uploaded_by=artist, platform="Revibe")
+        SongContributor.objects.create(artist=artist, song=self.content_song, contribution_type="Artist", primary_artist=True)
+        return self.content_song
 
 
 class MusicMixin:

@@ -699,6 +699,23 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         return True
 
+    def check_delete_permissions(self, artist, instance, rel):
+        assert type(rel) == str, "'rel' must be a string object"
+        assert rel in ['song','album'], "'rel' must be 'song' or 'album'"
+
+        if not hasattr(instance, rel):
+            raise Exception("Could not find the contribution's '{}'".format(rel))
+        content = getattr(instance, rel)
+
+        # define variables
+        contributor = instance.artist
+        uploader = content.uploaded_by
+
+        if not (artist == uploader or artist == contributor):
+            raise ForbiddenError("You cannot delete this contribution")
+
+        return True
+
     @action(detail=False, methods=['get','post','patch','delete'])
     def albums(self, request, *args, **kwargs):
         """
@@ -941,15 +958,20 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
 
         elif request.method == 'DELETE':
-            instance = albumcontribution_queryset.get(pk=contribution_id)
-
+            instance = AlbumContributor.objects.get(pk=contribution_id)
             # ensure that the current artist is authorized to delete this contribution
-            permitted = [instance.artist, instance.album.uploaded_by]
-            if request.user.artist in permitted:
-                instance.delete()
-                return responses.DELETED()
-            else:
-                return responses.NOT_PERMITTED(detail="You are not authorized to delete this contribution")
+            # permitted = [instance.artist, instance.album.uploaded_by]
+            # if request.user.artist in permitted:
+            #     instance.delete()
+            #     return responses.DELETED()
+            # else:
+            #     return responses.NOT_PERMITTED(detail="You are not authorized to delete this contribution")
+
+            # check permissions
+            self.check_delete_permissions(artist, instance, 'album')
+
+            instance.delete()
+            return responses.DELETED()
 
         else:
             return responses.NO_REQUEST_TYPE()

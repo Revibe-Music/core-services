@@ -660,13 +660,47 @@ class TestArtistAlbumContribution(RevibeTestCase):
         """
         Delete a contribution on a album this artist uploaded
         """
-        pass
+        # check state
+        if not self.contrib_added:
+            self.test_add_album_contribution()
+        if not self.contrib_added:
+            self.fail("Could not validate that a contribution waas created")
+
+        # send request
+        data = {
+            "contribution_id": str(self.contrib_id)
+        }
+        response = self.client.delete(self.url, data, format="json", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert204(response)
+        self.assertEqual(
+            0, AlbumContributor.objects.filter(id=str(self.contrib_id)).count(),
+            msg="Still found the contribution in the database"
+        )
 
     def test_delete_album_contribution_not_uploader(self):
         """
         Delete a contribution on an album this artist did not upload
         """
-        pass
+        # check state
+        if not self.contrib_added:
+            self.test_add_album_contribution()
+        if not self.contrib_added:
+            self.fail("Could not validate that a contribution waas created")
+
+        # send request
+        data = {
+            "contribution_id": str(self.contrib_id)
+        }
+        response = self.client.delete(self.url, data, format="json", **self._get_headers(artist2=True))
+
+        # validate response
+        self.assert204(response)
+        self.assertEqual(
+            0, AlbumContributor.objects.filter(id=str(self.contrib_id)).count(),
+            msg="Still found the contribution in the database"
+        )
     
     def test_approve_album_contribution(self):
         """

@@ -671,6 +671,34 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         return artist
 
+    def check_contrib_permissions(self, artist, instance, rel):
+        """
+        Checks settings and permissions to validate that the current request is
+        valid.
+        """
+        assert type(rel) == str, "'rel' must be a string object"
+        assert rel in ['song','album'], "'rel' must be 'song' or 'album'"
+
+        if not hasattr(instance, rel):
+            raise Exception("Could not find the contribution's '{}'".format(rel))
+        content = getattr(instance, rel)
+
+        # define variables
+        contributor = instance.artist
+        uploader = content.uploaded_by
+        allow_contrib_edit = uploader.artist_profile.allow_contributors_to_edit_contributions
+
+        if artist == uploader:
+            return True
+        
+        if artist != contributor:
+            raise ForbiddenError("You cannot edit this contribution")
+
+        if not allow_contrib_edit:
+            raise ForbiddenError("{} does not allow contributors to edit contributions".format(str(uploader)))
+
+        return True
+
     @action(detail=False, methods=['get','post','patch','delete'])
     def albums(self, request, *args, **kwargs):
         """
@@ -902,18 +930,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             instance = AlbumContributor.objects.get(pk=contribution_id)
 
             # check permissions and settings
-            if artist != instance.album.uploaded_by:
-                contributor = instance.artist
-                
-                # if the current user is not the contributor in the instance, 
-                # return 403
-                if artist != contributor:
-                    raise ForbiddenError("You are not permitted to edit this contribution")
-
-                # if the content creator does not allow contributors to edit
-                # contributions, return 403
-                if not instance.album.uploaded_by.artist_profile.allow_contributors_to_edit_contributions:
-                    raise ForbiddenError("{} does not allow contributors to edit contributions.".format(str(instance.album.uploaded_by)))
+            self.check_contrib_permissions(artist, instance, 'album')
 
             # perform update
             serializer = content_ser_v1.AlbumContributorSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
@@ -970,18 +987,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             instance = full_queryset.get(pk=contribution_id)
 
             # check permissions and settings
-            if artist != instance.song.uploaded_by:
-                contributor = instance.artist
-                
-                # if the current user is not the contributor in the instance, 
-                # return 403
-                if artist != contributor:
-                    raise ForbiddenError("You are not permitted to edit this contribution")
-
-                # if the content creator does not allow contributors to edit
-                # contributions, return 403
-                if not instance.song.uploaded_by.artist_profile.allow_contributors_to_edit_contributions:
-                    raise ForbiddenError("{} does not allow contributors to edit contributions.".format(str(instance.song.uploaded_by)))
+            self.check_contrib_permissions(artist, instance, 'song')
 
             serializer = content_ser_v1.SongContributorSerializer(instance=instance, data=request.data, partial=True, *args, **kwargs)
             if serializer.is_valid():

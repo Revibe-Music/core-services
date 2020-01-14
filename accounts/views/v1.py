@@ -899,19 +899,30 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.DEFAULT_400_RESPONSE()
 
         elif request.method == 'PATCH':
-            instance = albumcontribution_queryset.get(pk=contribution_id)
+            instance = AlbumContributor.objects.get(pk=contribution_id)
 
             # check permissions and settings
             if artist != instance.album.uploaded_by:
-                return responses.NOT_PERMITTED(detail="you are not permitted to edit this contribution")
+                not_perm = responses.NOT_PERMITTED("You are not permitted to edit this contribution")
+                contributor = instance.artist
+                
+                # if the current user is not the contributor in the instance, 
+                # return 403
+                if artist != contributor:
+                    return not_perm
 
-            serializer = BaseAlbumContributorSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
+                # if the content creator does not allow contributors to edit
+                # contributions, return 403
+                if not instance.album.uploaded_by.artist_profile.allow_contributors_to_edit_contributions:
+                    return not_perm
+
+            # perform update
+            serializer = content_ser_v1.AlbumContributorSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
-                return responess.OK(seriailzer=serializer)
-            else:
-                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE()
+                return responses.OK(serializer=serializer)
+
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
 
         elif request.method == 'DELETE':
             instance = albumcontribution_queryset.get(pk=contribution_id)

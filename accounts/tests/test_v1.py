@@ -13,7 +13,7 @@ from revibe._helpers.test import RevibeTestCase
 from revibe._helpers import status
 
 from accounts.models import CustomUser, Profile
-from content.models import Artist, Album, Song
+from content.models import *
 
 # -----------------------------------------------------------------------------
 
@@ -549,6 +549,9 @@ class TestArtistAlbumContribution(RevibeTestCase):
         _album.save()
         self.album_id = _album.id
 
+        # state variables
+        self.contrib_added = False
+
     def test_add_album_contribution(self):
         """
         Add album contribution to an album this artist uploaded
@@ -564,20 +567,73 @@ class TestArtistAlbumContribution(RevibeTestCase):
         self.assert201(response)
         self.assertReturnDict(response)
 
+        # set state variables
+        self.contrib_added = True
+        self.contrib_id = response.data['contribution_id']
+
     def test_edit_album_contribution(self):
         """
         Edit an album contribution to an album this artist uploaded
         """
+        # validate state
+        if not self.contrib_added:
+            self.test_add_album_contribution()
+        if not self.contrib_added:
+            self.fail("Could not validate that a contribution has been added")
+
+        # send request
         data = {
-            "contribution_id": ''
+            "contribution_id": self.contrib_id,
+            "contribution_type": "Test Edit"
         }
-        pass
+        response = self.client.patch(self.url, data, format="json", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            response.data['contribution_type'], AlbumContributor.objects.get(id=str(self.contrib_id)).contribution_type,
+            msg="the returned contribution type was not updated in the database"
+        )
 
     def test_edit_album_contribution_not_uploader(self):
         """
         Edit an album contribution to an album this artist did not upload
+
+        Uses the second artist from the ArtistUserMixin to validate the request
         """
-        pass
+        # validate state
+        if not self.contrib_added:
+            self.test_add_album_contribution()
+        if not self.contrib_added:
+            self.fail("Could not validate that a contribution was added")
+        
+        # send request
+        data = {
+            "contribution_id": str(self.contrib_id),
+            "contribution_type": "Test Edit 2"
+        }
+        response = self.client.patch(self.url, data, format="json", **self._get_headers(artist2=True))
+
+        # validate response
+        self.assert403(response)
+
+        # send request with artist 1's settings changed
+        self.artist.artist_profile.allow_contributors_to_edit_contributions = True
+        self.artist.artist_profile.save()
+        response = self.client.patch(self.url, data, format="json", **self._get_headers(artist2=True))
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            response.data['contribution_type'], AlbumContributor.objects.get(id=str(self.contrib_id)).contribution_type,
+            msg="the returned contribution type was not updated in the database"
+        )
+
+        # reset account setting
+        self.artist.artist_profile.allow_contributors_to_edit_contributions = False
+        self.artist.artist_profile.save()
 
     def test_get_album_contributions(self):
         """

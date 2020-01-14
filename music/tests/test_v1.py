@@ -32,17 +32,17 @@ class TestLibrary(RevibeTestCase):
         url = reverse('library-songs')
         data = {
             "platform": "Revibe",
-            "song_id": self.song.id
+            "song_id": self.content_song.id
         }
         response = self.client.post(url, data, format="json", **self._get_headers())
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(type(response.data), ReturnDict)
-        self.assertEqual(response.data['song'], str(self.song.id))
+        self.assertEqual(response.data['song'], str(self.content_song.id))
         
         # check that the song is in fact in the user's library
         library = Library.objects.get(user=self.user, platform="Revibe")
-        self.assertTrue(str(self.song.id) == str(library.songs.all()[0].id)) # have to cast ID's as strings, the object ID's come back as UUIID and str, respectively
+        self.assertTrue(str(self.content_song.id) == str(library.songs.all()[0].id)) # have to cast ID's as strings, the object ID's come back as UUIID and str, respectively
 
 
 class TestPlaylists(RevibeTestCase):
@@ -93,7 +93,7 @@ class TestPlaylists(RevibeTestCase):
         url = reverse('playlist-songs')
         data = {
             "playlist_id": playlist_id,
-            "song_id": self.song.id
+            "song_id": self.content_song.id
         }
 
         response = self.client.post(url, data, format="json", **self._get_headers())

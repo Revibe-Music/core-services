@@ -492,7 +492,7 @@ class TestArtistSongs(RevibeTestCase):
         # validate request
         self.assert403(response)
 
-    def test_edit_song_not_uploader(self): # not written, don't have a second artist yet
+    def test_edit_song_not_uploader(self):
         """
         Edit a song that was not uploaded by the person editing the song
         """

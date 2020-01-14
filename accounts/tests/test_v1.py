@@ -601,6 +601,12 @@ class TestArtistAlbumContribution(RevibeTestCase):
         Edit an album contribution to an album this artist did not upload
 
         Uses the second artist from the ArtistUserMixin to validate the request
+
+        Sends two requests, first is sent while the uploading artist does not
+        allow contribution edits, expecting 403.
+
+        Second request is sent after changing that artist's settings to allow
+        contributors to edit contributions, expecting 200.
         """
         # validate state
         if not self.contrib_added:
@@ -686,6 +692,9 @@ class TestArtistSongContributions(RevibeTestCase):
         _song.save()
         self.song_id = _song.id
 
+        # state variables
+        self.contrib_added = False
+
     def test_add_song_contribution(self):
         """
         Add song contribution to a song this artist uploaded
@@ -701,11 +710,34 @@ class TestArtistSongContributions(RevibeTestCase):
         self.assert201(response)
         self.assertReturnDict(response)
 
+        # set state variables
+        self.contrib_added = True
+        self.contrib_id = response.data['contribution_id']
+
     def test_edit_song_contribution(self):
         """
         Edit a song contribution on a song this artist uploaded
         """
-        pass
+        # validate state
+        if not self.contrib_added:
+            self.test_add_song_contribution()
+        if not self.contrib_added:
+            self.fail("Could not validate that a contribution was created")
+
+        # send request
+        data = {
+            "contribution_id": str(self.contrib_id),
+            "contribution_type": "Test Edit"
+        }
+        response = self.client.patch(self.url, data, format="json", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            response.data['contribution_type'], SongContributor.objects.get(id=str(self.contrib_id)).contribution_type,
+            msg="the returned contribution type was not updated in the database"
+        )
 
     def test_edit_song_contribution_not_uploader(self):
         """

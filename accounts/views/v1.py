@@ -977,10 +977,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             serializer = content_ser_v1.SongContributorSerializer(instance=instance, data=request.data, partial=True, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE()
+                return responses.UPDATED(serializer=serializer)
+
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
 
         elif request.method == 'DELETE':
             instance = full_queryset.get(pk=contribution_id)

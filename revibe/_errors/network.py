@@ -4,6 +4,14 @@ from revibe._helpers import status
 
 # -----------------------------------------------------------------------------
 
+# 2xx Errors
+
+class AlreadyReportedError(APIException):
+    status_code = status.HTTP_208_ALREADY_REPORTED
+    default_detail = "The requested function has already been performed"
+    default_code = "already_reported"
+
+
 # 4xx Errors
 class BadRequestError(APIException):
     status_code = status.HTTP_400_BAD_REQUEST

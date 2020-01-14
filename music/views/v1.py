@@ -171,7 +171,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if request.user != instance.user:
-            return responses.NOT_PERMITTED()
+            raise network.ForbiddenError()
 
         self.perform_destroy(instance)
         return responses.DELETED()
@@ -203,9 +203,11 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
         elif request.method == 'POST':
             serializer = PlaylistSongSerializer(data=request.data, *args, **kwargs)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            if serializer.is_valid():
+                serializer.save()
+                return responses.CREATED(serializer=serializer)
+
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
 
         elif request.method == 'DELETE':
             serializer = PlaylistSongSerializer(data=request.data, *args, **kwargs)

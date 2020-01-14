@@ -14,3 +14,11 @@ class ParameterMissingError(network.ExpectationFailedError):
 
 class SerializerValidationError(network.ExpectationFailedError):
     default_detail = "misc. serializer error, please try again"
+
+
+class TooManyObjectsReturnedError(network.ProgramError):
+    default_detail = "Too many objects found, please try again"
+
+
+class ObjectAlreadyExists(network.AlreadyReportedError):
+    default_detail = "The request object already exists"

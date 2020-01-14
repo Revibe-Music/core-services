@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
+from revibe._errors import auth, data, network
 from revibe._helpers.debug import debug_print
 
 from accounts.models import ArtistProfile
@@ -35,7 +36,8 @@ class PlaylistSerializer(serializers.ModelSerializer):
     def get_user(self):
         request = self.context.get("request")
         user = request.user
-        assert user is not None, "Could not identify the user."
+        if user is None:
+            raise auth.NoAuthenticationError("Could not identify the current user")
         return user
     
     def create(self, validated_data, *args, **kwargs):
@@ -46,9 +48,9 @@ class PlaylistSerializer(serializers.ModelSerializer):
         # check that this user does not have a playlist with this name already
         check = Playlist.objects.filter(name=name, user=user)
         if len(check) == 1:
-            raise serializers.ValidationError("A playlist with this name already exists")
+            raise network.ConflictError("A playlist with this name already exists") # 409 error
         if len(check) > 1:
-            raise serializers.ValidationError("Error retrieving playlist data")
+            raise data.TooManyObjectsReturnedError() # 512
 
         # create the playlist
         playlist = Playlist.objects.create(name=name, user=user)
@@ -152,13 +154,15 @@ class PlaylistSongSerializer(serializers.ModelSerializer):
         playlist_id = validated_data["playlist_id"]
         user_playlists = Playlist.objects.filter(user=user)
         if len(user_playlists) == 0:
-            raise serializers.ValidationError("Could not find user's playlists")
+            raise network.BadRequestError("The user has not playlists")
+
+        # some custom 'get_song()' method to check if non-revibe songs are saved in the DB
 
         song = get_object_or_404(Song.objects.all(), pk=song_id) # needs to be changed later to save other platform's songs
         playlist = get_object_or_404(user_playlists, pk=playlist_id)
         
         if song in playlist.songs.all():
-            return PlaylistSong.objects.filter(playlist=playlist, song=song)[0]
+            return data.ObjectAlreadyExists("{} is already in playlist {}".format(song.title, playlist.name))
 
         ps = PlaylistSong.objects.create(playlist=playlist, song=song)
         ps.save()

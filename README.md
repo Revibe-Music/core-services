@@ -42,6 +42,7 @@ All parts of this API follow a set of rules that dictate things like code organi
 - 200 OK - default, request processed successfully
 - 201 Created - successfully created an object/instance
 - 204 No Content - object/instance successfully deleted
+- 208 Already Reported - the object requesting to be made already exists. For example, adding a song to a playlist that already has that song
 
 3xx Redirection:
 - *no convention*

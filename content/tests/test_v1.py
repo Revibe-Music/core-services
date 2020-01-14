@@ -101,7 +101,9 @@ class TestSongs(RevibeTestCase):
         response = self.client.get(url, format="json", **self._get_headers())
 
         self.assert200(response.status_code)
-        self.assertEqual(type(response.data), ReturnList)
+        self.assertEqual(type(response.data), OrderedDict)
+        self.assertTrue('results' in response.data.keys())
+        self.assertReturnList(response.data['results'])
 
 
 class TestSearch(RevibeTestCase):

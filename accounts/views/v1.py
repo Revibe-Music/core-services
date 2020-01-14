@@ -700,6 +700,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
         return True
 
     def check_delete_permissions(self, artist, instance, rel):
+        """
+        Check that the current user has the permissions required to delete the
+        current object.
+        """
         assert type(rel) == str, "'rel' must be a string object"
         assert rel in ['song','album'], "'rel' must be 'song' or 'album'"
 
@@ -799,7 +803,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             # ensure editing artist is the uploading artist
             if artist != instance.uploaded_by:
-                return responses.NOT_PERMITTED(detail="you are not permitted to delete this album")
+                raise ForbiddenError("You are not permitted to delete this album")
 
             # set the album to 'is_deleted'
             instance.is_deleted = True
@@ -874,26 +878,25 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.DEFAULT_400_RESPONSE()
 
         elif request.method == 'PATCH':
-            instance = song_queryset.get(pk=song_id)
+            instance = Song.objects.get(pk=song_id)
 
             # ensure this artist uploaded this song
             if artist != instance.uploaded_by:
-                return Response({"detail": "You are not authorized to edit this song"}, status=status.HTTP_403_FORBIDDEN)
+                raise ForbiddenError("You are not authorized to edit this song")
 
             serializer = content_ser_v1.SongSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
                 return responses.UPDATED(serializer=serializer)
-            else:
-                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE()
+
+            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
 
         elif request.method == 'DELETE':
-            instance = song_queryset.get(pk=song_id)
+            instance = Song.objects.get(pk=song_id)
 
             # ensure this artist uploaded this song
             if artist != instance.uploaded_by:
-                return Response({"detail": "You are not authorized to edit this song"}, status=status.HTTP_403_FORBIDDEN)
+                raise ForbiddenError("You are not authorized to delete this song")
 
             instance.is_deleted = True
             instance.is_displayed = False
@@ -959,13 +962,6 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         elif request.method == 'DELETE':
             instance = AlbumContributor.objects.get(pk=contribution_id)
-            # ensure that the current artist is authorized to delete this contribution
-            # permitted = [instance.artist, instance.album.uploaded_by]
-            # if request.user.artist in permitted:
-            #     instance.delete()
-            #     return responses.DELETED()
-            # else:
-            #     return responses.NOT_PERMITTED(detail="You are not authorized to delete this contribution")
 
             # check permissions
             self.check_delete_permissions(artist, instance, 'album')
@@ -1006,7 +1002,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.DEFAULT_400_RESPONSE()
 
         elif request.method == 'PATCH':
-            instance = full_queryset.get(pk=contribution_id)
+            instance = SongContributor.objects.get(pk=contribution_id)
 
             # check permissions and settings
             self.check_contrib_permissions(artist, instance, 'song')
@@ -1019,15 +1015,13 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
 
         elif request.method == 'DELETE':
-            instance = full_queryset.get(pk=contribution_id)
+            instance = SongContributor.objects.get(pk=contribution_id)
 
-            # check that the current artist is permitted to delete this contribution
-            permitted = [instance.artist, instance.song.uploaded_by]
-            if request.user.artist in permitted:
-                instance.delete()
-                return responses.DELETED()
-            else:
-                return responses.NOT_PERMITTED(detail="you are not authorized to delete this contribution")
+            # check permissions
+            self.check_delete_permissions(artist, instance, 'song')
+
+            instance.delete()
+            return responses.DELETED()
         
         else:
             return responses.NO_REQUEST_TYPE()

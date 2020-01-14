@@ -341,6 +341,14 @@ class TestArtistAlbums(RevibeTestCase):
                 song.is_deleted,
                 msg=f"Album song '{song}.is_deleted' was not set to True"
             )
+        self.assertEqual(
+            0, Album.display_objects.filter(id=self.album_id).count(),
+            msg="The album is still showing up in 'display_objects'"
+        )
+        self.assertEqual(
+            0, Song.display_objects.filter(album__id=self.album_id).count(),
+            msg="The album's songs are still showing up in 'display_objects'"
+        )
 
 
 class TestArtistSongs(RevibeTestCase):
@@ -348,6 +356,7 @@ class TestArtistSongs(RevibeTestCase):
         self._get_application()
         self._get_user()
         self._get_artist_user()
+        self._get_second_artist_user()
         self._create_album()
         self.url = reverse('artistaccount-songs')
         album = Album.objects.create(name="The Best Album", uploaded_by=self.artist_user.artist)
@@ -487,7 +496,21 @@ class TestArtistSongs(RevibeTestCase):
         """
         Edit a song that was not uploaded by the person editing the song
         """
-        pass
+        # check state
+        if not self.song_uploaded:
+            self.test_upload_song()
+        if not self.song_uploaded:
+            self.fail("Could not validate that a song was uploaded")
+        
+        # send request
+        data = {
+            "song_id": self.song_id,
+            "title": "Not Gonna Work"
+        }
+        response = self.client.patch(self.url, data, format="json", **self._get_headers(artist2=True))
+
+        # validate response
+        self.assert403(response)
 
     def test_get_songs(self):
         # validate pre-request requirements
@@ -527,13 +550,30 @@ class TestArtistSongs(RevibeTestCase):
 
         # vaidate response
         self.assert204(response)
+        self.assertEqual(
+            0, Song.display_objects.filter(id=self.song_id).count(),
+            msg="The song still appears in the 'display_objects' manager"
+        )
 
     def test_delete_song_not_uploader(self): # can't test, don't have second artist account set up
         """
         Delete a song when not the one who uploaded that song
         Expect a 403
         """
-        pass
+        # check state
+        if not self.song_uploaded:
+            self.test_upload_song()
+        if not self.song_uploaded:
+            self.fail("Could not validate that a song was uploaded")
+
+        # send request
+        data = {
+            "song_id": self.song_id
+        }
+        response = self.client.delete(self.url, data, format="json", **self._get_headers(artist2=True))
+
+        # validate response
+        self.assert403(response)
 
 
 class TestArtistAlbumContribution(RevibeTestCase):
@@ -823,19 +863,63 @@ class TestArtistSongContributions(RevibeTestCase):
         """
         Get song contributions
         """
-        pass
+        # send request
+        response = self.client.get(self.url, format="json", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnList(response)
+        for contrib in response.data:
+            self.assertEqual(
+                contrib['artist_id'], self.artist.id,
+                msg="Not all contributions returned are this artist's contributions"
+            )
 
     def test_delete_song_contribution(self):
         """
         Delete a contribution on a song this artist uploaded
         """
-        pass
+        # check state
+        if not self.contrib_added:
+            self.test_add_song_contribution()
+        if not self.contrib_added:
+            self.fail("Could not validate that a contribution was created")
+
+        # send request
+        data = {
+            "contribution_id": str(self.contrib_id)
+        }
+        response = self.client.delete(self.url, data, format="json", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert204(response)
+        self.assertEqual(
+            0, SongContributor.objects.filter(id=str(self.contrib_id)).count(),
+            msg="Still found the contribution in the database"
+        )
 
     def test_delete_song_contribution_not_uploader(self):
         """
         Delete a contribution on a song this artist did not upload
         """
-        pass
+        # check state
+        if not self.contrib_added:
+            self.test_add_song_contribution()
+        if not self.contrib_added:
+            self.fail("Could not validate that a contribution was created")
+
+        # send request
+        data = {
+            "contribution_id": str(self.contrib_id)
+        }
+        response = self.client.delete(self.url, data, format="json", **self._get_headers(artist2=True))
+
+        # validate request
+        self.assert204(response)
+        self.assertEqual(
+            0, SongContributor.objects.filter(id=str(self.contrib_id)).count(),
+            msg="Still found the contribution in the database"
+        )
 
     def test_approve_song_contribution(self):
         """

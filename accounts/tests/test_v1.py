@@ -742,9 +742,49 @@ class TestArtistSongContributions(RevibeTestCase):
     def test_edit_song_contribution_not_uploader(self):
         """
         Edit a song contribution on a song this artist did not upload
+
+        Sends two responses:
+        First sends response when artist settings do not allow contributors to
+        edit contributions; expect 403.
+
+        Seconds sends response after updating settings to allow contributors to
+        edit contributions; expect 200.
         """
-        pass
-    
+        # check state
+        if not self.contrib_added:
+            self.test_add_song_contribution()
+        if not self.contrib_added:
+            self.fail("Could not validate that a contribution has been created")
+        # send request
+        data = {
+            "contribution_id": str(self.contrib_id),
+            "contribution_type": "Test Edit 2"
+        }
+        response = self.client.patch(self.url, data, format="json", **self._get_headers(artist2=True))
+
+        # validate response
+        self.assert403(response)
+
+        # second request
+        # change settings
+        self.artist.artist_profile.allow_contributors_to_edit_contributions = True
+        self.artist.artist_profile.save()
+
+        # send request
+        response = self.client.patch(self.url, data, format="json", **self._get_headers(artist2=True))
+
+        # vaildate response
+        self.assert200(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            response.data['contribution_type'], SongContributor.objects.get(id=str(self.contrib_id)).contribution_type,
+            msg="the returned contribution type was not updated in the database"
+        )
+
+        # reset account settings
+        self.artist.artist_profile.allow_contributors_to_edit_contributions = False
+        self.artist.artist_profile.save()
+
     def test_get_song_contribution(self):
         """
         Get song contributions

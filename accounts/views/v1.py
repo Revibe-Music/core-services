@@ -25,7 +25,7 @@ logger = getLogger(__name__)
 
 from revibe.viewsets import GenericPlatformViewSet
 from revibe._errors.accounts import AccountNotFound, NotArtistError
-from revibe._errors.network import ConflictError
+from revibe._errors.network import ConflictError, ForbiddenError
 from revibe._helpers import responses, const
 
 from accounts.permissions import TokenOrSessionAuthentication
@@ -903,18 +903,17 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             # check permissions and settings
             if artist != instance.album.uploaded_by:
-                not_perm = responses.NOT_PERMITTED("You are not permitted to edit this contribution")
                 contributor = instance.artist
                 
                 # if the current user is not the contributor in the instance, 
                 # return 403
                 if artist != contributor:
-                    return not_perm
+                    raise ForbiddenError("You are not permitted to edit this contribution")
 
                 # if the content creator does not allow contributors to edit
                 # contributions, return 403
                 if not instance.album.uploaded_by.artist_profile.allow_contributors_to_edit_contributions:
-                    return not_perm
+                    raise ForbiddenError("{} does not allow contributors to edit contributions.".format(str(instance.album.uploaded_by)))
 
             # perform update
             serializer = content_ser_v1.AlbumContributorSerializer(data=request.data, instance=instance, partial=True, *args, **kwargs)
@@ -972,7 +971,17 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             # check permissions and settings
             if artist != instance.song.uploaded_by:
-                return responses.NOT_PERMITTED(detail="you are not permitted to edit this contribution")
+                contributor = instance.artist
+                
+                # if the current user is not the contributor in the instance, 
+                # return 403
+                if artist != contributor:
+                    raise ForbiddenError("You are not permitted to edit this contribution")
+
+                # if the content creator does not allow contributors to edit
+                # contributions, return 403
+                if not instance.song.uploaded_by.artist_profile.allow_contributors_to_edit_contributions:
+                    raise ForbiddenError("{} does not allow contributors to edit contributions.".format(str(instance.song.uploaded_by)))
 
             serializer = content_ser_v1.SongContributorSerializer(instance=instance, data=request.data, partial=True, *args, **kwargs)
             if serializer.is_valid():

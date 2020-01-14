@@ -618,13 +618,32 @@ class TestArtistSongContributions(RevibeTestCase):
         self._get_application()
         self._get_user()
         self._get_artist_user()
+        self._get_second_artist_user()
         self._create_song()
-    
+        self.url = reverse('artistaccount-song_contributions')
+
+        _album = Album.objects.create(name="917834520", uploaded_by=self.artist, platform="Revibe")
+        _album.save()
+        self.album_id = _album.id
+
+        _song = Song.objects.create(title="983pqhfg", duration=238, album=_album, uploaded_by=self.artist, platform="Revibe")
+        _song.save()
+        self.song_id = _song.id
+
     def test_add_song_contribution(self):
         """
         Add song contribution to a song this artist uploaded
         """
-        pass
+        data = {
+            "artist_id": str(self.artist2.id),
+            "song_id": str(self.song_id),
+            "contribution_type": "Test"
+        }
+        response = self.client.post(self.url, data, format="json", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert201(response)
+        self.assertReturnDict(response)
 
     def test_edit_song_contribution(self):
         """

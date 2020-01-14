@@ -927,7 +927,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         else:
             return responses.NO_REQUEST_TYPE()
     
-    @action(detail=False, url_path='contributions/songs', methods=['get','post','patch','delete'])
+    @action(detail=False, url_path='contributions/songs', methods=['get','post','patch','delete'], url_name="song_contributions")
     def song_contributions(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
 

@@ -88,6 +88,7 @@ class ArtistViewset(PlatformViewSet):
 class AlbumViewSet(PlatformViewSet):
     platform = 'Revibe'
     serializer_class = ser_v1.AlbumSerializer
+    pagination_class = CustomLimitOffsetPagination
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"], ['first-party']],

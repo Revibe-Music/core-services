@@ -70,9 +70,10 @@ class TestAlbums(RevibeTestCase):
         url = reverse('album-list')
         response = self.client.get(url, format="json", **self._get_headers())
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), cnt_models.Album.objects.count())
-        self.assertEqual(type(response.data), ReturnList)
+        self.assert200(response)
+        self.assertEqual(type(response.data), OrderedDict)
+        self.assertEqual(len(response.data['results']), cnt_models.Album.objects.count())
+        self.assertReturnList(response.data['results'])
 
     def test_album_details(self):
         url = reverse('album-detail', args=[self.content_album.id])

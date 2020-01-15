@@ -243,3 +243,17 @@ class Platform:
 
         return instance
 
+    def save_song_to_playlist(self, request, playlist, *args, **kwargs):
+        """
+        Save a song to a user's playlist
+        """
+        user = request.user
+        data = request.data
+
+        song = self.save(data, *args, **kwargs)
+
+        instance = PlaylistSong.objects.create(song=song, playlist=playlist)
+        instance.save()
+
+        return instance
+

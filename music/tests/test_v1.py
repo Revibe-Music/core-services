@@ -192,6 +192,7 @@ class TestPlaylists(RevibeTestCase):
         self.assertEqual(Playlist.objects.count(), playlists_before+1)
 
         self.created_playlist = True
+        self.playlist_id = response.data['id']
     
     def test_add_song(self):
         if not self.created_playlist:
@@ -211,6 +212,40 @@ class TestPlaylists(RevibeTestCase):
         self.assertEqual(playlist_songs_before + 1, len(Playlist.objects.get(id=playlist_id).songs.all()))
 
         self.added_songs = True
+    
+    def test_add_youtube_song(self):
+        if not self.created_playlist:
+            self.test_create_playlist()
+        if not self.created_playlist:
+            self.fail("Could not verify that a playlist was created")
+
+        # send request
+        url = reverse('playlist-songs')
+        data = {
+            "playlist_id": self.playlist_id,
+            "platform": 'youtube',
+            "artist": {
+                "artist_id": "456y2urj3kef",
+                "artist_uri": "u7q3iaervo83thiger",
+                "name": "YouTube Guy",
+                "image_ref": "hello.com/hello.png"
+            },
+            "album": {
+                "image_ref": "9ui3wrsg.com/h3otgnerv.jpg"
+            },
+            "song": {
+                "song_id": "2346790",
+                "song_uri": "123467890",
+                "title" : "The Guy's Song",
+                "duration": "349",
+            }
+        }
+        response = self.client.post(url, data, format="json", **self._get_headers())
+
+        # validate response
+        if response.status_code != 201:
+            print(response.data)
+        self.assert201(response)
 
     def test_delete_song(self):
         if not self.added_songs:

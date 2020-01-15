@@ -174,6 +174,14 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return responses.DELETED()
 
+    def check_playlist_edit_permissions(self, playlist, user):
+        """
+        Checks if the current user is allowed to add/remove content from the
+        given playlist.
+        """
+        if user != playlist.user:
+            raise network.ForbiddenError("you are not authorized to add/remove content from this playlist")
+
     @action(detail=False, methods=['get','post', 'delete'])
     def songs(self, request, pk=None, *args, **kwargs):        
         kwargs['context'] = self.get_serializer_context()
@@ -200,12 +208,15 @@ class PlaylistViewSet(viewsets.ModelViewSet):
             return responses.OK(serializer=serializer)
 
         elif request.method == 'POST':
-            serializer = PlaylistSongSerializer(data=request.data, *args, **kwargs)
-            if serializer.is_valid():
-                serializer.save()
-                return responses.CREATED(serializer=serializer)
+            platform = get_platform(request.data.pop('platform','revibe'))
+            playlist = Playlist.objects.get(id=request.data.pop('playlist_id'))
 
-            return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
+            self.check_playlist_edit_permissions(playlist, request.user)
+
+            instance = platform.save_song_to_playlist(request, playlist, *args, **kwargs)
+            serializer = PlaylistSongSerializer(instance=instance, *args, **kwargs)
+
+            return responses.CREATED(serializer=serializer)
 
         elif request.method == 'DELETE':
             serializer = PlaylistSongSerializer(data=request.data, *args, **kwargs)

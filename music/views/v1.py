@@ -147,6 +147,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
         "POST": [["ADMIN"],["first-party"]],
+        "PATCH": [["ADMIN"],["first-party"]],
         "DELETE": [["ADMIN"],["first-party"]],
     }
 

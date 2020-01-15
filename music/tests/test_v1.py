@@ -9,6 +9,7 @@ logger = getLogger(__name__)
 from revibe._helpers import const, status
 from revibe._helpers.test import RevibeTestCase
 
+from content.models import Album
 from music.models import Library, Playlist
 
 # -----------------------------------------------------------------------------
@@ -68,10 +69,91 @@ class TestLibrary(RevibeTestCase):
         response = self.client.post(url, data, format="json", **self._get_headers())
 
         # validate response
+        self.assert201(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            1, Album.objects.filter(song__id=data['song']['song_id']).count(),
+            msg="Could not find an album with the correct song ID"
+        )
+        required_fields = ['library', 'song']
+        for field in required_fields:
+            self.assertTrue(
+                field in response.data.keys(),
+                msg=f"{field} not in response fields"
+            )
+
+    def test_save_spotify_song(self):
+        """
+        Creates a Spotify library for the user first
+        """
+        # create the spotify library
+        lib = Library.objects.create(platform='Spotify', user=self.user)
+        lib.save()
+
+        # send request
+        url = reverse('library-songs')
+        data = {
+            "platform":"spotify",
+            "artist": {
+                "artist_id": "28pwovyrh",
+                "artist_uri":"918q3y9ptfrh",
+                "name":"Spotify Boi",
+                "image_ref": "83yetu.com/yaboi.png"
+            },
+            "album": {
+                "album_id": "8tj89frjyegnufh8ui",
+                "album_uri": "hygjou9ehtj",
+                "name":"Dat Boi the Album",
+                "image_ref": "jywefrtni.hua"
+            },
+            "song": {
+                "song_id": "75ythjgvo9r48uyhrtjfio",
+                "song_uri": "uhtjgkocdieu3hrjkfdox9",
+                "title": "dat Boi's song",
+                "duration": "430"
+            }
+        }
+        response = self.client.post(url, data, format="json", **self._get_headers())
+
+        # validate response
         if response.status_code != 201:
             print(response.data)
         self.assert201(response)
 
+        # delete that library
+        lib.delete()
+
+    def test_save_spotify_song_no_library(self):
+        """
+        Save a spotify song when the user does not have a spotify library
+        """
+        # send request
+        url = reverse('library-songs')
+        data = {
+            "platform":"spotify",
+            "artist": {
+                "artist_id": "28pwovyrh",
+                "artist_uri":"918q3y9ptfrh",
+                "name":"Spotify Boi",
+                "image_ref": "83yetu.com/yaboi.png"
+            },
+            "album": {
+                "album_id": "8tj89frjyegnufh8ui",
+                "album_uri": "hygjou9ehtj",
+                "name":"Dat Boi the Album",
+                "image_ref": "jywefrtni.hua"
+            },
+            "song": {
+                "song_id": "75ythjgvo9r48uyhrtjfio",
+                "song_uri": "uhtjgkocdieu3hrjkfdox9",
+                "title": "dat Boi's song",
+                "duration": "430"
+            }
+        }
+        response = self.client.post(url, data, format="json", **self._get_headers())
+
+        # validate response
+        self.assert400(response)
 
 class TestPlaylists(RevibeTestCase):
     def setUp(self):

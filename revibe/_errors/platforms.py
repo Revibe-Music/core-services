@@ -14,5 +14,5 @@ class InvalidPlatformContent(network.ProgramError):
 class InvalidPlatformOperation(Exception):
     pass
 
-class PlatformNotFoundError(Exception):
-    pass
+class PlatformNotFoundError(network.BadRequestError):
+    default_detail = "The requested platform does not exist"

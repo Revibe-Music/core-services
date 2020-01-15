@@ -177,6 +177,13 @@ class Platform:
         else: #can only be 0
             return self._save_song(data, artist, album, *args, **kwargs)
 
+    def _validate_save_data(self, data):
+        errs = {}
+        required_dicts = ['song','album','artist']
+        for dic in required_dicts:
+            if dic not in data.keys():
+                errs[dic] = ["when saving non-revibe content, must include a '{}' object".format(dic)]
+
     def save(self, data, *args, **kwargs):
         """
         Expecting data to look like:
@@ -205,6 +212,7 @@ class Platform:
         }
         """
         self._invalidate_revibe()
+        self._validate_save_data(data)
 
         artist_data = data.pop('artist')
         album_data = data.pop('album')
@@ -223,7 +231,11 @@ class Platform:
         user = request.user
         data = request.data
         
-        library = Library.objects.get(user=user, platform=self.__class__.__name__)
+        try:
+            library = Library.objects.get(user=user, platform=self.__class__.__name__)
+        except Library.DoesNotExist as e:
+            raise plt_er.PlatformNotFoundError("This user does not have a {} library".format(self.__class__.__name__))
+
         song = self.save(data, *args, **kwargs)
 
         instance = LibrarySong.objects.create(library=library, song=song)

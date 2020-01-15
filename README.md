@@ -83,6 +83,10 @@ logger, anything from the *revibe* module, and anything from any other API app.
 
 ### Tests
 
+### Asyncronous Tasks
+
+Docs: [Implementing Celery with Django in AWS Elastic Beanstalk](https://stackoverflow.com/questions/41161691/how-to-run-a-celery-worker-with-django-app-scalable-by-aws-elastic-beanstalk)
+
 # Authors
 
 Jordan Prechac - [**jprechac@gmail.com**](mailto:jprechac@gmail.com "Jordan Prechac")

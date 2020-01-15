@@ -144,6 +144,7 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
     about_me = serializers.CharField(required=False)
     email = serializers.CharField(required=False)
     country = serializers.CharField(required=False)
+    state = serializers.CharField(required=False)
     city = serializers.CharField(required=False)
     zip_code = serializers.CharField(required=False)
 
@@ -166,6 +167,7 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
             'about_me',
             'email',
             'country',
+            'state',
             'city',
             'zip_code',
 
@@ -195,6 +197,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
     about_me = serializers.CharField(source="artist_profile.about_me", required=False, write_only=True)
     email = serializers.CharField(source="artist_profile.email", required=False, write_only=True)
     country = serializers.CharField(source="artist_profile.country", required=False, write_only=True)
+    state = serializers.CharField(source="artist_profile.state", required=False, write_only=True)
     city = serializers.CharField(source="artist_profile.city", required=False, write_only=True)
     zip_code = serializers.CharField(source="artist_profile.zip_code", required=False, write_only=True)
 
@@ -225,6 +228,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
             'about_me',
             'email',
             'country',
+            'state',
             'city',
             'zip_code',
 

@@ -76,6 +76,7 @@ class ArtistProfile(models.Model):
     email = models.CharField(max_length=255, null=True, blank=True)
     about_me = models.TextField(null=True, blank=True)
     city = models.CharField(max_length=255, null=True, blank=True)
+    state = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255, null=True, blank=True)
     zip_code = models.CharField(max_length=255, null=True, blank=True)
 

@@ -1,14 +1,8 @@
-from revibe.platforms.platforms import *
-from revibe._errors.platforms import PlatformNotFoundError
-
-linked_platforms = [
-    Revibe,
-    YouTube,
-    Spotify,
-]
+from revibe.platforms import get_platform as gp
 
 def get_platform(string):
-    for platform in linked_platforms:
-        if string in platform.strings:
-            return platform()
-    raise PlatformNotFoundError("Could not determine the platform based on the input {}".format(string))
+    """
+    Deprecated, only here for support of old files.
+    Please update to the new file location
+    """
+    return gp(string)

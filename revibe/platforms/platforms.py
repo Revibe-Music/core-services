@@ -4,7 +4,7 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 from revibe.platforms.base_platform import Platform
-from revibe._errors import data, versions
+from revibe._errors import data as data_err, versions
 from revibe._helpers.versions import Version
 
 from content.models import *
@@ -22,17 +22,8 @@ class Revibe(Platform):
         'reVibe',
     ]
 
-    def save_song_to_library(self, data, *args, **kwargs):
-        version = kwargs.pop('version', Version().latest)
-
-        if version == 'v1':
-            serializer = ser_v1.LibrarySongSerializer(data=data, *args, **kwargs)
-            if serializer.is_valid():
-                serializer.save()
-                return serializer
-            raise data.SerializerValidationError(serializer.errors)
-        
-        raise versions.VersionError("Could not identify the required API version")
+    def save(self, data, *args, **kwargs):
+        return self.get_song(data, None, None, *args, **kwargs)
     
     def destroy(self, instance):
         if isinstance(instance, (Song, Album)):
@@ -55,13 +46,36 @@ class YouTube(Platform):
         'You tube',
         'you Tube',
     ]
-    
-    def save_album(self, data, artist, *args, **kwargs):
-        serializer, album = super().save_album(data, artist=artist)
-        assert album, "Error saving album"
-        album.type = 'Single'
-        album.save()
-        return serializer, album
+
+    def get_album(self, data, artist, *args, **kwargs):
+        """
+        Overwrites the base platform get_album because YouTube content will not
+        have an album ID by default, so we need to create an arbitrary album to
+        fit our DB schema.
+        """
+        # validate data
+        if (not data['song']) or (not data['song']['song_id']):
+            raise data_err.SerializerValidationError({"song": ["song object must contain an ID"]})
+        if 'image_ref' not in data['album'].keys():
+            raise data_err.SerializerValidationError({"album": ["album object must contain an image_ref"]})
+
+        album_data = {
+            "name": data['song']['title'] + '-Album',
+            "image_ref": data['album']['image_ref']
+        }
+
+        return self._save_album(album_data, artist, *args, **kwargs)
+
+    def save(self, data, *args, **kwargs):
+        """
+        Overwrites the base platform save because YouTube content will never
+        have an album_id in the data because YouTube does not have albums.
+        """
+        artist = self.get_artist(data, *args, **kwargs)
+        album = self.get_album(data, artist, *args, **kwargs)
+        song = self.get_song(data, artist, album, *args, **kwargs)
+
+        return song
 
 
 class Spotify(Platform):

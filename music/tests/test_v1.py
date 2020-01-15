@@ -6,7 +6,7 @@ from collections import OrderedDict
 from logging import getLogger
 logger = getLogger(__name__)
 
-from revibe._helpers import status
+from revibe._helpers import const, status
 from revibe._helpers.test import RevibeTestCase
 
 from music.models import Library, Playlist
@@ -43,6 +43,34 @@ class TestLibrary(RevibeTestCase):
         # check that the song is in fact in the user's library
         library = Library.objects.get(user=self.user, platform="Revibe")
         self.assertTrue(str(self.content_song.id) == str(library.songs.all()[0].id)) # have to cast ID's as strings, the object ID's come back as UUIID and str, respectively
+
+    def test_save_youtube_song(self):
+        # send request
+        url = reverse('library-songs')
+        data = {
+            "platform": 'youtube',
+            "artist": {
+                "artist_id": "456y2urj3kef",
+                "artist_uri": "u7q3iaervo83thiger",
+                "name": "YouTube Guy",
+                "image_ref": "hello.com/hello.png"
+            },
+            "album": {
+                "image_ref": "9ui3wrsg.com/h3otgnerv.jpg"
+            },
+            "song": {
+                "song_id": "2346790",
+                "song_uri": "123467890",
+                "title" : "The Guy's Song",
+                "duration": "349",
+            }
+        }
+        response = self.client.post(url, data, format="json", **self._get_headers())
+
+        # validate response
+        if response.status_code != 201:
+            print(response.data)
+        self.assert201(response)
 
 
 class TestPlaylists(RevibeTestCase):

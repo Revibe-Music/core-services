@@ -315,7 +315,7 @@ class OtherArtistSerializer(serializers.ModelSerializer):
 
 class OtherAlbumSerializer(serializers.ModelSerializer):
     album_id = serializers.CharField(source='id', required=False)
-    artist_uri = serializers.CharField(source='uri', required=False)
+    album_uri = serializers.CharField(source='uri', required=False)
     uploaded_by = OtherArtistSerializer(read_only=True)
 
     class Meta:
@@ -334,8 +334,15 @@ class OtherAlbumSerializer(serializers.ModelSerializer):
 class OtherSongSerializer(serializers.ModelSerializer):
     song_id = serializers.CharField(source='id', required=False)
     song_uri = serializers.CharField(source='uri', required=False)
+
+    # read-only
     album = OtherAlbumSerializer(read_only=True)
     uploaded_by = OtherArtistSerializer(read_only=True)
+
+    # write-only
+    platform = serializers.CharField(write_only=True)
+    album_id = serializers.CharField(write_only=True)
+    artist_id = serializers.CharField(write_only=True)
 
     class Meta:
         model = Song
@@ -347,7 +354,25 @@ class OtherSongSerializer(serializers.ModelSerializer):
             'genre',
             'platform',
             'is_explicit',
+
+            # read-only
             'album',
             'uploaded_by',
+
+            # write-only
+            'platform',
+            'album_id',
+            'artist_id',
         ]
+    
+    def create(self, validated_data, *args, **kwargs):
+        platform = validated_data.pop('platform')
+        album = Album.objects.get(id=validated_data.pop('album_id'))
+        artist = Artist.objects.get(id=validated_data.pop('artist_id'))
+
+        song = Song.objects.create(album=album, uploaded_by=artist, platform=platform, **validated_data)
+        song.save()
+
+        return song
+        
 

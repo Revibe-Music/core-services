@@ -12,7 +12,7 @@ from revibe.pagination import CustomLimitOffsetPagination
 from revibe._errors import data, network
 from revibe._helpers import responses
 from revibe._helpers.debug import debug_print
-from revibe._helpers.platforms import get_platform, linked_platforms
+from revibe.platforms import get_platform, linked_platforms
 
 from accounts.permissions import TokenOrSessionAuthentication
 from content.serializers.v1 import *
@@ -86,14 +86,12 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
             # kwargs['version'] = self.get_version()
             platform = get_platform(request.data['platform'])
 
-            # serializer = platform.save_song_to_library(data=request.data, *args, **kwargs)
-            serializer = LibrarySongSerializer(data=request.data, *args, **kwargs)
-            if serializer.is_valid():
-                serializer.save()
-                return responses.CREATED(serializer)
-            else:
-                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE()
+            # instance = platform.save(request.data, *args, **kwargs)
+            instance = platform.save_song_to_library(request, *args, **kwargs)
+            serializer = LibrarySongSerializer(instance=instance, *args, **kwargs)
+
+            return responses.CREATED(serializer=serializer)
+
 
         elif request.method == 'DELETE':
             kwargs['context'] = self.get_serializer_context()

@@ -45,19 +45,23 @@ class Profile(models.Model):
 
     # user settings fields
     allow_explicit = models.BooleanField(
-        "Allow the user to listen to explicit content",
+        help_text="Allow the user to listen to explicit content",
+        null=False, blank=True, default=True
+    )
+    skip_youtube_when_phone_is_locked = models.BooleanField(
+        help_text="Skip YouTube content while phone is locked",
         null=False, blank=True, default=True
     )
 
     # privacy settings
     allow_listening_data = models.BooleanField(
-        "Allow this user to be linked to the recorded listening data",
+        help_text="Allow this user to be linked to the recorded listening data",
         null=False, blank=True, default=True
     )
 
     # notification settings
     allow_email_marketing = models.BooleanField(
-        "Allow Revibe to send email to the user for marketing purposes",
+        help_text="Allow Revibe to send email to the user for marketing purposes",
         null=False, blank=True, default=True
     )
 
@@ -77,27 +81,31 @@ class ArtistProfile(models.Model):
 
     # account settings
     require_contribution_approval = models.BooleanField(
-        "Require that all new contributions must be approved by the artist",
+        help_text="Require that all new contributions must be approved by the artist",
         null=False, blank=True, default=True
     )
     require_contribution_approval_on_edit = models.BooleanField(
-        "Require that all changes to contributions must be re-approved by the artist",
+        help_text="Require that all changes to contributions must be re-approved by the artist",
         null=False, blank=True, default=True
     )
     share_data_with_contributors = models.BooleanField(
-        "Allow streaming data to be shared with contributors to uploaded content",
+        help_text="Allow streaming data to be shared with contributors to uploaded content",
         null=False, blank=True, default=True
     )
     share_advanced_data_with_contributors = models.BooleanField(
-        "Allow advanced streaming data to be shared with contributors to uploaded content",
+        help_text="Allow advanced streaming data to be shared with contributors to uploaded content",
         null=False, blank=True, default=False
     )
     allow_contributors_to_edit_contributions = models.BooleanField(
-        "Allow contributors to edit their contributions to content", # can delete contributions regardless
+        help_text="Allow contributors to edit their contributions to content", # can delete contributions regardless
         null=False, blank=True, default=False
     )
     hide_all_content = models.BooleanField(
-        "Hide all artist's content from appearing in the Revibe app, and prevents the artist from being added as a contributor.",
+        help_text="Hide all artist's content from appearing in the Revibe app, and prevents the artist from being added as a contributor.",
+        null=False, blank=True, default=False
+    )
+    display_other_platform_content_on_revibe_page = models.BooleanField(
+        help_text="Display Spotify/YouTube content on the artist's Revibe artist page",
         null=False, blank=True, default=False
     )
 

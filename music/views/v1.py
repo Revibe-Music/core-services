@@ -219,11 +219,14 @@ class PlaylistViewSet(viewsets.ModelViewSet):
             return responses.CREATED(serializer=serializer)
 
         elif request.method == 'DELETE':
-            serializer = PlaylistSongSerializer(data=request.data, *args, **kwargs)
-            serializer.is_valid(raise_exception=True)
-            serializer.delete(data=request.data, *args, **kwargs)
+            song = Song.objects.get(id=request.data['song_id'])
+            playlist = Playlist.objects.get(id=request.data['playlist_id'])
+            self.check_playlist_edit_permissions(playlist, request.user)
 
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            instance = PlaylistSong.objects.get(playlist=playlist, song=song)
+            instance.delete()
+
+            return responses.DELETED()
 
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)

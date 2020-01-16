@@ -25,7 +25,7 @@ logger = getLogger(__name__)
 
 from revibe.viewsets import GenericPlatformViewSet
 from revibe._errors.accounts import AccountNotFound, NotArtistError
-from revibe._errors.network import ConflictError, ForbiddenError
+from revibe._errors.network import ConflictError, ForbiddenError, NotImplementedError
 from revibe._helpers import responses, const
 
 from accounts.permissions import TokenOrSessionAuthentication
@@ -937,7 +937,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             album_serializer = content_ser_v1.AlbumSerializer(albums, many=True)
             return Response(album_serializer.data)
         
-        if request.method == 'POST':
+        elif request.method == 'POST':
             serializer = content_ser_v1.AlbumContributorSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
@@ -1062,6 +1062,33 @@ class UserArtistViewSet(GenericPlatformViewSet):
         contribution.save()
 
         return responses.UPDATED(serializer(instance=contribution))
+
+    @action(detail=False, url_path="songs/metrics", methods=['get'], url_name="song_metrics")
+    def song_metrics(self, requests, *args, **kwargs):
+        artist = self.get_current_artist(request)
+
+        if request.method == 'GET':
+            raise NotImplementedError()
+
+        return responses.NO_REQUEST_TYPE()
+
+    @action(detail=False, url_path="contributions/albums/metrics", methods=['get'], url_name="album_contribution_metrics")
+    def album_contribution_metrics(self, request, *args, **kwargs):
+        artist = self.get_current_artist(request)
+
+        if request.method == 'GET':
+            raise NotImplementedError()
+
+        return responses.NO_REQUEST_TYPE()
+
+    @action(detail=False, url_path="contributions/songs/metrics", methods=['get'], url_name="song_contribution_metrics")
+    def song_contribution_metrics(self, request, *args, **kwargs):
+        artist = self.get_current_artist(request)
+
+        if request.method == 'GET':
+            raise NotImplementedError()
+
+        return responses.NO_REQUEST_TYPE()
 
 class UserViewSet(generics.GenericAPIView):
     serializer_class = UserSerializer

@@ -544,14 +544,21 @@ class SendRegisterLink(generics.GenericAPIView):
             f"Click <a href='{register_link}'>here</a> to join now!"
 
         # send the message
-        send_mail(
+        num_sent = send_mail(
             subject,
             message,
-            from_address,
-            to
+            from_email=from_address,
+            recipient_list=to,
+            fail_silently=True
         )
 
-        return responses.OK()
+        info = {
+            "total requested": len(to),
+            "total sent": num_sent,
+            "not sent": len(to) - num_sent, 
+        }
+
+        return responses.OK(data=info)
 
 # Linked Account Views
 

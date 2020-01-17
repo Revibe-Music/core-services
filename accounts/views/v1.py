@@ -743,6 +743,29 @@ class UserArtistViewSet(GenericPlatformViewSet):
         
         return contrib_songs
 
+    def _get_song_metrics(self, serializer, artist, *args, **kwargs):
+        data = serializer.data
+        env = 'test' if settings.DEBUG else 'production'
+
+        for song in serializer.data:
+            song_object = Song.objects.get(id=song['song_id'])
+            is_contributor = artist == song_object.uploaded_by
+
+            # only send back metrics if the user is the uploading artist
+            # or the contributor is allowed to see the metrics
+            if (not contribution) or song_object.uploaded_by.artist_profile.share_data_with_contributors:
+                song['total_streams'] = Stream.count(song['song_id'], Stream.environment == env)
+            
+            # create dict with more advanced metrics info
+            # only send if user is uploading artist or artist allows advanced
+            # data sharing
+            if (not contribution) or song_object.uploaded_by.artist_profile.share_advanced_data_with_contributors:
+                advanced_metrics = {}
+                # calculate metrics...
+                song['advanced_metrics'] = advanced_metrics
+        
+        return data
+
     @action(detail=False, methods=['get','post','patch','delete'])
     def albums(self, request, *args, **kwargs):
         """
@@ -876,13 +899,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             # attach the number of streams in running in the cloud
             if settings.USE_S3:
-                data = serializer.data
-
-                # attach the data to the serializer data
-                env = 'test' if settings.DEBUG else 'production'
-                for song in serializer.data:
-                    song['total_streams'] = Stream.count(song['song_id'], Stream.environment == env)
-                return Response(data, status=status.HTTP_200_OK)
+                metrics_data = self._get_song_metrics(serializer, artist, *args, **kwargs)
+                return responses.OK(data=metrics_data)
 
             return Response(serializer.data)
 
@@ -1037,23 +1055,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             # attach stream data if in the cloud
             if settings.USE_S3:
-                data = song_serializer.data
-                env = 'test' if settings.DEBUG else 'production'
-
-                for song in song_serializer.data:
-                    song_object = Song.objects.get(id=song['song_id'])
-
-                    # check if the artist allows metrics for contributors
-                    if not song_object.uploaded_by.artist_profile.share_data_with_contributors:
-                        continue
-
-                    song['total_streams'] = Stream.count(song['song_id'], Stream.environment == env)
-
-                    if song_object.uploaded_by.artist_profile.share_advanced_data_with_contributors:
-                        # attach an extra object with advanced stream data
-                        song['advanced_metrics'] = {}
+                metrics_data = self._get_song_metrics(song_serializer, artist, *args, **kwargs)
                 
-                return responses.OK(data=data)
+                return responses.OK(data=metrics_data)
 
             return responses.OK(serializer=song_serializer)
 

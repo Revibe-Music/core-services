@@ -949,10 +949,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             # attach metrics when running in the cloud
             if settings.USE_S3:
-                data = serializer.data
+                data = album_serializer.data
                 env = 'test' if settings.DEBUG else 'production'
 
-                for album in serializer.data:
+                for album in album_serializer.data:
                     album_object = Album.objects.get(id=album['album_id'])
                     # check if the album is allowed to have any metrics returned
                     if not album_objects.uploaded_by.artist_profile.share_data_with_contributors:
@@ -1097,7 +1097,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         return responses.UPDATED(serializer(instance=contribution))
 
-    # metrics endpoints
+    # metrics endpoints # probably not going to get used anyway tbh, found a better way
 
     @action(detail=False, url_path="albums/metrics", methods=['get'], url_name="album_metrics")
     def album_metrics(self, request, *args, **kwargs):

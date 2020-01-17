@@ -732,6 +732,17 @@ class UserArtistViewSet(GenericPlatformViewSet):
         
         return contrib_albums
 
+    def _get_song_contributions(self, artist, *args, **kwargs):
+        """
+        Gets a lit of songs that the current artist contributed to but did not
+        upload.
+        """
+        contrib_songs = Song.hidden_objects \
+            .filter(song_to_artist__primary_artist=False, contributors=artist) \
+            .distinct()
+        
+        return contrib_songs
+
     @action(detail=False, methods=['get','post','patch','delete'])
     def albums(self, request, *args, **kwargs):
         """
@@ -965,7 +976,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                     
                     if album_object.uploaded_by.artist_profile.share_advanced_data_with_contributors:
                         # attach an extra object with advanced stream data
-                        pass
+                        album['advanced_metrics'] = {}
 
                 return responses.OK(data=data)
 
@@ -1017,14 +1028,34 @@ class UserArtistViewSet(GenericPlatformViewSet):
             contribution_id = request.data.pop('contribution_id')
 
         if request.method == 'GET':
-            # get the list of contributions that belong to this artist
-            contrib_songs = SongContributor.objects.filter(primary_artist=False, artist=artist)
+            # # deprecated, kept here for reference
+            # contrib_songs = SongContributor.objects.filter(primary_artist=False, artist=artist)
+            # songs = list(set([sc.song for sc in contrib_songs if sc.song.is_deleted==False]))
 
-            # get the list of unique songs that have have one of the contributors in the last list
-            songs = list(set([sc.song for sc in contrib_songs if sc.song.is_deleted==False]))
-
+            songs = self._get_song_contributions(artist)
             song_serializer = content_ser_v1.SongSerializer(songs, many=True, *args, **kwargs)
-            return Response(song_serializer.data)
+
+            # attach stream data if in the cloud
+            if settings.USE_S3:
+                data = song_serializer.data
+                env = 'test' if settings.DEBUG else 'production'
+
+                for song in song_serializer.data:
+                    song_object = Song.objects.get(id=song['song_id'])
+
+                    # check if the artist allows metrics for contributors
+                    if not song_object.uploaded_by.artist_profile.share_data_with_contributors:
+                        continue
+
+                    song['total_streams'] = Stream.count(song.id, Stream.environment == env)
+
+                    if song_object.uploaded_by.artist_profile.share_advanced_data_with_contributors:
+                        # attach an extra object with advanced stream data
+                        song['advanced_metrics'] = {}
+                
+                return responses.OK(data=data)
+
+            return responses.OK(serializer=song_serializer)
 
         elif request.method == 'POST':
             serializer = content_ser_v1.SongContributorSerializer(data=request.data, *args, **kwargs)

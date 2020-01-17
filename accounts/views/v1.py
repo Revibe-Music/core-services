@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.http import HttpRequest
 from django.utils import timesince
@@ -25,7 +26,7 @@ logger = getLogger(__name__)
 
 from revibe.viewsets import GenericPlatformViewSet
 from revibe._errors.accounts import AccountNotFound, NotArtistError
-from revibe._errors.network import ConflictError, ForbiddenError, NotImplementedError
+from revibe._errors.network import ConflictError, ForbiddenError, NotImplementedError, ExpectationFailedError
 from revibe._helpers import responses, const
 
 from accounts.permissions import TokenOrSessionAuthentication
@@ -499,6 +500,58 @@ class LogoutAllAPI(generics.GenericAPIView):
         tokens.delete()
 
         return Response({"detail": "logout-all successful", "tokens deleted": num}, status=status.HTTP_200_OK)
+
+class SendRegisterLink(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        """
+        Required fields:
+        to: (list) the emails to send mail to
+        artist: (bool) coming from an artist function or not (like the Artist Portal)
+        type: (string) the type of invite to send,
+            must be one of 'artist_invite', 
+        """
+        # validate data
+        errors = {}
+        required_fields = ['to','type']
+        alt_fields = ['artist']
+        for key in request.data.keys():
+            if key not in required_fields and key not in alt_fields:
+                errors[key] = f"Got an unexpected value: {key}"
+        for field in required_fields:
+            if field not in request.data.keys():
+                errors[field] = f"Must include {field} in request"
+        if len(errors) > 0:
+            raise ExpectationFailedError(detail=errors)
+
+        # define variables
+        user = request.user
+        register_link = "artist.revibe.tech/account/register"
+
+        # leave out 'artist' from request data if it's supposed to be False
+        artist_param = request.data.get('artist', False)
+        artist = bool(artist_param)
+        user_name = user.first_name + user.last_name if (user.first_name != None) and (user.last_name != None) else user.username
+        name = user.artist.name if artist else user_name
+
+        # configure email content
+        subject = f"{name} has invited you to join Revibe"
+        from_address = f'"Join Revibe" <{const.ARTIST_FROM_EMAIL}>'
+        to = request.data['to']
+        to = to if type(to) == list else [to,]
+        message = f"{name} has invited you to join Revibe.\n" + \
+            f"Click <a href='{register_link}'>here</a> to join now!"
+
+        # send the message
+        send_mail(
+            subject,
+            message,
+            from_address,
+            to
+        )
+
+        return responses.OK()
 
 # Linked Account Views
 

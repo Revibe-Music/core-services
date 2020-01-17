@@ -30,5 +30,5 @@ urlpatterns = [
     path('spotify-authentication/', v1.SpotifyConnect.as_view()),
     path('spotify-refresh/', v1.SpotifyRefresh.as_view()),
     path('spotify-logout/', v1.SpotifyLogout.as_view()),
-    # path('artist', v1.UserArtistViewSet, name='user_artist'),
+    path('send-email', v1.SendRegisterLink.as_view(), name="send-email"),
 ]

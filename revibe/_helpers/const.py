@@ -29,3 +29,6 @@ SEARCH_LIMIT = 50
 PAGINATION_SIZE = 50
 MAX_PAGINATION_SIZE = 200
 
+
+# email stuff
+ARTIST_FROM_EMAIL = "artists@revibe.tech"

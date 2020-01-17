@@ -356,6 +356,11 @@ if USE_S3:
     DEFAULT_FILE_STORAGE = 'revibe.storage_backends.MediaStorage' # custom storage settings
     # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage' # default storage settings
 
+    # email settings
+    EMAIL_BACKEND = "django_ses.SESBackend"
+    AWS_SES_REGION_NAME = "us-east-1"
+    AWS_SES_REGION_ENDPOINT = f'email.{AWS_SES_REGION_NAME}.amazonaws.com'
+
     _log_level = 'DEBUG' if DEBUG else 'INFO' 
 
     LOGGING = {

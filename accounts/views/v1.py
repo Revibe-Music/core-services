@@ -3,7 +3,9 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.http import HttpRequest
+from django.template.loader import render_to_string
 from django.utils import timesince
+from django.utils.html import strip_tags
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -540,15 +542,22 @@ class SendRegisterLink(generics.GenericAPIView):
         from_address = f'"Join Revibe" <{const.ARTIST_FROM_EMAIL}>'
         to = request.data['to']
         to = to if type(to) == list else [to,]
-        message = f"{name} has invited you to join Revibe.\n" + \
-            f"Click <a href='{register_link}'>here</a> to join now!"
+        
+        # get html message
+        context = {
+            "name": name,
+            "register_link": "artist.revibe.tech/account/register"
+        }
+        html_message = render_to_string('accounts/invite_artist.html', context=context)
+        plain_message = strip_tags(html_message)
 
         # send the message
         num_sent = send_mail(
             subject,
-            message,
+            plain_message,
             from_email=from_address,
             recipient_list=to,
+            html_message=html_message,
             fail_silently=True
         )
 

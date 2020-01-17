@@ -1,0 +1,15 @@
+:root {
+    --carnival: #572898;
+    --space-cadet: #0c0804;
+}
+.text-carnival {
+    color: var(--carnival);
+}
+
+a {
+    color: var(--carnival);
+    text-decoration: None;
+}
+a:hover{
+    text-decoration: underline;
+}

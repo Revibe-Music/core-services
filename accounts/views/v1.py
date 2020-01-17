@@ -720,6 +720,18 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         return True
 
+    def _get_album_contributions(self, artist, *args, **kwargs):
+        """
+        Gets a list of albums that the current artist contributed to but did
+        not upload.
+        """
+        # get all the contributions to albums that aren't uploaded by this artist
+        contrib_albums = Album.hidden_objects \
+            .filter(album_to_artist__primary_artist=False, contributors=artist) \
+            .distinct()
+        
+        return contrib_albums
+
     @action(detail=False, methods=['get','post','patch','delete'])
     def albums(self, request, *args, **kwargs):
         """
@@ -928,14 +940,36 @@ class UserArtistViewSet(GenericPlatformViewSet):
             contribution_id = request.data['contribution_id']
 
         if request.method == 'GET':
-            # get all the contributions to albums that aren't the ones this artist uploaded
-            contrib_albums = AlbumContributor.objects.filter(primary_artist=False, artist=artist)
+            # # old, but keeping here for reference
+            # contrib_albums = AlbumContributor.objects.filter(primary_artist=False, artist=artist)
+            # albums = list(set([ac.album for ac in contrib_albums if ac.album.is_deleted == False]))
 
-            # get the unique albums that contain this artist as a contributor
-            albums = list(set([ac.album for ac in contrib_albums if ac.album.is_deleted == False]))
-
+            albums = self._get_album_contributions(artist, *args, **kwargs)
             album_serializer = content_ser_v1.AlbumSerializer(albums, many=True)
-            return Response(album_serializer.data)
+
+            # attach metrics when running in the cloud
+            if settings.USE_S3:
+                data = serializer.data
+                env = 'test' if settings.DEBUG else 'production'
+
+                for album in serializer.data:
+                    album_object = Album.objects.get(id=album['album_id'])
+                    # check if the album is allowed to have any metrics returned
+                    if not album_objects.uploaded_by.artist_profile.share_data_with_contributors:
+                        # if the artist does not allow ANY sharing of data with contributors, just skip the album
+                        continue
+
+                    album['total_streams'] = 0
+                    for song in album_object.song_set.all():
+                        album['total_streams'] += Stream.count(song.id, Stream.environment == env)
+                    
+                    if album_object.uploaded_by.artist_profile.share_advanced_data_with_contributors:
+                        # attach an extra object with advanced stream data
+                        pass
+
+                return responses.OK(data=data)
+
+            return responses.OK(serializer=album_serializer)
         
         elif request.method == 'POST':
             serializer = content_ser_v1.AlbumContributorSerializer(data=request.data, *args, **kwargs)
@@ -1063,8 +1097,21 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         return responses.UPDATED(serializer(instance=contribution))
 
+    # metrics endpoints
+
+    @action(detail=False, url_path="albums/metrics", methods=['get'], url_name="album_metrics")
+    def album_metrics(self, request, *args, **kwargs):
+        artist = self.get_current_artist(request)
+
+        if request.method == 'GET':
+            raise NotImplementedError()
+            contrib_albums = self._get_album_contributions(artist)
+            serializer = content_ser_v1.AlbumSerializer(contrib_albums, many=True)
+
+        return responses.NO_REQUEST_TYPE()
+
     @action(detail=False, url_path="songs/metrics", methods=['get'], url_name="song_metrics")
-    def song_metrics(self, requests, *args, **kwargs):
+    def song_metrics(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
 
         if request.method == 'GET':

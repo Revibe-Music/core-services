@@ -10,11 +10,11 @@
             color: var(--carnival);
         }
 
-        a.link-carnival {
+        a {
             color: var(--carnival);
             text-decoration: None;
         }
-        a.link-carnival:hover{
+        a:hover{
             text-decoration: underline;
         }
     </style>
@@ -22,7 +22,7 @@
 <body>
 
     <p style="font-size: 1.5rem;">
-        {{ name }} has invited you to join <span class="text-carnival">Revibe</span>.
+        {{ name }} has invited you to join <span style="color: #572898;" class="text-carnival">Revibe</span>.
     </p>
     <p>
         Click <a href="{{ register_link }}">here</a> to join now!

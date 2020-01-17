@@ -955,7 +955,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 for album in album_serializer.data:
                     album_object = Album.objects.get(id=album['album_id'])
                     # check if the album is allowed to have any metrics returned
-                    if not album_objects.uploaded_by.artist_profile.share_data_with_contributors:
+                    if not album_object.uploaded_by.artist_profile.share_data_with_contributors:
                         # if the artist does not allow ANY sharing of data with contributors, just skip the album
                         continue
 

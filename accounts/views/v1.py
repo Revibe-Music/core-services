@@ -749,17 +749,17 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         for song in serializer.data:
             song_object = Song.objects.get(id=song['song_id'])
-            is_contributor = artist == song_object.uploaded_by
+            is_uploader = artist == song_object.uploaded_by
 
             # only send back metrics if the user is the uploading artist
             # or the contributor is allowed to see the metrics
-            if (not contribution) or song_object.uploaded_by.artist_profile.share_data_with_contributors:
+            if is_uploader or song_object.uploaded_by.artist_profile.share_data_with_contributors:
                 song['total_streams'] = Stream.count(song['song_id'], Stream.environment == env)
             
             # create dict with more advanced metrics info
             # only send if user is uploading artist or artist allows advanced
             # data sharing
-            if (not contribution) or song_object.uploaded_by.artist_profile.share_advanced_data_with_contributors:
+            if is_uploader or song_object.uploaded_by.artist_profile.share_advanced_data_with_contributors:
                 advanced_metrics = {}
                 # calculate metrics...
                 song['advanced_metrics'] = advanced_metrics

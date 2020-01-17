@@ -1047,7 +1047,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                     if not song_object.uploaded_by.artist_profile.share_data_with_contributors:
                         continue
 
-                    song['total_streams'] = Stream.count(song.id, Stream.environment == env)
+                    song['total_streams'] = Stream.count(song['song_id'], Stream.environment == env)
 
                     if song_object.uploaded_by.artist_profile.share_advanced_data_with_contributors:
                         # attach an extra object with advanced stream data

@@ -565,7 +565,7 @@ class SendRegisterLink(generics.GenericAPIView):
                 from_email=from_address,
                 recipient_list=[to,],
                 html_message=html_message,
-                fail_silently=True
+                # fail_silently=True
             )
 
         info = {

@@ -507,6 +507,14 @@ class LogoutAllAPI(generics.GenericAPIView):
 class SendRegisterLink(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    register_link = "http://artist.revibe.tech/account/register"
+
+    def __init__(self, *args, **kwargs):
+        super(SendRegisterLink, self).__init__(*args, **kwargs)
+        self.types_of_emails = {
+            'artist_invite': self.artist_invite_email,
+        }
+
     def post(self, request, *args, **kwargs):
         """
         Required fields:
@@ -520,53 +528,13 @@ class SendRegisterLink(generics.GenericAPIView):
             raise network.BadEnvironmentError()
 
         # validate data
-        errors = {}
-        required_fields = ['to','type']
-        alt_fields = ['artist']
-        for key in request.data.keys():
-            if key not in required_fields and key not in alt_fields:
-                errors[key] = f"Got an unexpected value: {key}"
-        for field in required_fields:
-            if field not in request.data.keys():
-                errors[field] = f"Must include {field} in request"
-        if len(errors) > 0:
-            raise ExpectationFailedError(detail=errors)
+        self._validate_request(request)
 
-        # define variables
-        user = request.user
-        register_link = "artist.revibe.tech/account/register"
+        # configure recipients
+        to = self._get_recipients(request)
 
-        # leave out 'artist' from request data if it's supposed to be False
-        artist_param = request.data.get('artist', False)
-        artist = bool(artist_param)
-        user_name = user.first_name + user.last_name if (user.first_name != None) and (user.last_name != None) else user.username
-        name = user.artist.name if artist else user_name
-
-        # configure email content
-        subject = f"{name} has invited you to join Revibe"
-        from_address = f'"Join Revibe" <{const.ARTIST_FROM_EMAIL}>'
-        to = request.data['to']
-        to = to if isinstance(to, list) else [to,]
-
-        # get html message
-        context = {
-            "name": name,
-            "register_link": "artist.revibe.tech/account/register"
-        }
-        html_message = render_to_string('accounts/invite_artist.html', context=context)
-        plain_message = strip_tags(html_message)
-
-        # send the message
-        num_sent = 0
-        for rec in to:
-            num_sent += send_mail(
-                subject,
-                plain_message,
-                from_email=from_address,
-                recipient_list=[rec,],
-                html_message=html_message,
-                # fail_silently=True
-            )
+        # determine what kind of email it is and call the function
+        num_sent = self.types_of_emails[request.data['type']](request.user, to, *args, **kwargs)
 
         info = {
             "total requested": len(to),
@@ -575,6 +543,82 @@ class SendRegisterLink(generics.GenericAPIView):
         }
 
         return responses.OK(data=info)
+
+    def artist_invite_email(self, user, recipients, *args, **kwargs):
+        """
+        """
+        # define variables
+        subject = f"{user.artist.name} has invited you to join revibe"
+        from_address = f'"Join Revibe" <{const.ARTIST_FROM_EMAIL}>'
+
+        # get html message
+        context = {
+            "name": name,
+            "register_link": self.register_link,
+        }
+        html_message = render_to_string('accounts/invite_artist.html', context=context)
+
+        # send the mail
+        num_sent = self._send_emails(subject, html_message, from_address, recipients)            
+
+        return num_sent
+    
+    def _send_emails(self, subject, html_message, from_address, recipient_list, fail_silently=True, *args, **kwargs):
+        """
+        function that actually sends the messages.
+        """
+        plain_message = strip_tags(html_message)
+
+        num_sent = 0
+        for rec in recipient_list:
+            num_sent += send_mail(
+                subject=subject,
+                message= plain_message,
+                from_email=from_address,
+                recipient_list=[rec,],
+                html_message= html_message,
+                fail_silently=fail_silently
+            )
+        
+        return num_sent
+
+    def _get_recipients(self, request):
+        """
+        helper function to return a list of valid strings
+        """
+        # do not need to validate that 'to' is in request.data, this should
+        # only ever be called after validating the request
+
+        to = request.data['to']
+        to = to if isinstance(to, list) else [to,]
+
+        # maybe validate email addresses later?
+        return to
+
+    def _validate_request(self, request):
+        """
+        """
+        errors = {}
+
+        # validate fields
+        required_fields = ['to','type']
+        alt_fields = ['artist']
+        for key in request.data.keys():
+            if key not in required_fields and key not in alt_fields:
+                errors[key] = f"Got an unexpected value: {key}"
+        for field in required_fields:
+            if field not in request.data.keys():
+                errors[field] = f"Must include {field} in request"
+        
+        # valiadate email type
+        t = request.data['type']
+        if t not in self.types_of_emails.keys():
+            errors['type'] = f"Cannot determine what kind of email to send from type: {t}"
+
+        # return errors if there are any, otherwise move on
+        if len(errors) > 0:
+            raise ExpectationFailedError(detail=errors)
+        return True
 
 # Linked Account Views
 

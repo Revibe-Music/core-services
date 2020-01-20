@@ -27,6 +27,7 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 from revibe.viewsets import GenericPlatformViewSet
+from revibe._errors import network
 from revibe._errors.accounts import AccountNotFound, NotArtistError
 from revibe._errors.network import ConflictError, ForbiddenError, NotImplementedError, ExpectationFailedError
 from revibe._helpers import responses, const
@@ -514,6 +515,10 @@ class SendRegisterLink(generics.GenericAPIView):
         type: (string) the type of invite to send,
             must be one of 'artist_invite', 
         """
+        # only send emails when in the cloud
+        if not settings.USE_S3:
+            raise network.BadEnvironmentError()
+
         # validate data
         errors = {}
         required_fields = ['to','type']

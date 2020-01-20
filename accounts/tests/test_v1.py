@@ -928,3 +928,16 @@ class TestArtistSongContributions(RevibeTestCase):
         pass
 
 
+class EmailTestCase(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_artist_user()
+        self.url = reverse('send-email-list')
+    
+    def test_send_artist_invite_email(self):
+        # send request
+        data = {}
+        response = self.client.post(self.url, data, format="json", **self._get_headers(artist=True))
+
+        # validate request
+        self.assert503(response)

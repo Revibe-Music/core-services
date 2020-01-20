@@ -27,7 +27,7 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 from revibe.viewsets import GenericPlatformViewSet
-from revibe._errors import network
+from revibe._errors import accounts ,network
 from revibe._errors.accounts import AccountNotFound, NotArtistError
 from revibe._errors.network import ConflictError, ForbiddenError, NotImplementedError, ExpectationFailedError
 from revibe._helpers import responses, const
@@ -548,6 +548,9 @@ class SendRegisterLink(generics.GenericAPIView):
         """
         """
         # define variables
+        if getattr(user, 'artist', None) == None:
+            raise accounts.NotArtistError()
+
         name = user.artist.name
         subject = f"{name} has invited you to join revibe"
         from_address = f'"Join Revibe" <{const.ARTIST_FROM_EMAIL}>'

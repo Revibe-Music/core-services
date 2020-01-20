@@ -7,6 +7,10 @@ from revibe._helpers.status import *
 
 # from revibe._helpers import const # may need later
 
+# -----------------------------------------------------------------------------
+
+NoneType = type(None)
+
 def log_request(response, request_code):
     """
     Logs a response objects to DynamoDB
@@ -26,11 +30,11 @@ def log_request(response, request_code):
 def OK(serializer=None, detail=None, data=None, *args, **kwargs):
     assert not (serializer and data), "cannot have both a serializer and data in a request"
     response = Response(status=HTTP_200_OK)
-    if serializer:
+    if not isinstance(serializer, NoneType):
         response.data = serializer.data
-    elif detail:
+    elif not isinstance(detail, NoneType):
         response.data = {"detail": detail}
-    elif data:
+    elif not isinstance(data, NoneType):
         response.data = data
     return response
 

@@ -89,28 +89,37 @@ class TestStatusMixin:
 
 
 class TestTypeMixin:
-    def _get_response_data_type(self, obj):
+    def _get_response_data(self, obj):
         if hasattr(obj, 'data'):
             # return type of response.data
-            return type(obj.data)
+            return obj.data
         else:
             # return type of data from response.data
-            return type(obj)
+            return obj
 
     def assertReturnDict(self, arg, *args, **kwargs):
-        self.assertEqual(
-            self._get_response_data_type(arg), ReturnDict, *args, **kwargs
+        self._perform_assertion(
+            arg, dict, *args, **kwargs
         )
     def assertReturnList(self, arg, *args, **kwargs):
-        self.assertEqual(
-            self._get_response_data_type(arg), ReturnList, *args, **kwargs
+        self._perform_assertion(
+            arg, list, *args, **kwargs
         )
     
     def _perform_assertion(self, arg, check, *args, **kwargs):
+        """
+        Checks that the arg is of the same class or a subclass of the check
+        value.
+        """
+        arg = self._get_response_data(arg)
+
         if 'msg' not in kwargs.keys():
             kwargs['msg'] = "{} is not of type {}".format(str(arg), str(check))
         
-        self.assertEqual(arg, check)
+        self.assertTrue(
+            isinstance(arg, check),
+            *args, **kwargs
+        )
 
 
 class BaseRevibeTestMixin:

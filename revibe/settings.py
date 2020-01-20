@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
+from django.utils.translation import gettext_lazy as _
+
 import os
 import sys
 
@@ -433,5 +435,45 @@ JET_THEMES = [
         'theme': 'light-gray',
         'color': '#222',
         'title': 'Light Gray'
+    }
+]
+
+JET_SIDE_MENU_ITEMS = [ # A list of application or custom item dicts
+    {
+        "label": _("Accounts"),
+        'items': [
+            {"name": 'accounts.customuser', "label": _("Users")},
+            {"name": 'accounts.profile'},
+            {"name": "accounts.social"}
+        ]
+    },
+    {
+        "label": _("Artists and Content"),
+        "items": [
+            {"name": 'content.artist'},
+            {"name": 'accounts.artistprofile'},
+            {"name": 'accounts.customuser', "label": _("Users")},
+            {"name": 'content.album'},
+            {"name": 'content.song'},
+            {"name": 'content.albumcontributor'},
+            {"name": 'content.songcontributor'}
+        ]
+    },
+    # {
+    #     "app_label": "content", 
+    #     "items": [
+    #         {"name": "artist"},
+    #         {"name": "album"},
+    #         {"name": "song"},
+    #         {"name": "albumcontributor"},
+    #         {"name": "songcontributor"}
+    #     ]
+    # },
+    {
+        "label": _("External Links"), # TODO: make these links work
+        "items": [
+            {"label": _("API Docs"), "url": _("https://documenter.getpostman.com/view/6267328/SWEB1ah6?version=latest")},
+            {"label": _("Artist Portal"), "url": _("https://artist.revibe.tech")},
+        ]
     }
 ]

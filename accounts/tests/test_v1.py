@@ -931,8 +931,9 @@ class TestArtistSongContributions(RevibeTestCase):
 class EmailTestCase(RevibeTestCase):
     def setUp(self):
         self._get_application()
+        self._get_user()
         self._get_artist_user()
-        self.url = reverse('send-email-list')
+        self.url = reverse('send-email')
     
     def test_send_artist_invite_email(self):
         # send request

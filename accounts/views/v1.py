@@ -559,7 +559,7 @@ class SendRegisterLink(generics.GenericAPIView):
         # send the message
         num_sent = 0
         for rec in to:
-            num_sent += send_mass_mail(
+            num_sent += send_mail(
                 subject,
                 plain_message,
                 from_email=from_address,

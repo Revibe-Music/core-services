@@ -756,17 +756,44 @@ class UserArtistViewSet(GenericPlatformViewSet):
             request.data._mutable = True
             request.data['platform'] = 'Revibe'
             request.data._mutable = _mutable
+
         # create the artist and attach to the user
         serializer = self.serializer_class(data=request.data, *args, **kwargs)
-        if serializer.is_valid():
-            artist = serializer.save()
-            request.user.artist = artist
-            request.user.is_artist = True
-            request.user.save()
-            return responses.CREATED(serializer)
-        else:
+        if not serializer.is_valid():
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-        return responses.DEFAULT_400_RESPONSE()
+        
+        artist = serializer.save()
+
+        # attach artist to user
+        request.user.artist = artist
+        request.user.is_artist = True
+        request.user.save()
+
+        # add contributions from urls
+        params = request.query_params
+
+        # song contributions
+        if 'song_contrib' in params.keys():
+            contribs = params['song_contrib'].split(',')
+            for contrib in contribs:
+                obj = SongContributor.objects.get(id=contrib)
+                obj.artist = artist
+                obj.pending = True
+                obj.approved = False
+                obj.save()
+        
+        # album contributions
+        if 'album_contrib' in params.keys():
+            contribs = params['album_contrib'].split(',')
+            for contrib in contribs:
+                obj = AlbumContributor.objects.get(id=contrib)
+                obj.artist = artist
+                obj.pending = True
+                obj.approved = False
+                obj.save()
+
+        return responses.CREATED(serializer)
+
 
     def patch(self, request, *args, **kwargs):
         instance = self.get_current_artist(request)

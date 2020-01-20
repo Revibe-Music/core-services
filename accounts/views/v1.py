@@ -1128,25 +1128,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             # attach metrics when running in the cloud
             if settings.USE_S3:
-                data = album_serializer.data
-                env = 'test' if settings.DEBUG else 'production'
-
-                for album in album_serializer.data:
-                    album_object = Album.objects.get(id=album['album_id'])
-                    # check if the album is allowed to have any metrics returned
-                    if not album_object.uploaded_by.artist_profile.share_data_with_contributors:
-                        # if the artist does not allow ANY sharing of data with contributors, just skip the album
-                        continue
-
-                    album['total_streams'] = 0
-                    for song in album_object.song_set.all():
-                        album['total_streams'] += Stream.count(song.id, Stream.environment == env)
-                    
-                    if album_object.uploaded_by.artist_profile.share_advanced_data_with_contributors:
-                        # attach an extra object with advanced stream data
-                        album['advanced_metrics'] = {}
-
-                return responses.OK(data=data)
+                metrics_data = self._get_album_metrics(album_serializer, artist, *args, **kwargs)
+                return responses.OK(data=metrics_data)
 
             return responses.OK(serializer=album_serializer)
         

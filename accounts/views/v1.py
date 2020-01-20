@@ -546,8 +546,8 @@ class SendRegisterLink(generics.GenericAPIView):
         subject = f"{name} has invited you to join Revibe"
         from_address = f'"Join Revibe" <{const.ARTIST_FROM_EMAIL}>'
         to = request.data['to']
-        to = to if type(to) == list else [to,]
-        
+        to = to if isinstance(to, list) else [to,]
+
         # get html message
         context = {
             "name": name,
@@ -563,7 +563,7 @@ class SendRegisterLink(generics.GenericAPIView):
                 subject,
                 plain_message,
                 from_email=from_address,
-                recipient_list=[to,],
+                recipient_list=[rec,],
                 html_message=html_message,
                 # fail_silently=True
             )

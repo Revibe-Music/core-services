@@ -867,7 +867,41 @@ class UserArtistViewSet(GenericPlatformViewSet):
         
         return contrib_songs
 
+    def _get_album_metrics(self, serializer, artist, *args, **kwargs):
+        # send an empty list if there is no data anyway
+        if len(serializer.data) == 0:
+            return []
+
+        data = serializer.data
+        env = 'test' if settings.DEBUG else 'production'
+
+        # attach the data to the serializer data
+        for album in serializer.data:
+            album_object = Album.objects.get(id=album['album_id'])
+            is_uploader = artist == album_object.uploaded_by
+
+            # only send back metrics if the user is the uploading artist
+            # or the contributor is allowed to see metrics
+            if is_uploader or album_object.uploaded_by.artist_profile.share_data_with_contributors:
+                album['total_streams'] = 0
+                for song in album_object.song_set.all():
+                    album['total_streams'] += Stream.count(song.id, Stream.environment == env)
+
+            # create dict with more advanced metrics info
+            # only send if user is uploading artist or artist allows advanced
+            # data sharing
+            if is_uploader or album_object.uploaded_by.artist_profile.share_advanced_data_with_contributors:
+                advanced_metrics = {}
+                # calculate metrics
+                album['advanced_metrics'] = advanced_metrics
+        
+        return data
+
     def _get_song_metrics(self, serializer, artist, *args, **kwargs):
+        # send an empty list if there is no data anyway
+        if len(serializer.data) == 0:
+            return []
+
         data = serializer.data
         env = 'test' if settings.DEBUG else 'production'
 
@@ -918,16 +952,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             # attach the number of streams in running in the cloud
             if settings.USE_S3:
-                data = serializer.data
-
-                # attach the data to the serializer data
-                env = 'test' if settings.DEBUG else 'production'
-                for album in serializer.data:
-                    album_object = Album.objects.get(id=album['album_id'])
-                    album['total_streams'] = 0
-                    for song in album_object.song_set.all():
-                        album['total_streams'] += Stream.count(song.id, Stream.environment == env)
-                return Response(data, status=status.HTTP_200_OK)
+                metrics_data = self._get_album_metrics(serializer, artist, *args, **kwargs)
+                return responses.OK(data=metrics_data)
 
             return responses.OK(serializer)
 

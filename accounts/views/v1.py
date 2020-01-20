@@ -548,7 +548,8 @@ class SendRegisterLink(generics.GenericAPIView):
         """
         """
         # define variables
-        subject = f"{user.artist.name} has invited you to join revibe"
+        name = user.artist.name
+        subject = f"{name} has invited you to join revibe"
         from_address = f'"Join Revibe" <{const.ARTIST_FROM_EMAIL}>'
 
         # get html message

@@ -777,6 +777,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             contribs = params['song_contrib'].split(',')
             for contrib in contribs:
                 obj = SongContributor.objects.get(id=contrib)
+                # TODO: add some check for like obj.allow_add_on_register or something
                 obj.artist = artist
                 obj.pending = True
                 obj.approved = False
@@ -787,6 +788,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             contribs = params['album_contrib'].split(',')
             for contrib in contribs:
                 obj = AlbumContributor.objects.get(id=contrib)
+                # TODO: add some check for like obj.allow_add_on_register or something
                 obj.artist = artist
                 obj.pending = True
                 obj.approved = False

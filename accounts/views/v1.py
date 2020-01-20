@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
-from django.core.mail import send_mail
+from django.core.mail import send_mail, send_mass_mail
 from django.db import IntegrityError
 from django.http import HttpRequest
 from django.template.loader import render_to_string
@@ -557,14 +557,16 @@ class SendRegisterLink(generics.GenericAPIView):
         plain_message = strip_tags(html_message)
 
         # send the message
-        num_sent = send_mail(
-            subject,
-            plain_message,
-            from_email=from_address,
-            recipient_list=to,
-            html_message=html_message,
-            fail_silently=True
-        )
+        num_sent = 0
+        for rec in to:
+            num_sent += send_mass_mail(
+                subject,
+                plain_message,
+                from_email=from_address,
+                recipient_list=[to,],
+                html_message=html_message,
+                fail_silently=True
+            )
 
         info = {
             "total requested": len(to),

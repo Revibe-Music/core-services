@@ -523,7 +523,7 @@ class SendRegisterLink(generics.GenericAPIView):
         to: (list) the emails to send mail to
         artist: (bool) coming from an artist function or not (like the Artist Portal)
         type: (string) the type of invite to send,
-            must be one of 'artist_invite', 
+            must be one of 'artist_invite', 'contribution', 'contribution_black' 
         """
         # only send emails when in the cloud
         if not settings.USE_S3:

@@ -512,10 +512,12 @@ class SendRegisterLink(generics.GenericAPIView):
     def __init__(self, *args, **kwargs):
         super(SendRegisterLink, self).__init__(*args, **kwargs)
         self.types_of_emails = {
-            'artist_invite': self.artist_invite_email,
+            'artist_invite':  'artist_invite_email',# general invite for artists
+            'contribution': 'contribution_invite_email_black', # invite for contributions, white background
+            'contribution_black': 'contribution_invite_email_white', # invite for contributions, black background
         }
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, subject=None, *args, **kwargs):
         """
         Required fields:
         to: (list) the emails to send mail to
@@ -534,7 +536,7 @@ class SendRegisterLink(generics.GenericAPIView):
         to = self._get_recipients(request)
 
         # determine what kind of email it is and call the function
-        num_sent = self.types_of_emails[request.data['type']](request.user, to, *args, **kwargs)
+        num_sent = self.configure_email(request.user, to, *args, **kwargs)
 
         info = {
             "total requested": len(to),
@@ -544,6 +546,22 @@ class SendRegisterLink(generics.GenericAPIView):
 
         return responses.OK(data=info)
 
+    def configure_email(self, user, recipients, *args, **kwargs):
+        """"""
+        if getattr(user, 'artist', None) == None:
+            raise accounts.NotArtistError()
+
+        name = user.artist.name
+        subject = f"{name} has invited you to join Revibe" if subject == None else subject
+        from_address = f'"Join Revibe" <{const.ARTIST_FROM_EMAIL}>'
+
+        # get the html message
+        context = {
+            "name": name,
+            "register_link": self.register_link,
+        }
+        html_message = render_to_string(f"accounts/{self.types_of_emails[]}.html", context=context)
+
     def artist_invite_email(self, user, recipients, *args, **kwargs):
         """
         """
@@ -552,7 +570,7 @@ class SendRegisterLink(generics.GenericAPIView):
             raise accounts.NotArtistError()
 
         name = user.artist.name
-        subject = f"{name} has invited you to join revibe"
+        subject = f"{name} has invited you to join Revibe"
         from_address = f'"Join Revibe" <{const.ARTIST_FROM_EMAIL}>'
 
         # get html message
@@ -567,6 +585,29 @@ class SendRegisterLink(generics.GenericAPIView):
 
         return num_sent
     
+    def contribution_email(self, user, recipients, *args, **kwargs):
+        """
+        """
+        # define variables
+        if getattr(user, 'artist', None) == None:
+            raise accounts.NotArtistError()
+
+        name = user.artist.name
+        subject = f"{name} has invited you to join Revibe"
+        from_address = f"'Join Revibe' <{const.ARTIST_FROM_EMAIL}>"
+
+        # get html message
+        context = {
+            "name": name,
+            "register_link": self.register_link,
+        }
+        html_message = render_to_string('accounts/contribution_invite_email_white.html')
+
+        # send the mail
+        num_sent = self._send_emails(subject, html_message, from_address, recipients)
+
+        return num_sent
+
     def _send_emails(self, subject, html_message, from_address, recipient_list, fail_silently=True, *args, **kwargs):
         """
         function that actually sends the messages.

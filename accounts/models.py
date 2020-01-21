@@ -13,11 +13,11 @@ class CustomUser(AbstractUser):
     artist = models.OneToOneField('content.artist', on_delete=models.SET_NULL, related_name='artist_user', null=True, blank=True)
     manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
     is_artist = models.BooleanField(
-        'Flag that indicates this user has an Artist Profile',
+        help_text='Flag that indicates this user has an Artist Profile',
         null=False, blank=True, default=False
     )
     is_manager = models.BooleanField(
-        'Flag that indicates this user is a manager of an artist', 
+        help_text='Flag that indicates this user is a manager of an artist', 
         null=False, blank=True, default=False
     )
 

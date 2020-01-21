@@ -517,7 +517,7 @@ class SendRegisterLink(generics.GenericAPIView):
             'contribution_black': 'contribution_invite_email_black', # invite for contributions, black background
         }
 
-    def post(self, request, subject=None, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         """
         Required fields:
         to: (list) the emails to send mail to
@@ -546,7 +546,7 @@ class SendRegisterLink(generics.GenericAPIView):
 
         return responses.OK(data=info)
 
-    def configure_email(self, user, recipients, *args, **kwargs):
+    def configure_email(self, user, recipients, subject=None, *args, **kwargs):
         """"""
         if getattr(user, 'artist', None) == None:
             raise accounts.NotArtistError()

@@ -561,7 +561,7 @@ class SendRegisterLink(generics.GenericAPIView):
         context = {
             "name": name,
             "register_link": self.register_link,
-            "revibe_medium_image": const.REVIBE_MEDIUM_IMAGE
+            "revibe_medium_image": const.REVIBE_MEDIUM_IMAGE,
             "youtube_image": const.YOUTUBE_IMAGE,
             "twitter_image": const.TWITTER_IMAGE,
             "facebook_image": const.FACEBOOK_IMAGE,

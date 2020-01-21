@@ -32,3 +32,8 @@ MAX_PAGINATION_SIZE = 200
 
 # email stuff
 ARTIST_FROM_EMAIL = "artists@revibe.tech"
+REVIBE_MEDIUM_IMAGE = "https://revibe-media.s3.us-east-2.amazonaws.com/email_images/Revibe_Logo_Transparent_MEDIUM.png"
+FACEBOOK_IMAGE = "https://revibe-media.s3.us-east-2.amazonaws.com/email_images/facebook2x.png"
+YOUTUBE_IMAGE = "https://revibe-media.s3.us-east-2.amazonaws.com/email_images/youtube2x.png"
+INSTAGRAM_IMAGE = "https://revibe-media.s3.us-east-2.amazonaws.com/email_images/instagram2x.png"
+TWITTER_IMAGE = "https://revibe-media.s3.us-east-2.amazonaws.com/email_images/twitter2x.png"

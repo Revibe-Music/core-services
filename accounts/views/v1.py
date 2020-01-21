@@ -536,7 +536,7 @@ class SendRegisterLink(generics.GenericAPIView):
         to = self._get_recipients(request)
 
         # determine what kind of email it is and call the function
-        num_sent = self.configure_email(request.user, to, *args, **kwargs)
+        num_sent = self.configure_email(request, to, *args, **kwargs)
 
         info = {
             "total requested": len(to),
@@ -546,8 +546,10 @@ class SendRegisterLink(generics.GenericAPIView):
 
         return responses.OK(data=info)
 
-    def configure_email(self, user, recipients, subject=None, *args, **kwargs):
-        """"""
+    def configure_email(self, request, recipients, subject=None, *args, **kwargs):
+        """
+        """
+        user = request.user
         if getattr(user, 'artist', None) == None:
             raise accounts.NotArtistError()
 

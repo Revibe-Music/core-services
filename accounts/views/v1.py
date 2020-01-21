@@ -513,8 +513,8 @@ class SendRegisterLink(generics.GenericAPIView):
         super(SendRegisterLink, self).__init__(*args, **kwargs)
         self.types_of_emails = {
             'artist_invite':  'artist_invite_email',# general invite for artists
-            'contribution': 'contribution_invite_email_black', # invite for contributions, white background
-            'contribution_black': 'contribution_invite_email_white', # invite for contributions, black background
+            'contribution': 'contribution_invite_email_white', # invite for contributions, white background
+            'contribution_black': 'contribution_invite_email_black', # invite for contributions, black background
         }
 
     def post(self, request, subject=None, *args, **kwargs):
@@ -560,48 +560,7 @@ class SendRegisterLink(generics.GenericAPIView):
             "name": name,
             "register_link": self.register_link,
         }
-        html_message = render_to_string(f"accounts/{self.types_of_emails[]}.html", context=context)
-
-    def artist_invite_email(self, user, recipients, *args, **kwargs):
-        """
-        """
-        # define variables
-        if getattr(user, 'artist', None) == None:
-            raise accounts.NotArtistError()
-
-        name = user.artist.name
-        subject = f"{name} has invited you to join Revibe"
-        from_address = f'"Join Revibe" <{const.ARTIST_FROM_EMAIL}>'
-
-        # get html message
-        context = {
-            "name": name,
-            "register_link": self.register_link,
-        }
-        html_message = render_to_string('accounts/invite_artist.html', context=context)
-
-        # send the mail
-        num_sent = self._send_emails(subject, html_message, from_address, recipients)            
-
-        return num_sent
-    
-    def contribution_email(self, user, recipients, *args, **kwargs):
-        """
-        """
-        # define variables
-        if getattr(user, 'artist', None) == None:
-            raise accounts.NotArtistError()
-
-        name = user.artist.name
-        subject = f"{name} has invited you to join Revibe"
-        from_address = f"'Join Revibe' <{const.ARTIST_FROM_EMAIL}>"
-
-        # get html message
-        context = {
-            "name": name,
-            "register_link": self.register_link,
-        }
-        html_message = render_to_string('accounts/contribution_invite_email_white.html')
+        html_message = render_to_string(f"accounts/{self.types_of_emails[request.data['type']]}.html", context=context)
 
         # send the mail
         num_sent = self._send_emails(subject, html_message, from_address, recipients)

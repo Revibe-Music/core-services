@@ -1,8 +1,8 @@
 def rename_song(instance, filename):
     ext = filename.split('.')[-1]
-    path = "audio/songs/"
+    path = "audio/songs"
     if instance.uri:
-        return "{path}{uri}.{ext}".format(path=path, uri=instance.uri, ext=ext)
+        return "{path}/{uri}/inputs.{ext}".format(path=path, uri=instance.uri, ext=ext)
     else:
         return path + filename
 

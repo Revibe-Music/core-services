@@ -18,17 +18,36 @@ class Image(models.Model):
         null=True, blank=True
     )
 
-    file = models.FileField(null=True, blank=True, default=None)
-    reference = models.CharField(max_length=255, null=True, blank=True, default=None)
-
+    file = models.FileField(
+        help_text="The file that will be uploaded / is uploaded in S3",
+        upload_to=ext.custom_image_upload,
+        null=True, blank=True, default=None
+    )
+    reference = models.CharField(
+        help_text="Reference to the file location if it is not a revibe image",
+        max_length=255, null=True, blank=True, default=None
+    )
     height = models.IntegerField(null=False, blank=False)
     width = models.IntegerField(null=False, blank=False)
+
+    is_original = models.BooleanField(
+        help_text="Shows if the uploaded file is the original file uploaded by the user",
+        null=False, blank=True, default=True
+    )
 
     def __str__(self):
         if self.reference != None:
             return self.reference
         else:
             return "{} ({}x{})".format(self.file.name, self.height, self.width)
+    
+    def get_object_reference(self):
+        if self.artist != None:
+            return self.artist
+        elif self.album != None:
+            return self.album
+        
+        return None
     
     class Meta:
         verbose_name = 'image'

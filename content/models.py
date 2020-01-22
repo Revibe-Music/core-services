@@ -10,11 +10,13 @@ class Image(models.Model):
     artist = models.ForeignKey(
         'content.Artist',
         on_delete=models.CASCADE,
+        related_name="artist_image",
         null=True, blank=True
     )
     album = models.ForeignKey(
         'content.Album',
         on_delete=models.CASCADE,
+        related_name="album_image",
         null=True, blank=True
     )
 

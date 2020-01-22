@@ -6,33 +6,33 @@ from content import model_exts as ext
 from content.managers import *
 
 
-class Image(models.Model):
-    artist = models.ForeignKey(
-        'content.Artist',
-        on_delete=models.CASCADE,
-        null=True, blank=True
-    )
-    album = models.ForeignKey(
-        'content.Album',
-        on_delete=models.CASCADE,
-        null=True, blank=True
-    )
+# class Image(models.Model):
+#     artist = models.ForeignKey(
+#         'content.Artist',
+#         on_delete=models.CASCADE,
+#         null=True, blank=True
+#     )
+#     album = models.ForeignKey(
+#         'content.Album',
+#         on_delete=models.CASCADE,
+#         null=True, blank=True
+#     )
 
-    file = models.FileField(null=True, blank=True, default=None)
-    reference = models.CharField(max_length=255, null=True, blank=True, default=None)
+#     file = models.FileField(null=True, blank=True, default=None)
+#     reference = models.CharField(max_length=255, null=True, blank=True, default=None)
 
-    height = models.IntegerField(null=False, blank=False)
-    width = models.IntegerField(null=False, blank=False)
+#     height = models.IntegerField(null=False, blank=False)
+#     width = models.IntegerField(null=False, blank=False)
 
-    def __str__(self):
-        if self.reference != None:
-            return self.reference
-        else:
-            return "{} ({}x{})".format(self.file.name, self.height, self.width)
+#     def __str__(self):
+#         if self.reference != None:
+#             return self.reference
+#         else:
+#             return "{} ({}x{})".format(self.file.name, self.height, self.width)
     
-    class Meta:
-        verbose_name = 'image'
-        verbose_name_plural = 'images'
+#     class Meta:
+#         verbose_name = 'image'
+#         verbose_name_plural = 'images'
 
 
 class Artist(models.Model):

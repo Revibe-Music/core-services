@@ -1,3 +1,7 @@
+import os
+
+# -----------------------------------------------------------------------------
+
 def rename_song(instance, filename):
     ext = filename.split('.')[-1]
     path = "audio/songs"
@@ -18,16 +22,18 @@ def rename_image(instance, filename):
 def custom_image_upload(instance, filename):
     ext = filename.split('.')[-1]
 
-    ref = instance.get_object_reference()
-    folder = ref.__class__.__name__
-    uri = ref.uri
+    folder = instance.obj.__class__.__name__
+    uri = instance.obj.uri
 
-    root_path = f"images/{folder}/{uri}"
+    root_path = os.path.join("images", folder, uri)
 
     if instance.is_original:
         path = f"{root_path}/inputs/original.{ext}"
+        path = os.path.join(root_path, "inputs", "original."+ext)
     else:
         path = f"{root_path}/outputs/{ext}/{filename}"
+    
+    return path
 
 def custom_audio_upload(instance, filename):
     ext = filename.split('.')[-1]
@@ -41,3 +47,5 @@ def custom_audio_upload(instance, filename):
         path = f"{root_path}/inputs/original.{ext}"
     else:
         path = f"{root_path}/outputs/{ext}/{filename}"
+    
+    return path

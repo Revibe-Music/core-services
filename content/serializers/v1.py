@@ -7,10 +7,21 @@ from content.models import *
 from content.mixins import ContributionSerializerMixin
 
 
-# class ImageSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Image
-#         fields = '__all__'
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = [
+            'file_path',
+            'height',
+            'width',
+            'is_original',
+        ]
+
+
+class TrackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Track
+        fields = '__all__'
 
 
 class ArtistSerializer(serializers.ModelSerializer):
@@ -21,6 +32,7 @@ class ArtistSerializer(serializers.ModelSerializer):
 
     # read-only
     ext = serializers.SerializerMethodField('image_extension', read_only=True)
+    images = ImageSerializer(source="artist_image", many=True, read_only=True)
 
     # write-only
     image = serializers.FileField(write_only=True, required=False)
@@ -35,6 +47,7 @@ class ArtistSerializer(serializers.ModelSerializer):
 
             # read-only
             'ext',
+            'images',
 
             # write-only
             'image',
@@ -184,6 +197,7 @@ class AlbumSerializer(serializers.ModelSerializer):
     contributors = AlbumContributorSerializer(source='album_to_artist', many=True, read_only=True)
     uploaded_date = serializers.DateField(read_only=True)
     last_changed = serializers.DateField(read_only=True)
+    images = ImageSerializer(source="album_image", many=True, read_only=True)
 
     # write-only
     image = serializers.FileField(write_only=True, required=False)
@@ -204,6 +218,7 @@ class AlbumSerializer(serializers.ModelSerializer):
             'contributors',
             'uploaded_date',
             'last_changed',
+            'images',
 
             # write-only
             'image',
@@ -245,6 +260,7 @@ class SongSerializer(serializers.ModelSerializer):
     contributors = SongContributorSerializer(source='song_to_artist', many=True, read_only=True)
     uploaded_date = serializers.DateField(read_only=True)
     last_changed = serializers.DateField(read_only=True)
+    tracks = TrackSerializer(read_only=True, many=True)
 
     # write-only
     album_id = serializers.CharField(write_only=True, required=True)
@@ -268,6 +284,7 @@ class SongSerializer(serializers.ModelSerializer):
             'contributors',
             'uploaded_date',
             'last_changed',
+            'tracks',
 
             # write-only
             'album_id',

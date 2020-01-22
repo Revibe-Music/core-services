@@ -38,19 +38,37 @@ class Image(models.Model):
     )
 
     def __str__(self):
-        if self.reference != None:
-            return self.reference
-        else:
-            return "{} ({}x{})".format(self.file.name, self.height, self.width)
+        if self.file_path:
+            return self.file_path
+
+        return "({})".format(self.dimensions)
     
-    def get_object_reference(self):
-        if self.artist != None:
+    def __repr__(self):
+        if self.file_path:
+            return "<{}: {} ({})".format(self.__class__.__name__, self.file_path, self.dimensions)
+        else:
+            return "<{}: ({})".format(self.__class__.__name__, self.dimensions)
+
+    @property
+    def obj(self):
+        if self.artist:
             return self.artist
-        elif self.album != None:
+        elif self.album:
             return self.album
-        
         return None
     
+    @property
+    def file_path(self):
+        if self.file:
+            return self.file.name
+        elif self.reference:
+            return self.reference
+        return None
+    
+    @property
+    def dimensions(self):
+        return "{}x{}".format(self.height,self.width)
+
     class Meta:
         verbose_name = 'image'
         verbose_name_plural = 'images'
@@ -59,6 +77,7 @@ class Image(models.Model):
 class Track(models.Model):
     song = models.ForeignKey(
         'content.Song',
+        related_name="tracks",
         on_delete=models.CASCADE,
         null=False, blank=False
     )
@@ -77,6 +96,12 @@ class Track(models.Model):
         help_text="Shows if the uploaded file is the original file uploaded by the user",
         null=False, blank=True, default=True
     )
+
+    def __str__(self):
+        if self.reference != None:
+            return self.reference
+        else:
+            return self.file.name
 
     class Meta:
         verbose_name = "track"

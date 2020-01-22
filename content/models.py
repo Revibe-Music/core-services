@@ -54,6 +54,33 @@ class Image(models.Model):
         verbose_name_plural = 'images'
 
 
+class Track(models.Model):
+    song = models.ForeignKey(
+        'content.Song',
+        on_delete=models.CASCADE,
+        null=False, blank=False
+    )
+
+    file = models.FileField(
+        help_text="The audio file itself",
+        upload_to=ext.custom_audio_upload,
+        null=True, blank=True
+    )
+    reference = models.CharField(
+        help_text="Reference to the song location if it is not a revibe song",
+        max_length=255, null=True, blank=True
+    )
+
+    is_original = models.BooleanField(
+        help_text="Shows if the uploaded file is the original file uploaded by the user",
+        null=False, blank=True, default=True
+    )
+
+    class Meta:
+        verbose_name = "track"
+        verbose_name_plural = "tracks"
+
+
 class Artist(models.Model):
     id = models.CharField(max_length=255, primary_key=True, default=uuid.uuid4, editable=False)
     uri = models.CharField(max_length=255, default=uuid.uuid4, unique=True, editable=False)

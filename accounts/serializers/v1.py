@@ -1,15 +1,21 @@
 from allauth.socialaccount.models import SocialToken, SocialApp
 from django.conf import settings
 from django.contrib.auth import authenticate
+from django.core.files.images import get_image_dimensions
 from django.forms.models import model_to_dict
 from django.utils import timezone
 from oauth2_provider.models import AccessToken, RefreshToken
 from oauth2_provider.generators import generate_client_id
 from rest_framework import serializers
 
+from revibe._helpers.files import add_image_to_obj
+
 from accounts.models import *
-from content.models import Artist
+from content.models import Artist, Image
+from content.serializers.v1 import ImageSerializer
 from music.models import Library
+
+# -----------------------------------------------------------------------------
 
 class ProfileSerializer(serializers.ModelSerializer): # TODO: do this right, please
     allow_explicit = serializers.BooleanField(required=False)
@@ -187,9 +193,9 @@ class UserArtistSerializer(serializers.ModelSerializer):
     # read only
     artist_id = serializers.ReadOnlyField(source='id')
     artist_uri = serializers.ReadOnlyField(source='uri')
-    ext = serializers.SerializerMethodField('image_extension', read_only=True)
     artist_profile = UserArtistProfileSerializer(read_only=True)
     user = UserSerializer(source='artist_user', read_only=True)
+    images = ImageSerializer(source='artist_image', many=True, read_only=True)
 
     # write only
     image = serializers.FileField(write_only=True, allow_null=True, required=False)
@@ -217,9 +223,9 @@ class UserArtistSerializer(serializers.ModelSerializer):
             # read-only
             'artist_id',
             'artist_uri',
-            'ext',
             'artist_profile',
             'user',
+            'images',
 
             # write only
             'image',
@@ -256,6 +262,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data, *args, **kwargs):
         artist_profile_data = validated_data.pop('artist_profile', False)
+        img = validated_data.pop('image', None)
 
         artist = Artist.objects.create(**validated_data)
         artist.save()
@@ -264,6 +271,8 @@ class UserArtistSerializer(serializers.ModelSerializer):
         if 'email' in artist_profile_data.keys():
             profile.email = artist_profile_data['email']
         profile.save()
+
+        image_obj = add_image_to_obj(artist, img)
 
         return artist
     
@@ -281,12 +290,6 @@ class UserArtistSerializer(serializers.ModelSerializer):
             artist_profile.save()
         
         return instance
-
-    def image_extension(self, obj):
-        if obj.image:
-            return obj.image.name.split('.')[-1]
-        else:
-            return False
 
 class SocialTokenSerializer(serializers.ModelSerializer):
     platform = serializers.ReadOnlyField(source='app.name')

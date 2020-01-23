@@ -112,9 +112,8 @@ class Artist(models.Model):
     id = models.CharField(max_length=255, primary_key=True, default=uuid.uuid4, editable=False)
     uri = models.CharField(max_length=255, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=255, null=False, blank=False)
-    image = models.FileField(upload_to=ext.rename_image, null=True, blank=True)
-    image_reference = models.CharField(max_length=255, null=True, blank=True, default=None)
     platform = models.CharField(max_length=255, null=False, blank=False)
+    # artist_image = one-to-many with 'Image'
 
     date_joined = models.DateTimeField(auto_now_add=True, null=True, blank=True, editable=False)
 
@@ -136,9 +135,8 @@ class Album(models.Model):
     uri = models.CharField(max_length=255, unique=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     type = models.CharField(max_length=255, null=True, blank=True)
-    image = models.FileField(upload_to=ext.rename_image, null=True, blank=True)
-    image_ref = models.CharField(max_length=255, null=True, blank=True, default=None)
     platform = models.CharField(max_length=255, null=False, blank=False)
+    # album_image = one-to-many with 'Image'
 
     uploaded_date = models.DateField(auto_now_add=True, null=True, editable=False)
     last_changed = models.DateField(auto_now=True, null=True)
@@ -193,12 +191,12 @@ class AlbumContributor(models.Model):
 class Song(models.Model):
     id = models.CharField(primary_key=True, default=uuid.uuid4, editable=False, max_length=255)
     uri = models.CharField('URI', default=uuid.uuid4, unique=True, editable=False, max_length=255)
-    file = models.FileField('Song', upload_to=ext.rename_song, null=True, blank=True)
     title = models.CharField('Name', max_length=255, null=False)
     duration = models.DecimalField('Duration', null=True, blank=True, max_digits=6, decimal_places=2) # in seconds
     genre = models.CharField(max_length=255, null=True, blank=True)
     platform = models.CharField(max_length=255, null=True)
     is_explicit = models.BooleanField(null=False, blank=True, default=False)
+    # tracks = one-to-many with 'Track'
 
     is_displayed = models.BooleanField(null=False, blank=True, default=True)
     is_deleted = models.BooleanField(null=False, blank=True, default=False)

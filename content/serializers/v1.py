@@ -1,7 +1,9 @@
+from django.core.files.images import get_image_dimensions
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from revibe._errors.network import ProgramError
+from revibe._helpers.files import add_image_to_obj
 
 from content.models import *
 from content.mixins import ContributionSerializerMixin
@@ -53,6 +55,16 @@ class ArtistSerializer(serializers.ModelSerializer):
             'image',
         ]
     
+    def create(self, validated_data, *args, **kwargs):
+        print(validated_data)
+        img = validated_data.pop('image', None)
+
+        instance = super().create(validated_data, *args, **kwargs)
+
+        image_obj = add_image_to_obj(instance, img)
+
+        return image_obj
+
     def image_extension(self, obj):
         if hasattr(obj, 'image') and obj.image != None:
             return obj.image.name.split('.')[-1]

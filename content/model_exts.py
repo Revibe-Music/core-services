@@ -23,15 +23,14 @@ def custom_image_upload(instance, filename):
     ext = filename.split('.')[-1]
 
     folder = instance.obj.__class__.__name__
-    uri = instance.obj.uri
+    uri = str(instance.obj.uri)
 
     root_path = os.path.join("images", folder, uri)
 
     if instance.is_original:
-        path = f"{root_path}/inputs/original.{ext}"
         path = os.path.join(root_path, "inputs", "original."+ext)
     else:
-        path = f"{root_path}/outputs/{ext}/{filename}"
+        path = os.path.join(root_path, "outputs", ext, filename)
     
     return path
 
@@ -39,13 +38,13 @@ def custom_audio_upload(instance, filename):
     ext = filename.split('.')[-1]
 
     song = instance.song
-    uri = song.uri
+    uri = str(song.uri)
 
-    root_path = f"audio/songs/{uri}"
+    root_path = os.path.join("audio", "songs", uri)
 
     if instance.is_original:
-        path = f"{root_path}/inputs/original.{ext}"
+        path = os.path.join(root_path, "inputs", "original."+ext)
     else:
-        path = f"{root_path}/outputs/{ext}/{filename}"
+        path = os.path.join(root_path, "outputs", ext, filename)
     
     return path

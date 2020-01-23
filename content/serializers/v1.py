@@ -60,7 +60,6 @@ class ArtistSerializer(serializers.ModelSerializer):
         ]
     
     def create(self, validated_data, *args, **kwargs):
-        print(validated_data)
         img = validated_data.pop('image', None)
 
         instance = super().create(validated_data, *args, **kwargs)

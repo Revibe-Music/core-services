@@ -46,20 +46,12 @@ def add_image_to_obj(obj, img, *args, **kwargs):
         for item in images:
             if item.file:
                 if settings.USE_S3:
-                    s3.Object(settings.AWS_STORAGE_BUCKET_NAME, item.file_path)
+                    s3.Object(settings.AWS_STORAGE_BUCKET_NAME, item.file.name)
                 # else: # delete file locally... who cares...
             
             item.delete()
-        # if t == 'artist':
-        #     obj.artist_image.all().delete()
-
-        # # delete the objects from S3 if using S3
-        # if settings.USE_S3:
-        #     s3 = boto3.resource('s3')
-        #     bucket = s3.bucket(settings.AWS_STORAGE_BUCKET_NAME)
-        #     bucket.objects.filter(Prefix=prefix).delete()
-
-
+    
+    # create the object
     if type(img) == str:
         image_obj = Image.objects.create(reference=img, is_original=True, height=1, width=1, **objs)
     elif type(img) == dict:

@@ -9,6 +9,9 @@ from content.models import Artist, Album, Image
 def add_image_to_obj(obj, img, *args, **kwargs):
     """
     """
+    # skip everything if there is no image
+    if img == None:
+        return None
 
     # find out of the object is an artist or an album
     # then add the artist or the album to the objects

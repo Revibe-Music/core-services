@@ -278,6 +278,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data, *args, **kwargs):
         artist_profile_data = validated_data.pop('artist_profile', False)
+        img = validated_data.pop('image', None)
 
         for key, value in validated_data.items():
             setattr(instance, key, value)
@@ -288,7 +289,9 @@ class UserArtistSerializer(serializers.ModelSerializer):
             for key, value in artist_profile_data.items():
                 setattr(artist_profile, key, value)
             artist_profile.save()
-        
+
+        image_obj = add_image_to_obj(instance, img, edit=True)
+
         return instance
 
 class SocialTokenSerializer(serializers.ModelSerializer):

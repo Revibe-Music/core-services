@@ -68,6 +68,15 @@ class ArtistSerializer(serializers.ModelSerializer):
         image_obj = add_image_to_obj(instance, img)
 
         return image_obj
+    
+    def update(self, instance, validated_data, *args, **kwargs):
+        img = validated_data.pop('image', None)
+
+        instance = super().update(instance, validated_data, *args, **kwargs)
+
+        image_obj = add_image_to_object(instance, img, edit=True)
+
+        return instance
 
     def image_extension(self, obj):
         if hasattr(obj, 'image') and obj.image != None:

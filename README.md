@@ -71,6 +71,15 @@ All requests in the API have a unique string identifier, called the **Request Co
 
 Revibe's API was created with evolution in mind, so the URL configuration has been built to allow for easy versioning in the future. The leading component of every endpoint is the version number; so when we begin developing new endpoints for existing features, old versions of Revibe applications can continue to work on the older endpoints without inhibiting continuing support and development.
 
+## File Uploads
+
+File uploads, such as Album covers or song files, are all stored in [Amazon Simple Storage Service (S3)](https://aws.amazon.com/s3/ "Amazon S3").
+Each Artist or Album (or other future objects that have images) can have multiple files related to them. Each object has a subfolder in the S3 bucket, designated by the object's URI. Within that folder, the original image is stored as inputs/original%.*ext*. Any additional files created in post-processing (for example, creating different-sized images for faster load in the mobile app) will be stored in the 'outputs' folder, and further organized by file extension (JPG, WAV, etc.). 
+
+Additional images are stored in the content.Image model, additional audio files are stored in the content.Track model. 
+
+All post-processing of files is handled in a separate thread, so the user will not have to wait for the creation of *n* additional files to receive a good response; however, the user will then also not receive an error if there are issues in creating additional objects. 
+
 ## Other
 
 ### File Layout

@@ -2,7 +2,7 @@ from django.core.files.images import get_image_dimensions
 
 import os
 
-from content.models import Artist, Album, Image
+from content.models import Artist, Album, Image, Track
 
 # -----------------------------------------------------------------------------
 
@@ -33,3 +33,25 @@ def add_image_to_obj(obj, img, *args, **kwargs):
         image_obj.save()
 
     return image_obj
+
+
+def add_track_to_song(obj, track, *args, **kwargs):
+    """
+    """
+    # skip everyting if there is no Track
+    if track == None:
+        return None
+
+    objs = {
+        "song": obj
+    }
+
+    if type(track) == str:
+        track_obj = Track.objects.create(reference=track, is_original=True, **objs)
+    elif type(track) == dict:
+        track_obj = Track.objects.create(reference=track['track'], is_original=True, **objs)
+    else:
+        track_obj = Track.objects.create(file=track, is_original=True, **objs)
+    
+    track_obj.save()
+    return track_obj

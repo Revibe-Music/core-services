@@ -97,6 +97,14 @@ class Track(models.Model):
         null=False, blank=True, default=True
     )
 
+    @property
+    def file_path(self):
+        if self.file:
+            return self.file.name
+        elif self.reference:
+            return self.reference
+        return None
+
     def __str__(self):
         if self.reference != None:
             return self.reference

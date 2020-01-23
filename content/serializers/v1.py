@@ -3,11 +3,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from revibe._errors.network import ProgramError
-from revibe._helpers.files import add_image_to_obj
+from revibe._helpers.files import add_image_to_obj, add_track_to_song
 
 from content.models import *
 from content.mixins import ContributionSerializerMixin
 
+# -----------------------------------------------------------------------------
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,7 +24,10 @@ class ImageSerializer(serializers.ModelSerializer):
 class TrackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Track
-        fields = '__all__'
+        fields = [
+            'file_path',
+            'is_original',
+        ]
 
 
 class ArtistSerializer(serializers.ModelSerializer):
@@ -309,6 +313,7 @@ class SongSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         album = Album.objects.get(pk=validated_data.pop('album_id'))
+        track = validated_data.pop('file', None)
 
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
@@ -321,6 +326,8 @@ class SongSerializer(serializers.ModelSerializer):
 
         song_contrib = SongContributor(artist=artist, song=song, contribution_type="Artist", primary_artist=True)
         song_contrib.save()
+
+        track_obj = add_track_to_song(song, track)
 
         return song
 

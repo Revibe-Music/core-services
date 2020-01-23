@@ -340,7 +340,7 @@ class OtherArtistSerializer(serializers.ModelSerializer):
     artist_uri = serializers.CharField(source='uri', required=False)
 
     # read-only
-    
+    images = ImageSerializer(source='artist_image', many=True, read_only=True)    
 
     class Meta:
         model = Artist
@@ -348,7 +348,7 @@ class OtherArtistSerializer(serializers.ModelSerializer):
             'artist_id',
             'artist_uri',
             'name',
-            'image',
+            'images',
             'platform',
         ]
 
@@ -357,6 +357,7 @@ class OtherAlbumSerializer(serializers.ModelSerializer):
     album_id = serializers.CharField(source='id', required=False)
     album_uri = serializers.CharField(source='uri', required=False)
     uploaded_by = OtherArtistSerializer(read_only=True)
+    images = ImageSerializer(source='album_image', many=True, read_only=True)
 
     class Meta:
         model = Album
@@ -365,7 +366,7 @@ class OtherAlbumSerializer(serializers.ModelSerializer):
             'album_uri',
             'name',
             'type',
-            'image_ref',
+            'images',
             'platform',
             'uploaded_by',
         ]
@@ -378,6 +379,7 @@ class OtherSongSerializer(serializers.ModelSerializer):
     # read-only
     album = OtherAlbumSerializer(read_only=True)
     uploaded_by = OtherArtistSerializer(read_only=True)
+    tracks = TrackSerializer(many=True, read_only=True)
 
     # write-only
     platform = serializers.CharField(write_only=True)
@@ -398,6 +400,7 @@ class OtherSongSerializer(serializers.ModelSerializer):
             # read-only
             'album',
             'uploaded_by',
+            'tracks',
 
             # write-only
             'platform',

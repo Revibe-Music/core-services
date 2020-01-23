@@ -10,7 +10,7 @@ from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 from oauth2_provider.models import Application
 
 import io
-from PIL import Image
+from PIL import Image as PILImage
 import sys
 
 from revibe._helpers import status
@@ -143,7 +143,7 @@ class BaseRevibeTestMixin:
     
     def generate_image(self):
         file = io.BytesIO()
-        image = Image.new('RGBA', (100,100), color=(155,0,0))
+        image = PILImage.new('RGBA', (100,100), color=(155,0,0))
         image.save(file, 'png')
         file.name = 'test.png'
         file.seek(0)

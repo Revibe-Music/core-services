@@ -180,10 +180,14 @@ def convert_audio_file(obj, *args, **kwargs):
         # 'wav',
         # 'aac',
     ]
+    # format_lookup = {
+    #     "aac": "m4a",
+    # }
 
     byte_data = obj.file.read()
     byte_format = BytesIO(byte_data)
 
+    # ext = format_lookup.get(ext, ext)
     segment = AudioSegment.from_file(file=byte_format, format=ext)
     logger.info("Created audio segment")
     logger.debug(segment)

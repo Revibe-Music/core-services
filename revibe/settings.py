@@ -389,6 +389,22 @@ else:
     AWS_ACCESS_KEY_ID = None
     AWS_SECRET_ACCESS_KEY = None
 
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': 'INFO',
+            },
+        },
+    }
+
 STATIC_URL = '/static/'
 
 # CORS settings

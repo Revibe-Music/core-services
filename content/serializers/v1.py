@@ -37,7 +37,6 @@ class ArtistSerializer(serializers.ModelSerializer):
     platform = serializers.CharField(required=True)
 
     # read-only
-    ext = serializers.SerializerMethodField('image_extension', read_only=True)
     images = ImageSerializer(source="artist_image", many=True, read_only=True)
 
     # write-only
@@ -52,7 +51,6 @@ class ArtistSerializer(serializers.ModelSerializer):
             'platform',
 
             # read-only
-            'ext',
             'images',
 
             # write-only
@@ -76,12 +74,6 @@ class ArtistSerializer(serializers.ModelSerializer):
         image_obj = add_image_to_object(instance, img, edit=True)
 
         return instance
-
-    def image_extension(self, obj):
-        if hasattr(obj, 'image') and obj.image != None:
-            return obj.image.name.split('.')[-1]
-        else:
-            return None
 
 
 class SongContributorSerializer(serializers.ModelSerializer, ContributionSerializerMixin):
@@ -216,7 +208,6 @@ class AlbumSerializer(serializers.ModelSerializer):
     is_displayed = serializers.BooleanField(required=False, default=True)
 
     # read-only
-    ext = serializers.SerializerMethodField('get_ext', read_only=True)
     uploaded_by = ArtistSerializer(read_only=True)
     contributors = AlbumContributorSerializer(source='album_to_artist', many=True, read_only=True)
     uploaded_date = serializers.DateField(read_only=True)
@@ -237,7 +228,6 @@ class AlbumSerializer(serializers.ModelSerializer):
             'is_displayed',
 
             # read-only
-            'ext',
             'uploaded_by',
             'contributors',
             'uploaded_date',
@@ -267,12 +257,15 @@ class AlbumSerializer(serializers.ModelSerializer):
         image_obj = add_image_to_obj(album, img)
 
         return album
+    
+    def update(self, instance, validated_data, *args, **kwargs):
+        img = validated_data.pop('image', None)
 
-    def get_ext(self, obj):
-        if hasattr(obj, "image") and (obj.image != None):
-            return obj.image.name.split('.')[-1]
-        else:
-            return None
+        instance = super().update(instance, validated_data, *args, **kwargs)
+
+        image_obj = add_image_to_obj(instance, img, edit=True)
+
+        return instance
 
 
 class SongSerializer(serializers.ModelSerializer):
@@ -291,8 +284,8 @@ class SongSerializer(serializers.ModelSerializer):
     tracks = TrackSerializer(read_only=True, many=True)
 
     # write-only
-    album_id = serializers.CharField(write_only=True, required=True)
-    file = serializers.FileField(write_only=True, required=True)
+    album_id = serializers.CharField(write_only=True, required=False)
+    file = serializers.FileField(write_only=True, required=False)
 
     class Meta:
         model = Song
@@ -338,6 +331,15 @@ class SongSerializer(serializers.ModelSerializer):
         track_obj = add_track_to_song(song, track)
 
         return song
+    
+    def update(self, instance, validated_data, *args, **kwargs):
+        img = validated_data.pop('file', None)
+
+        instance = super().update(instance, validated_data, *args, **kwargs)
+
+        image_obj = add_track_to_song(instance, img)
+
+        return instance
 
 
 # -----------------------------------------------------------------------------

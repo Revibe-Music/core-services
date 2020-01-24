@@ -4,10 +4,13 @@ created: 23 Jan, 2020
 """
 
 from django.conf import settings
+from django.core.files.base import ContentFile
 from django.core.files.images import get_image_dimensions
 
+from io import BytesIO
 import boto3
 import os
+from PIL import Image as PILImage
 
 from content.models import Artist, Album, Image, Track
 
@@ -46,7 +49,7 @@ def add_image_to_obj(obj, img, *args, **kwargs):
         for item in images:
             if item.file:
                 if settings.USE_S3:
-                    s3.Object(settings.AWS_STORAGE_BUCKET_NAME, item.file.name)
+                    s3.Object(settings.AWS_STORAGE_BUCKET_NAME, item.file.name)#.delete()
                 # else: # delete file locally... who cares...
             
             item.delete()
@@ -63,7 +66,10 @@ def add_image_to_obj(obj, img, *args, **kwargs):
         image_obj.width = width
         image_obj.height = height
         image_obj.save()
+
         # post processing, creating duplicates, etc...
+        # create new thread...
+        resize_image(image_obj)
 
     return image_obj
 
@@ -72,7 +78,7 @@ def add_track_to_song(obj, track, *args, **kwargs):
     """
     """
     # skip everyting if there is no Track
-    if track == None:
+    if not track:
         return None
 
     objs = {
@@ -82,10 +88,13 @@ def add_track_to_song(obj, track, *args, **kwargs):
     editing = kwargs.pop('edit', False)
     if editing:
         prefix = f"audio/songs/{str(obj.uri)}/"
+        tracks = obj.tracks.all()
         if settings.USE_S3:
             s3 = boto3.resource('s3')
-            bucket = s3.bucket(settings.AWS_STORAGE_BUCKET_NAME)
-            bucket.objects.filter(Prefix=prefix).delete()
+        for t in tracks:
+            if settings.USE_S3:
+                s3.Object(settings.AWS_STORAGE_BUCKET_NAME, t.file.name).delete()
+            t.delete()
 
     if type(track) == str:
         track_obj = Track.objects.create(reference=track, is_original=True, **objs)
@@ -96,3 +105,46 @@ def add_track_to_song(obj, track, *args, **kwargs):
     
     track_obj.save()
     return track_obj
+
+
+def resize_image(obj, *args, **kwargs):
+    """
+    takes the image from the django object and creates new images of the sizes needed
+    """
+    # get the string version of the object class, lowercase. 
+    t = obj.obj.__class__.__name__.lower()
+
+    img = obj.file
+    sizes = [ # width x height
+        (50,50),
+        (100,100),
+        (200,200),
+    ]
+    ext = obj.file.name.split('.')[-1].lower()
+    ext = "jpeg" if ext == 'jpg' else ext
+
+    original_image = PILImage.open(obj.file)
+
+    # generate a new image for each required dimension
+    for dimension in sizes:
+        f = BytesIO()
+        original_image.save(f, format=ext)
+        s = f.getvalue()
+
+        # resize file
+        pil_image_obj = PILImage.open(BytesIO(s))
+        pil_image_obj = pil_image_obj.resize(dimension)
+
+        # resave variables with newly resized image
+        f = BytesIO()
+        pil_image_obj.save(f, format=ext)
+        s = f.getvalue()
+
+        content_file = ContentFile(s)
+
+        file_name = f"{dimension[0]}x{dimension[1]}.{ext}"
+
+        image_obj = Image.objects.create(is_original=False, height=dimension[1], width=dimension[0], **{t:obj.obj})
+        image_obj.file.save(file_name, content_file)
+        image_obj.save()
+

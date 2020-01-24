@@ -67,7 +67,7 @@ class Image(models.Model):
     
     @property
     def dimensions(self):
-        return "{}x{}".format(self.height,self.width)
+        return "{}x{}".format(self.width,self.height)
 
     class Meta:
         verbose_name = 'image'

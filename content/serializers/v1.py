@@ -1,16 +1,33 @@
+from django.core.files.images import get_image_dimensions
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from revibe._errors.network import ProgramError
+from revibe._helpers.files import add_image_to_obj, add_track_to_song
 
 from content.models import *
 from content.mixins import ContributionSerializerMixin
 
+# -----------------------------------------------------------------------------
 
-# class ImageSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Image
-#         fields = '__all__'
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = [
+            'file_path',
+            'height',
+            'width',
+            'is_original',
+        ]
+
+
+class TrackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Track
+        fields = [
+            'file_path',
+            'is_original',
+        ]
 
 
 class ArtistSerializer(serializers.ModelSerializer):
@@ -20,7 +37,7 @@ class ArtistSerializer(serializers.ModelSerializer):
     platform = serializers.CharField(required=True)
 
     # read-only
-    ext = serializers.SerializerMethodField('image_extension', read_only=True)
+    images = ImageSerializer(source="artist_image", many=True, read_only=True)
 
     # write-only
     image = serializers.FileField(write_only=True, required=False)
@@ -34,17 +51,29 @@ class ArtistSerializer(serializers.ModelSerializer):
             'platform',
 
             # read-only
-            'ext',
+            'images',
 
             # write-only
             'image',
         ]
     
-    def image_extension(self, obj):
-        if hasattr(obj, 'image') and obj.image != None:
-            return obj.image.name.split('.')[-1]
-        else:
-            return None
+    def create(self, validated_data, *args, **kwargs):
+        img = validated_data.pop('image', None)
+
+        instance = super().create(validated_data, *args, **kwargs)
+
+        image_obj = add_image_to_obj(instance, img)
+
+        return image_obj
+    
+    def update(self, instance, validated_data, *args, **kwargs):
+        img = validated_data.pop('image', None)
+
+        instance = super().update(instance, validated_data, *args, **kwargs)
+
+        image_obj = add_image_to_object(instance, img, edit=True)
+
+        return instance
 
 
 class SongContributorSerializer(serializers.ModelSerializer, ContributionSerializerMixin):
@@ -179,11 +208,11 @@ class AlbumSerializer(serializers.ModelSerializer):
     is_displayed = serializers.BooleanField(required=False, default=True)
 
     # read-only
-    ext = serializers.SerializerMethodField('get_ext', read_only=True)
     uploaded_by = ArtistSerializer(read_only=True)
     contributors = AlbumContributorSerializer(source='album_to_artist', many=True, read_only=True)
     uploaded_date = serializers.DateField(read_only=True)
     last_changed = serializers.DateField(read_only=True)
+    images = ImageSerializer(source="album_image", many=True, read_only=True)
 
     # write-only
     image = serializers.FileField(write_only=True, required=False)
@@ -199,11 +228,11 @@ class AlbumSerializer(serializers.ModelSerializer):
             'is_displayed',
 
             # read-only
-            'ext',
             'uploaded_by',
             'contributors',
             'uploaded_date',
             'last_changed',
+            'images',
 
             # write-only
             'image',
@@ -216,6 +245,8 @@ class AlbumSerializer(serializers.ModelSerializer):
             artist = request.user.artist
         else:
             raise Exception("problem") # implement custom exception class
+        
+        img = validated_data.pop('image', None)
 
         album = Album(**validated_data, uploaded_by=artist)
         album.save()
@@ -223,13 +254,18 @@ class AlbumSerializer(serializers.ModelSerializer):
         album_contrib = AlbumContributor.objects.create(artist=artist, album=album, contribution_type="Artist", primary_artist=True)
         album_contrib.save()
 
-        return album
+        image_obj = add_image_to_obj(album, img)
 
-    def get_ext(self, obj):
-        if hasattr(obj, "image") and (obj.image != None):
-            return obj.image.name.split('.')[-1]
-        else:
-            return None
+        return album
+    
+    def update(self, instance, validated_data, *args, **kwargs):
+        img = validated_data.pop('image', None)
+
+        instance = super().update(instance, validated_data, *args, **kwargs)
+
+        image_obj = add_image_to_obj(instance, img, edit=True)
+
+        return instance
 
 
 class SongSerializer(serializers.ModelSerializer):
@@ -245,10 +281,11 @@ class SongSerializer(serializers.ModelSerializer):
     contributors = SongContributorSerializer(source='song_to_artist', many=True, read_only=True)
     uploaded_date = serializers.DateField(read_only=True)
     last_changed = serializers.DateField(read_only=True)
+    tracks = TrackSerializer(read_only=True, many=True)
 
     # write-only
-    album_id = serializers.CharField(write_only=True, required=True)
-    file = serializers.FileField(write_only=True, required=True)
+    album_id = serializers.CharField(write_only=True, required=False)
+    file = serializers.FileField(write_only=True, required=False)
 
     class Meta:
         model = Song
@@ -268,6 +305,7 @@ class SongSerializer(serializers.ModelSerializer):
             'contributors',
             'uploaded_date',
             'last_changed',
+            'tracks',
 
             # write-only
             'album_id',
@@ -276,6 +314,7 @@ class SongSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         album = Album.objects.get(pk=validated_data.pop('album_id'))
+        track = validated_data.pop('file', None)
 
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
@@ -289,7 +328,18 @@ class SongSerializer(serializers.ModelSerializer):
         song_contrib = SongContributor(artist=artist, song=song, contribution_type="Artist", primary_artist=True)
         song_contrib.save()
 
+        track_obj = add_track_to_song(song, track)
+
         return song
+    
+    def update(self, instance, validated_data, *args, **kwargs):
+        img = validated_data.pop('file', None)
+
+        instance = super().update(instance, validated_data, *args, **kwargs)
+
+        image_obj = add_track_to_song(instance, img)
+
+        return instance
 
 
 # -----------------------------------------------------------------------------
@@ -300,7 +350,7 @@ class OtherArtistSerializer(serializers.ModelSerializer):
     artist_uri = serializers.CharField(source='uri', required=False)
 
     # read-only
-    
+    images = ImageSerializer(source='artist_image', many=True, read_only=True)    
 
     class Meta:
         model = Artist
@@ -308,7 +358,7 @@ class OtherArtistSerializer(serializers.ModelSerializer):
             'artist_id',
             'artist_uri',
             'name',
-            'image',
+            'images',
             'platform',
         ]
 
@@ -317,6 +367,7 @@ class OtherAlbumSerializer(serializers.ModelSerializer):
     album_id = serializers.CharField(source='id', required=False)
     album_uri = serializers.CharField(source='uri', required=False)
     uploaded_by = OtherArtistSerializer(read_only=True)
+    images = ImageSerializer(source='album_image', many=True, read_only=True)
 
     class Meta:
         model = Album
@@ -325,7 +376,7 @@ class OtherAlbumSerializer(serializers.ModelSerializer):
             'album_uri',
             'name',
             'type',
-            'image_ref',
+            'images',
             'platform',
             'uploaded_by',
         ]
@@ -338,6 +389,7 @@ class OtherSongSerializer(serializers.ModelSerializer):
     # read-only
     album = OtherAlbumSerializer(read_only=True)
     uploaded_by = OtherArtistSerializer(read_only=True)
+    tracks = TrackSerializer(many=True, read_only=True)
 
     # write-only
     platform = serializers.CharField(write_only=True)
@@ -358,6 +410,7 @@ class OtherSongSerializer(serializers.ModelSerializer):
             # read-only
             'album',
             'uploaded_by',
+            'tracks',
 
             # write-only
             'platform',

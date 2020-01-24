@@ -11,6 +11,7 @@ from io import BytesIO
 import boto3
 import os
 from PIL import Image as PILImage
+import threading
 
 from content.models import Artist, Album, Image, Track
 
@@ -69,7 +70,9 @@ def add_image_to_obj(obj, img, *args, **kwargs):
 
         # post processing, creating duplicates, etc...
         # create new thread...
-        resize_image(image_obj)
+        t = threading.Thread(target=resize_image, args=[image_obj])
+        t.setDaemon(True)
+        t.start()
 
     return image_obj
 

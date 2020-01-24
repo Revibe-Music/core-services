@@ -8,10 +8,11 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.images import get_image_dimensions
 
-from io import BytesIO
+from io import BytesIO, StringIO
 import boto3
 import os
 from PIL import Image as PILImage
+from pydub import AudioSegment
 import threading
 
 from content.models import Artist, Album, Image, Track
@@ -78,39 +79,6 @@ def add_image_to_obj(obj, img, *args, **kwargs):
     return image_obj
 
 
-def add_track_to_song(obj, track, *args, **kwargs):
-    """
-    """
-    # skip everyting if there is no Track
-    if not track:
-        return None
-
-    objs = {
-        "song": obj
-    }
-
-    editing = kwargs.pop('edit', False)
-    if editing:
-        prefix = f"audio/songs/{str(obj.uri)}/"
-        tracks = obj.tracks.all()
-        if settings.USE_S3:
-            s3 = boto3.resource('s3')
-        for t in tracks:
-            if settings.USE_S3:
-                s3.Object(settings.AWS_STORAGE_BUCKET_NAME, t.file.name).delete()
-            t.delete()
-
-    if type(track) == str:
-        track_obj = Track.objects.create(reference=track, is_original=True, **objs)
-    elif type(track) == dict:
-        track_obj = Track.objects.create(reference=track['track'], is_original=True, **objs)
-    else:
-        track_obj = Track.objects.create(file=track, is_original=True, **objs)
-    
-    track_obj.save()
-    return track_obj
-
-
 def resize_image(obj, *args, **kwargs):
     """
     takes the image from the django object and creates new images of the sizes needed
@@ -153,4 +121,53 @@ def resize_image(obj, *args, **kwargs):
         image_obj.save()
     
     connection.close()
+
+
+def add_track_to_song(obj, track, *args, **kwargs):
+    """
+    """
+    # skip everyting if there is no Track
+    if not track:
+        return None
+
+    objs = {
+        "song": obj
+    }
+
+    editing = kwargs.pop('edit', False)
+    if editing:
+        prefix = f"audio/songs/{str(obj.uri)}/"
+        tracks = obj.tracks.all()
+        if settings.USE_S3:
+            s3 = boto3.resource('s3')
+        for t in tracks:
+            if settings.USE_S3:
+                s3.Object(settings.AWS_STORAGE_BUCKET_NAME, t.file.name).delete()
+            t.delete()
+
+    if type(track) == str:
+        track_obj = Track.objects.create(reference=track, is_original=True, **objs)
+    elif type(track) == dict:
+        track_obj = Track.objects.create(reference=track['track'], is_original=True, **objs)
+    else:
+        track_obj = Track.objects.create(file=track, is_original=True, **objs)
+        convert_audio_file(track_obj)
+    
+    track_obj.save()
+    return track_obj
+
+
+def convert_audio_file(obj, *args, **kwargs):
+    """
+    Only run this when running in the cloud due to the use of AWS resources
+    """
+    # pass
+    if not obj.file:
+        return None
+
+    if not settings.USE_S3:
+        return None
+    # temp
+    return None
+
 

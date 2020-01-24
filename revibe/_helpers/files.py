@@ -3,6 +3,7 @@ author: Jordan Prechac
 created: 23 Jan, 2020
 """
 
+from django.db import connection
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.images import get_image_dimensions
@@ -119,9 +120,9 @@ def resize_image(obj, *args, **kwargs):
 
     img = obj.file
     sizes = [ # width x height
-        (50,50),
-        (100,100),
-        (200,200),
+        (64,64),
+        (300,300),
+        (600,600),
     ]
     ext = obj.file.name.split('.')[-1].lower()
     ext = "jpeg" if ext == 'jpg' else ext
@@ -150,4 +151,6 @@ def resize_image(obj, *args, **kwargs):
         image_obj = Image.objects.create(is_original=False, height=dimension[1], width=dimension[0], **{t:obj.obj})
         image_obj.file.save(file_name, content_file)
         image_obj.save()
+    
+    connection.close()
 

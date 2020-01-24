@@ -180,9 +180,26 @@ def convert_audio_file(obj, *args, **kwargs):
         # 'wav',
         # 'aac',
     ]
-    # format_lookup = {
-    #     "aac": "m4a",
-    # }
+    new_formats = {
+        {
+            "format": "m4a",
+            "encoding": "aac",
+            "bitrate": "128",
+            "filename": "medium",
+        },
+        {
+            "format": "m4a",
+            "encoding": "aac",
+            "bitrate":"256",
+            "filename": "high",
+        },
+        {
+            "format": "m4a",
+            "encoding": "aac",
+            "bitrate": "96",
+            "filename": "low",
+        },
+    }
 
     byte_data = obj.file.read()
     byte_format = BytesIO(byte_data)
@@ -192,11 +209,13 @@ def convert_audio_file(obj, *args, **kwargs):
     logger.info("Created audio segment")
     logger.debug(segment)
 
+    # for f in new_formats:
     for f in formats:
         output = BytesIO()
         segment.export(output, format=f)
 
         value = output.getvalue()
+        # filename = f"{f["filename"]}.{f["format"]}"
         file_name = f"fuckyeah.{f}"
 
         track = Track.objects.create(is_original=False, song=obj.song)

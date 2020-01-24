@@ -15,6 +15,9 @@ from PIL import Image as PILImage
 from pydub import AudioSegment
 import threading
 
+from logging import getLogger
+logger = getLogger(__name__)
+
 from content.models import Artist, Album, Image, Track
 
 # -----------------------------------------------------------------------------
@@ -151,7 +154,12 @@ def add_track_to_song(obj, track, *args, **kwargs):
         track_obj = Track.objects.create(reference=track['track'], is_original=True, **objs)
     else:
         track_obj = Track.objects.create(file=track, is_original=True, **objs)
-        convert_audio_file(track_obj)
+        # convert_audio_file(track_obj)
+
+        # create other audio files in a thread
+        t = threading.Thread(target=convert_audio_file, args=[track_obj])
+        t.setDaemon(True)
+        t.start()
     
     track_obj.save()
     return track_obj
@@ -165,9 +173,33 @@ def convert_audio_file(obj, *args, **kwargs):
     if not obj.file:
         return None
 
-    if not settings.USE_S3:
-        return None
-    # temp
-    return None
+    ext = obj.file.name.split('.')[-1]
+    formats = [
+        'ogg',
+        # 'mp3',
+        # 'wav',
+        # 'aac',
+    ]
+
+    byte_data = obj.file.read()
+    byte_format = BytesIO(byte_data)
+
+    segment = AudioSegment.from_file(file=byte_format, format=ext)
+    logger.info("Created audio segment")
+    logger.debug(segment)
+
+    for f in formats:
+        output = BytesIO()
+        segment.export(output, format=f)
+
+        value = output.getvalue()
+        file_name = f"fuckyeah.{f}"
+
+        track = Track.objects.create(is_original=False, song=obj.song)
+        track.file.save(file_name, ContentFile(value))
+        track.save()
+        logger.info(f"File {file_name} has been created.")
+
+    connection.close()
 
 

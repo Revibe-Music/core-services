@@ -2,6 +2,8 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+import random
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -38,6 +40,32 @@ class FormViewSet(viewsets.GenericViewSet):
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         return responses.NO_REQUEST_TYPE()
+
+
+class YouTubeKeyViewSet(viewsets.GenericViewSet):
+    queryset = YouTubeKey.objects.filter()
+    serializer_class = adm_ser_v1.YouTubeKeySerializer
+    permission_classes = [TokenOrSessionAuthentication]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"],["first-party"]],
+    }
+
+    def list(self, request, *args, **kwargs):
+        choices = [x for x in self.queryset if x.is_valid]
+        choice = random.choice(list(choices))
+        
+        # check the key if it hasn't been tested in 1 day (time?) or
+        # if it failed it's last test
+        # if not choice.needs_to_be_tested:
+        if choice.worked_on_last_test and choice.recently_tested:
+            # return the key because it's valid
+            serializer = self.serializer_class(instance=choice)
+            return responses.OK(serializer=serializer)
+        else:
+            # check YouTube to see if the key is valid
+            return responses.NOT_IMPLEMENTED()
+
+            # send request to youtube...
 
 
 class CompanyViewSet(GenericPlatformViewSet):

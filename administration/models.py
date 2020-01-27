@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+import datetime
 from uuid import uuid1
 
 # -----------------------------------------------------------------------------
@@ -41,6 +42,9 @@ class Campaign(models.Model):
 
 
 class YouTubeKey(models.Model):
+    # create a class variable that keeps the required seconds to recheck the api key
+    _check_time = 24 * 60 * 60 # one day in seconds
+    _failure_threshold = 10
 
     # id = models.AutoField(primary_key=True)
     key = models.CharField(
@@ -56,6 +60,10 @@ class YouTubeKey(models.Model):
         help_text=_("The last time this key was tested, it worked."),
         null=False, blank=True, default=True
     )
+    failure_count = models.IntegerField(
+        help_text="The number of failures without passing",
+        null=False, blank=True, default=0
+    )
 
     date_created = models.DateTimeField(
         auto_now_add=True
@@ -64,6 +72,42 @@ class YouTubeKey(models.Model):
     def __str__(self):
         star = "" if self.worked_on_last_test else "*"
         return f"{star}{self.key}{star}"
+    
+    def test_key(self):
+        """
+        Test the key against Youtube's API to determine if it's valid.
+        """
+        pass
+
+    @property
+    def recently_tested(self):
+        """
+        Return True if the key has been tested in the last day
+        """
+        now = datetime.datetime.now(datetime.timezone.utc)
+        difference = now - self.last_tested
+
+        if difference.seconds < self._check_time:
+            return True
+        else:
+            return False
+    
+    @property
+    def is_valid(self):
+        """
+        Will return false if the key has failed more than the failure threshold.
+        """
+        if self.failure_count >= self._failure_threshold:
+            return False
+        else:
+            return True
+    
+    @property
+    def needs_to_be_tested(self):
+        """
+        property that states if the key needs to be checked for validity
+        """
+        return None
 
     class Meta:
         verbose_name = 'YouTube Key'

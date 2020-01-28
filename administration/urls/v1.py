@@ -8,6 +8,7 @@ from administration.views import v1
 router = routers.DefaultRouter()
 router.register('forms', v1.FormViewSet, 'forms')
 router.register('company', v1.CompanyViewSet, 'company')
+router.register('youtubekey', v1.YouTubeKeyViewSet, 'youtubekey')
 
 urlpatterns = [
 

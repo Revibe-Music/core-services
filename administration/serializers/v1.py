@@ -90,6 +90,14 @@ class ContactFormSerializer(serializers.ModelSerializer):
         return contact_form
 
 
+class YouTubeKeySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = YouTubeKey
+        fields = [
+            'key'
+        ]
+
+
 class UserMetricsSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     username = serializers.ReadOnlyField()

@@ -6,3 +6,4 @@ from administration.models import *
 
 admin.site.register(ContactForm)
 admin.site.register(Campaign)
+admin.site.register(YouTubeKey)

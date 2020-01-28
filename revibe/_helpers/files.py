@@ -174,49 +174,42 @@ def convert_audio_file(obj, *args, **kwargs):
         return None
 
     ext = obj.file.name.split('.')[-1]
-    formats = [
-        'ogg',
-        # 'mp3',
-        # 'wav',
-        # 'aac',
-    ]
-    new_formats = {
+    new_formats = [
         {
-            "format": "m4a",
+            "format": "mp4",
             "encoding": "aac",
-            "bitrate": "128",
+            "bitrate": "128k",
             "filename": "medium",
         },
         {
-            "format": "m4a",
+            "format": "mp4",
             "encoding": "aac",
-            "bitrate":"256",
+            "bitrate":"256k",
             "filename": "high",
         },
         {
-            "format": "m4a",
+            "format": "mp4",
             "encoding": "aac",
-            "bitrate": "96",
+            "bitrate": "96k",
             "filename": "low",
         },
-    }
+    ]
 
     byte_data = obj.file.read()
     byte_format = BytesIO(byte_data)
 
-    # ext = format_lookup.get(ext, ext)
     segment = AudioSegment.from_file(file=byte_format, format=ext)
     logger.info("Created audio segment")
     logger.debug(segment)
 
-    # for f in new_formats:
-    for f in formats:
+    # for f in formats:
+    for f in new_formats:
         output = BytesIO()
-        segment.export(output, format=f)
+        segment.export(output, format=f['format'], codec=f['encoding'], bitrate=f['bitrate'])
 
         value = output.getvalue()
-        # filename = f"{f["filename"]}.{f["format"]}"
-        file_name = f"fuckyeah.{f}"
+        file_name = f"{f['filename']}.{f['format']}"
+        # file_name = f"fuckyeah.{f}"
 
         track = Track.objects.create(is_original=False, song=obj.song)
         track.file.save(file_name, ContentFile(value))

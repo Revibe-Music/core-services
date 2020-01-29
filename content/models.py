@@ -41,13 +41,13 @@ class Image(models.Model):
 
     def __str__(self):
         if self.file_path:
-            return self.file_path
+            return self.url
 
         return "({})".format(self.dimensions)
     
     def __repr__(self):
         if self.file_path:
-            return "<{}: {} ({})".format(self.__class__.__name__, self.file_path, self.dimensions)
+            return "<{}: {} ({})".format(self.__class__.__name__, self.url, self.dimensions)
         else:
             return "<{}: ({})".format(self.__class__.__name__, self.dimensions)
 

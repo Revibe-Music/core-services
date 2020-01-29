@@ -22,3 +22,7 @@ class TooManyObjectsReturnedError(network.ProgramError):
 
 class ObjectAlreadyExists(network.AlreadyReportedError):
     default_detail = "The request object already exists"
+
+
+class NoKeysError(network.BadEnvironmentError):
+    default_detail = "Could not find any valid keys"

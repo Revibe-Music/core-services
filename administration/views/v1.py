@@ -8,6 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from revibe.viewsets import GenericPlatformViewSet
+from revibe._errors.data import NoKeysError
 from revibe._errors.random import ValidationError
 from revibe._helpers import const, responses
 
@@ -52,6 +53,11 @@ class YouTubeKeyViewSet(viewsets.GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         choices = [x for x in self.queryset if x.is_valid]
+        # return error if no keys
+        if len(choices) == 0:
+            raise NoKeysError("Found no available API keys")
+
+        # pick a random one
         choice = random.choice(list(choices))
         
         # check the key if it hasn't been tested in 1 day (time?) or

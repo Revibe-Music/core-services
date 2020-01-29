@@ -178,6 +178,12 @@ def convert_audio_file(obj, *args, **kwargs):
         {
             "format": "mp4",
             "encoding": "aac",
+            "bitrate": "96k",
+            "filename": "low",
+        },
+        {
+            "format": "mp4",
+            "encoding": "aac",
             "bitrate": "128k",
             "filename": "medium",
         },
@@ -186,12 +192,6 @@ def convert_audio_file(obj, *args, **kwargs):
             "encoding": "aac",
             "bitrate":"256k",
             "filename": "high",
-        },
-        {
-            "format": "mp4",
-            "encoding": "aac",
-            "bitrate": "96k",
-            "filename": "low",
         },
     ]
 
@@ -204,8 +204,9 @@ def convert_audio_file(obj, *args, **kwargs):
 
     # for f in formats:
     for f in new_formats:
+        channels = f.get('channels', 2)
         output = BytesIO()
-        segment.export(output, format=f['format'], codec=f['encoding'], bitrate=f['bitrate'])
+        segment.export(output, format=f['format'], codec=f['encoding'], bitrate=f['bitrate'], parameters=["-ac", str(channels)])
 
         value = output.getvalue()
         file_name = f"{f['filename']}.{f['format']}"

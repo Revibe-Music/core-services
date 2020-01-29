@@ -65,8 +65,8 @@ class Image(models.Model):
             if settings.USE_S3:
                 u = settings.MEDIA_URL
             else:
-                u = "fuck it"
-            return f"{u}/{self.file.name}"
+                u = "fuck it/"
+            return f"{u}{self.file.name}"
         elif self.reference:
             return self.reference
         return None
@@ -109,8 +109,8 @@ class Track(models.Model):
             if settings.USE_S3:
                 u = settings.MEDIA_URL
             else:
-                u = "fuck it"
-            return f"{u}/{self.file.name}"
+                u = "fuck it/"
+            return f"{u}{self.file.name}"
         elif self.reference:
             return self.reference
         return None

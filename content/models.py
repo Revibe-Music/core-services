@@ -104,9 +104,13 @@ class Track(models.Model):
     )
 
     @property
-    def file_path(self):
+    def url(self):
         if self.file:
-            return self.file.name
+            if settings.USE_S3:
+                u = settings.MEDIA_URL
+            else:
+                u = "fuck it"
+            return f"{u}/{self.file.name}"
         elif self.reference:
             return self.reference
         return None

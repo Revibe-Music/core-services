@@ -25,7 +25,7 @@ class TrackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Track
         fields = [
-            'file_path',
+            'url',
             'is_original',
         ]
 

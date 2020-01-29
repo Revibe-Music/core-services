@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.images import get_image_dimensions
 
+import gc
 from io import BytesIO, StringIO
 import boto3
 import os
@@ -122,7 +123,16 @@ def resize_image(obj, *args, **kwargs):
         image_obj = Image.objects.create(is_original=False, height=dimension[1], width=dimension[0], **{t:obj.obj})
         image_obj.file.save(file_name, content_file)
         image_obj.save()
-    
+
+        # free memory
+        del content_file
+        del f
+        del s
+        gc.collect()
+
+    del original_image
+    gc.collect()
+
     connection.close()
 
 
@@ -216,6 +226,12 @@ def convert_audio_file(obj, *args, **kwargs):
         track.file.save(file_name, ContentFile(value))
         track.save()
         logger.info(f"File {file_name} has been created.")
+
+        del value
+        gc.collect()
+
+    del segment
+    gc.collect()
 
     connection.close()
 

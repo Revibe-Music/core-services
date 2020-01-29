@@ -223,9 +223,9 @@ class UserArtistSerializer(serializers.ModelSerializer):
             # read-only
             'artist_id',
             'artist_uri',
+            'images',
             'artist_profile',
             'user',
-            'images',
 
             # write only
             'image',

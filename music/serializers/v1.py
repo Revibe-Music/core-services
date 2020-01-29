@@ -68,6 +68,7 @@ class LibrarySongSerializer(serializers.ModelSerializer):
         fields = [
             'library',
             'song',
+            'date_saved',
             # write-only fields
             'song_id',
         ]
@@ -127,7 +128,7 @@ class LibrarySongSerializer(serializers.ModelSerializer):
 class PlaylistSongSerializer(serializers.ModelSerializer):
     # read-only fields
     playlist = serializers.ReadOnlyField(source='playlist.id')
-    song = serializers.ReadOnlyField(source='song.id')
+    song = SongSerializer(read_only=True)
     # write-only fields
     song_id = serializers.CharField(write_only=True)
     playlist_id = serializers.IntegerField(write_only=True)
@@ -136,6 +137,7 @@ class PlaylistSongSerializer(serializers.ModelSerializer):
         fields = [
             'playlist',
             'song',
+            'date_saved',
             # write-only fields
             'song_id',
             'playlist_id',

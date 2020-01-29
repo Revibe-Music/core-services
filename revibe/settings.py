@@ -475,16 +475,25 @@ JET_SIDE_MENU_ITEMS = [ # A list of application or custom item dicts
             {"name": 'content.songcontributor'}
         ]
     },
-    # {
-    #     "app_label": "content", 
-    #     "items": [
-    #         {"name": "artist"},
-    #         {"name": "album"},
-    #         {"name": "song"},
-    #         {"name": "albumcontributor"},
-    #         {"name": "songcontributor"}
-    #     ]
-    # },
+    {
+        "app_label": _("content"), 
+        "items": [
+            {"name": "artist"},
+            {"name": "album"},
+            {"name": "image"},
+            {"name": "song"},
+            {"name": "track"},
+            {"name": "albumcontributor"},
+            {"name": "songcontributor"}
+        ]
+    },
+    {
+        "label": _("Files"),
+        "items": [
+            {"name":"content.image"},
+            {"name": "content.track"},
+        ]
+    },
     {
         "label": _("External Links"), # TODO: make these links work
         "items": [

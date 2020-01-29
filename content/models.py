@@ -40,7 +40,7 @@ class Image(models.Model):
     )
 
     def __str__(self):
-        if self.file_path:
+        if self.url:
             return self.url
 
         return "({})".format(self.dimensions)

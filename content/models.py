@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.timezone import now
 import uuid
@@ -5,6 +6,7 @@ import uuid
 from content import model_exts as ext
 from content.managers import *
 
+# -----------------------------------------------------------------------------
 
 class Image(models.Model):
     artist = models.ForeignKey(
@@ -56,11 +58,15 @@ class Image(models.Model):
         elif self.album:
             return self.album
         return None
-    
+
     @property
-    def file_path(self):
+    def url(self):
         if self.file:
-            return self.file.name
+            if settings.USE_S3:
+                u = settings.MEDIA_URL
+            else:
+                u = "fuck it"
+            return f"{u}/{self.file.name}"
         elif self.reference:
             return self.reference
         return None

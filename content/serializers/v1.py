@@ -14,7 +14,7 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = [
-            'file_path',
+            'url',
             'height',
             'width',
             'is_original',

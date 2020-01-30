@@ -5,35 +5,57 @@ from content.models import *
 
 # -----------------------------------------------------------------------------
 
-# admin actions
+# Register your models here.
 
-# Admin Models
+@admin.register(Artist)
 class ArtistAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('name','platform',)
+    list_display = ('__str__','platform','artist_user')
     list_filter = ('platform',)
 
+    empty_value_display = '-empty-'
 
+
+@admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('name','platform','uploaded_by')
+    list_display = ('__str__','platform','uploaded_by')
     list_filter = ('platform','uploaded_by')
+    # customize detail display
+    # fields = ()
     # customize actions
     actions = [perform_delete, remove_delete]
+    
+    empty_value_display = '-empty-'
 
 
+@admin.register(Song)
 class SongAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('title','platform', 'album','uploaded_by')
+    list_display = ('__str__','platform', 'album','uploaded_by')
     list_filter = ('platform','album','uploaded_by')
     # customize actions
     actions = [perform_delete, remove_delete]
 
-# Register your models here.
-admin.site.register(Artist, ArtistAdmin)
-admin.site.register(Album, AlbumAdmin)
-admin.site.register(Song, SongAdmin)
-admin.site.register(AlbumContributor)
-admin.site.register(SongContributor)
-admin.site.register(Image)
-admin.site.register(Track)
+    empty_value_display = '-empty-'
+
+
+@admin.register(AlbumContributor)
+class AlbumContributorAdmin(admin.ModelAdmin):
+    empty_value_display = '-empty-'
+
+
+@admin.register(SongContributor)
+class SongContributorAdmin(admin.ModelAdmin):
+    empty_value_display = '-empty-'
+
+
+@admin.register(Image)
+class ImageAdmin(admin.ModelAdmin):
+    empty_value_display = '-empty-'
+
+
+@admin.register(Track)
+class TrackAdmin(admin.ModelAdmin):
+    empty_value_display = '-empty-'
+

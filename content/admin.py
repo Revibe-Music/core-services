@@ -15,6 +15,8 @@ class ArtistAdmin(admin.ModelAdmin):
         'platform',
         ('date_joined', admin.DateFieldListFilter),
     )
+    # customize search
+    search_fields = ['name', 'platform', 'artist_user__username']
 
     # other stuff
     empty_value_display = '-empty-'
@@ -25,8 +27,8 @@ class AlbumAdmin(admin.ModelAdmin):
     # customize list display
     list_display = ('__str__','platform','uploaded_by')
     list_filter = ('platform','uploaded_by',)
-    # customize detail display
-    # fields = ()
+    # customize search
+    search_fields = ['name', 'platform', 'uploaded_by__name']
     # customize actions
     actions = [perform_delete, remove_delete]
 

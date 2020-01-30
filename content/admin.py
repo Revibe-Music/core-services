@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from content.admin_ext import perform_delete, remove_delete
+from content.admin_ext import approve_contribution, remove_delete, perform_delete
 from content.models import *
 
 # -----------------------------------------------------------------------------
@@ -42,17 +42,29 @@ class SongAdmin(admin.ModelAdmin):
 
 @admin.register(AlbumContributor)
 class AlbumContributorAdmin(admin.ModelAdmin):
+    # customize actions
+    actions = [approve_contribution,]
+
     empty_value_display = '-empty-'
 
 
 @admin.register(SongContributor)
 class SongContributorAdmin(admin.ModelAdmin):
+    # customize actions
+    actions = [approve_contribution]
+
     empty_value_display = '-empty-'
 
 
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
+    # customize list display
+    list_display = ('__str__', 'get_object')
+
     empty_value_display = '-empty-'
+
+    def get_object(self, o):
+        return f"{o.obj.__class__.__name__} - {o.obj}"
 
 
 @admin.register(Track)

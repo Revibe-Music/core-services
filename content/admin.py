@@ -59,15 +59,21 @@ class SongContributorAdmin(admin.ModelAdmin):
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__', 'get_object')
+    list_display = ('__str__', 'get_object2')
 
     empty_value_display = '-empty-'
 
-    def get_object(self, o):
+    def get_object2(self, o):
         return f"{o.obj.__class__.__name__} - {o.obj}"
 
 
 @admin.register(Track)
 class TrackAdmin(admin.ModelAdmin):
+    # customize list display
+    list_display = ('__str__', 'get_object2')
+
     empty_value_display = '-empty-'
+
+    def get_object2(self, o):
+        return f"{o.song.__class__.__name__} - {o.song}"
 

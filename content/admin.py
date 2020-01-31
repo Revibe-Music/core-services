@@ -29,7 +29,7 @@ class ArtistAdmin(admin.ModelAdmin):
 @admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__','platform','uploaded_by', '_display_status', '_deleted_status')
+    list_display = ('__str__','platform','uploaded_by', '_display_status', '_deletion_status')
     list_filter = ( # reverse of display order
         ('is_deleted', admin.BooleanFieldListFilter),
         ('is_displayed', admin.BooleanFieldListFilter),
@@ -46,7 +46,7 @@ class AlbumAdmin(admin.ModelAdmin):
     # other stuff
     empty_value_display = '-empty-'
 
-    def _deleted_status(self, obj):
+    def _deletion_status(self, obj):
         return check_deletion(obj)
     
     def _display_status(self, obj):
@@ -56,15 +56,26 @@ class AlbumAdmin(admin.ModelAdmin):
 @admin.register(Song)
 class SongAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__','platform', 'album','uploaded_by', '_display_status', '_deleted_status')
-    list_filter = ('platform','album','uploaded_by',)
+    list_display = ('__str__','platform', 'album','uploaded_by', '_display_status', '_deletion_status')
+    list_filter = (
+        ('is_deleted', admin.BooleanFieldListFilter),
+        ('is_displayed', admin.BooleanFieldListFilter),
+        ('album', admin.RelatedOnlyFieldListFilter),
+        ('uploaded_by', admin.RelatedOnlyFieldListFilter),
+        'genre',
+        'platform',
+    )
+
+    # customize search
+    search_fields = ['title', 'album__name', 'uploaded_by__name',]
+
     # customize actions
     actions = [perform_delete, remove_delete]
 
     # other stuff
     empty_value_display = '-empty-'
 
-    def _deleted_status(self, obj):
+    def _deletion_status(self, obj):
         return check_deletion(obj)
     
     def _display_status(self, obj):

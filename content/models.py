@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 import uuid
 
 from content import model_exts as ext
@@ -159,8 +160,14 @@ class Album(models.Model):
     uploaded_date = models.DateField(auto_now_add=True, null=True, editable=False)
     last_changed = models.DateField(auto_now=True, null=True)
     date_published = models.DateField(null=True, blank=True, default=now)
-    is_displayed = models.BooleanField(null=False, blank=True, default=True)
-    is_deleted = models.BooleanField(null=False, blank=True, default=False)
+    is_displayed = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("display status")
+    )
+    is_deleted = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("deletion status")
+    )
 
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="album_uploaded_by")
     contributors = models.ManyToManyField(Artist, through='AlbumContributor')
@@ -216,8 +223,14 @@ class Song(models.Model):
     is_explicit = models.BooleanField(null=False, blank=True, default=False)
     # tracks = one-to-many with 'Track'
 
-    is_displayed = models.BooleanField(null=False, blank=True, default=True)
-    is_deleted = models.BooleanField(null=False, blank=True, default=False)
+    is_displayed = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("display status")
+    )
+    is_deleted = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("deletion status")
+    )
     last_changed = models.DateField(auto_now=True, null=True, blank=True)
     uploaded_date = models.DateField(auto_now_add=True, null=True, blank=True, editable=False)
 

@@ -89,8 +89,9 @@ side_menu = [ # A list of application or custom item dicts
     {
         "label": _("External Links"), # TODO: make these links work
         "items": [
-            {"label": _("API Docs"), "url": _("https://documenter.getpostman.com/view/6267328/SWEB1ah6?version=latest")},
-            {"label": _("Artist Portal"), "url": _("https://artist.revibe.tech")},
+            {"label": _("API Docs"), "url": "https://documenter.getpostman.com/view/6267328/SWEB1ah6?version=latest"},
+            {"label": _("Website"), "url": "https://revibe.tech"},
+            {"label": _("Artist Portal"), "url": "https://artist.revibe.tech"},
         ]
     }
 ]

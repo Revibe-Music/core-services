@@ -38,7 +38,8 @@ class Image(models.Model):
 
     is_original = models.BooleanField(
         help_text="Shows if the uploaded file is the original file uploaded by the user",
-        null=False, blank=True, default=True
+        null=False, blank=True, default=True,
+        verbose_name="original file status"
     )
 
     def __str__(self):
@@ -107,7 +108,8 @@ class Track(models.Model):
 
     is_original = models.BooleanField(
         help_text="Shows if the uploaded file is the original file uploaded by the user",
-        null=False, blank=True, default=True
+        null=False, blank=True, default=True,
+        verbose_name="original file status"
     )
 
     def __str__(self):

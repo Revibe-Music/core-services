@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils.html import format_html
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 import uuid
@@ -72,6 +73,14 @@ class Image(models.Model):
             return self.reference
         return None
     
+    def _link_url(self):
+        return format_html(
+            "<a href={} target='_blank'>{}</a>",
+            self.url,
+            "Go to image"
+        )
+    _link_url.short_description = "url"
+
     @property
     def dimensions(self):
         return "{}x{}".format(self.width,self.height)
@@ -104,6 +113,12 @@ class Track(models.Model):
         null=False, blank=True, default=True
     )
 
+    def __str__(self):
+        if self.reference != None:
+            return self.reference
+        else:
+            return self.file.name
+
     @property
     def url(self):
         if self.file:
@@ -116,11 +131,13 @@ class Track(models.Model):
             return self.reference
         return None
 
-    def __str__(self):
-        if self.reference != None:
-            return self.reference
-        else:
-            return self.file.name
+    def _link_url(self):
+        return format_html(
+            "<a href={} target='_blank'>{}</a>",
+            self.url,
+            "Go to track"
+        )
+    _link_url.short_description = "url"
 
     class Meta:
         verbose_name = "track"

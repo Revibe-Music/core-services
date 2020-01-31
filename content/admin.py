@@ -129,7 +129,7 @@ class SongContributorAdmin(admin.ModelAdmin):
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__', '_object', 'dimensions')
+    list_display = ('__str__', '_object', 'dimensions', '_link_url')
     list_filter = (
         ('is_original', admin.BooleanFieldListFilter),
     )
@@ -148,10 +148,13 @@ class ImageAdmin(admin.ModelAdmin):
 @admin.register(Track)
 class TrackAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__', 'song',)
+    list_display = ('__str__', 'song', '_link_url')
     list_filter = (
         ('is_original', admin.BooleanFieldListFilter),
     )
+
+    # customize search
+    search_fields = ['song__title', 'song__uploaded_by']
 
     # other stuff
     empty_value_display = '-empty-'

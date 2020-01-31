@@ -42,10 +42,7 @@ class Image(models.Model):
     )
 
     def __str__(self):
-        if self.url:
-            return self.url
-
-        return "({})".format(self.dimensions)
+        return f"{self.obj.name} ({self.dimensions})"
     
     def __repr__(self):
         if self.file_path:
@@ -114,10 +111,8 @@ class Track(models.Model):
     )
 
     def __str__(self):
-        if self.reference != None:
-            return self.reference
-        else:
-            return self.file.name
+        ext = self.url.split('/')[-1]
+        return f"{self.song.title} ({ext})"
 
     @property
     def url(self):

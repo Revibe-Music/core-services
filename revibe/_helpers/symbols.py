@@ -1,0 +1,2 @@
+CHECK_MARK = "\u2714"
+CROSS_MARK = "\u274C"

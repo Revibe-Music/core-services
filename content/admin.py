@@ -129,16 +129,20 @@ class SongContributorAdmin(admin.ModelAdmin):
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__', 'object', 'width', 'height')
+    list_display = ('__str__', '_object', 'dimensions')
     list_filter = (
         ('is_original', admin.BooleanFieldListFilter),
     )
 
+    # customize search
+    search_fields = ['album__name', 'artist__name']
+
     # other stuff
     empty_value_display = '-empty-'
 
-    def object(self, o):
+    def _object(self, o):
         return f"{o.obj.__class__.__name__} - {o.obj}"
+    _object.short_description = "related object"
 
 
 @admin.register(Track)

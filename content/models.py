@@ -196,7 +196,10 @@ class AlbumContributor(models.Model):
 
     date_added = models.DateField(auto_now_add=True, null=True, editable=False)
     last_changed = models.DateField(auto_now=True, null=True)
-    primary_artist = models.BooleanField(null=False, blank=True, default=False)
+    primary_artist = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name="primary artist status"
+    )
 
     objects = models.Manager()
     hidden_objects = HiddenAlbumContributorManager()
@@ -262,7 +265,10 @@ class SongContributor(models.Model):
 
     date_added = models.DateField(auto_now_add=True, null=True, editable=False)
     last_changed = models.DateField(auto_now=True, null=True)
-    primary_artist = models.BooleanField(null=False, blank=True, default=False)
+    primary_artist = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name="primary artist status"
+    )
 
     objects = models.Manager()
     hidden_objects = HiddenSongContributorManager()

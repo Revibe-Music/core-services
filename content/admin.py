@@ -87,12 +87,16 @@ class AlbumContributorAdmin(admin.ModelAdmin):
     # customize list display
     list_display = ('__str__','album', 'artist', 'contribution_type')
     list_filter = (
-        ('album__uploaded_by', admin.RelatedOnlyFieldListFilter),
-        ('album', admin.RelatedOnlyFieldListFilter),
-        ('artist', admin.RelatedFieldListFilter),
-        'contribution_type',
         ('primary_artist', admin.BooleanFieldListFilter),
+        ('artist', admin.RelatedFieldListFilter),
+        ('album', admin.RelatedOnlyFieldListFilter),
+        ('album__uploaded_by', admin.RelatedOnlyFieldListFilter),
+        'contribution_type',
     )
+
+    # customize search
+    search_fields = ['album__name', 'album__uploaded_by__name','artist__name']
+
     # customize actions
     actions = [approve_contribution,]
 
@@ -105,12 +109,16 @@ class SongContributorAdmin(admin.ModelAdmin):
     # customize list display
     list_display = ('__str__', 'song', 'artist', 'contribution_type')
     list_filter = (
-        ('song__uploaded_by', admin.RelatedOnlyFieldListFilter),
-        ('song', admin.RelatedOnlyFieldListFilter),
-        ('artist', admin.RelatedFieldListFilter),
-        'contribution_type',
         ('primary_artist', admin.BooleanFieldListFilter),
+        ('artist', admin.RelatedFieldListFilter),
+        ('song', admin.RelatedOnlyFieldListFilter),
+        ('song__uploaded_by', admin.RelatedOnlyFieldListFilter),
+        'contribution_type',
     )
+
+    # customize search
+    search_fields = ['song__title', 'song__uploaded_by__name', 'artist__name']
+
     # customize actions
     actions = [approve_contribution]
 

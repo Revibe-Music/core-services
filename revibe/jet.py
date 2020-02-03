@@ -72,9 +72,19 @@ side_menu = [ # A list of application or custom item dicts
         ]
     },
     {
+        "label": _("Music"),
+        "items": [
+            {"name": 'music.playlist'},
+            {"name": 'music.library'},
+        ]
+    },
+    {
         "label": _("Administration"),
         "items": [
             {"name": 'administration.contactform'},
+            {"name": 'administration.campaign'},
+            {"name": 'administration.youtubekey'},
+            {"name": 'oauth2_provider.accesstoken'}
         ]
     },
     {

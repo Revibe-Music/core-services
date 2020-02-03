@@ -6,6 +6,10 @@ class Library(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
     songs = models.ManyToManyField('content.song', through='LibrarySong', related_name='library_songs')
     
+    class Meta:
+        verbose_name = "library"
+        verbose_name_plural = "libraries"
+
     def __str__(self):
         return "{} on {}".format(self.user, self.platform)
     

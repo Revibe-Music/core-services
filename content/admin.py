@@ -82,8 +82,10 @@ class SongAdmin(admin.ModelAdmin):
         return check_display(obj)
     
     def get_original_track(self, obj):
-        t = obj.tracks.filter(is_original=True)[0]
-        return t._link_url()
+        ts = obj.tracks.filter(is_original=True)
+        if len(ts) > 0:
+            return ts[0]._link_url()
+        return None
     get_original_track.short_description = 'original track'
 
 

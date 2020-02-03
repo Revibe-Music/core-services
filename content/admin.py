@@ -56,7 +56,7 @@ class AlbumAdmin(admin.ModelAdmin):
 @admin.register(Song)
 class SongAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__','platform', 'album','uploaded_by', '_display_status', '_deletion_status')
+    list_display = ('__str__','platform', 'album','uploaded_by', '_display_status', '_deletion_status', 'get_original_track')
     list_filter = (
         ('is_deleted', admin.BooleanFieldListFilter),
         ('is_displayed', admin.BooleanFieldListFilter),
@@ -80,6 +80,11 @@ class SongAdmin(admin.ModelAdmin):
     
     def _display_status(self, obj):
         return check_display(obj)
+    
+    def get_original_track(self, obj):
+        t = obj.tracks.filter(is_original=True)[0]
+        return t._link_url()
+    get_original_track.short_description = 'original track'
 
 
 @admin.register(AlbumContributor)

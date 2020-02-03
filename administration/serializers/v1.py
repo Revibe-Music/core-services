@@ -124,7 +124,6 @@ class UserMetricsSerializer(serializers.ModelSerializer):
 class ArtistMetricsSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     uri = serializers.ReadOnlyField()
-    ext = serializers.SerializerMethodField('image_ext', read_only=True)
     name = serializers.ReadOnlyField()
     date_joined = serializers.ReadOnlyField()
     user_id = serializers.SerializerMethodField('get_user_id', read_only=True)
@@ -134,18 +133,11 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'uri',
-            'ext',
             'name',
             'date_joined',
             'user_id',
         ]
-    
-    def image_ext(self, obj):
-        if obj.image:
-            return obj.image.name.split('.')[-1]
-        else:
-            return None
-    
+
     def get_user_id(self, obj):
         if hasattr(obj, 'artist_user'):
             return obj.artist_user.id
@@ -155,7 +147,6 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
 
 class AlbumMetricsSerializer(serializers.ModelSerializer):
 
-    ext = serializers.SerializerMethodField('image_ext', read_only=True)
     artist_id = serializers.SerializerMethodField('get_artist_id', read_only=True)
 
     class Meta:
@@ -163,7 +154,6 @@ class AlbumMetricsSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'uri',
-            'ext',
             'name',
             'type',
             'uploaded_date',
@@ -173,12 +163,6 @@ class AlbumMetricsSerializer(serializers.ModelSerializer):
             'is_deleted',
             'artist_id',
         ]
-
-    def image_ext(self, obj):
-        if obj.image:
-            return obj.image.name.split('.')[-1]
-        else:
-            return None
     
     def get_artist_id(self, obj):
         if hasattr(obj, 'uploaded_by') and (obj.uploaded_by != None):
@@ -189,7 +173,6 @@ class AlbumMetricsSerializer(serializers.ModelSerializer):
 
 class SongMetricsSerializer(serializers.ModelSerializer):
 
-    ext = serializers.SerializerMethodField('get_ext', read_only=True)
     album_id = serializers.ReadOnlyField(source='album.id')
     artist_id = serializers.ReadOnlyField(source='uploaded_by.id')
 
@@ -198,7 +181,6 @@ class SongMetricsSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'uri',
-            'ext',
             'title',
             'genre',
             'duration',
@@ -212,12 +194,6 @@ class SongMetricsSerializer(serializers.ModelSerializer):
             'album_id',
             'artist_id',
         ]
-    
-    def get_ext(self, obj):
-        if hasattr(obj, 'file') and (obj.file != None):
-            return obj.file.name.split('.')[-1]
-        else:
-            return None
 
 
 class ContactFormMetricsSerializer(serializers.ModelSerializer):

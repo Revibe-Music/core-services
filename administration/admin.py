@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from administration.admin_ext import test_api_key
 from administration.models import *
 
 # -----------------------------------------------------------------------------
@@ -29,6 +30,11 @@ class YoutubeKeyAdmin(admin.ModelAdmin):
     sortable_str.short_description = 'API Key'
     sortable_str.admin_order_field = 'key'
 
+    # customize search
+    search_fields = ['key']
+
+    # actions
+    actions = [test_api_key]
 
 
 # general admin information and changes

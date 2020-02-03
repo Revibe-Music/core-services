@@ -9,7 +9,8 @@ from administration.models import *
 
 @admin.register(ContactForm)
 class ContactFormAdmin(admin.ModelAdmin):
-    pass
+    # customize list display
+    list_display = ('__str__', 'assigned_to')
 
 
 @admin.register(Campaign)

@@ -18,20 +18,28 @@ class ContactForm(models.Model):
     message = models.TextField("Message", null=False, blank=False)
 
     # administrative fields
-    resolved = models.BooleanField("Indicates if the request/issue has been resolved or not", null=False, blank=False, default=False)
-    assigned_to = models.CharField("Revibe staff member it's assigned to", max_length=255, null=True, blank=True)
-    date_created = models.DateTimeField("When the form was submitted", auto_now_add=True, null=True)
+    resolved = models.BooleanField(
+        help_text=_("Indicates if the request/issue has been resolved or not"),
+        null=False, blank=False, default=False
+    )
+    assigned_to = models.CharField(
+        help_text=_("Revibe staff member it's assigned to"),
+        max_length=255,
+        null=True, blank=True,
+        verbose_name=_("staff member")
+    )
+    date_created = models.DateTimeField(
+        help_text=_("When the form was submitted"),
+        auto_now_add=True, null=True
+    )
     last_changed = models.DateTimeField("Last time the form was edited", auto_now=True, null=True)
 
     def __str__(self):
-        if self.resolved:
-            status = "RESOLVED"
-        elif self.assigned_to == None:
-            status = "UNASSIGNED"
-        else:
-            status = self.assigned_to
-        string = "{status} - {id}".format(status=status, id=self.id)
-        return string
+        if self.subject:
+            return self.subject + " - " + str(self.id)
+        elif self.message:
+            return f"{self.message[:50]}{'...' if len(self.message) > 25 else ''} - {self.id}"
+        return f"Form {self.id}"
 
 
 class Campaign(models.Model):

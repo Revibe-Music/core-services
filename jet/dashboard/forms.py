@@ -80,7 +80,10 @@ class AddUserDashboardModuleForm(forms.ModelForm):
                 if data['type'] == 'children':
                     module = index_dashboard.children[data['module']]
                 elif data['type'] == 'available_children':
-                    module = index_dashboard.available_children[data['module']]()
+                    try:
+                        module = index_dashboard.available_children[data['module']]()
+                    except TypeError:
+                        module = index_dashboard.available_children[data['module']]
                 else:
                     raise ValidationError('error')
 

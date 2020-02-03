@@ -37,3 +37,6 @@ FACEBOOK_IMAGE = "https://revibe-media.s3.us-east-2.amazonaws.com/email_images/f
 YOUTUBE_IMAGE = "https://revibe-media.s3.us-east-2.amazonaws.com/email_images/youtube2x.png"
 INSTAGRAM_IMAGE = "https://revibe-media.s3.us-east-2.amazonaws.com/email_images/instagram2x.png"
 TWITTER_IMAGE = "https://revibe-media.s3.us-east-2.amazonaws.com/email_images/twitter2x.png"
+
+# other links
+API_DOCS_LINK = 'https://documenter.getpostman.com/view/6267328/SWEB1ah6?version=latest'

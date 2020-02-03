@@ -5,7 +5,7 @@
         <ul>
             {% for link in module.children %}
                 <li>
-                    <a href="{{ link.url }}">{% if link.external %}<span class="icon-open-external"></span> {% endif %}{{ link.title }}</a>
+                    <a href="{{ link.url }}" {% if link.external%} target='_blank' {%endif%}>{% if link.external %}<span class="icon-open-external"></span> {% endif %}{{ link.title }}</a>
                 </li>
             {% endfor %}
         </ul>
@@ -14,7 +14,7 @@
             <ul class="inline">
                 {% for link in module.children %}
                     <li>
-                        <a href="{{ link.url }}" class="nowrap">{% if link.external %}<span class="icon-open-external"></span> {% endif %}{{ link.title }}</a>
+                        <a href="{{ link.url }}" class="nowrap" {% if link.external%} target='_blank' {%endif%}>{% if link.external %}<span class="icon-open-external"></span> {% endif %}{{ link.title }}</a>
                     </li>
                 {% endfor %}
             </ul>

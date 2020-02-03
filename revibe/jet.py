@@ -52,38 +52,29 @@ side_menu = [ # A list of application or custom item dicts
         'items': [
             {"name": 'accounts.customuser', "label": _("Users")},
             {"name": 'accounts.profile'},
+            {"name": 'auth.group'},
+            {"name": 'auth.permissions'},
+            {"name": 'content.artist'},
+            {"name": 'accounts.artistprofile'},
             {"name": "accounts.social"}
         ]
     },
     {
-        "label": _("Artists and Content"),
+        "label": _("Content"),
         "items": [
             {"name": 'content.artist'},
-            {"name": 'accounts.artistprofile'},
-            {"name": 'accounts.customuser', "label": _("Users")},
             {"name": 'content.album'},
             {"name": 'content.song'},
             {"name": 'content.albumcontributor'},
-            {"name": 'content.songcontributor'}
+            {"name": 'content.songcontributor'},
+            {"name": "content.image"},
+            {"name": "content.track"},
         ]
     },
-    # {
-    #     "app_label": _("content"), 
-    #     "items": [
-    #         {"name": "artist"},
-    #         {"name": "album"},
-    #         {"name": "image"},
-    #         {"name": "song"},
-    #         {"name": "track"},
-    #         {"name": "albumcontributor"},
-    #         {"name": "songcontributor"}
-    #     ]
-    # },
     {
-        "label": _("Files"),
+        "label": _("Administration"),
         "items": [
-            {"name":"content.image"},
-            {"name": "content.track"},
+            {"name": 'administration.contactform'},
         ]
     },
     {

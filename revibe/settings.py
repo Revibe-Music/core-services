@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # django jet admin portal
+    # 'jet.dashboard',
     'jet',
 
     'django.contrib.admin',
@@ -419,3 +420,5 @@ ACCOUNT_EMAIL_REQUIRED = False
 JET_DEFAULT_THEME = 'default'
 JET_THEMES = jet.themes
 JET_SIDE_MENU_ITEMS = jet.side_menu
+
+JET_INDEX_DASHBOARD = 'revibe.dashboard.CustomIndexDashboard'

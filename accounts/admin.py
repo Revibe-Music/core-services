@@ -8,11 +8,15 @@ from .models import *
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__', 'date_joined', '_full_name')
+    list_display = ('__str__', '_full_name', 'date_joined')
     list_filter = (
         ('date_joined', admin.DateFieldListFilter),
         ('is_staff', admin.BooleanFieldListFilter),
     )
+
+    # customize search
+    search_fields = ['username', 'first_name', 'last_name']
+
     # customize actions
     # actions = [change_password]
 
@@ -23,7 +27,15 @@ class CustomUserAdmin(admin.ModelAdmin):
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__', 'user')
+    list_display = ('__str__', 'email', 'user')
+    list_filter = (
+        ('user__is_staff', admin.BooleanFieldListFilter),
+        ('campaign', admin.RelatedOnlyFieldListFilter),
+        ('allow_email_marketing', admin.BooleanFieldListFilter),
+    )
+
+    # customize search
+    search_fields = ['user__username', 'user__first_name', 'user__last_name', 'email']
 
 
 @admin.register(Social)
@@ -33,5 +45,9 @@ class SocialAdmin(admin.ModelAdmin):
 
 @admin.register(ArtistProfile)
 class ArtistProfileAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'artist',)
+    list_display = ('__str__', 'artist', 'email', 'get_artist_username')
+
+    def get_artist_username(self, obj):
+        return obj.artist.artist_user.username
+    get_artist_username.short_description = 'username'
 

@@ -52,8 +52,17 @@ class YouTubeKey(models.Model):
         max_length=255,
         null=False, blank=False, unique=True
     )
+    point_budget = models.IntegerField(
+        help_text=_("Number of points this API key is allotted"),
+        null=False, blank=True, default=0
+    )
+    number_of_users = models.IntegerField(
+        help_text=_("Estimated number of users using this key"),
+        null=False, blank=True, default=0
+    )
 
     last_tested = models.DateTimeField(
+        help_text=_("Time the key was last tested against the YouTube servers"),
         null=False, blank=True, default=timezone.now
     )
     worked_on_last_test = models.BooleanField(
@@ -70,8 +79,7 @@ class YouTubeKey(models.Model):
     )
 
     def __str__(self):
-        star = "" if self.worked_on_last_test else "*"
-        return f"{star}{self.key}{star}"
+        return str(self.key)
     
     def test_key(self):
         """
@@ -91,7 +99,7 @@ class YouTubeKey(models.Model):
             return True
         else:
             return False
-    
+
     @property
     def is_valid(self):
         """
@@ -101,15 +109,9 @@ class YouTubeKey(models.Model):
             return False
         else:
             return True
-    
-    @property
-    def needs_to_be_tested(self):
-        """
-        property that states if the key needs to be checked for validity
-        """
-        return None
 
     class Meta:
         verbose_name = 'YouTube Key'
         verbose_name_plural = 'YouTube Keys'
+        ordering = ['-point_budget']
 

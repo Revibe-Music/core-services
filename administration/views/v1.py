@@ -52,26 +52,31 @@ class YouTubeKeyViewSet(viewsets.GenericViewSet):
     }
 
     def list(self, request, *args, **kwargs):
-        choices = [x for x in self.queryset if x.is_valid]
-        # return error if no keys
+        # get the key with the most points
+        choices = YouTubeKey.objects.all()
         if len(choices) == 0:
-            raise NoKeysError("Found no available API keys")
-
-        # pick a random one
-        choice = random.choice(list(choices))
+            raise NoKeysError()
         
-        # check the key if it hasn't been tested in 1 day (time?) or
-        # if it failed it's last test
-        # if not choice.needs_to_be_tested:
-        if choice.worked_on_last_test and choice.recently_tested:
-            # return the key because it's valid
-            serializer = self.serializer_class(instance=choice)
-            return responses.OK(serializer=serializer)
-        else:
-            # check YouTube to see if the key is valid
-            return responses.NOT_IMPLEMENTED()
+        # loop through the keys in order to see if they are valid
+        i = 0
+        while i < len(choices):
+            choice = choices[i]
+            
+            if not choice.is_valid:
+                i += 1
+                continue
+            
+            if not choice.recently_tested:
+                choice.test_key()
+                # currently this doesn't really do anything
+            
+            # return the key, and add to the number of users
+            choice.number_of_users += 1
+            choice.save()
+            return responses.OK(data={'key': str(choice.key)})
+        
+        raise NoKeysError("Could identify any valid keys")
 
-            # send request to youtube...
 
 
 class CompanyViewSet(GenericPlatformViewSet):

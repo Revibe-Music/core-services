@@ -177,7 +177,7 @@ def add_track_to_song(obj, track, *args, **kwargs):
 
 def convert_audio_file(obj, *args, **kwargs):
     """
-    Only run this when running in the cloud due to the use of AWS resources
+    Takes an input audio file and converts it to 3 different quality AAc files.
     """
     # pass
     if not obj.file:

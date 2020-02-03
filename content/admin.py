@@ -4,7 +4,9 @@ from django.utils.html import format_html
 from revibe.admin import check_deletion, check_display
 from revibe._helpers.symbols import CROSS_MARK, CHECK_MARK
 
-from content.admin_ext import approve_contribution, remove_delete, perform_delete
+from content.admin_ext import (
+    approve_contribution, remove_delete, perform_delete, reprocess_song
+)
 from content.models import *
 
 # -----------------------------------------------------------------------------
@@ -70,7 +72,7 @@ class SongAdmin(admin.ModelAdmin):
     search_fields = ['title', 'album__name', 'uploaded_by__name',]
 
     # customize actions
-    actions = [perform_delete, remove_delete]
+    actions = [perform_delete, remove_delete, reprocess_song]
 
     # other stuff
     empty_value_display = '-empty-'

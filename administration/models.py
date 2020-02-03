@@ -40,6 +40,34 @@ class Campaign(models.Model):
     budget = models.IntegerField(null=False, blank=False)
     spent = models.IntegerField(null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+    
+    def create_url(self):
+        return f"https://artist.revibe.tech/account/register?cid={self.uri}"
+    create_url.short_description = 'Custom URL'
+    create_url.admin_sort_field = 'uri'
+
+    def _budget(self):
+        """
+        Formats the 'budget' column as a currency
+        """
+        if self.budget != None:
+            return '${:,.2f}'.format(self.budget)
+        return None
+    _budget.short_description = "budget"
+    _budget.admin_sort_field = "budget"
+
+    def _spent(self):
+        """
+        Formats the 'spent' column as a currency
+        """
+        if self.spent != None:
+            return '${:,.2f}'.format(self.spent)
+        return None
+    _spent.short_description = "budget"
+    _spent.admin_sort_field = "budget"
+
 
 class YouTubeKey(models.Model):
     # create a class variable that keeps the required seconds to recheck the api key

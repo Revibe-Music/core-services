@@ -7,10 +7,15 @@ from administration.models import *
 
 # Register your models here.
 
-admin.site.register(ContactForm)
+@admin.register(ContactForm)
+class ContactFormAdmin(admin.ModelAdmin):
+    pass
 
 
-admin.site.register(Campaign)
+@admin.register(Campaign)
+class CampaingAdmin(admin.ModelAdmin):
+    # customize list display
+    list_display = ('__str__', '_budget', '_spent', 'create_url',)
 
 
 @admin.register(YouTubeKey)

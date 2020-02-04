@@ -72,10 +72,13 @@ INSTALLED_APPS = [
 
     # my apps
     'accounts',
-    'content',
-    'music',
-    'metrics',
     'administration',
+    'content',
+    'distribution',
+    'marketplace',
+    'merch',
+    'metrics',
+    'music',
 
     # installed apps
     'rest_framework',

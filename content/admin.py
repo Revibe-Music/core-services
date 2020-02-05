@@ -16,7 +16,7 @@ from content.models import *
 @admin.register(Artist)
 class ArtistAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__','platform','artist_user')
+    list_display = ('sortable_str','platform','artist_user')
     list_filter = (
         'platform',
         ('date_joined', admin.DateFieldListFilter),
@@ -26,6 +26,11 @@ class ArtistAdmin(admin.ModelAdmin):
 
     # other stuff
     empty_value_display = '-empty-'
+
+    def sortable_str(self, obj):
+        return obj.__str__()
+    sortable_str.short_description = 'artist'
+    sortable_str.admin_order_field = 'name'
 
 
 @admin.register(Album)

@@ -22,9 +22,12 @@ class ContactForm(models.Model):
         help_text=_("Indicates if the request/issue has been resolved or not"),
         null=False, blank=False, default=False
     )
-    assigned_to = models.CharField(
+    assigned_to = models.ForeignKey(
+        'accounts.CustomUser',
+        on_delete=models.SET_NULL,
+        limit_choices_to={'is_staff': True},
+        related_name='contact_form_assignment',
         help_text=_("Revibe staff member it's assigned to"),
-        max_length=255,
         null=True, blank=True,
         verbose_name=_("staff member")
     )

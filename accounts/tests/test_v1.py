@@ -20,6 +20,7 @@ from content.models import *
 class TestRegister(RevibeTestCase):
     def setUp(self):
         self._get_application()
+        self._get_user()
 
     def test_register(self):
         """
@@ -36,6 +37,30 @@ class TestRegister(RevibeTestCase):
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CustomUser.objects.get(username=data['username']).username, data['username'])
+    
+    def test_register_with_referral(self):
+        """
+        tests the registration feature with a referrer ID included
+        """
+        # send request
+        url = str(reverse('register')) + f"?uid={self.user.id}"
+        data = {
+            "username": "anothertestusername",
+            "password": "password",
+            "device_type": "browser",
+            "profile": {},
+        }
+
+        # validate response
+        response = self.client.post(url, data, format="json")
+        self.assert200(response)
+
+        referrer = self.user
+        new_user = CustomUser.objects.get(username=response.data['user']['username'])
+        self.assertEqual(
+            str(referrer.id), str(new_user.profile.referrer.id),
+            msg="The expected referrer is not listed as the new user's referrer"
+        )
 
 
 class TestLogin(RevibeTestCase):

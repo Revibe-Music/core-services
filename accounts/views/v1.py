@@ -294,7 +294,7 @@ class RegistrationAPI(generics.GenericAPIView):
         uid = getattr(params, 'uid', None)
         if uid != None:
             try:
-                referrer = CustomUser.objects.get(uri=uid)
+                referrer = CustomUser.objects.get(id=uid)
                 profile.referrer = referrer
                 profile.save()
             except Exception as e:
@@ -435,7 +435,8 @@ class LoginAPI(generics.GenericAPIView):
             access_token.source_refresh_token = refresh_token
             access_token.save()
 
-            user.last_login = datetime.datetime.now()
+            user.last_login = timezone.now()
+            user.save()
 
             data = {
                 "user": UserSerializer(user, context=self.get_serializer_context()).data,
@@ -477,12 +478,13 @@ class RefreshTokenAPI(generics.GenericAPIView):
 
         device = request.data['device_type']
         time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME
-        access_token.expires = access_token.expires + datetime.timedelta(hours=time)
+        access_token.expires = timezone.now() + datetime.timedelta(hours=time)
 
         access_token.save()
 
         user = access_token.user
-        user.last_login = datetime.datetime.now()
+        user.last_login = timezone.now()
+        user.save()
 
         return Response({"access_token": access_token.token}, status=status.HTTP_200_OK)
 

@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from revibe.admin import html_check_x
+
 from administration.admin_ext import test_api_key
 from administration.models import *
 
@@ -10,7 +12,12 @@ from administration.models import *
 @admin.register(ContactForm)
 class ContactFormAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__', 'assigned_to')
+    list_display = ('__str__', 'assigned_to', 'get_resolution')
+
+    def get_resolution(self, obj):
+        return html_check_x(obj, 'resolved')
+    get_resolution.short_description = 'resolved'
+    get_resolution.admin_order_field = 'resolved'
 
 
 @admin.register(Campaign)

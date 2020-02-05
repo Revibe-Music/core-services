@@ -37,11 +37,12 @@ class ContactForm(models.Model):
     )
     last_changed = models.DateTimeField("Last time the form was edited", auto_now=True, null=True)
 
+    _message_limit = 50
     def __str__(self):
         if self.subject:
             return self.subject + " - " + str(self.id)
         elif self.message:
-            return f"{self.message[:50]}{'...' if len(self.message) > 25 else ''} - {self.id}"
+            return f"{self.message[:self._message_limit]}{'...' if len(self.message) > self._message_limit else ''} - {self.id}"
         return f"Form {self.id}"
 
 

@@ -4,7 +4,6 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
-# from oauth2_provider.models import AccessToken, AbstractAccessToken
 
 # -----------------------------------------------------------------------------
 
@@ -21,14 +20,32 @@ class CustomUser(AbstractUser):
         null=False, blank=True, default=False
     )
 
+    # def _get_link_url
+
+
 class Profile(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
     email = models.CharField(
-        "User's email address",
-        max_length=255, null=True, blank=True, unique=True
+        help_text=_("User's email address"),
+        max_length=255,
+        null=True, blank=True, unique=True
     )
-    campaign = models.ForeignKey('administration.Campaign', on_delete=models.SET_NULL, null=True, blank=True, default=None)
+    campaign = models.ForeignKey(
+        'administration.Campaign',
+        on_delete=models.SET_NULL,
+        help_text=_("The marketing campaign that got this user"),
+        verbose_name="marketing campaign",
+        null=True, blank=True, default=None
+    )
+    referrer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="referred_users",
+        help_text=_("The user that referred this one"),
+        verbose_name=_("referrer"),
+        null=True, blank=True, default=None
+    )
 
     country = models.CharField(
         'Country',
@@ -67,6 +84,7 @@ class Profile(models.Model):
 
     def __str__(self):
         return "{}'s User Profile".format(self.user)
+
 
 class ArtistProfile(models.Model):
     id = models.AutoField(primary_key=True)

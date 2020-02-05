@@ -26,6 +26,7 @@ import requests
 from logging import getLogger
 logger = getLogger(__name__)
 
+from revibe.auth.artist import get_authenticated_artist
 from revibe.viewsets import GenericPlatformViewSet
 from revibe._errors import accounts ,network
 from revibe._errors.accounts import AccountNotFound, NotArtistError
@@ -278,6 +279,29 @@ class RegistrationAPI(generics.GenericAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
+    def attach_referer(self, params, profile, *args, **kwargs):
+        # check for marketing campaign
+        cid = getattr(params, 'cid', None)
+        if cid != None:
+            try:
+                campaign = Campaign.objects.get(uri=cid)
+                profile.campaign = campaign
+                profile.save()
+            except Exception as e:
+                pass
+
+        # check for user referral
+        uid = getattr(params, 'uid', None)
+        if uid != None:
+            try:
+                referrer = CustomUser.objects.get(uri=uid)
+                profile.referrer = referrer
+                profile.save()
+            except Exception as e:
+                pass
+
+        return profile
+
     def post(self, request, *args, **kwargs):
         # check expectations
         username = request.data['username']
@@ -310,16 +334,10 @@ class RegistrationAPI(generics.GenericAPIView):
                 user=serializer.save()
             except IntegrityError as err:
                 return responses.CONFLICT(detail=str(err))
-            
-            # check query params for campaign info
+
+            # check query params for referrals and/or marketing campaign
             params = request.query_params
-            if 'cid' in params:
-                try:
-                    campaign = Campaign.objects.get(uri=params['cid'])
-                    user.profile.campaign = campaign
-                    user.profile.save()
-                except Exception as e:
-                    pass
+            self.attach_referer(params, user.profile)
 
             time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME
             expire = timezone.now() + datetime.timedelta(hours=time)
@@ -815,21 +833,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         return responses.DEFAULT_400_RESPONSE()
 
     def get_current_artist(self, request):
-        # check that the request has a user
-        if not request.user:
-            raise AccountNotFound() # 401
-
-        # check that the user has an artist account
-        if not request.user.artist:
-            raise NotArtistError() # 403
-
-        # double check that the artist has an artist profile
-        artist = request.user.artist
-        if not artist.artist_profile:
-            artist_profile = ArtistProfile.objects.create(artist=artist)
-            artist_profile.save()
-
-        return artist
+        return get_authenticated_artist(request)
 
     def check_contrib_permissions(self, artist, instance, rel):
         """

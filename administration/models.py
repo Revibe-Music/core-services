@@ -28,8 +28,8 @@ class ContactForm(models.Model):
         limit_choices_to={'is_staff': True},
         related_name='contact_form_assignment',
         help_text=_("Revibe staff member it's assigned to"),
-        null=True, blank=True,
-        verbose_name=_("staff member")
+        verbose_name=_("staff member"),
+        null=True, blank=True
     )
     date_created = models.DateTimeField(
         help_text=_("When the form was submitted"),
@@ -77,8 +77,8 @@ class Campaign(models.Model):
         if self.spent != None:
             return '${:,.2f}'.format(self.spent)
         return None
-    _spent.short_description = "budget"
-    _spent.admin_sort_field = "budget"
+    _spent.short_description = "spent"
+    _spent.admin_sort_field = "spent"
 
 
 class YouTubeKey(models.Model):

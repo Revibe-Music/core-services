@@ -199,6 +199,7 @@ class Album(models.Model):
     class Meta:
         verbose_name = 'album'
         verbose_name_plural = 'albums'
+        ordering = ['name',]
 
 
 class AlbumContributor(models.Model):

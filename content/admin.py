@@ -31,7 +31,7 @@ class ArtistAdmin(admin.ModelAdmin):
 @admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__','platform','uploaded_by', '_display_status', '_deletion_status')
+    list_display = ('sortable_str','platform','uploaded_by', '_display_status', '_deletion_status')
     list_filter = ( # reverse of display order
         ('is_deleted', admin.BooleanFieldListFilter),
         ('is_displayed', admin.BooleanFieldListFilter),
@@ -53,6 +53,11 @@ class AlbumAdmin(admin.ModelAdmin):
     
     def _display_status(self, obj):
         return check_display(obj)
+    
+    def sortable_str(self, obj):
+        return obj.__str__()
+    sortable_str.short_description = 'album'
+    sortable_str.admin_order_field = 'name'
 
 
 @admin.register(Song)

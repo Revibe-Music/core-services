@@ -16,6 +16,7 @@ import sys
 from revibe._helpers import status
 
 from accounts.models import CustomUser, Profile, ArtistProfile
+from administration.models import Campaign
 from content.models import *
 
 # -----------------------------------------------------------------------------
@@ -285,7 +286,13 @@ class MusicMixin:
 
 
 class AdministrationMixin:
-    pass
+    def _get_campaign(self):
+        try:
+            total = Campaign.object.get(name="example campaign")
+        except Exception:
+            campaign = Campaign.objects.create(name="example campaign", budget=0, spent=0)
+            campaign.save()
+        self.campaign = campaign
 
 
 class MetricsMixin:

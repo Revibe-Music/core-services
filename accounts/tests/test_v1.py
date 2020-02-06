@@ -13,6 +13,7 @@ from revibe._helpers.test import RevibeTestCase
 from revibe._helpers import status
 
 from accounts.models import CustomUser, Profile
+from administration.models import Campaign
 from content.models import *
 
 # -----------------------------------------------------------------------------
@@ -20,7 +21,6 @@ from content.models import *
 class TestRegister(RevibeTestCase):
     def setUp(self):
         self._get_application()
-        self._get_user()
 
     def test_register(self):
         """
@@ -42,6 +42,7 @@ class TestRegister(RevibeTestCase):
         """
         tests the registration feature with a referrer ID included
         """
+        self._get_user()
         # send request
         url = str(reverse('register')) + f"?uid={self.user.id}"
         data = {
@@ -57,9 +58,39 @@ class TestRegister(RevibeTestCase):
 
         referrer = self.user
         new_user = CustomUser.objects.get(username=response.data['user']['username'])
+        self.assertTrue(
+            bool(getattr(new_user.profile, "referrer", False)),
+            msg="Could not find the profile's 'referrer'"
+        )
         self.assertEqual(
             str(referrer.id), str(new_user.profile.referrer.id),
             msg="The expected referrer is not listed as the new user's referrer"
+        )
+
+    def test_register_with_campaign(self):
+        self._get_campaign()
+        # send request
+        url = str(reverse('register')) + f"?cid={self.campaign.uri}"
+        data = {
+            "username": "ipugawvjln",
+            "password": "password",
+            "device_type": "browser",
+            "profile": {},
+        }
+
+        # validate response
+        response = self.client.post(url, data, format="json")
+        self.assert200(response)
+
+        campaign = Campaign.objects.get(name='example campaign')
+        new_user = CustomUser.objects.get(username=response.data['user']['username'])
+        self.assertTrue(
+            bool(getattr(new_user.profile, 'campaign', False)),
+            msg="Could not find the profile's campaign"
+        )
+        self.assertEqual(
+            str(campaign.id), str(new_user.profile.campaign.id),
+            msg="The expected campaign is not listed as the user's campaign"
         )
 
 

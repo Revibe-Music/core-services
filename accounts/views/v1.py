@@ -281,8 +281,10 @@ class RegistrationAPI(generics.GenericAPIView):
 
     def attach_referer(self, params, profile, *args, **kwargs):
         # check for marketing campaign
-        cid = getattr(params, 'cid', None)
+        cid = params.get('cid', None)
         if cid != None:
+            if type(cid) == list:
+                cid = cid[0]
             try:
                 campaign = Campaign.objects.get(uri=cid)
                 profile.campaign = campaign
@@ -291,14 +293,16 @@ class RegistrationAPI(generics.GenericAPIView):
                 pass
 
         # check for user referral
-        uid = getattr(params, 'uid', None)
+        uid = params.get('uid', None)
         if uid != None:
+            if type(uid) == list:
+                uid = uid[0]
             try:
                 referrer = CustomUser.objects.get(id=uid)
                 profile.referrer = referrer
                 profile.save()
             except Exception as e:
-                pass
+                raise e
 
         return profile
 

@@ -28,6 +28,7 @@ logger = getLogger(__name__)
 
 from revibe.auth.artist import get_authenticated_artist
 from revibe.viewsets import GenericPlatformViewSet
+from revibe.utils.params import get_url_param
 from revibe._errors import accounts ,network
 from revibe._errors.accounts import AccountNotFound, NotArtistError
 from revibe._errors.network import ConflictError, ForbiddenError, NotImplementedError, ExpectationFailedError
@@ -281,10 +282,8 @@ class RegistrationAPI(generics.GenericAPIView):
 
     def attach_referer(self, params, profile, *args, **kwargs):
         # check for marketing campaign
-        cid = params.get('cid', None)
+        cid = get_url_param(params, 'cid')
         if cid != None:
-            if type(cid) == list:
-                cid = cid[0]
             try:
                 campaign = Campaign.objects.get(uri=cid)
                 profile.campaign = campaign
@@ -293,10 +292,8 @@ class RegistrationAPI(generics.GenericAPIView):
                 pass
 
         # check for user referral
-        uid = params.get('uid', None)
+        uid = get_url_param(params, 'uid')
         if uid != None:
-            if type(uid) == list:
-                uid = uid[0]
             try:
                 referrer = CustomUser.objects.get(id=uid)
                 profile.referrer = referrer

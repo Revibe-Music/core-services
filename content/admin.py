@@ -99,7 +99,7 @@ class SongAdmin(admin.ModelAdmin):
             link = ts[0].url
             return format_html(
                 f"""<audio controls>
-                    <source src={link}
+                    <source src="{link}"
                     type="audio/{link.split('.')[-1]}" />
                 </audio>"""
             )

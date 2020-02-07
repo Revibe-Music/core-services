@@ -45,7 +45,16 @@ class SocialAdmin(admin.ModelAdmin):
 
 @admin.register(ArtistProfile)
 class ArtistProfileAdmin(admin.ModelAdmin):
+    # customize list display
     list_display = ('__str__', 'artist', 'email', 'get_artist_username')
+    list_filter = (
+        'city',
+        'state',
+        'country',
+    )
+
+    # customize search
+    search_fields = ['artist', 'email',]
 
     def get_artist_username(self, obj):
         return obj.artist.artist_user.username

@@ -9,13 +9,38 @@ from uuid import uuid1
 
 class ContactForm(models.Model):
 
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey('accounts.CustomUser', on_delete=models.SET_NULL, null=True, blank=True)
-    first_name = models.CharField("First Name", max_length=255, null=True, blank=True)
-    last_name = models.CharField("Last Name", max_length=255, null=True, blank=True)
-    email = models.CharField("Email", max_length=255, null=True, blank=True)
-    subject = models.CharField("Contact form subject / type of request", max_length=255, null=True, blank=True) # going to be used as 'type'
-    message = models.TextField("Message", null=False, blank=False)
+    id = models.AutoField(
+        primary_key=True
+    )
+    user = models.ForeignKey(
+        'accounts.CustomUser',
+        on_delete=models.SET_NULL,
+        null=True, blank=True
+    )
+    first_name = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        help_text=_("First Name")
+    )
+    last_name = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        help_text=_("Last Name")
+    )
+    email = models.CharField(
+        max_length=255, 
+        null=True, blank=True,
+        help_text=_("Email")
+    )
+    subject = models.CharField(
+        max_length=255, 
+        null=True, blank=True,
+        help_text=_("Contact form subject / type of request")
+    )
+    message = models.TextField(
+        null=False, blank=False,
+        help_text=_("Message")
+    )
 
     # administrative fields
     resolved = models.BooleanField(

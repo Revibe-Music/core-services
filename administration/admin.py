@@ -13,6 +13,18 @@ from administration.models import *
 class ContactFormAdmin(admin.ModelAdmin):
     # customize list display
     list_display = ('__str__', 'assigned_to', 'get_resolution')
+    list_filter = (
+        ('assigned_to', admin.RelatedFieldListFilter),
+        'subject',
+        ('resolved', admin.BooleanFieldListFilter),
+    )
+
+    # customize search
+    search_fields = [
+        'message',
+        'subject',
+        'assigned_to',
+    ]
 
     def get_resolution(self, obj):
         return html_check_x(obj, 'resolved')
@@ -24,6 +36,10 @@ class ContactFormAdmin(admin.ModelAdmin):
 class CampaingAdmin(admin.ModelAdmin):
     # customize list display
     list_display = ('__str__', '_budget', '_spent', 'create_url',)
+    # list_filter = (,)
+
+    # customize search
+    search_fields = ['name']
 
 
 @admin.register(YouTubeKey)

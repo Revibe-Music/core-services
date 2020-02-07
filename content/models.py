@@ -136,6 +136,16 @@ class Track(models.Model):
         )
     _link_url.short_description = "url"
 
+    def _audio_controls(self):
+        link = self.url
+        return format_html(
+            f"""<audio controls>
+                <source src="{link}"
+                type="audio/{link.split('.')[-1]}"
+                preload="none" />
+            </audio>"""
+        )
+
     class Meta:
         verbose_name = "track"
         verbose_name_plural = "tracks"

@@ -96,7 +96,13 @@ class SongAdmin(admin.ModelAdmin):
     def get_original_track(self, obj):
         ts = obj.tracks.filter(is_original=True)
         if len(ts) > 0:
-            return ts[0]._link_url()
+            link = ts[0].url
+            return format_html(
+                f"""<audio controls>
+                    <source src={link}
+                    type="audio/{link.split('.')[-1]}" />
+                </audio>"""
+            )
         return None
     get_original_track.short_description = 'original track'
 

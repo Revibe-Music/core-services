@@ -126,6 +126,7 @@ class UserPatchSerializer(serializers.ModelSerializer):
             'email': {'required': False},
         }
 
+
 class LoginAccountSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
@@ -140,11 +141,14 @@ class LoginAccountSerializer(serializers.Serializer):
             return user
         raise serializers.ValidationError("Unable to log in, please try again")
 
+
 class AccessTokenSerializer(serializers.Serializer):
     access_token = serializers.CharField()
 
+
 class RefreshTokenSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
+
 
 class UserArtistProfileSerializer(serializers.ModelSerializer):
     about_me = serializers.CharField(required=False)
@@ -185,6 +189,7 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
             'allow_contributors_to_edit_contributions',
             'display_other_platform_content_on_revibe_page',
         ]
+
 
 class UserArtistSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False)
@@ -293,6 +298,7 @@ class UserArtistSerializer(serializers.ModelSerializer):
         image_obj = add_image_to_obj(instance, img, edit=True)
 
         return instance
+
 
 class SocialTokenSerializer(serializers.ModelSerializer):
     platform = serializers.ReadOnlyField(source='app.name')

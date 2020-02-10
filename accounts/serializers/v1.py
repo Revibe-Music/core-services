@@ -8,6 +8,7 @@ from oauth2_provider.models import AccessToken, RefreshToken
 from oauth2_provider.generators import generate_client_id
 from rest_framework import serializers
 
+from revibe._errors.data import ObjectAlreadyExists
 from revibe._helpers.files import add_image_to_obj
 
 from accounts.models import *
@@ -19,12 +20,40 @@ from music.models import Library
 
 class SocialMediaSerializer(serializers.ModelSerializer):
 
+    # read-only
+    id = serializers.ReadOnlyField()
+    social_media = serializers.CharField(source='_get_service', read_only=True)
+
+    # write-only
+    description = serializers.CharField(write_only=True, required=False)
+    service = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = SocialMedia
         fields = [
-            '_get_service',
+            'id', # read-only
+            'social_media', # read-only
             'handle',
+
+            # write-only
+            'description',
+            'service',
         ]
+    
+    def create(self, validated_data):
+        # get artist profile
+        request = self.context.get("request")
+        if request and hasattr(request, "user"):
+            artist_profile = request.user.artist.artist_profile
+
+        # check that this artist doesn't already have a social media with this service
+        if validated_data['service'] != 'other':
+            medias = SocialMedia.objects.filter(artist_profile=artist_profile, service=validated_data['service'])
+            if len(medias) > 0:
+                raise ObjectAlreadyExists()
+
+        validated_data['artist_profile'] = artist_profile
+        return super().create(validated_data)
 
 
 class ProfileSerializer(serializers.ModelSerializer): # TODO: do this right, please

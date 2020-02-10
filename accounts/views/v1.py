@@ -1308,21 +1308,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         return responses.UPDATED(serializer(instance=contribution))
 
-    # metrics endpoints # probably not going to get used anyway tbh, found a better way
 
-    @action(detail=False, url_path="albums/metrics", methods=['get'], url_name="album_metrics")
-    def album_metrics(self, request, *args, **kwargs):
-        artist = self.get_current_artist(request)
-
-        if request.method == 'GET':
-            raise NotImplementedError()
-            contrib_albums = self._get_album_contributions(artist)
-            serializer = content_ser_v1.AlbumSerializer(contrib_albums, many=True)
-
-        return responses.NO_REQUEST_TYPE()
-
-    @action(detail=False, url_path="songs/metrics", methods=['get'], url_name="song_metrics")
-    def song_metrics(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
 
         if request.method == 'GET':
@@ -1330,23 +1316,50 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         return responses.NO_REQUEST_TYPE()
 
-    @action(detail=False, url_path="contributions/albums/metrics", methods=['get'], url_name="album_contribution_metrics")
-    def album_contribution_metrics(self, request, *args, **kwargs):
+    # register social media
+    @action(detail=False, url_path="social-media", methods=['post', 'patch', 'delete'])
+    def register_social_media(self, request, *args, **kwargs):
+        """
+        Adds, edits, or removes a social media link from an artist's profile
+        """
         artist = self.get_current_artist(request)
+        kwargs['context'] = self.get_serializer_context()
 
-        if request.method == 'GET':
-            raise NotImplementedError()
+        if request.method in ['PATCH', 'DELETE'] and getattr(request.data, 'socialmedia_id', None) == None:
+            raise ExpectationFailedError(detail="'socialmedia_id' must be included in request fields")
+
+        if request.method == 'POST':
+            # validate data
+            errors = []
+            if 'service' not in request.data.keys():
+                errors['service'] = ["'service' must be included in data fields"]
+            if 'handle' not in request.data.keys():
+                errors['handle'] = ["'handle' must be included in data fields"]
+            desc = getattr(request.data, 'description', False)
+            if request.data['service'] == 'other' and desc != False:
+                errors['description'] = ["if 'service' is 'other', must include 'description' field"]
+                errors['service'].append("if 'service' is 'other', must include 'description' field")
+            # return errors if there are any
+            if len(errors) > 0:
+                raise ExpectationFailedError(detail=errors)
+
+            # continue with request...
+            context = self.get_serializer_context()
+            serializer = SocialMediaSerializer(data=request.data, *args, **kwargs)
+            if not serializer.is_valid():
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
+            
+            serializer.save()
+            return responses.CREATED(serializer=serializer)
+
+        elif request.method == 'PATCH':
+            pass
+
+        elif request.method == 'DELETE':
+            pass
 
         return responses.NO_REQUEST_TYPE()
 
-    @action(detail=False, url_path="contributions/songs/metrics", methods=['get'], url_name="song_contribution_metrics")
-    def song_contribution_metrics(self, request, *args, **kwargs):
-        artist = self.get_current_artist(request)
-
-        if request.method == 'GET':
-            raise NotImplementedError()
-
-        return responses.NO_REQUEST_TYPE()
 
 class UserViewSet(generics.GenericAPIView):
     serializer_class = UserSerializer

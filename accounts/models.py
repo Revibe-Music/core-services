@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 # -----------------------------------------------------------------------------
@@ -131,8 +132,65 @@ class ArtistProfile(models.Model):
     def __str__(self):
         return "{}'s Artist Profile".format(self.artist)
 
+
 class Social(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='user_social')
     platform = models.CharField(max_length=255, null=True)
+
+
+class SocialMedia(models.Model):
+    _facebook_text = "facebook"
+    _instagram_text = "instagram"
+    _soundcloud_text = "soundcloud"
+    _twitter_text = "twitter"
+    _youtube_text = "youtube"
+    _other_text = "other"
+    service_choices = (
+        (_facebook_text, "Facebook"),
+        (_instagram_text, "Instagram"),
+        (_soundcloud_text, "SoundCloud"),
+        (_twitter_text, "Twitter"),
+        (_youtube_text, "YouTube"),
+        (_other_text, "Other")
+    )
+
+
+    artist_profile = models.ForeignKey(
+        'accounts.ArtistProfile',
+        on_delete=models.CASCADE,
+        null=False, blank=False,
+        help_text=_("Account's artist")
+    )
+    service = models.CharField(
+        max_length=255,
+        null=False, blank=False, default=_other_text,
+        help_text=_("Social media service - Twitter, Instagram, etc.")
+    )
+    description = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        help_text=_("If service is other, this will be the displayed value for the link")
+    )
+    handle = models.CharField(
+        max_length=255,
+        null=False, blank=False,
+        help_text=_("Social media handle or URL")
+    )
+
+    def __str__(self):
+        return f"{self._get_service()} - {self.handle}"
+
+    def _get_service(self):
+        return self.service if self.service != self._other_text else self.description
+
+    def _generate_html_link(self):
+        return format_html(
+            "<a herf='{}' target='_blank'>{}</a>",
+            self.handle,
+            self._get_service()
+        )
+    _generate_html_link.short_description = "link to page"
+
+    # _get_service.short_description = "Social Media"
 
 

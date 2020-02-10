@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import *
+
+from accounts.models import *
 
 # -----------------------------------------------------------------------------
 
@@ -59,4 +60,20 @@ class ArtistProfileAdmin(admin.ModelAdmin):
     def get_artist_username(self, obj):
         return obj.artist.artist_user.username
     get_artist_username.short_description = 'username'
+
+
+@admin.register(SocialMedia)
+class SocialMediaAdmin(admin.ModelAdmin):
+    # customize list display
+    list_display = ("_sortable_str", "_get_artist",)
+
+    def _sortable_str(self, obj):
+        return obj.__str__()
+    _sortable_str.short_description = "social media"
+    _sortable_str.admin_order_field = "handle"
+
+    def _get_artist(self, obj):
+        return str(obj.artist_profile.artist)
+    _get_artist.short_description = "artist"
+    _get_artist.admin_order_field = "artist_profile__artist__name"
 

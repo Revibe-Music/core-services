@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 import datetime
 from uuid import uuid1
 
+from revibe._helpers import const
+
 # -----------------------------------------------------------------------------
 
 class ContactForm(models.Model):
@@ -72,16 +74,36 @@ class ContactForm(models.Model):
 
 
 class Campaign(models.Model):
+    _user_text = "user"
+    _artist_text = "artist"
+    destination_choices = (
+        (_user_text, 'Listener'),
+        (_artist_text, 'Artist'),
+        ('other', 'Other'),
+    )
+
     uri = models.CharField(max_length=255, null=False, blank=False, unique=True, default=uuid1)
     name = models.CharField(max_length=255, null=False, blank=False)
     budget = models.IntegerField(null=False, blank=False)
     spent = models.IntegerField(null=True, blank=True)
+    destination = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        choices=destination_choices,
+        help_text=_("Target audience")
+    )
 
     def __str__(self):
         return self.name
     
     def create_url(self):
-        return f"https://artist.revibe.tech/account/register?cid={self.uri}"
+        lookup = {
+            self._user_text: const.LISTENER_SIGNUP_LINK,
+            self._artist_text: const.ARTIST_SIGNUP_LINK,
+        }
+        params = f"?cid={self.uri}"
+        url = lookup.get(str(self.destination), "")
+        return url + params
     create_url.short_description = 'Custom URL'
     create_url.admin_sort_field = 'uri'
 

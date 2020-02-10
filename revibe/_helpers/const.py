@@ -6,6 +6,10 @@ DEFAULT_EXPIRY_TIME = 2 # hours
 # object constants
 FIRST_PARTY_APPLICATION_NAME = 'Revibe First Party Application'
 
+# revibe contstants
+LISTENER_SIGNUP_LINK = "https://revibe.tech/pages/revibe-beta-testing-sign-up"
+ARTIST_SIGNUP_LINK = "https://artist.revibe.tech/account/register"
+
 
 # Platform constants
 

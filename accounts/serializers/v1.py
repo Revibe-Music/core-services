@@ -17,6 +17,16 @@ from music.models import Library
 
 # -----------------------------------------------------------------------------
 
+class SocialMediaSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SocialMedia
+        fields = [
+            '_get_service',
+            'handle',
+        ]
+
+
 class ProfileSerializer(serializers.ModelSerializer): # TODO: do this right, please
     allow_explicit = serializers.BooleanField(required=False)
     allow_listening_data = serializers.BooleanField(required=False)
@@ -167,6 +177,7 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
 
     # read-only
     profile_id = serializers.ReadOnlyField(source='id')
+    social_media = SocialMediaSerializer(read_only=True, many=True)
 
     class Meta:
         model = ArtistProfile
@@ -188,6 +199,9 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
             'share_advanced_data_with_contributors',
             'allow_contributors_to_edit_contributions',
             'display_other_platform_content_on_revibe_page',
+
+            # social media
+            'social_media',
         ]
 
 
@@ -310,3 +324,4 @@ class SocialTokenSerializer(serializers.ModelSerializer):
             'token_secret',
             'expires_at',
         ]
+

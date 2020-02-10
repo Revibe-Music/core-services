@@ -158,12 +158,14 @@ class SocialMedia(models.Model):
     artist_profile = models.ForeignKey(
         'accounts.ArtistProfile',
         on_delete=models.CASCADE,
+        related_name="social_media",
         null=False, blank=False,
         help_text=_("Account's artist")
     )
     service = models.CharField(
         max_length=255,
         null=False, blank=False, default=_other_text,
+        choices=service_choices,
         help_text=_("Social media service - Twitter, Instagram, etc.")
     )
     description = models.CharField(

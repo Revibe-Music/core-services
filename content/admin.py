@@ -178,7 +178,7 @@ class TrackAdmin(admin.ModelAdmin):
     )
 
     # customize search
-    search_fields = ['song__title', 'song__uploaded_by']
+    search_fields = ['song__title', 'song__uploaded_by__name']
 
     # other stuff
     empty_value_display = '-empty-'

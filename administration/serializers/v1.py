@@ -184,6 +184,8 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
     
     def get_campaign_id(self, obj):
         profile = self._get_profile(obj)
+        if profile == None:
+            return None
         campaign = getattr(profile, 'campaign', None)
         if campaign == None:
             return None

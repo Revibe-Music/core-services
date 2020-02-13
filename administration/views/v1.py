@@ -174,3 +174,17 @@ class CompanyViewSet(GenericPlatformViewSet):
         data['Contact Forms'] = serializer.data
 
         return responses.OK(data=data)
+    
+    @action(detail=False, methods=['get'], url_path="campaign-metrics", url_name="campaign-metrics")
+    def campaign_metrics(self, request, *args, **kwargs):
+        queryset = Campaign.objects.all()
+        serializer_class = adm_ser_v1.CampaignMetricsSerializer
+
+        data = {}
+        data['Campaign Count'] = queryset.count()
+
+        serializer = serializer_class(queryset, many=True)
+        data['Campaigns'] = serializer.data
+
+        return responses.OK(data=data)
+

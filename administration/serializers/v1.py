@@ -98,6 +98,8 @@ class YouTubeKeySerializer(serializers.ModelSerializer):
         ]
 
 
+# metrics information
+
 class UserMetricsSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
     username = serializers.ReadOnlyField()
@@ -218,3 +220,17 @@ class ContactFormMetricsSerializer(serializers.ModelSerializer):
         if obj.last_name != None:
             string += " {}".format(obj.last_name)
         return string
+
+
+class CampaignMetricsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Campaign
+        fields = [
+            'id',
+            'uri',
+            'name',
+            'budget',
+            'spent',
+            'destination',
+        ]

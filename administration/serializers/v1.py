@@ -154,6 +154,7 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
     name = serializers.ReadOnlyField()
     date_joined = serializers.ReadOnlyField()
     user_id = serializers.SerializerMethodField('get_user_id', read_only=True)
+    campaign = serializers.SerializerMethodField('get_campaign_id', read_only=True)
 
     class Meta:
         model = cnt_models.Artist
@@ -163,13 +164,30 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
             'name',
             'date_joined',
             'user_id',
+            'campaign',
         ]
+    
+    def _get_profile(self, obj):
+        user = getattr(obj, 'artist_user', None)
+        if user == None:
+            return None
+        profile = getattr(user, 'profile', None)
+        if profile == None:
+            return None
+        return profile
 
     def get_user_id(self, obj):
         if hasattr(obj, 'artist_user'):
             return obj.artist_user.id
         else:
             return None
+    
+    def get_campaign_id(self, obj):
+        profile = self._get_profile(obj)
+        campaign = getattr(profile, 'campaign', None)
+        if campaign == None:
+            return None
+        return getattr(campaign, 'id', None)
 
 
 class AlbumMetricsSerializer(serializers.ModelSerializer):

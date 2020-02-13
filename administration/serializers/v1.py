@@ -108,6 +108,8 @@ class UserMetricsSerializer(serializers.ModelSerializer):
     last_login = serializers.ReadOnlyField()
     is_staff = serializers.ReadOnlyField()
     date_joined = serializers.ReadOnlyField()
+    campaign = serializers.SerializerMethodField(method_name='get_campaign', read_only=True)
+    referrer = serializers.SerializerMethodField(method_name='get_referrer', read_only=True)
 
     class Meta:
         model = acc_models.CustomUser
@@ -120,7 +122,30 @@ class UserMetricsSerializer(serializers.ModelSerializer):
             'is_staff',
             'date_joined',
             'artist_id',
+            'referrer',
+            'campaign',
         ]
+    
+    def _get_profile(self, obj):
+        return getattr(obj, 'profile', None)
+    
+    def get_referrer(self, obj):
+        profile = self._get_profile(obj)
+        if profile == None:
+            return None
+        referrer = getattr(profile, 'referrer', None)
+        if referrer == None:
+            return None
+        return getattr(referrer, 'id', None)
+    
+    def get_campaign(self, obj):
+        profile = self._get_profile(obj)
+        if profile == None:
+            return None
+        campaign = getattr(profile, 'campaign', None)
+        if campaign == None:
+            return None
+        return getattr(campaign, 'id', None)
 
 
 class ArtistMetricsSerializer(serializers.ModelSerializer):

@@ -76,9 +76,11 @@ class ContactForm(models.Model):
 class Campaign(models.Model):
     _user_text = "user"
     _artist_text = "artist"
+    _both_text = "both"
     destination_choices = (
         (_user_text, 'Listener'),
         (_artist_text, 'Artist'),
+        (_both_text, "Artists and Listeners"),
         ('other', 'Other'),
     )
 

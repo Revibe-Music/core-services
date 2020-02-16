@@ -71,7 +71,7 @@ def create_libraries(user):
     default_libraries = [const.REVIBE_STRING, const.YOUTUBE_STRING]
     for def_lib in default_libraries:
         Library.objects.create(platform=def_lib, user=user)
-    
+
     # check that it worked
     if len(Library.objects.filter(user=user)) < 2:
         raise ValidationError("Error creating libraries")
@@ -104,7 +104,7 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
         except Exception as e:
             raise e
         return device
-    
+
     def create_libraries(self, user):
         """
         Creates default libraries when creating an account, Revibe and YouTube
@@ -131,11 +131,11 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
                 at.delete()
         elif user:
             pass
-    
+
     def get_expire_time(self, device, *args, **kwargs):
         time = const.BROWSER_EXPIRY_TIME if device.device_type == 'browser' else const.DEFAULT_EXPIRY_TIME
         return timezone.now() + datetime.timedelta(hours=time)
-    
+
     def get_scopes(self, device, user, *args, **kwargs):
         scopes = ["first-party"]
         if device.device_type == 'browser':
@@ -143,7 +143,7 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
         if user.is_staff:
             scopes.append("ADMIN")
         return " ".join(scopes)
-    
+
     def generate_tokens(self, device, user, *args, **kwargs):
         logger.info("Generating tokens...")
         access_token = AccessToken(
@@ -319,7 +319,7 @@ class RegistrationAPI(generics.GenericAPIView):
             errors['email'] = []
             err = f"A user with email '{email}' already exists."
             errors['email'].append(err)
-        
+
         if errors != {}:
             raise ConflictError(detail=errors)
 
@@ -395,7 +395,7 @@ class LoginAPI(generics.GenericAPIView):
         if serializer.is_valid():
 
             device = request.data['device_type']
-            
+
             user = serializer.validated_data
 
             scopes = ["first-party"]
@@ -451,7 +451,7 @@ class LoginAPI(generics.GenericAPIView):
 
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-        
+
         return responses.DEFAULT_400_RESPONSE()
 
 
@@ -544,7 +544,7 @@ class SendRegisterLink(generics.GenericAPIView):
         to: (list) the emails to send mail to
         artist: (bool) coming from an artist function or not (like the Artist Portal)
         type: (string) the type of invite to send,
-            must be one of 'artist_invite', 'contribution', 'contribution_black' 
+            must be one of 'artist_invite', 'contribution', 'contribution_black'
         """
         # only send emails when in the cloud
         if not settings.USE_S3:
@@ -562,7 +562,7 @@ class SendRegisterLink(generics.GenericAPIView):
         info = {
             "total requested": len(to),
             "total sent": num_sent,
-            "not sent": len(to) - num_sent, 
+            "not sent": len(to) - num_sent,
         }
 
         return responses.OK(data=info)
@@ -611,7 +611,7 @@ class SendRegisterLink(generics.GenericAPIView):
                 html_message= html_message,
                 fail_silently=fail_silently
             )
-        
+
         return num_sent
 
     def _get_recipients(self, request):
@@ -641,7 +641,7 @@ class SendRegisterLink(generics.GenericAPIView):
         for field in required_fields:
             if field not in request.data.keys():
                 errors[field] = f"Must include {field} in request"
-        
+
         # valiadate email type
         t = request.data['type']
         if t not in self.types_of_emails.keys():
@@ -657,7 +657,7 @@ class SendRegisterLink(generics.GenericAPIView):
 class SpotifyConnect(SocialConnectView):
     """ Logs already authenticated user into Spotify account """
     adapter_class = SpotifyOAuth2Adapter
-    callback_url = 'https://www.getpostman.com/oauth2/callback'
+    callback_url = 'revibeapp://callback'
     client_class = OAuth2Client
 
     def get_response(self):
@@ -777,7 +777,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         # check if user already has an artist object
         if request.user.artist != None:
             return responses.CONFLICT(detail="this user already has an artist profile")
-        
+
         # set data platform
         if 'platform' not in request.data.keys():
             _mutable = request.data._mutable
@@ -789,7 +789,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         serializer = self.serializer_class(data=request.data, *args, **kwargs)
         if not serializer.is_valid():
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-        
+
         artist = serializer.save()
 
         # attach artist to user
@@ -810,7 +810,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 obj.pending = True
                 obj.approved = False
                 obj.save()
-        
+
         # album contributions
         if 'album_contrib' in params.keys():
             contribs = params['album_contrib'].split(',')
@@ -857,7 +857,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         if artist == uploader:
             return True
-        
+
         if artist != contributor:
             raise ForbiddenError("You cannot edit this contribution")
 
@@ -896,7 +896,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         contrib_albums = Album.hidden_objects \
             .filter(album_to_artist__primary_artist=False, contributors=artist) \
             .distinct()
-        
+
         return contrib_albums
 
     def _get_song_contributions(self, artist, *args, **kwargs):
@@ -907,7 +907,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         contrib_songs = Song.hidden_objects \
             .filter(song_to_artist__primary_artist=False, contributors=artist) \
             .distinct()
-        
+
         return contrib_songs
 
     def _get_album_metrics(self, serializer, artist, *args, **kwargs):
@@ -937,7 +937,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 advanced_metrics = {}
                 # calculate metrics
                 album['advanced_metrics'] = advanced_metrics
-        
+
         return data
 
     def _get_song_metrics(self, serializer, artist, *args, **kwargs):
@@ -956,7 +956,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             # or the contributor is allowed to see the metrics
             if is_uploader or song_object.uploaded_by.artist_profile.share_data_with_contributors:
                 song['total_streams'] = Stream.count(song['song_id'], Stream.environment == env)
-            
+
             # create dict with more advanced metrics info
             # only send if user is uploading artist or artist allows advanced
             # data sharing
@@ -964,7 +964,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 advanced_metrics = {}
                 # calculate metrics...
                 song['advanced_metrics'] = advanced_metrics
-        
+
         return data
 
     @action(detail=False, methods=['get','post','patch','delete'])
@@ -1136,7 +1136,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             instance.is_displayed = False
             instance.save()
             return responses.DELETED()
-        
+
         return responses.NO_REQUEST_TYPE()
 
     @action(detail=False)
@@ -1151,7 +1151,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             'songs': song_serializer.data,
             'albums': album_serializer.data
         })
-    
+
     @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums', url_name="album_contributions")
     def album_contributions(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
@@ -1175,7 +1175,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 return responses.OK(data=metrics_data)
 
             return responses.OK(serializer=album_serializer)
-        
+
         elif request.method == 'POST':
             serializer = content_ser_v1.AlbumContributorSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
@@ -1210,7 +1210,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         else:
             return responses.NO_REQUEST_TYPE()
-    
+
     @action(detail=False, url_path='contributions/songs', methods=['get','post','patch','delete'], url_name="song_contributions")
     def song_contributions(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
@@ -1232,7 +1232,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             # attach stream data if in the cloud
             if settings.USE_S3:
                 metrics_data = self._get_song_metrics(song_serializer, artist, *args, **kwargs)
-                
+
                 return responses.OK(data=metrics_data)
 
             return responses.OK(serializer=song_serializer)
@@ -1267,7 +1267,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             instance.delete()
             return responses.DELETED()
-        
+
         else:
             return responses.NO_REQUEST_TYPE()
 
@@ -1295,12 +1295,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
             serializer = content_ser_v1.AlbumContributorSerializer
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(detail="Field 'content' must be either 'song' or 'album'.")
-        
+
         # get contribution and check request user against contribution artist
         contribution = model.objects.get(pk=request.data['contribution_id'])
         if not artist == contribution.artist:
             return responses.NOT_PERMITTED(detail="You are not authorized to approve this contribution")
-        
+
         # set instance data
         contribution.pending = False
         contribution.approved = approval
@@ -1348,7 +1348,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             serializer = SocialMediaSerializer(data=request.data, *args, **kwargs)
             if not serializer.is_valid():
                 return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
-            
+
             serializer.save()
             return responses.CREATED(serializer=serializer)
 

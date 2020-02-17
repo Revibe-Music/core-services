@@ -309,3 +309,27 @@ class SongContributor(models.Model):
         verbose_name = 'song contributor'
         verbose_name_plural = 'song contributors'
 
+
+class Tag(models.Model):
+    text = models.CharField(
+        max_length=100,
+        primary_key=True,
+        help_text=_("Text value of the tag"),
+        verbose_name=_("Tag text")
+    )
+    
+    date_created = models.DateTimeField(
+        auto_now_add=True,
+        editable=False
+    )
+    last_changed = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return self.text
+    
+    def __repr__(self):
+        return f"<{self.__class__.__name__} - {self.__str__()}>"
+
+

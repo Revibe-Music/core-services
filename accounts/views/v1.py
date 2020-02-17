@@ -4,7 +4,9 @@ from django.core.mail import send_mail, send_mass_mail
 from django.db import IntegrityError
 from django.http import HttpRequest
 from django.template.loader import render_to_string
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timesince
+from django.utils.decorators import method_decorator
 from django.utils.html import strip_tags
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.decorators import action
@@ -385,6 +387,10 @@ class RegistrationAPI(generics.GenericAPIView):
 class LoginAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = LoginAccountSerializer
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(LoginAPI, self).dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         login_data = {

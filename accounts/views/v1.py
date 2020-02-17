@@ -43,6 +43,7 @@ from accounts._helpers import validation
 from administration.models import Campaign
 from content.models import Album, Song, SongContributor, AlbumContributor
 from content.serializers import v1 as content_ser_v1
+from content.utils.models import add_tag_to_song
 from metrics.models import Stream
 from music.models import *
 from music.serializers import v1 as music_ser_v1
@@ -893,6 +894,17 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         return True
 
+    def check_tagging_permissions(self, artist, instance):
+        """
+        Ensures that the person editing the tag(s) is either the artist who
+        uploaded the song/album, or the uploader allows contributors to edit
+        tags.
+        """
+        uploader = instance.uploaded_by
+        if uploader != artist:
+            if not uploader.artist_profile.allow_contributors_to_edit_tags:
+                raise ForbiddenError(f"You cannot add/remove tags from {instance.__str__()}")
+
     def _get_album_contributions(self, artist, *args, **kwargs):
         """
         Gets a list of albums that the current artist contributed to but did
@@ -1366,6 +1378,25 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         return responses.NO_REQUEST_TYPE()
 
+    # tag content
+    @action(detail=False, methods=['post', 'delete'], url_path="songs/tags", url_name="tag_song")
+    def tag_song(self, request, *args, **kwargs):
+        # stuff for all requests
+        artist = self.get_current_artist(request)
+        song = Song.objects.get(id=request.data['song_id'])
+
+        if request.method == 'POST':
+            # check that the artist can add taqs to a song
+            self.check_tagging_permissions(artist, song)
+
+            # add the tags to the song
+            tags = [str(x) for x in request.data['tags']]
+            add_tag_to_song(tags, song)
+
+            return responses.CREATED()
+
+        elif request.method == 'DELETE':
+            pass
 
 class UserViewSet(generics.GenericAPIView):
     serializer_class = UserSerializer

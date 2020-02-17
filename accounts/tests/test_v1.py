@@ -998,3 +998,22 @@ class EmailTestCase(RevibeTestCase):
 
         # validate request
         self.assert503(response)
+
+
+class TagSongsTestCase(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._get_artist_user()
+        self._create_song()
+        self.url = reverse('artistaccount-tag_song')
+    
+    def test_add_tag(self):
+        # send request
+        data = {}
+        response = self.client.post(self.url, data, format="json", **self._get_headers(artist=True))
+
+        # validate request
+        self.assert201(response)
+
+

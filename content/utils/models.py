@@ -3,7 +3,7 @@ Created: 17 Feb. 2020
 Author: Jordan Prechac
 """
 
-from content.models import Tag
+from content.models import Song, Tag
 
 
 # -----------------------------------------------------------------------------
@@ -18,3 +18,20 @@ def get_tag(text, *args, **kwargs):
         tag = Tag.objects.create(text=text)
     
     return tag
+
+
+def add_tag_to_song(tags, song, *args, **kwargs):
+    """
+    Add a tag to a song
+    """
+    # get the song, if the sent data isn't already a Song object
+    if type(song) != Song:
+        song = Song.objects.get(id=song)
+
+    # get a list of all the tags
+    tag_objects = [get_tag(x) for x in tags]
+    for t in tag_objects:
+        song.tags.add(t)
+
+    return True
+

@@ -128,6 +128,10 @@ class ArtistProfile(models.Model):
         help_text="Display Spotify/YouTube content on the artist's Revibe artist page",
         null=False, blank=True, default=False
     )
+    allow_contributors_to_edit_tags = models.BooleanField(
+        help_text=_("Allows contributors to content to add/remove tags from that content"),
+        null=False, blank=True, default=False
+    )
 
     def __str__(self):
         return "{}'s Artist Profile".format(self.artist)

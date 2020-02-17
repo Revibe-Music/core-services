@@ -183,3 +183,8 @@ class TrackAdmin(admin.ModelAdmin):
     # other stuff
     empty_value_display = '-empty-'
 
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    pass
+

@@ -195,6 +195,11 @@ class Album(models.Model):
 
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="album_uploaded_by")
     contributors = models.ManyToManyField(Artist, through='AlbumContributor')
+    tags = models.ManyToManyField(
+        to='content.tag',
+        related_name='albums',
+        help_text=_("Associated tags")
+    )
 
     def __str__(self):
         return "{}".format(self.name)
@@ -321,6 +326,8 @@ class Tag(models.Model):
         help_text=_("Text value of the tag"),
         verbose_name=_("Tag text")
     )
+    # songs = many to many with 'Song'
+    # albums = many to many with 'album'
     
     date_created = models.DateTimeField(
         auto_now_add=True,

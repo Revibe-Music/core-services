@@ -43,7 +43,7 @@ from accounts._helpers import validation
 from administration.models import Campaign
 from content.models import Album, Song, SongContributor, AlbumContributor
 from content.serializers import v1 as content_ser_v1
-from content.utils.models import add_tag_to_song
+from content.utils.models import add_tag_to_song, remove_tag_from_song
 from metrics.models import Stream
 from music.models import *
 from music.serializers import v1 as music_ser_v1
@@ -1396,7 +1396,14 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.CREATED()
 
         elif request.method == 'DELETE':
-            pass
+            # check that the artist can remove tags from a song
+            self.check_tagging_permissions(artist, song)
+
+            # remove the tags from the song
+            tags = [str(x) for x in request.data['tags']]
+            remove_tag_from_song(tags, song)
+
+            return responses.DELETED()
 
 class UserViewSet(generics.GenericAPIView):
     serializer_class = UserSerializer

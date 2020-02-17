@@ -265,6 +265,10 @@ class Song(models.Model):
     album  = models.ForeignKey(Album, on_delete=models.CASCADE, null=False, blank=False)
     contributors = models.ManyToManyField(Artist, through='SongContributor', related_name="song_contributors")
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="song_uploaded_by") # artist or user???
+    tags = models.ManyToManyField(
+        to='content.tag',
+        related_name='songs'
+    )
 
     objects = models.Manager() # all objects
     hidden_objects = NotDeletedManager() # objects that are not deleted

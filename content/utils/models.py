@@ -54,7 +54,7 @@ def add_tag_to_album(tags, album, *args, **kwargs):
     Add tags to an album
     """
     # get the album, if the sent data isn't already an album object
-    if type(album) == Album:
+    if type(album) != Album:
         album = Album.objects.get(id=album)
     
     # get a list of all the tags

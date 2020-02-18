@@ -43,7 +43,7 @@ from accounts._helpers import validation
 from administration.models import Campaign
 from content.models import Album, Song, SongContributor, AlbumContributor
 from content.serializers import v1 as content_ser_v1
-from content.utils.models import add_tag_to_song, remove_tag_from_song
+from content.utils.models import add_tag_to_song, remove_tag_from_song, add_tag_to_album, remove_tag_from_album
 from metrics.models import Stream
 from music.models import *
 from music.serializers import v1 as music_ser_v1
@@ -1394,6 +1394,32 @@ class UserArtistViewSet(GenericPlatformViewSet):
             # remove the tags from the song
             tags = [str(x) for x in request.data['tags']]
             remove_tag_from_song(tags, song)
+
+            return responses.DELETED()
+
+    @action(detail=False, methods=['post', 'delete'], url_path="albums/tags", url_name="tag_album")
+    def tag_album(self, request, *args, **kwargs):
+        # stuff for all request
+        artist = self.get_current_artist(request)
+        album = Album.objects.get(id=request.data['album_id'])
+
+        if request.method == 'POST':
+            # check that the artist can add tags to the album
+            self.check_tagging_permissions(artist, album)
+
+            # add the tags to the album
+            tags = [str(x) for x in request.data['tags']]
+            add_tag_to_album(tags, album)
+
+            return responses.CREATED()
+
+        elif request.method == 'DELETE':
+            # check that the artist can remove tags from an album
+            self.check_tagging_permissions(artist, album)
+
+            # remove the tags from the album
+            tags = [str(x) for x in request.data['tags']]
+            remove_tag_from_album(tags, album)
 
             return responses.DELETED()
 

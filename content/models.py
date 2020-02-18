@@ -198,7 +198,8 @@ class Album(models.Model):
     tags = models.ManyToManyField(
         to='content.tag',
         related_name='albums',
-        help_text=_("Associated tags")
+        help_text=_("Associated tags"),
+        blank=True
     )
 
     def __str__(self):
@@ -272,7 +273,8 @@ class Song(models.Model):
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="song_uploaded_by") # artist or user???
     tags = models.ManyToManyField(
         to='content.tag',
-        related_name='songs'
+        related_name='songs',
+        blank=True
     )
 
     objects = models.Manager() # all objects

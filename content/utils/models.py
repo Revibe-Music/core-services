@@ -3,7 +3,7 @@ Created: 17 Feb. 2020
 Author: Jordan Prechac
 """
 
-from content.models import Song, Tag
+from content.models import Album, Song, Tag
 
 
 # -----------------------------------------------------------------------------
@@ -30,10 +30,10 @@ def add_tag_to_song(tags, song, *args, **kwargs):
 
     # get a list of all the tags
     tag_objects = [get_tag(x) for x in tags]
-    for t in tag_objects:
-        song.tags.add(t)
+    song.tags.add(*tag_objects)
 
     return True
+
 
 def remove_tag_from_song(tags, song, *args, **kwargs):
     """
@@ -44,8 +44,35 @@ def remove_tag_from_song(tags, song, *args, **kwargs):
     
     # get a list of all the tags
     tag_objects = [get_tag(x) for x in tags]
-    for t in tag_objects:
-        song.tags.remove(t)
+    song.tags.remove(*tag_objects)
     
+    return True
+
+
+def add_tag_to_album(tags, album, *args, **kwargs):
+    """
+    Add tags to an album
+    """
+    # get the album, if the sent data isn't already an album object
+    if type(album) == Album:
+        album = Album.objects.get(id=album)
+    
+    # get a list of all the tags
+    tag_objects = [get_tag(x) for x in tags]
+    album.tags.add(*tag_objects)
+
+    return True
+
+
+def remove_tag_from_album(tags, album, *args, **kwargs):
+    """
+    Remove tags from an album
+    """
+    if type(album) != Album:
+        album = Album.objects.get(id=album)
+    
+    tag_objects = [get_tag(x) for x in tags]
+    album.tags.remove(*tag_objects)
+
     return True
 

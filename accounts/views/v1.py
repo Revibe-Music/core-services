@@ -273,6 +273,7 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
 
         return Response({"detail": "logout-all successful", "tokens deleted": num}, status=status.HTTP_200_OK)
 
+
 class RegistrationAPI(generics.GenericAPIView):
     """
     this works when application has following attributes:
@@ -385,6 +386,7 @@ class RegistrationAPI(generics.GenericAPIView):
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         return responses.DEFAULT_400_RESPONSE()
 
+
 @method_decorator(csrf_exempt, name='dispatch')
 class LoginAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
@@ -493,6 +495,7 @@ class RefreshTokenAPI(generics.GenericAPIView):
 
         return Response({"access_token": access_token.token}, status=status.HTTP_200_OK)
 
+
 class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = AccessTokenSerializer
@@ -511,6 +514,7 @@ class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
 
         return responses.OK(detail="logout successful")
 
+
 class LogoutAllAPI(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -528,6 +532,7 @@ class LogoutAllAPI(generics.GenericAPIView):
         tokens.delete()
 
         return Response({"detail": "logout-all successful", "tokens deleted": num}, status=status.HTTP_200_OK)
+
 
 class SendRegisterLink(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -656,6 +661,7 @@ class SendRegisterLink(generics.GenericAPIView):
             raise ExpectationFailedError(detail=errors)
         return True
 
+
 # Linked Account Views
 
 class SpotifyConnect(SocialConnectView):
@@ -710,6 +716,7 @@ class SpotifyRefresh(generics.GenericAPIView):
 
         return Response({"error":"Social Token does not exist."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
 
+
 class SpotifyLogout(generics.GenericAPIView):
     permission_classes = (TokenOrSessionAuthentication)
     required_alternate_scopes = {
@@ -739,18 +746,6 @@ class UserLinkedAccounts(viewsets.ModelViewSet):
         user = self.request.user
         return SocialToken.objects.filter(account__user=user)
 
-# class UserLinkedAccounts(generics.GenericAPIView):
-#     permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
-#     serializer_class = SocialTokenSerializer
-#
-#     def get(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         data = serializer.validated_data
-#         return Response(data, status=status.HTTP_200_OK)
-#     #     # return Response({"error":"User has not logged into Spotify."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
-#     #
-#     #     # return Response(SocialTokenSerializer(request.user, context=self.get_serializer_context()).data)
 
 # Artist Account API Views
 
@@ -1401,6 +1396,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             remove_tag_from_song(tags, song)
 
             return responses.DELETED()
+
 
 class UserViewSet(generics.GenericAPIView):
     serializer_class = UserSerializer

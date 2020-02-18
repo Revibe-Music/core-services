@@ -385,13 +385,10 @@ class RegistrationAPI(generics.GenericAPIView):
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         return responses.DEFAULT_400_RESPONSE()
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = LoginAccountSerializer
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(LoginAPI, self).dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         login_data = {

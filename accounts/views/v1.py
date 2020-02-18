@@ -1335,7 +1335,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         artist = self.get_current_artist(request)
         kwargs['context'] = self.get_serializer_context()
 
-        if request.method in ['PATCH', 'DELETE'] and getattr(request.data, 'socialmedia_id', None) == None:
+        if request.method in ['PATCH', 'DELETE'] and request.data.get('socialmedia_id', None) == None:
             raise ExpectationFailedError(detail="'socialmedia_id' must be included in request fields")
 
         if request.method == 'POST':
@@ -1366,9 +1366,17 @@ class UserArtistViewSet(GenericPlatformViewSet):
             pass
 
         elif request.method == 'DELETE':
-            pass
+            social_media = SocialMedia.objects.get(id=request.data['socialmedia_id'])
 
-        return responses.NO_REQUEST_TYPE()
+            if artist.artist_profile != social_media.artist_profile:
+                raise ForbiddenError("You cannot remove this linked social media")
+
+            social_media.delete()
+
+            return responses.DELETED()
+
+        else:
+            return responses.NO_REQUEST_TYPE()
 
     # tag content
     @action(detail=False, methods=['post', 'delete'], url_path="songs/tags", url_name="tag_song")

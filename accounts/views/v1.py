@@ -274,6 +274,7 @@ class AuthenticationViewSet(viewsets.GenericViewSet):
         return Response({"detail": "logout-all successful", "tokens deleted": num}, status=status.HTTP_200_OK)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class RegistrationAPI(generics.GenericAPIView):
     """
     this works when application has following attributes:
@@ -461,6 +462,7 @@ class LoginAPI(generics.GenericAPIView):
         return responses.DEFAULT_400_RESPONSE()
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class RefreshTokenAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = RefreshTokenSerializer

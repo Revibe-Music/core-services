@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from revibe._errors.network import ProgramError
 from revibe._helpers.files import add_image_to_obj, add_track_to_song
+from revibe.serializers import CustomDateField
 
 from content.models import *
 from content.mixins import ContributionSerializerMixin
@@ -205,7 +206,9 @@ class AlbumSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False)
     type = serializers.CharField(required=False)
     platform = serializers.CharField(required=False)
-    is_displayed = serializers.BooleanField(required=False, default=True)
+    is_displayed = serializers.BooleanField(required=False)
+    # date_published = serializers.DateField(required=False)
+    date_published = CustomDateField(required=False, format="%Y-%m-%d")
 
     # read-only
     uploaded_by = ArtistSerializer(read_only=True)
@@ -226,6 +229,7 @@ class AlbumSerializer(serializers.ModelSerializer):
             'type',
             'platform',
             'is_displayed',
+            'date_published',
 
             # read-only
             'uploaded_by',

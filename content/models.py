@@ -210,7 +210,7 @@ class Album(models.Model):
 
     objects = models.Manager()
     hidden_objects = NotDeletedManager()
-    display_objects = NotHiddenNotDeletedManager()
+    display_objects = AlbumNotHiddenNotDeletedManager()
 
     class Meta:
         verbose_name = 'album'

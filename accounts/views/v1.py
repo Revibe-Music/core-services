@@ -690,7 +690,7 @@ class SpotifyConnect(SocialConnectView):
 
 
 class SpotifyRefresh(generics.GenericAPIView):
-    permission_classes = (TokenOrSessionAuthentication)
+    permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         'GET': [['ADMIN'], ['first-party']],
         'POST': [['ADMIN'], ['first-party']]
@@ -720,7 +720,7 @@ class SpotifyRefresh(generics.GenericAPIView):
 
 
 class SpotifyLogout(generics.GenericAPIView):
-    permission_classes = (TokenOrSessionAuthentication)
+    permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         'GET': [['ADMIN'], ['first-party']],
         'POST': [['ADMIN'], ['first-party']]

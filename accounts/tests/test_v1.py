@@ -284,7 +284,7 @@ class TestArtistAccount(RevibeTestCase):
         response = self.client.post(url, data, format="json", **self._get_headers(artist=True))
 
         self.assert201(response)
-    
+
     def test_remove_social_media(self):
         # get media ID
         self.test_add_social_media()

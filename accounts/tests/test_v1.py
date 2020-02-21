@@ -272,6 +272,35 @@ class TestArtistAccount(RevibeTestCase):
             msg="The artist returned is not the authenticated artist"
         )
 
+    def test_add_social_media(self):
+        # send request
+        url = reverse('artistaccount-social_media')
+        data = {
+            "handle": "@testingtestytests",
+            "service": "twitter"
+        }
+
+        # validate response
+        response = self.client.post(url, data, format="json", **self._get_headers(artist=True))
+
+        self.assert201(response)
+    
+    def test_remove_social_media(self):
+        # get media ID
+        self.test_add_social_media()
+        media_id = self.artist_user.artist.artist_profile.social_media.all()[0].id
+
+        # send request
+        url = reverse('artistaccount-social_media')
+        data = {
+            "socialmedia_id": str(media_id)
+        }
+
+        # validate response
+        response = self.client.delete(url, data, format="json", **self._get_headers(artist=True))
+
+        self.assert204(response)
+
 
 class TestArtistAlbums(RevibeTestCase):
     def setUp(self):

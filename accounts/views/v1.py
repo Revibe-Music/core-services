@@ -1135,7 +1135,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         return responses.NO_REQUEST_TYPE()
 
     # register social media
-    @action(detail=False, url_path="social-media", methods=['post', 'patch', 'delete'])
+    @action(detail=False, methods=['post', 'patch', 'delete'], url_path="social-media", url_name="social_media")
     def register_social_media(self, request, *args, **kwargs):
         """
         Adds, edits, or removes a social media link from an artist's profile

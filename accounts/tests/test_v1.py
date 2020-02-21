@@ -1036,13 +1036,26 @@ class TagSongsTestCase(RevibeTestCase):
         self._get_artist_user()
         self._create_song()
         self.url = reverse('artistaccount-tag_song')
-    
+
     def test_add_tag(self):
+        Song.objects.create(title='test', duration=100, uploaded_by=self.artist_user.artist, album=self.content_album)
+        # get song ID
+        song_id = self.artist_user.artist.song_uploaded_by.all()[0].id
+
         # send request
-        data = {}
+        data = {
+            "song_id": str(song_id),
+            "tags": [
+                "Testy"
+            ]
+        }
         response = self.client.post(self.url, data, format="json", **self._get_headers(artist=True))
 
         # validate request
         self.assert201(response)
+        self.assertEqual(
+            Tag.objects.get(text="Testy").text, "Testy",
+            msg="Could not find the tag that should have been created"
+        )
 
 

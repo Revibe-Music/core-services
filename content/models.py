@@ -5,6 +5,8 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 import uuid
 
+from revibe.utils.aws.s3 import delete_s3_object
+
 from content import model_exts as ext
 from content.managers import *
 
@@ -111,6 +113,16 @@ class Track(models.Model):
         null=False, blank=True, default=True,
         verbose_name="original file status"
     )
+
+    def delete(self):
+        """
+        Delete the file object from S3 before removing the row from the db
+        """
+        try:
+            delete_s3_object(self.file)
+        except Exception as e:
+            print(e)
+        super().delete()
 
     def __str__(self):
         ext = self.url.split('/')[-1]

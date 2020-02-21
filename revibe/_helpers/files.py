@@ -19,6 +19,8 @@ import threading
 from logging import getLogger
 logger = getLogger(__name__)
 
+from revibe.utils.aws.s3 import delete_s3_object
+
 from content.models import Artist, Album, Image, Track
 
 # -----------------------------------------------------------------------------
@@ -151,11 +153,7 @@ def add_track_to_song(obj, track, *args, **kwargs):
     if editing:
         prefix = f"audio/songs/{str(obj.uri)}/"
         tracks = obj.tracks.all()
-        if settings.USE_S3:
-            s3 = boto3.resource('s3')
         for t in tracks:
-            if settings.USE_S3:
-                s3.Object(settings.AWS_STORAGE_BUCKET_NAME, t.file.name).delete()
             t.delete()
 
     if type(track) == str:

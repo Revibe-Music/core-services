@@ -9,7 +9,6 @@ from django.conf import settings
 from rest_framework.exceptions import APIException
 
 import boto3
-from boto3.s3.con
 
 # -----------------------------------------------------------------------------
 

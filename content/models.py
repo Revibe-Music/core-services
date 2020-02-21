@@ -220,6 +220,19 @@ class Album(models.Model):
     def __repr__(self):
         return "<Album: {} {}>".format(self.name, self.id)
 
+    def delete(self):
+        songs = Song.objects.filter(album=self)
+        for s in songs:
+            s.delete()
+        
+        images = Image.objects.filter(album=self)
+        for i in images:
+            i.delete()
+        
+        self.is_displayed = False
+        self.is_deleted = True
+        self.save()
+
     objects = models.Manager()
     hidden_objects = NotDeletedManager()
     display_objects = AlbumNotHiddenNotDeletedManager()
@@ -298,6 +311,14 @@ class Song(models.Model):
     
     def __repr__(self):
         return "<Song: {} {}>".format(self.title, self.id)
+    
+    def delete(self):
+        tracks = self.tracks.all()
+        for t in tracks:
+            t.delete()
+        self.is_displayed = False
+        self.is_deleted = True
+        self.save()
     
     class Meta:
         verbose_name = 'song'

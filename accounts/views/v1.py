@@ -863,16 +863,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 raise ForbiddenError("You are not permitted to delete this album")
 
             # set the album to 'is_deleted'
-            instance.is_deleted = True
-            instance.is_displayed = False
-            instance.save()
-
-            # set all songs to 'is_deleted'
-            for song in instance.song_set.all():
-                song.is_deleted = True
-                song.is_displayed = False
-                song.save()
-
+            instance.delete()
             return responses.DELETED()
 
         else:
@@ -950,9 +941,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             if artist != instance.uploaded_by:
                 raise ForbiddenError("You are not authorized to delete this song")
 
-            instance.is_deleted = True
-            instance.is_displayed = False
-            instance.save()
+            instance.delete()
             return responses.DELETED()
 
         return responses.NO_REQUEST_TYPE()

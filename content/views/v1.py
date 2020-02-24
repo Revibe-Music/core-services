@@ -5,6 +5,8 @@ from rest_framework.response import Response
 
 from revibe.pagination import CustomLimitOffsetPagination
 from revibe.viewsets import *
+from revibe.utils.params import get_url_param
+from revibe._errors.network import ProgramError, ExpectationFailedError
 from revibe._helpers import const, responses
 from revibe._helpers.platforms import get_platform
 
@@ -12,6 +14,7 @@ from accounts.permissions import TokenOrSessionAuthentication
 from content.mixins import V1Mixin
 from content.models import *
 from content.serializers import v1 as ser_v1
+from content.utils.models import get_tag
 
 # -----------------------------------------------------------------------------
 
@@ -304,9 +307,44 @@ class MusicSearch(GenericPlatformViewSet):
     def search_playlists(self, text, *args, **kwargs):
         pass
 
-    
+    @action(detail=False, methods=['get'], url_path="tags", url_name="search-tags")
+    def tags(self, request, *args, **kwargs):
+        params = request.query_params
+
+        if 'text' not in params:
+            raise ExpectationFailedError("Param 'text' not in query params")
+        text = get_url_param(params, 'text')
+        content = get_url_param(params, 'content')
+        if (content == None) or (content not in ['songs', 'albums']):
+            content = 'songs'
+        
+        objs = self.search_tags(text, content)
+        data = {
+            content: objs.data
+        }
+
+        return responses.OK(data=data)
+
+    def search_tags(self, text, obj, *args, **kwargs):
+        """
+        return songs/albums by the tag that was sent
+        """
+        # get the tag
+        tag = get_tag(text)
+        objs = []
+
+        # which object to search
+        if obj.lower() == 'songs':
+            objs = ser_v1.SongSerializer(tag.songs.all(), many=True)
+        elif obj.lower() == 'albums':
+            objs = ser_v1.AlbumSerializer(tag.albums.all(), many=True)
+        else:
+            raise ProgramError("Must send either 'songs' or 'albums' to 'search_tags'.")
+
+        return objs
+
     @action(detail=False, methods=['get'], url_path="artists", url_name="search-artists")
-    def artsits(self, request, *args, **kwargs):
+    def artists(self, request, *args, **kwargs):
         """
         Special endpoint just for artists to be able to search other artsists
         when adding contributors.
@@ -342,3 +380,33 @@ class MusicSearch(GenericPlatformViewSet):
                 return artists[:limit]
             
         return artists[:limit]
+
+
+class Browse(GenericPlatformViewSet):
+    platform = 'Revibe'
+    permission_classes = [TokenOrSessionAuthentication]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"],["first-party"]]
+    }
+
+    def list(self, request, *args, **kwargs):
+        pass
+    
+    def _browse_recent_albums(self, *args, **kwargs):
+        pass
+
+    def _browse_recent_popular_albums(self, *args, **kwargs):
+        pass
+
+    def _browse_recent_popular_songs(self, *args, **kwargs):
+        pass
+
+    def _browse_recent_popular_playlists(self, *args, **kwargs):
+        pass
+
+    def _browse_top_songs_by_genre(self, *args, **kwargs):
+        pass
+
+    def _browse_top_songs_by_tag(self, *args, **kwargs):
+        pass
+

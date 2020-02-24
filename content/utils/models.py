@@ -12,6 +12,7 @@ def get_tag(text, *args, **kwargs):
     """
     Retrieves a tag, or creates one and returns that
     """
+    text = text.lower()
     try:
         tag = Tag.objects.get(text=text)
     except Tag.DoesNotExist:

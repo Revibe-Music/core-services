@@ -297,6 +297,28 @@ class Song(models.Model):
     last_changed = models.DateField(auto_now=True, null=True, blank=True)
     uploaded_date = models.DateField(auto_now_add=True, null=True, blank=True, editable=False)
 
+    # updated from dynamo DB by Lambda function...
+    streams_yesterday = models.IntegerField(
+        null=False, blank=True, default=0,
+        verbose_name=_("streams yesterday"),
+        help_text=_("Number of streams recorded in DynamoDB yesterday. Will be updated automatically.")
+    )
+    streams_last_week = models.IntegerField(
+        null=False, blank=True, default=0,
+        verbose_name=_("streams in the last 7 days"),
+        help_text=_("Number of streams recorded in DynamoDB in the last 7 days. Will be updated automatically.")
+    )
+    streams_last_month = models.IntegerField(
+        null=False, blank=True, default=0,
+        verbose_name=_("streams in the last 30 days"),
+        help_text=_("Number of streams recorded in DynamoDB in the last 30 days. Will be updated automatically.")
+    )
+    streams_this_year = models.IntegerField(
+        null=False, blank=True, default=0,
+        verbose_name=_("streams this calendar year"),
+        help_text=_("Number of streams recorded in DynamoDB during this calendar year. Will be updated automatically.")
+    )
+
     album  = models.ForeignKey(Album, on_delete=models.CASCADE, null=False, blank=False)
     contributors = models.ManyToManyField(Artist, through='SongContributor', related_name="song_contributors")
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="song_uploaded_by") # artist or user???

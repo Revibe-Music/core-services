@@ -318,6 +318,11 @@ class Song(models.Model):
         verbose_name=_("streams this calendar year"),
         help_text=_("Number of streams recorded in DynamoDB during this calendar year. Will be updated automatically.")
     )
+    streams_all_time = models.IntegerField(
+        null=False, blank=True, default=0,
+        verbose_name=_("streams all time"),
+        help_text=_("Number of streams recorded in DynamoDB all time. Will be updated automatically.")
+    )
 
     album  = models.ForeignKey(Album, on_delete=models.CASCADE, null=False, blank=False)
     contributors = models.ManyToManyField(Artist, through='SongContributor', related_name="song_contributors")

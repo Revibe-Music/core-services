@@ -46,9 +46,6 @@ class CampaingAdmin(admin.ModelAdmin):
 class YoutubeKeyAdmin(admin.ModelAdmin):
     # customize list display
     list_display = ('sortable_str', 'point_budget', 'number_of_users', )
-    list_filter = (
-        ('worked_on_last_test', admin.BooleanFieldListFilter),
-    )
 
     def sortable_str(self, obj):
         """

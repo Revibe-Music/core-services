@@ -2,12 +2,14 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+import datetime
 import random
 
 import logging
 logger = logging.getLogger(__name__)
 
 from revibe.viewsets import GenericPlatformViewSet
+from revibe.utils.params import get_url_param
 from revibe._errors.data import NoKeysError
 from revibe._errors.random import ValidationError
 from revibe._helpers import const, responses
@@ -57,6 +59,18 @@ class YouTubeKeyViewSet(viewsets.GenericViewSet):
         if len(choices) == 0:
             raise NoKeysError()
 
+        params = request.query_params
+        old_key = get_url_param(params, "old_key")
+        if old_key != None:
+            try:
+                old_key_object = YouTubeKey.objects.get(key=str(old_key))
+                old_key_object.last_date_broken = datetime.date.today()
+                old_key_object.save()
+
+                choices = choices.exclude(key=str(old_key))
+            except Exception as e:
+                raise e
+
         # loop through the keys in order to see if they are valid
         i = 0
         while i < len(choices):
@@ -65,10 +79,6 @@ class YouTubeKeyViewSet(viewsets.GenericViewSet):
             if not choice.is_valid:
                 i += 1
                 continue
-            
-            if not choice.recently_tested:
-                choice.test_key()
-                # currently this doesn't do anything
             
             # return the key, and add to the number of users
             choice.number_of_users += 1

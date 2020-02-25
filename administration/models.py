@@ -131,11 +131,6 @@ class Campaign(models.Model):
 
 
 class YouTubeKey(models.Model):
-    # create a class variable that keeps the required seconds to recheck the api key
-    _check_time = 24 * 60 * 60 # one day in seconds
-    _failure_threshold = 10
-
-    # id = models.AutoField(primary_key=True)
     key = models.CharField(
         help_text=_("API Key"),
         max_length=255,
@@ -150,17 +145,10 @@ class YouTubeKey(models.Model):
         null=False, blank=True, default=0
     )
 
-    last_tested = models.DateTimeField(
-        help_text=_("Time the key was last tested against the YouTube servers"),
-        null=False, blank=True, default=timezone.now
-    )
-    worked_on_last_test = models.BooleanField(
-        help_text=_("The last time this key was tested, it worked."),
-        null=False, blank=True, default=True
-    )
-    failure_count = models.IntegerField(
-        help_text="The number of failures without passing",
-        null=False, blank=True, default=0
+    last_date_broken = models.DateField(
+        null=True, blank=True,
+        help_text=_("The last date that this key ran dry"),
+        verbose_name=_("Most recent date expired")
     )
 
     date_created = models.DateTimeField(
@@ -169,36 +157,16 @@ class YouTubeKey(models.Model):
 
     def __str__(self):
         return str(self.key)
-    
-    def test_key(self):
-        """
-        Test the key against Youtube's API to determine if it's valid.
-        """
-        pass
-
-    @property
-    def recently_tested(self):
-        """
-        Return True if the key has been tested in the last day
-        """
-        now = datetime.datetime.now(datetime.timezone.utc)
-        difference = now - self.last_tested
-
-        if difference.seconds < self._check_time:
-            return True
-        else:
-            return False
 
     @property
     def is_valid(self):
         """
         Will return false if the key has failed more than the failure threshold.
         """
-        return True
-        # if self.failure_count >= self._failure_threshold:
-        #     return False
-        # else:
-        #     return True
+        if self.last_date_broken == datetime.date.today():
+            return False
+        else:
+            return True
 
     class Meta:
         verbose_name = 'YouTube Key'

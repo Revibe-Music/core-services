@@ -348,7 +348,7 @@ class SendRegisterLink(generics.GenericAPIView):
     register_link = "http://artist.revibe.tech/account/register"
 
     def get_register_link(self, user):
-        return f"{self.register_link}?uid={user.uri}"
+        return f"{self.register_link}?uid={user.id}"
 
     def __init__(self, *args, **kwargs):
         super(SendRegisterLink, self).__init__(*args, **kwargs)

@@ -347,6 +347,9 @@ class SendRegisterLink(generics.GenericAPIView):
 
     register_link = "http://artist.revibe.tech/account/register"
 
+    def get_register_link(self, user):
+        return f"{self.register_link}?uid={user.uri}"
+
     def __init__(self, *args, **kwargs):
         super(SendRegisterLink, self).__init__(*args, **kwargs)
         self.types_of_emails = {
@@ -398,7 +401,7 @@ class SendRegisterLink(generics.GenericAPIView):
         # get the html message
         context = {
             "name": name,
-            "register_link": self.register_link,
+            "register_link": self.get_register_link(user),
             "revibe_medium_image": const.REVIBE_MEDIUM_IMAGE,
             "youtube_image": const.YOUTUBE_IMAGE,
             "twitter_image": const.TWITTER_IMAGE,

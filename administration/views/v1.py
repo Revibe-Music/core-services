@@ -53,10 +53,10 @@ class YouTubeKeyViewSet(viewsets.GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         # get the key with the most points
-        choices = YouTubeKey.objects.all()
+        choices = YouTubeKey.objects.order_by('number_of_users')
         if len(choices) == 0:
             raise NoKeysError()
-        
+
         # loop through the keys in order to see if they are valid
         i = 0
         while i < len(choices):
@@ -68,7 +68,7 @@ class YouTubeKeyViewSet(viewsets.GenericViewSet):
             
             if not choice.recently_tested:
                 choice.test_key()
-                # currently this doesn't really do anything
+                # currently this doesn't do anything
             
             # return the key, and add to the number of users
             choice.number_of_users += 1

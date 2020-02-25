@@ -194,10 +194,11 @@ class YouTubeKey(models.Model):
         """
         Will return false if the key has failed more than the failure threshold.
         """
-        if self.failure_count >= self._failure_threshold:
-            return False
-        else:
-            return True
+        return True
+        # if self.failure_count >= self._failure_threshold:
+        #     return False
+        # else:
+        #     return True
 
     class Meta:
         verbose_name = 'YouTube Key'

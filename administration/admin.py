@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from revibe.admin import html_check_x
 
-from administration.admin_ext import test_api_key
+from administration.admin_ext import test_api_key, reset_user_count
 from administration.models import *
 
 # -----------------------------------------------------------------------------
@@ -45,7 +45,7 @@ class CampaingAdmin(admin.ModelAdmin):
 @admin.register(YouTubeKey)
 class YoutubeKeyAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('sortable_str', 'point_budget',)
+    list_display = ('sortable_str', 'point_budget', 'number_of_users', )
     list_filter = (
         ('worked_on_last_test', admin.BooleanFieldListFilter),
     )
@@ -63,7 +63,7 @@ class YoutubeKeyAdmin(admin.ModelAdmin):
     search_fields = ['key']
 
     # actions
-    actions = [test_api_key]
+    actions = [test_api_key, reset_user_count]
 
 
 # general admin information and changes

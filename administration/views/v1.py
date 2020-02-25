@@ -65,6 +65,7 @@ class YouTubeKeyViewSet(viewsets.GenericViewSet):
             try:
                 old_key_object = YouTubeKey.objects.get(key=str(old_key))
                 old_key_object.last_date_broken = datetime.date.today()
+                old_key_object.number_of_users -= 1
                 old_key_object.save()
 
                 choices = choices.exclude(key=str(old_key))

@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from metrics.models import *
+
+# -----------------------------------------------------------------------------
+
+@admin.register(Stream)
+class StreamAdmin(admin.ModelAdmin):
+    pass

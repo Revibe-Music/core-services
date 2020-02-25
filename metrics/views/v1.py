@@ -1,23 +1,32 @@
 from django.conf import settings
 from rest_framework.views import APIView
 
+from revibe._errors.network import ExpectationFailedError
 from revibe._helpers import responses
+from revibe.pagination import CustomLimitOffsetPagination
+from revibe.viewsets import *
 
+from accounts.permissions import TokenOrSessionAuthentication
+from metrics.models import *
 from metrics.serializers.v1 import *
 
+# -----------------------------------------------------------------------------
 
-class StreamView(APIView):
-    def post(self, request, *args, **kwargs):
-        # return an error when not running in the cloud
-        if not settings.USE_S3:
-            return responses.BAD_ENVIRONMENT()
+class StreamView(PlatformViewSet):
+    platform = 'Revibe'
+    queryset = Stream.objects.all()
+    serializer_class = StreamSerializer
+    pagination_class = CustomLimitOffsetPagination
+    permission_classes = [TokenOrSessionAuthentication]
+    required_alternate_scopes = {
+        "POST": [["ADMIN"],["first-party"]],
+    }
 
-        serializer = StreamSerializer(data=request.data, *args, **kwargs)
-        if serializer.is_valid():
-            serializer.save()
-            return responses.CREATED()
-        else:
-            return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
-        
-        return responses.DEFAULT_400_RESPONSE()
+    def create(self, request, *args, **kwargs):
+        """
+        Overwrites the default create method simply to send a blank 201 response
+        """
+        super().create(request, *args, **kwargs)
+        return responses.CREATED()
+
 

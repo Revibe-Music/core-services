@@ -5,11 +5,9 @@ from rest_framework import routers
 from metrics.views import v1
 
 router = routers.DefaultRouter()
-# router.register("stream", v1.StreamView, "streams")
+router.register("stream", v1.StreamView, "stream")
 
 urlpatterns = [
-
     path("", include(router.urls)),
-    path("stream/", v1.StreamView.as_view(), name="streams"),
 ]
 

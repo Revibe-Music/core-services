@@ -747,9 +747,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             # only send back metrics if the user is the uploading artist
             # or the contributor is allowed to see metrics
             if is_uploader or album_object.uploaded_by.artist_profile.share_data_with_contributors:
-                album['total_streams'] = 0
-                for song in album_object.song_set.all():
-                    album['total_streams'] += Stream.count(song.id, Stream.environment == env)
+                album['total_streams'] = 0#album_object.song_set.all().streams.all().count() # TODO: make this work cause I think it's possible
+                for song_object in album_object.song_set.all():
+                    album['total_streams'] += song_object.streams.all().count()
 
             # create dict with more advanced metrics info
             # only send if user is uploading artist or artist allows advanced
@@ -767,7 +767,6 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return []
 
         data = serializer.data
-        env = 'test' if settings.DEBUG else 'production'
 
         for song in serializer.data:
             song_object = Song.objects.get(id=song['song_id'])
@@ -776,7 +775,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             # only send back metrics if the user is the uploading artist
             # or the contributor is allowed to see the metrics
             if is_uploader or song_object.uploaded_by.artist_profile.share_data_with_contributors:
-                song['total_streams'] = Stream.count(song['song_id'], Stream.environment == env)
+                song['total_streams'] = song_object.streams.all().count()
 
             # create dict with more advanced metrics info
             # only send if user is uploading artist or artist allows advanced
@@ -814,12 +813,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
             albums = album_queryset
             serializer = content_ser_v1.AlbumSerializer(albums, many=True)
 
-            # attach the number of streams in running in the cloud
-            if settings.USE_S3:
-                metrics_data = self._get_album_metrics(serializer, artist, *args, **kwargs)
-                return responses.OK(data=metrics_data)
-
-            return responses.OK(serializer)
+            # attach the number of streams
+            metrics_data = self._get_album_metrics(serializer, artist, *args, **kwargs)
+            return responses.OK(data=metrics_data)
 
         elif request.method == 'POST':
             # default album platform to 'Revibe'
@@ -902,12 +898,10 @@ class UserArtistViewSet(GenericPlatformViewSet):
             # get the serialized data
             serializer = content_ser_v1.SongSerializer(songs, many=True)
 
-            # attach the number of streams in running in the cloud
-            if settings.USE_S3:
-                metrics_data = self._get_song_metrics(serializer, artist, *args, **kwargs)
-                return responses.OK(data=metrics_data)
+            # attach the number of streams
+            metrics_data = self._get_song_metrics(serializer, artist, *args, **kwargs)
+            return responses.OK(data=metrics_data)
 
-            return Response(serializer.data)
 
         elif request.method == 'POST':
             if 'platform' not in request.data.keys():
@@ -980,11 +974,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
             album_serializer = content_ser_v1.AlbumSerializer(albums, many=True)
 
             # attach metrics when running in the cloud
-            if settings.USE_S3:
-                metrics_data = self._get_album_metrics(album_serializer, artist, *args, **kwargs)
-                return responses.OK(data=metrics_data)
-
-            return responses.OK(serializer=album_serializer)
+            metrics_data = self._get_album_metrics(album_serializer, artist, *args, **kwargs)
+            return responses.OK(data=metrics_data)
 
         elif request.method == 'POST':
             serializer = content_ser_v1.AlbumContributorSerializer(data=request.data, *args, **kwargs)
@@ -1040,12 +1031,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
             song_serializer = content_ser_v1.SongSerializer(songs, many=True, *args, **kwargs)
 
             # attach stream data if in the cloud
-            if settings.USE_S3:
-                metrics_data = self._get_song_metrics(song_serializer, artist, *args, **kwargs)
-
-                return responses.OK(data=metrics_data)
-
-            return responses.OK(serializer=song_serializer)
+            metrics_data = self._get_song_metrics(song_serializer, artist, *args, **kwargs)
+            return responses.OK(data=metrics_data)
 
         elif request.method == 'POST':
             serializer = content_ser_v1.SongContributorSerializer(data=request.data, *args, **kwargs)

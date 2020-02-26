@@ -81,7 +81,6 @@ def create_libraries(user):
         raise ValidationError("Error creating libraries")
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class RegistrationAPI(generics.GenericAPIView):
     """
     this works when application has following attributes:
@@ -195,7 +194,6 @@ class RegistrationAPI(generics.GenericAPIView):
         return responses.DEFAULT_400_RESPONSE()
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class LoginAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = LoginAccountSerializer
@@ -269,7 +267,6 @@ class LoginAPI(generics.GenericAPIView):
         return responses.DEFAULT_400_RESPONSE()
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class RefreshTokenAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = RefreshTokenSerializer

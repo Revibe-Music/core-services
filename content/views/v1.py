@@ -404,8 +404,15 @@ class Browse(GenericPlatformViewSet):
     def top_albums_all_time(self, request, *args, **kwargs):
         serializer = browse.top_albums_all_time()
         return responses.OK(serializer=serializer)
+    
+    @action(detail=False, methods=['get'], url_path="top-artists-all-time", url_name="top-artists-all-time")
+    def top_artists_all_time(self, request, *args, **kwargs):
+        serializer = browse.top_artists_all_time()
+        return responses.OK(serializer=serializer)
+
 
     # trending
+
     @action(detail=False, methods=['get'], url_path="trending-songs", url_name="trending-songs")
     def trending_songs(self, request, *args, **kwargs):
         params = request.query_params
@@ -424,5 +431,15 @@ class Browse(GenericPlatformViewSet):
             raise ExpectationFailedError("Could not find parameter 'time_period' in request.")
 
         serializer = browse.trending_albums(time_period)
+        return responses.OK(serializer=serializer)
+    
+    @action(detail=False, methods=['get'], url_path="trending-artists", url_name="trending-artists")
+    def trending_artists(self, request, *args, **kwargs):
+        params = request.query_params
+        time_period = get_url_param(params, "time_period")
+        if time_period == None:
+            raise ExpectationFailedError("Could not find parameter 'time_period' in request.")
+
+        serializer = browse.trending_artists(time_period)
         return responses.OK(serializer=serializer)
 

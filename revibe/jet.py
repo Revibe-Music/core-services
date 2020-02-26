@@ -53,7 +53,6 @@ side_menu = [ # A list of application or custom item dicts
             {"name": 'accounts.customuser', "label": _("Users")},
             {"name": 'accounts.profile'},
             {"name": 'auth.group'},
-            {"name": 'auth.permissions'},
             {"name": 'content.artist'},
             {"name": 'accounts.artistprofile'},
             {"name": "accounts.social"}

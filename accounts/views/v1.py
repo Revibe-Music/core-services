@@ -36,6 +36,7 @@ from revibe._errors.accounts import AccountNotFound, NotArtistError
 from revibe._errors.network import ConflictError, ForbiddenError, NotImplementedError, ExpectationFailedError
 from revibe._helpers import responses, const
 
+from accounts.adapter import TokenAuthSupportQueryString
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *

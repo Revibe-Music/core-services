@@ -3,6 +3,8 @@ from rest_framework import views, viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+import random
+
 from revibe.pagination import CustomLimitOffsetPagination
 from revibe.viewsets import *
 from revibe.utils.params import get_url_param
@@ -391,7 +393,27 @@ class Browse(GenericPlatformViewSet):
     }
 
     def list(self, request, *args, **kwargs):
-        return responses.NOT_IMPLEMENTED()
+        all_options = browse.all_browse_options.copy()
+        defaul_limit = min(10, len(all_options))
+
+        params = request.query_params
+        number_of_options = int(get_url_param(params, 'sections'))
+        limit = min(number_of_options, len(all_options)) if number_of_options != None else defaul_limit
+
+        output = []
+        options = random.sample(all_options, k=limit)
+        for option in options:
+            extras = option.get("params", {})
+            extras["limit"] = 10
+            result = {
+                "name": option["name"],
+                "type": option["type"],
+                "result": option["function"](**extras).data
+            }
+            output.append(result)
+        
+        return responses.OK(data=output)
+
 
     # all-time
 

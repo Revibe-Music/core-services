@@ -27,6 +27,10 @@ time_lookup = {
     "last_month": last_month,
 }
 
+
+# -----------------------------------------------------------------------------
+# utils
+
 def _browse_song(annotation, limit=_DEFAULT_LIMIT):
     songs = Song.display_objects.filter(platform=const.REVIBE_STRING).annotate(count=annotation).order_by('-count')[:limit]
     return cnt_ser_v1.SongSerializer(songs, many=True)
@@ -92,3 +96,72 @@ def trending_artists(time_period, limit=_DEFAULT_LIMIT):
     annotation = Count('song_uploaded_by__streams__id', filter=Q(song_uploaded_by__streams__timestamp__gte=time_lookup[time_period]))
     return _browse_artist(annotation, limit)
 
+
+# -----------------------------------------------------------------------------
+
+time_options = [
+    ("today", "Today"),
+    ("last_week", "This Week"),
+    ("last_month", "This Month"),
+]
+trending_options = [
+    {
+        "function": trending_songs,
+        "name": "{}'s Trending Songs",
+        "type": "songs"
+    },
+    {
+        "function": trending_albums,
+        "name": "{}'s Trending Albums",
+        "type": "albums"
+    },
+    {
+        "function": trending_artists,
+        "name": "{}'s Trending Artists",
+        "type": "artists"
+    }
+]
+
+all_browse_options = [
+    {
+        "function": top_songs_all_time,
+        "name": "Revibe's Top Songs",
+        "type": "songs"
+    },
+    {
+        "function": top_albums_all_time,
+        "name": "Revibe's Top Albums",
+        "type": "albums"
+    },
+    {
+        "function": top_artists_all_time,
+        "name": "Revibe's Top Artists",
+        "type": "artists"
+    },
+    # {
+    #     "function": trending_songs,
+    #     "name": "Today's Trending Songs",
+    #     "type": "songs",
+    #     "params": {"time_period": "today"}
+    # },
+    # {
+    #     "function": trending_albums,
+    #     "name": "This Month's Trending Songs",
+    #     "type": "albums",
+    #     "params": {"time_period": "last_month"}
+    # },
+    # {
+    #     "function": trending_artists,
+    #     "name": "This Week's Trending Artists",
+    #     "type": "artists",
+    #     "params": {"time_period": "last_week"}
+    # }
+]
+for i in trending_options:
+    for j in time_options:
+        all_browse_options.append({
+            "function": i["function"],
+            "name": i["name"].format(j[1]),
+            "type": i["type"],
+            "params": {"time_period": j[0]}
+        })

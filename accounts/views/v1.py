@@ -499,7 +499,7 @@ class SpotifyConnect(SocialConnectView):
 
 
 class SpotifyRefresh(generics.GenericAPIView):
-    permission_classes = [TokenOrSessionAuthentication]
+    permission_classes = [TokenAuthSupportQueryString]
     required_alternate_scopes = {
         'GET': [['ADMIN'], ['first-party']],
         'POST': [['ADMIN'], ['first-party']]

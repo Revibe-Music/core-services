@@ -747,9 +747,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             # only send back metrics if the user is the uploading artist
             # or the contributor is allowed to see metrics
             if is_uploader or album_object.uploaded_by.artist_profile.share_data_with_contributors:
-                album['total_streams'] = 0#album_object.song_set.all().streams.all().count() # TODO: make this work cause I think it's possible
-                for song_object in album_object.song_set.all():
-                    album['total_streams'] += song_object.streams.all().count()
+                album['total_streams'] = album_object.number_of_streams
 
             # create dict with more advanced metrics info
             # only send if user is uploading artist or artist allows advanced
@@ -775,7 +773,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             # only send back metrics if the user is the uploading artist
             # or the contributor is allowed to see the metrics
             if is_uploader or song_object.uploaded_by.artist_profile.share_data_with_contributors:
-                song['total_streams'] = song_object.streams.all().count()
+                song['total_streams'] = song_object.number_of_streams
 
             # create dict with more advanced metrics info
             # only send if user is uploading artist or artist allows advanced

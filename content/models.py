@@ -12,6 +12,7 @@ from revibe.utils.aws.s3 import delete_s3_object
 
 from content import model_exts as ext
 from content.managers import *
+from metrics.utils.models import count_streams_from_songs
 
 # -----------------------------------------------------------------------------
 
@@ -178,6 +179,26 @@ class Artist(models.Model):
 
     objects = models.Manager()
 
+    @property
+    def number_of_streams_from_uploads(self):
+        """
+        Count the number of streams from uploads
+        """
+        songs = getattr(self, 'song_uploaded_by').all()
+        return count_streams_from_songs(songs)
+    
+    @property
+    def number_of_streams_from_contributions(self):
+        """
+        Count the number of streams from contributions
+        """
+        songs = getattr(self, 'song_contributors').all().distinct()
+        return count_streams_from_songs(songs)
+    
+    @property
+    def number_of_streams(self):
+        return self.number_of_streams_from_uploads + self.number_of_streams_from_contributions
+
     def __str__(self):
         return "{}".format(self.name)
     
@@ -218,6 +239,15 @@ class Album(models.Model):
         blank=True
     )
 
+    objects = models.Manager()
+    hidden_objects = NotDeletedManager()
+    display_objects = AlbumNotHiddenNotDeletedManager()
+
+    @property
+    def number_of_streams(self):
+        songs = getattr(self, 'song_set').all()
+        return count_streams_from_songs(songs)
+
     def __str__(self):
         return "{}".format(self.name)
     
@@ -236,10 +266,6 @@ class Album(models.Model):
         self.is_displayed = False
         self.is_deleted = True
         self.save()
-
-    objects = models.Manager()
-    hidden_objects = NotDeletedManager()
-    display_objects = AlbumNotHiddenNotDeletedManager()
 
     class Meta:
         verbose_name = 'album'
@@ -297,33 +323,6 @@ class Song(models.Model):
     last_changed = models.DateField(auto_now=True, null=True, blank=True)
     uploaded_date = models.DateField(auto_now_add=True, null=True, blank=True, editable=False)
 
-    # updated from dynamo DB by Lambda function...
-    streams_yesterday = models.IntegerField(
-        null=False, blank=True, default=0,
-        verbose_name=_("streams yesterday"),
-        help_text=_("Number of streams recorded in DynamoDB yesterday. Will be updated automatically.")
-    )
-    streams_last_week = models.IntegerField(
-        null=False, blank=True, default=0,
-        verbose_name=_("streams in the last 7 days"),
-        help_text=_("Number of streams recorded in DynamoDB in the last 7 days. Will be updated automatically.")
-    )
-    streams_last_month = models.IntegerField(
-        null=False, blank=True, default=0,
-        verbose_name=_("streams in the last 30 days"),
-        help_text=_("Number of streams recorded in DynamoDB in the last 30 days. Will be updated automatically.")
-    )
-    streams_this_year = models.IntegerField(
-        null=False, blank=True, default=0,
-        verbose_name=_("streams this calendar year"),
-        help_text=_("Number of streams recorded in DynamoDB during this calendar year. Will be updated automatically.")
-    )
-    streams_all_time = models.IntegerField(
-        null=False, blank=True, default=0,
-        verbose_name=_("streams all time"),
-        help_text=_("Number of streams recorded in DynamoDB all time. Will be updated automatically.")
-    )
-
     album  = models.ForeignKey(Album, on_delete=models.CASCADE, null=False, blank=False)
     contributors = models.ManyToManyField(Artist, through='SongContributor', related_name="song_contributors")
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="song_uploaded_by") # artist or user???
@@ -332,10 +331,18 @@ class Song(models.Model):
         related_name='songs',
         blank=True
     )
+    # streams = many-to-one with metrics.Stream
 
     objects = models.Manager() # all objects
     hidden_objects = NotDeletedManager() # objects that are not deleted
     display_objects = SongNotHiddenNotDeletedManager() # objects that are not deleted and not hidden and album is not hidden or deleted
+
+    @property
+    def number_of_streams(self):
+        """
+        Simple thing to make counting streams easier
+        """
+        return int(getattr(self, 'streams').all().count())
 
     def __str__(self):
         return "{}".format(self.title)

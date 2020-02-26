@@ -11,6 +11,7 @@ from revibe._helpers import const, responses
 from revibe._helpers.platforms import get_platform
 
 from accounts.permissions import TokenOrSessionAuthentication
+from content import browse
 from content.mixins import V1Mixin
 from content.models import *
 from content.serializers import v1 as ser_v1
@@ -390,23 +391,15 @@ class Browse(GenericPlatformViewSet):
     }
 
     def list(self, request, *args, **kwargs):
-        pass
-    
-    def _browse_recent_albums(self, *args, **kwargs):
-        pass
+        return responses.NOT_IMPLEMENTED()
 
-    def _browse_recent_popular_albums(self, *args, **kwargs):
-        pass
+    @action(detail=False, methods=['get'], url_path="top-songs-all-time", url_name="top-songs-all-time")
+    def top_songs_all_time(self, request, *args, **kwargs):
+        serializer = browse.top_songs_all_time()
+        return responses.OK(serializer=serializer)
 
-    def _browse_recent_popular_songs(self, *args, **kwargs):
-        pass
-
-    def _browse_recent_popular_playlists(self, *args, **kwargs):
-        pass
-
-    def _browse_top_songs_by_genre(self, *args, **kwargs):
-        pass
-
-    def _browse_top_songs_by_tag(self, *args, **kwargs):
-        pass
+    @action(detail=False, methods=['get'], url_path="top-albums-all-time", url_name="top-albums-all-time")
+    def top_albums_all_time(self, request, *args, **kwargs):
+        serializer = browse.top_albums_all_time()
+        return responses.OK(serializer=serializer)
 

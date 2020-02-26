@@ -245,8 +245,9 @@ class Album(models.Model):
 
     @property
     def number_of_streams(self):
-        songs = getattr(self, 'song_set').all()
-        return count_streams_from_songs(songs)
+        # songs = getattr(self, 'song_set').all()
+        # return count_streams_from_songs(songs)
+        return getattr(self, 'song_set').all().annotate(streams=models.Count('streams__id')).aggregate(models.Sum('streams'))
 
     def __str__(self):
         return "{}".format(self.name)

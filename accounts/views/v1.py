@@ -81,6 +81,7 @@ def create_libraries(user):
         raise ValidationError("Error creating libraries")
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class RegistrationAPI(generics.GenericAPIView):
     """
     this works when application has following attributes:
@@ -194,6 +195,7 @@ class RegistrationAPI(generics.GenericAPIView):
         return responses.DEFAULT_400_RESPONSE()
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class LoginAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = LoginAccountSerializer
@@ -267,6 +269,7 @@ class LoginAPI(generics.GenericAPIView):
         return responses.DEFAULT_400_RESPONSE()
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class RefreshTokenAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = RefreshTokenSerializer
@@ -496,6 +499,7 @@ class SpotifyConnect(SocialConnectView):
         return Response({'access_token':spotify_token.token,'refresh_token':spotify_token.token_secret,"expires_in": 3600}, status=status.HTTP_200_OK)
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class SpotifyRefresh(generics.GenericAPIView):
     permission_classes = [TokenAuthSupportQueryString]
     required_alternate_scopes = {
@@ -526,6 +530,7 @@ class SpotifyRefresh(generics.GenericAPIView):
         return Response({"error":"Social Token does not exist."},status=status.HTTP_400_BAD_REQUEST) # should probably return current tokens
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class SpotifyLogout(generics.GenericAPIView):
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {

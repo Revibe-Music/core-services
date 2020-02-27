@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from rest_framework import views, viewsets, permissions as perm, generics, status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.decorators import action
@@ -22,6 +24,7 @@ from music.serializers.v1 import *
 
 # -----------------------------------------------------------------------------
 
+@method_decorator(csrf_exempt, name="dispatch")
 class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
     serializer_class = LibrarySerializer
     pagination_class = CustomLimitOffsetPagination
@@ -140,6 +143,8 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
         else:
             return Reponse(status=status.HTTP_400_BAD_REQUEST)
 
+
+@method_decorator(csrf_exempt, name="dispatch")
 class PlaylistViewSet(viewsets.ModelViewSet):
     serializer_class = PlaylistSerializer
     pagination_class = CustomLimitOffsetPagination

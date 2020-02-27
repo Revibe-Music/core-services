@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
 
 from revibe._errors.network import ExpectationFailedError
@@ -12,6 +14,8 @@ from metrics.serializers.v1 import *
 
 # -----------------------------------------------------------------------------
 
+
+@method_decorator(csrf_exempt, name="dispatch")
 class StreamView(PlatformViewSet):
     platform = 'Revibe'
     queryset = Stream.objects.all()

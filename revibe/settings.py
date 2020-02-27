@@ -215,7 +215,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'accounts.adapter.TokenAuthSupportQueryString',
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-        'rest_framework.authentication.SessionAuthentication', # To keep the Browsable API
+        # 'rest_framework.authentication.SessionAuthentication', # To keep the Browsable API # disabled to remove CSRF checks
+        'revibe.authentication.CsrfExemptSessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',

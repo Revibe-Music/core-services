@@ -501,7 +501,8 @@ class SpotifyConnect(SocialConnectView):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class SpotifyRefresh(generics.GenericAPIView):
-    permission_classes = [TokenAuthSupportQueryString]
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = [TokenAuthSupportQueryString]
     required_alternate_scopes = {
         'GET': [['ADMIN'], ['first-party']],
         'POST': [['ADMIN'], ['first-party']]

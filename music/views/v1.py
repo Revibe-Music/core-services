@@ -74,13 +74,13 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
                 raise network.NotFoundError()
             library = library[0]
 
-            songs = library.songs.all()
+            songs = library.library_to_song.all()
             page = self.paginate_queryset(songs)
             if page is not None:
-                serializer = SongSerializer(page, many=True)
+                serializer = ReadOnlyLibrarySongSerializer(page, many=True)
                 return self.get_paginated_response(serializer.data)
-            
-            serializer = SongSerializer(songs, many=True)
+
+            serializer = ReadOnlyLibrarySongSerializer(songs, many=True)
             return responses.OK(serializer=serializer)
 
 

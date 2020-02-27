@@ -22,6 +22,7 @@ class LibrarySerializer(serializers.ModelSerializer):
             # 'songs',
         ]
 
+
 class PlaylistSerializer(serializers.ModelSerializer):
     # songs = SongSerializer(many=True, read_only=True)
     # write-only fields
@@ -57,10 +58,22 @@ class PlaylistSerializer(serializers.ModelSerializer):
         playlist.save()
         return playlist
 
+
+class ReadOnlyLibrarySongSerializer(serializers.ModelSerializer):
+    song = SongSerializer(read_only=True)
+
+    class Meta:
+        model = LibrarySong
+        fields = [
+            "song",
+            "date_saved",
+        ]
+
+
 class LibrarySongSerializer(serializers.ModelSerializer):
     # read-only fields
     library = serializers.ReadOnlyField(source='library.id')
-    song = serializers.ReadOnlyField(source='song.id')
+    song = SongSerializer(read_only=True)
     # write-only fields
     song_id = serializers.CharField(write_only=True)
     class Meta:
@@ -72,7 +85,7 @@ class LibrarySongSerializer(serializers.ModelSerializer):
             # write-only fields
             'song_id',
         ]
-    
+
     def get_library(self, platform):
         """
         Gets the library of the current request's user d on the platform passed
@@ -124,6 +137,7 @@ class LibrarySongSerializer(serializers.ModelSerializer):
         lib_song = lib_song[0]
 
         lib_song.delete()
+
 
 class PlaylistSongSerializer(serializers.ModelSerializer):
     # read-only fields

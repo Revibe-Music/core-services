@@ -364,6 +364,9 @@ class OtherArtistSerializer(serializers.ModelSerializer):
     # read-only
     images = ImageSerializer(source='artist_image', many=True, read_only=True)    
 
+    # write-only
+    image_refs = serializers.ListField(write_only=True, required=False)
+
     class Meta:
         model = Artist
         fields = [
@@ -372,7 +375,21 @@ class OtherArtistSerializer(serializers.ModelSerializer):
             'name',
             'images',
             'platform',
+
+            # write-only
+            'image_refs'
         ]
+    
+    def create(self, validated_data):
+        image_refs = validated_data.pop("image_refs", None)
+        artist = super().create(validated_data)
+
+        if image_refs != None:
+            for i in image_refs:
+                im_obj = Image.objects.create(artist=artist, reference=i["ref"], height=i["height"], width=i["width"], is_original=False)
+                im_obj.save()
+        
+        return artist
 
 
 class OtherAlbumSerializer(serializers.ModelSerializer):
@@ -380,6 +397,9 @@ class OtherAlbumSerializer(serializers.ModelSerializer):
     album_uri = serializers.CharField(source='uri', required=False)
     uploaded_by = OtherArtistSerializer(read_only=True)
     images = ImageSerializer(source='album_image', many=True, read_only=True)
+
+    # write-only
+    image_refs = serializers.ListField(write_only=True, required=False)
 
     class Meta:
         model = Album
@@ -391,7 +411,21 @@ class OtherAlbumSerializer(serializers.ModelSerializer):
             'images',
             'platform',
             'uploaded_by',
+
+            # write-only
+            "image_refs",
         ]
+    
+    def create(self, validated_data):
+        image_refs = validated_data.pop("image_refs", None)
+        album = super().create(validated_data)
+
+        if image_refs != None:
+            for i in image_refs:
+                im_obj = Image.objects.create(album=album, reference=i["ref"], height=i["height"], width=i["width"], is_original=False)
+                im_obj.save()
+        
+        return album
 
 
 class OtherSongSerializer(serializers.ModelSerializer):

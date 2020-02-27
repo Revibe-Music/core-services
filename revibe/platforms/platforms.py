@@ -56,12 +56,12 @@ class YouTube(Platform):
         # validate data
         if (not data['song']) or (not data['song']['song_id']):
             raise data_err.SerializerValidationError({"song": ["song object must contain an ID"]})
-        if 'image_ref' not in data['album'].keys():
-            raise data_err.SerializerValidationError({"album": ["album object must contain an image_ref"]})
+        if 'image_refs' not in data['album'].keys():
+            raise data_err.SerializerValidationError({"album": ["album object must contain an image_refs"]})
 
         album_data = {
             "name": data['song']['title'] + '-Album',
-            "image_ref": data['album']['image_ref']
+            "image_refs": data['album']['image_refs']
         }
 
         return self._save_album(album_data, artist, *args, **kwargs)

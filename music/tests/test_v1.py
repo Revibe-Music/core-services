@@ -54,10 +54,22 @@ class TestLibrary(RevibeTestCase):
                 "artist_id": "456y2urj3kef",
                 "artist_uri": "u7q3iaervo83thiger",
                 "name": "YouTube Guy",
-                "image_ref": "hello.com/hello.png"
+                "image_refs": [
+                    {
+                        "ref": "whatever.com/iwign.jpg",
+                        "height": "450",
+                        "width": "450",
+                    }
+                ]
             },
             "album": {
-                "image_ref": "9ui3wrsg.com/h3otgnerv.jpg"
+                "image_refs": [
+                    {
+                        "ref": "whatever.com/iwign.jpg",
+                        "height": "300",
+                        "width": "300",
+                    }
+                ]
             },
             "song": {
                 "song_id": "2346790",
@@ -69,6 +81,8 @@ class TestLibrary(RevibeTestCase):
         response = self.client.post(url, data, format="json", **self._get_headers())
 
         # validate response
+        if response.status_code != 201:
+            print(response.data)
         self.assert201(response)
         self.assertReturnDict(response)
         self.assertEqual(

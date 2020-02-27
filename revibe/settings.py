@@ -216,7 +216,7 @@ REST_FRAMEWORK = {
         'accounts.adapter.TokenAuthSupportQueryString',
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
         # 'rest_framework.authentication.SessionAuthentication', # To keep the Browsable API # disabled to remove CSRF checks
-        'revibe.authentication.CsrfExemptSessionAuthentication',
+        'revibe.authentication.CsrfExemptSessionAuthentication', # https://stackoverflow.com/questions/30871033/django-rest-framework-remove-csrf
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',

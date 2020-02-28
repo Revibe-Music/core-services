@@ -173,3 +173,61 @@ class YouTubeKey(models.Model):
         verbose_name_plural = 'YouTube Keys'
         ordering = ['-point_budget']
 
+
+class Alert(models.Model):
+
+    _category_choices = (
+        ("warn", "Warning"),
+        ("error", "Error"),
+        ("info", "Information"),
+        ("feature", "New Feature")
+    )
+
+    subject = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        verbose_name=_("subject"),
+        help_text=_("The subject of the message to send")
+    )
+    message = models.TextField(
+        null=False, blank=False,
+        verbose_name=_("Message"),
+        help_text=_("The content of the alert to send to users.")
+    )
+    category = models.CharField(
+        max_length=255,
+        null=False, blank=False,
+        choices=_category_choices,
+        verbose_name=_("alert category"),
+        help_text=_("The type of alert to send to users")
+    )
+    start_date = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name=_("message start date"),
+        help_text=_("The date to start sending the alert on")
+    )
+    end_date = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name=_("message end date"),
+        help_text=_("The date to stop sending the alert on")
+    )
+    enabled = models.BooleanField(
+        null=False, blank=False, default=True,
+        verbose_name=_("Message is enabled"),
+        help_text=_("When set to off, will not be sent to any more users")
+    )
+
+    date_created = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def _get_subject(self):
+        return self.subject if self.subject != None else "no subject"
+
+    class Meta:
+        verbose_name = "system alert"
+        verbose_name_plural = "system alerts"
+
+    def __str__(self):
+        erythang = f"{self._get_subject()} - {self.message}"
+

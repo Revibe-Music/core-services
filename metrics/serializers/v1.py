@@ -33,12 +33,12 @@ class StreamSerializer(serializers.ModelSerializer):
         except Song.DoesNotExist as e:
             raise network.BadEnvironmentError("This song_id has not yet been recorded, this is normal for non-Revibe content.")
 
-        user_id = validate_data.pop('user_id', None)
-        if user_id != None:
-            user = CustomUser.objects.get(id=user_id)
-            validate_data['user'] = user
-
         stream = Stream.objects.create(**validate_data, song=song)
+
+        user = self.context.get("request").user
+        if user and user.profile.allow_listening_data:
+            stream.user = user
+
         stream.save()
 
         return stream

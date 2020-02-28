@@ -172,7 +172,7 @@ class Platform:
             return song
         
         elif num_returned > 1:
-            raise plt.InvalidPlatformContent("Found multiple artists with this ID")
+            raise plt.InvalidPlatformContent("Found multiple songs with this ID")
 
         else: #can only be 0
             return self._save_song(data, artist, album, *args, **kwargs)
@@ -238,8 +238,15 @@ class Platform:
 
         song = self.save(data, *args, **kwargs)
 
-        instance = LibrarySong.objects.create(library=library, song=song)
-        instance.save()
+        lib_songs = LibrarySong.objects.filter(library=library, song=song)
+        number_of_objects = lib_songs.count()
+        if number_of_objects == 0:
+            instance = LibrarySong.objects.create(library=library, song=song)
+            instance.save()
+        elif number_of_objects == 1:
+            instance = lib_songs[0]
+        else: # has more than 1 song in the check
+            raise plt_er.InvalidPlatformContent("Error checking user's library for this song")
 
         return instance
 

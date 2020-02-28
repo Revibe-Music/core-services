@@ -3,6 +3,7 @@ from rest_framework import serializers
 import logging
 logger = logging.getLogger(__name__)
 
+from revibe._errors import network
 from revibe._errors.random import ValidationError
 
 from accounts import models as acc_models
@@ -96,6 +97,24 @@ class YouTubeKeySerializer(serializers.ModelSerializer):
         fields = [
             'key'
         ]
+
+
+class AlertSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Alert
+        fields = [
+            "subject",
+            "message",
+            "category",
+            "start_date",
+        ]
+
+    def create(self, validated_data):
+        raise network.BadEnvironmentError("Cannot create an alert from the API")
+    
+    def update(self, validated_data):
+        raise network.BadEnvironmentError("Cannot update an alert from the API")
 
 
 # metrics information

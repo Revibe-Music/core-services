@@ -7,6 +7,8 @@ from uuid import uuid1
 
 from revibe._helpers import const
 
+from administration import managers
+
 # -----------------------------------------------------------------------------
 
 class ContactForm(models.Model):
@@ -221,6 +223,10 @@ class Alert(models.Model):
         auto_now_add=True
     )
 
+    # managers
+    objects = models.Manager()
+    display_objects = managers.AlertDisplayManager()
+
     def _get_subject(self):
         return self.subject if self.subject != None else "no subject"
 
@@ -230,4 +236,5 @@ class Alert(models.Model):
 
     def __str__(self):
         erythang = f"{self._get_subject()} - {self.message}"
+        return erythang[:50] + "..."
 

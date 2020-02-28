@@ -8,6 +8,7 @@ import random
 import logging
 logger = logging.getLogger(__name__)
 
+from revibe.pagination import CustomLimitOffsetPagination
 from revibe.viewsets import GenericPlatformViewSet
 from revibe.utils.params import get_url_param
 from revibe._errors.data import NoKeysError
@@ -88,6 +89,15 @@ class YouTubeKeyViewSet(viewsets.GenericViewSet):
         
         raise NoKeysError("Could identify any valid keys")
 
+
+class AlertViewSet(viewsets.ModelViewSet):
+    queryset = Alert.display_objects.all()
+    serializer_class = adm_ser_v1.AlertSerializer
+    permission_classes = [TokenOrSessionAuthentication]
+    pagination_class = CustomLimitOffsetPagination
+    required_alternate_scopes = {
+        "GET": [["ADMIN"],["first-party"]]
+    }
 
 
 class CompanyViewSet(GenericPlatformViewSet):

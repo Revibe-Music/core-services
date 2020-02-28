@@ -287,7 +287,10 @@ class RefreshTokenAPI(generics.GenericAPIView):
                 return responses.SERIALIZER_ERROR_RESPONSE(detail=err)
 
         # get tokens
-        refresh_token = RefreshToken.objects.get(token=request.data['refresh_token'])
+        try:
+            refresh_token = RefreshToken.objects.get(token=request.data['refresh_token'])
+        except RefreshToken.DoesNotExist as e:
+            raise network.BadEnvironmentError("This account has been logged in on another device, please log in again")
         access_token = refresh_token.access_token
 
         access_token.token = common.generate_token()

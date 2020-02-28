@@ -515,7 +515,9 @@ class SpotifyRefresh(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         # should spotify refresh token be verified against user?
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            raise network.ExpectationFailedError(detail=serializer.errors)
+
         refresh_token = serializer.validated_data['refresh_token']
         if SocialToken.objects.filter(token_secret=refresh_token).exists():
             token = SocialToken.objects.get(token_secret=refresh_token)

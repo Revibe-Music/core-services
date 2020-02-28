@@ -150,9 +150,11 @@ class MusicSearch(GenericPlatformViewSet):
             # result['songs'] = ser_v1.SongSerializer(self.search_songs(text), many=True).data
             result['songs'] = ser_v1.SongSerializer(search.search_songs(text), many=True).data
         if (t == 'albums') or (not t):
-            result['albums'] = ser_v1.AlbumSerializer(self.search_albums(text), many=True).data
+            # result['albums'] = ser_v1.AlbumSerializer(self.search_albums(text), many=True).data
+            result['albums'] = ser_v1.AlbumSerializer(search.search_albums(text), many=True).data
         if (t == 'artists') or (not t):
-            result['artists'] = ser_v1.ArtistSerializer(self.search_artists(text), many=True).data
+            # result['artists'] = ser_v1.ArtistSerializer(self.search_artists(text), many=True).data
+            result['artists'] = ser_v1.ArtistSerializer(search.search_artists(text), many=True).data
 
         return Response(result ,status=status.HTTP_200_OK)
     
@@ -225,6 +227,9 @@ class MusicSearch(GenericPlatformViewSet):
         return songs[:limit]
 
     def search_albums(self, text, *args, **kwargs):
+        """
+        DEPRECATED: See content.utils.search for the new search_albums function.
+        """
         assert text, "method 'search_albums' requires a search value."
         limit = const.SEARCH_LIMIT
 
@@ -278,6 +283,9 @@ class MusicSearch(GenericPlatformViewSet):
         return albums[:limit]
     
     def search_artists(self, text, *args, **kwargs):
+        """
+        DEPRECATED: See content.utils.search for the new search_albums function.
+        """
         assert text, "method 'search_artists' requires a search value."
         limit = const.SEARCH_LIMIT
 

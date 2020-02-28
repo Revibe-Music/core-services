@@ -1,6 +1,8 @@
 from django.conf import settings
 from rest_framework import serializers
 
+from revibe._errors import network
+
 from accounts.models import CustomUser
 from content.models import Song
 from metrics.models import *
@@ -26,7 +28,10 @@ class StreamSerializer(serializers.ModelSerializer):
     
     def create(self, validate_data):
         song_id = validate_data.pop('song_id')
-        song = Song.objects.get(id=song_id)
+        try:
+            song = Song.objects.get(id=song_id)
+        except Song.DoesNotExist as e:
+            raise network.BadEnvironmentError("This song_id has not yet been recorded, this is normal for non-Revibe content.")
 
         user_id = validate_data.pop('user_id', None)
         if user_id != None:

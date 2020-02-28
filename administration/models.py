@@ -223,6 +223,13 @@ class Alert(models.Model):
         auto_now_add=True
     )
 
+    users_seen = models.ManyToManyField(
+        to="accounts.customuser",
+        related_name="alerts_seen",
+        through="administration.AlertSeen",
+        help_text=_("The users that have seen this alert")
+    )
+
     # managers
     objects = models.Manager()
     display_objects = managers.AlertDisplayManager()
@@ -237,4 +244,34 @@ class Alert(models.Model):
     def __str__(self):
         erythang = f"{self._get_subject()} - {self.message}"
         return erythang[:50] + "..."
+
+
+class AlertSeen(models.Model):
+
+    alert = models.ForeignKey(
+        to='administration.alert',
+        on_delete=models.CASCADE,
+        related_name="alert_seen",
+        null=False, blank=False,
+        verbose_name=_("alert"),
+        help_text=_("Related system alert")
+    )
+    user = models.ForeignKey(
+        to='accounts.customuser',
+        on_delete=models.CASCADE,
+        related_name="alert_seen",
+        null=False, blank=False,
+        verbose_name=_("user"),
+        help_text=_("User that saw the alert")
+    )
+
+    has_seen = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("has seen"),
+        help_text=_("Indicates that the user has seen the alert")
+    )
+
+    class Meta:
+        verbose_name = "alert seen"
+        verbose_name_plural = "alerts seen"
 

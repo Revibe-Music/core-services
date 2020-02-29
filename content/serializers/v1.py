@@ -257,10 +257,11 @@ class AlbumSerializer(serializers.ModelSerializer):
             artist = request.user.artist
         else:
             raise Exception("problem") # implement custom exception class
-        
+
         img = validated_data.pop('image', None)
 
         album = Album(**validated_data, uploaded_by=artist)
+        album.is_displayed = True
         album.save()
 
         album_contrib = AlbumContributor.objects.create(artist=artist, album=album, contribution_type="Artist", primary_artist=True)
@@ -269,7 +270,7 @@ class AlbumSerializer(serializers.ModelSerializer):
         image_obj = add_image_to_obj(album, img)
 
         return album
-    
+
     def update(self, instance, validated_data, *args, **kwargs):
         img = validated_data.pop('image', None)
 

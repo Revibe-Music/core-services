@@ -275,3 +275,13 @@ class AlertSeen(models.Model):
         verbose_name = "alert seen"
         verbose_name_plural = "alerts seen"
 
+
+class ArtistSpotlight(models.Model):
+
+    date = models.DateField(
+        primary_key=True
+    )
+
+    class Meta:
+        pass
+

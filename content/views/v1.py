@@ -433,7 +433,7 @@ class Browse(GenericPlatformViewSet):
 
         # top hits are always available at the bottom of the browse page
         output.append({
-            "name": "Top Hits",
+            "name": "Top Hits - All-Time",
             "type": "container",
             "results": [
                 {

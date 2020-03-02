@@ -1,4 +1,5 @@
 from django.db.models import Count, Q
+from django.urls import reverse
 from rest_framework import views, viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -406,24 +407,55 @@ class Browse(GenericPlatformViewSet):
     }
 
     def list(self, request, *args, **kwargs):
-        all_options = browse.all_browse_options.copy()
-        defaul_limit = min(10, len(all_options))
-
-        params = request.query_params
-        number_of_options = int(get_url_param(params, 'sections'))
-        limit = min(number_of_options, len(all_options)) if number_of_options != None else defaul_limit
-
         output = []
-        options = random.sample(all_options, k=limit)
-        for option in options:
-            extras = option.get("params", {})
-            extras["limit"] = 10
-            result = {
-                "name": option["name"],
-                "type": option["type"],
-                "result": option["function"](**extras).data
-            }
-            output.append(result)
+
+        # append various browse things
+        browse_page_limit = 5
+        browses = [
+            # TODO: artist spotlight
+            {
+                "function": browse.trending_songs,
+                "kwargs": {"time_period": "today", "limit": browse_page_limit}
+            },
+            {
+                "function": browse.trending_albums,
+                "kwargs": {"time_period": "today", "limit": browse_page_limit}
+            },
+            {
+                "function": browse.trending_artists,
+                "kwargs": {"time_period": "today", "limit": browse_page_limit}
+            },
+            # TODO: recently uploaded albums
+            # TODO: popular on Revibe (Youtube shit)
+        ]
+        for func in browses:
+            output.append(func["function"](**func["kwargs"]))
+
+        # top hits are always available at the bottom of the browse page
+        output.append({
+            "name": "Top Hits",
+            "type": "container",
+            "results": [
+                {
+                    "name": "Top Songs",
+                    "type": "songs",
+                    "icon": None,
+                    "url": reverse("browse-top-songs-all-time"),
+                },
+                {
+                    "name": "Top Albums",
+                    "type": "albums",
+                    "icon": None,
+                    "url": reverse("browse-top-albums-all-time"),
+                },
+                {
+                    "name": "Top Artists",
+                    "type": "artists",
+                    "icon": None,
+                    "url": reverse("browse-top-artists-all-time"),
+                },
+            ],
+        })
         
         return responses.OK(data=output)
 
@@ -432,18 +464,18 @@ class Browse(GenericPlatformViewSet):
 
     @action(detail=False, methods=['get'], url_path="top-songs-all-time", url_name="top-songs-all-time")
     def top_songs_all_time(self, request, *args, **kwargs):
-        serializer = browse.top_songs_all_time()
-        return responses.OK(serializer=serializer)
+        result = browse.top_songs_all_time()
+        return responses.OK(data=result)
 
     @action(detail=False, methods=['get'], url_path="top-albums-all-time", url_name="top-albums-all-time")
     def top_albums_all_time(self, request, *args, **kwargs):
-        serializer = browse.top_albums_all_time()
-        return responses.OK(serializer=serializer)
-    
+        result = browse.top_albums_all_time()
+        return responses.OK(data=result)
+
     @action(detail=False, methods=['get'], url_path="top-artists-all-time", url_name="top-artists-all-time")
     def top_artists_all_time(self, request, *args, **kwargs):
-        serializer = browse.top_artists_all_time()
-        return responses.OK(serializer=serializer)
+        result = browse.top_artists_all_time()
+        return responses.OK(data=result)
 
 
     # trending
@@ -455,8 +487,8 @@ class Browse(GenericPlatformViewSet):
         if time_period == None:
             raise ExpectationFailedError("Could not find parameter 'time_period' in request.")
 
-        serializer = browse.trending_songs(time_period)
-        return responses.OK(serializer=serializer)
+        result = browse.trending_songs(time_period)
+        return responses.OK(data=result)
     
     @action(detail=False, methods=['get'], url_path="trending-albums", url_name="trending-albums")
     def trending_albums(self, request, *args, **kwargs):
@@ -465,8 +497,8 @@ class Browse(GenericPlatformViewSet):
         if time_period == None:
             raise ExpectationFailedError("Could not find parameter 'time_period' in request.")
 
-        serializer = browse.trending_albums(time_period)
-        return responses.OK(serializer=serializer)
+        result = browse.trending_albums(time_period)
+        return responses.OK(data=result)
     
     @action(detail=False, methods=['get'], url_path="trending-artists", url_name="trending-artists")
     def trending_artists(self, request, *args, **kwargs):
@@ -475,6 +507,6 @@ class Browse(GenericPlatformViewSet):
         if time_period == None:
             raise ExpectationFailedError("Could not find parameter 'time_period' in request.")
 
-        serializer = browse.trending_artists(time_period)
-        return responses.OK(serializer=serializer)
+        result = browse.trending_artists(time_period)
+        return responses.OK(data=result)
 

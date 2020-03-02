@@ -12,7 +12,6 @@ from revibe.utils.aws.s3 import delete_s3_object
 
 from content import model_exts as ext
 from content.managers import *
-from metrics.utils.models import count_streams_from_songs
 
 # -----------------------------------------------------------------------------
 
@@ -185,15 +184,15 @@ class Artist(models.Model):
         Count the number of streams from uploads
         """
         songs = getattr(self, 'song_uploaded_by').all()
-        return count_streams_from_songs(songs)
-    
+        return songs.streams.all().count()
+
     @property
     def number_of_streams_from_contributions(self):
         """
         Count the number of streams from contributions
         """
         songs = getattr(self, 'song_contributors').all().distinct()
-        return count_streams_from_songs(songs)
+        return songs.streams.all().count()
     
     @property
     def number_of_streams(self):
@@ -245,9 +244,8 @@ class Album(models.Model):
 
     @property
     def number_of_streams(self):
-        # songs = getattr(self, 'song_set').all()
-        # return count_streams_from_songs(songs)
-        return getattr(self, 'song_set').all().annotate(count_streams=models.Count('streams__id')).aggregate(models.Sum('count_streams'))
+        result = getattr(self, 'song_set').all().annotate(count_streams=models.Count('streams__id')).aggregate(models.Sum('count_streams'))
+        return result["count_streams__sum"]
 
     def __str__(self):
         return "{}".format(self.name)

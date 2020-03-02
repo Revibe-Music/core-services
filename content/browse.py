@@ -14,6 +14,7 @@ import datetime
 
 from revibe._helpers import const
 
+from administration.utils.models import todays_artist_spotlight
 from content.models import Song, Album, Artist
 from content.serializers import v1 as cnt_ser_v1
 from metrics.models import Stream
@@ -160,4 +161,18 @@ def recently_uploaded_albums(time_period="last_week", limit=_DEFAULT_LIMIT):
     
     return cnt_ser_v1.AlbumSerializer(albums, many=True)
 
+
+# -----------------------------------------------------------------------------
+##### other #####
+
+def artist_spotlight():
+    artist = todays_artist_spotlight()
+
+    options = {
+        "name": "Artist Spotlight",
+        "type": "artist",
+        "result": cnt_ser_v1.ArtistSerializer(artist, many=False).data if artist != None else None
+    }
+
+    return options
 

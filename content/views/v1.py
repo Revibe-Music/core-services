@@ -412,7 +412,10 @@ class Browse(GenericPlatformViewSet):
         # append various browse things
         browse_page_limit = 5
         browses = [
-            # TODO: artist spotlight
+            {
+                "function": browse.artist_spotlight,
+                "kwargs": {},
+            },
             {
                 "function": browse.trending_songs,
                 "kwargs": {"time_period": "today", "limit": browse_page_limit}
@@ -509,4 +512,11 @@ class Browse(GenericPlatformViewSet):
 
         result = browse.trending_artists(time_period)
         return responses.OK(data=result)
+
+
+    # other
+
+    @action(detail=False, methods=['get'], url_path="artist-spotlight", url_name="artist-spotlight")
+    def artist_spotlight(self, request, *args, **kwargs):
+        return responses.OK(data=browse.artist_spotlight())
 

@@ -281,7 +281,20 @@ class ArtistSpotlight(models.Model):
     date = models.DateField(
         primary_key=True
     )
+    artist = models.ForeignKey(
+        to='content.artist',
+        on_delete=models.CASCADE,
+        related_name='spotlights',
+        limit_choices_to={'platform': const.REVIBE_STRING},
+        null=False, blank=False,
+        verbose_name=_("artist"),
+        help_text=_("Artist to spotlight on the Revibe Music home screen")
+    )
+
+    def __str__(self):
+        return f"{self.date} - {self.artist.name}"
 
     class Meta:
-        pass
+        verbose_name = "artist spotlight"
+        verbose_name_plural = "artist spotlights"
 

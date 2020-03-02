@@ -60,6 +60,70 @@ class Stream(models.Model):
         verbose_name_plural = "streams"
 
 
+class Search(models.Model):
+
+    search_text = models.TextField(
+        null=False, blank=False,
+        verbose_name=_("search text"),
+        help_text=_("The search query")
+    )
+    user = models.ForeignKey(
+        to='accounts.customuser',
+        on_delete=models.SET_NULL,
+        related_name='searches',
+        null=True, blank=True,
+        verbose_name=_("user"),
+        help_text=_("The user that searched something")
+    )
+    timestamp = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.search_text
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} ({self.search_text})>"
+
+    class Meta:
+        verbose_name = _("search")
+        verbose_name_plural = _("searches")
+
+
+class AppSession(models.Model):
+
+    start_time = models.DateTimeField(
+        auto_now_add=True
+    )
+    end_time = models.DateTimeField(
+        auto_now=True
+    )
+    user = models.ForeignKey(
+        to='accounts.customuser',
+        on_delete=models.CASCADE,
+        related_name='sessions',
+        null=False, blank=False,
+        verbose_name=_("user"),
+        help_text=_("User that sessioned")
+    )
+    interactions = models.IntegerField(
+        null=False, blank=True, default=0,
+        verbose_name=_("interactions"),
+        help_text=_("Number of interactions the user had with the app during the session")
+    )
+
+    @property
+    def session_time(self):
+        tdelta = self.end_time - self.start_time
+        minutes = tdelta.total_seconds() / 60
+
+        return minutes
+
+    class Meta:
+        verbose_name = _("mobile app session")
+        verbose_name_plural = _("mobile app sessions")
+
+
 # -----------------------------------------------------------------------------
 # DEPRECATED
 # Used to use AWS DynamoDB for tracking stream information

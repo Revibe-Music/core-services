@@ -4,6 +4,7 @@ from django.utils.html import format_html
 from revibe.admin import check_deletion, check_display
 from revibe._helpers.symbols import CROSS_MARK, CHECK_MARK
 
+from content import browse
 from content.admin_ext import (
     approve_contribution, remove_delete, perform_delete, reprocess_song
 )
@@ -187,4 +188,9 @@ class TrackAdmin(admin.ModelAdmin):
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     pass
+
+
+# class TopSongsAdmin(SongAdmin):
+#     def get_queryset(self, request):
+#         return browse.top_songs_all_time()
 

@@ -22,6 +22,10 @@ from metrics.models import Stream
 # -----------------------------------------------------------------------------
 
 _DEFAULT_LIMIT = 25
+_name = "name"
+_type = "type"
+_results = "results"
+
 today = datetime.datetime.now()
 yesterday = today - datetime.timedelta(days=1)
 last_week = today - datetime.timedelta(days=7)
@@ -44,19 +48,19 @@ time_names = {
 
 def _browse_song(annotation, limit=_DEFAULT_LIMIT, **options):
     songs = Song.display_objects.filter(platform=const.REVIBE_STRING).annotate(count=annotation).order_by('-count')[:limit]
-    options["results"] = cnt_ser_v1.SongSerializer(songs, many=True).data
+    options[_results] = cnt_ser_v1.SongSerializer(songs, many=True).data
 
     return options
 
 def _browse_album(annotation, limit=_DEFAULT_LIMIT, **options):
     albums = Album.display_objects.filter(platform=const.REVIBE_STRING).annotate(count=annotation).order_by('-count')[:limit]
-    options["results"] = cnt_ser_v1.AlbumSerializer(albums, many=True).data
+    options[_results] = cnt_ser_v1.AlbumSerializer(albums, many=True).data
 
     return options
 
 def _browse_artist(annotation, limit=_DEFAULT_LIMIT, **options):
     artists = Artist.objects.filter(platform=const.REVIBE_STRING).annotate(count=annotation).order_by('-count')[:limit]
-    options["results"] = cnt_ser_v1.ArtistSerializer(artists, many=True).data
+    options[_results] = cnt_ser_v1.ArtistSerializer(artists, many=True).data
 
     return options
 
@@ -70,8 +74,8 @@ def top_songs_all_time(limit=_DEFAULT_LIMIT):
     annotation = Count('streams__id')
 
     options = {
-        "name": "Top Songs",
-        "type": "songs"
+        _name: "Top Songs",
+        _type: "songs"
     }
 
     return _browse_song(annotation, limit, **options)
@@ -83,8 +87,8 @@ def top_albums_all_time(limit=_DEFAULT_LIMIT):
     annotation = Count('song__streams__id')
 
     options = {
-        "name": "Top Albums",
-        "type": "albums"
+        _name: "Top Albums",
+        _type: "albums"
     }
 
     return _browse_album(annotation, limit, **options)
@@ -95,8 +99,8 @@ def top_artists_all_time(limit=_DEFAULT_LIMIT):
     annotation = Count('song_uploaded_by__streams__id')
 
     options = {
-        "name": "Top Artists",
-        "type": "artists"
+        _name: "Top Artists",
+        _type: "artists"
     }
 
     return _browse_artist(annotation, limit, **options)
@@ -110,8 +114,8 @@ def trending_songs(time_period, limit=_DEFAULT_LIMIT):
     annotation = Count('streams__id', filter=Q(streams__timestamp__gte=time_lookup[time_period]))
 
     options = {
-        "name": "Trending Songs",
-        "type": "songs"
+        _name: "Trending Songs",
+        _type: "songs"
     }
 
     return _browse_song(annotation, limit, **options)
@@ -121,8 +125,8 @@ def trending_albums(time_period, limit=_DEFAULT_LIMIT):
     annotation = Count('song__streams__id', filter=Q(song__streams__timestamp__gte=time_lookup[time_period]))
 
     options = {
-        "name": "Trending Albums",
-        "type": "albums"
+        _name: "Trending Albums",
+        _type: "albums"
     }
 
     return _browse_album(annotation, limit, **options)
@@ -132,8 +136,8 @@ def trending_artists(time_period, limit=_DEFAULT_LIMIT):
     annotation = Count('song_uploaded_by__streams__id', filter=Q(song_uploaded_by__streams__timestamp__gte=time_lookup[time_period]))
 
     options = {
-        "name": "Trending Artists",
-        "type": "artists"
+        _name: "Trending Artists",
+        _type: "artists"
     }
 
     return _browse_artist(annotation, limit, **options)
@@ -169,9 +173,9 @@ def artist_spotlight():
     artist = todays_artist_spotlight()
 
     options = {
-        "name": "Artist Spotlight",
-        "type": "artist",
-        "result": cnt_ser_v1.ArtistSerializer(artist, many=False).data if artist != None else None
+        _name: "Artist Spotlight",
+        _type: "artist",
+        _results: cnt_ser_v1.ArtistSerializer(artist, many=False).data if artist != None else None
     }
 
     return options

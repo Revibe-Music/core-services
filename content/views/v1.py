@@ -432,7 +432,9 @@ class Browse(GenericPlatformViewSet):
             # TODO: popular on Revibe (Youtube shit)
         ]
         for func in browses:
-            output.append(func["function"](**func["kwargs"]))
+            function_result = func["function"](**func["kwargs"])
+            if bool(function_result["results"]):
+                output.append(function_result)
 
         # top hits are always available at the bottom of the browse page
         output.append({

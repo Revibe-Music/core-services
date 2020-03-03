@@ -39,6 +39,7 @@ class ArtistSerializer(serializers.ModelSerializer):
 
     # read-only
     images = ImageSerializer(source="artist_image", many=True, read_only=True)
+    bio = serializers.SerializerMethodField('_get_artist_bio', read_only=True)
 
     # write-only
     image = serializers.FileField(write_only=True, required=False)
@@ -53,6 +54,7 @@ class ArtistSerializer(serializers.ModelSerializer):
 
             # read-only
             'images',
+            "bio",
 
             # write-only
             'image',
@@ -75,6 +77,18 @@ class ArtistSerializer(serializers.ModelSerializer):
         image_obj = add_image_to_object(instance, img, edit=True)
 
         return instance
+    
+    def _get_artist_bio(self, obj):
+        try:
+            profile = getattr(obj, "artist_profile", None)
+
+            if profile == None:
+                return None
+            
+            bio = getattr(profile, "about_me", None)
+            return bio
+        except Exception:
+            return None
 
 
 class SongContributorSerializer(serializers.ModelSerializer, ContributionSerializerMixin):

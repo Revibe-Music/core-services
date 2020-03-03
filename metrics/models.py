@@ -17,9 +17,21 @@ class Stream(models.Model):
         to='content.song',
         related_name='streams',
         on_delete=models.CASCADE,
-        null=False, blank=False,
+        null=True, blank=True,
         verbose_name=_("song"),
         help_text=_("The song that was streamed")
+    )
+    alternate_id = models.CharField(
+        max_length=255,
+        null=True, blank=True, default=None,
+        verbose_name=_("alternate ID"),
+        help_text=_("ID of the song/video streamed if that ID has not yet been stored in the database")
+    )
+    alternate_platform = models.CharField(
+        max_length=255,
+        null=True, blank=True, default=None,
+        verbose_name=_("alternate platform"),
+        help_text=_("Platform of the song/video if that song/video has not yet been stored in the database")
     )
     user = models.ForeignKey(
         to='accounts.customuser',
@@ -50,8 +62,9 @@ class Stream(models.Model):
     )
 
     def __str__(self):
-        return f"{self.song.title} - {self.user.username if self.user else self.timestamp}"
-    
+        first_part = self.song.title if self.song else f"<{self.alternate_id}>"
+        return f"{first_part} | {self.user.username if self.user else self.timestamp}"
+
     def __repr__(self):
         return f"<{self.__class__.__name__} ({self.id})>"
 

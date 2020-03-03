@@ -46,8 +46,8 @@ time_names = {
 # -----------------------------------------------------------------------------
 # utils
 
-def _browse_song(annotation, limit=_DEFAULT_LIMIT, **options):
-    songs = Song.display_objects.filter(platform=const.REVIBE_STRING).annotate(count=annotation).order_by('-count')[:limit]
+def _browse_song(annotation, limit=_DEFAULT_LIMIT, platform=const.REVIBE_STRING, **options):
+    songs = Song.display_objects.filter(platform=platform).annotate(count=annotation).order_by('-count')[:limit]
     options[_results] = cnt_ser_v1.SongSerializer(songs, many=True).data
 
     return options
@@ -141,6 +141,20 @@ def trending_artists(time_period, limit=_DEFAULT_LIMIT):
     }
 
     return _browse_artist(annotation, limit, **options)
+
+def treding_youtube_videos(time_period, limit=_DEFAULT_LIMIT):
+    """
+    Similar to the 
+    """
+    assert time_period in time_lookup.keys(), f"Coulf not find 'time_period' value '{time_period}' in lookup"
+    annotation = Count('streams__id', filter=Q(streams__timestamp__gte=time_lookup[time_period]))
+
+    options = {
+        _name: "Popular on Revibe",
+        _type: "songs",
+    }
+
+    return _browse_song(annotation, limit, platform=const.YOUTUBE_STRING, **options)
 
 
 # -----------------------------------------------------------------------------

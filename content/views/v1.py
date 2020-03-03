@@ -409,6 +409,10 @@ class Browse(GenericPlatformViewSet):
     def list(self, request, *args, **kwargs):
         output = []
 
+        # time_period = get_url_param(request.query_params, "time_period")
+        # if time_period == None:
+        #     time_period = "today"
+
         # append various browse things
         browse_page_limit = 5
         browses = [
@@ -428,8 +432,12 @@ class Browse(GenericPlatformViewSet):
                 "function": browse.trending_artists,
                 "kwargs": {"time_period": "today", "limit": browse_page_limit}
             },
+            {
+                # Popular Youtube songs on Revibe
+                "function": browse.treding_youtube_videos,
+                "kwargs": {"time_period": "last_week", "limit": browse_page_limit}
+            },
             # TODO: recently uploaded albums
-            # TODO: popular on Revibe (Youtube shit)
         ]
         for func in browses:
             function_result = func["function"](**func["kwargs"])

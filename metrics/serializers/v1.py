@@ -24,6 +24,9 @@ class StreamSerializer(serializers.ModelSerializer):
             'is_saved',
             'song_id',
             'user_id',
+            'lat',
+            'long',
+            'source',
         ]
     
     def create(self, validate_data):

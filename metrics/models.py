@@ -10,6 +10,28 @@ from revibe._helpers import const
 # -----------------------------------------------------------------------------
 
 class Stream(models.Model):
+
+    # choices
+    _library_choice = 'library'
+    _playlist_choice = 'playlist'
+    _search_choice = 'search'
+    _browse_choice = 'browse'
+    _album_choice = 'album'
+    _artist_choice = 'artist'
+    _share_choice = 'share'
+    _embedded_choice = 'embedded'
+
+    _source_choices = (
+        (_library_choice, 'Library'),
+        (_playlist_choice, 'Playlist'),
+        (_search_choice, 'Search'),
+        (_browse_choice, 'Browse'),
+        (_album_choice, 'Album Page'),
+        (_artist_choice, 'Artist Page'),
+        (_share_choice, 'Shared'),
+        (_embedded_choice, 'Embedded Player'),
+    )
+
     id = models.AutoField(
         primary_key=True
     )
@@ -59,6 +81,25 @@ class Stream(models.Model):
         null=True, blank=True,
         verbose_name=_("saved status"),
         help_text=_("Whether or not the user has the song saved in their library at the time of streaming the song")
+    )
+    source = models.CharField(
+        max_length=255,
+        choices=_source_choices,
+        null=True, blank=True,
+        verbose_name=_("stream source"),
+        help_text=_("Source the user streamed the song from: playlist, search, etc.")
+    )
+
+    # location data
+    lat = models.DecimalField(
+        max_digits=9, decimal_places=6,
+        null=True, blank=True,
+        verbose_name=_("latitude")
+    )
+    long = models.DecimalField(
+        max_digits=9, decimal_places=6,
+        null=True, blank=True,
+        verbose_name=_("longitude")
     )
 
     def __str__(self):

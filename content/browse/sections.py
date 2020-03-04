@@ -9,6 +9,8 @@ from django.db.models import (
     IntegerField
 )
 from django.db.models.functions import ExtractDay
+from django.urls import reverse
+
 
 import datetime
 
@@ -173,4 +175,30 @@ def artist_spotlight():
     }
 
     return options
+
+def top_content_container():
+    return {
+        "name": "Top Hits - All-Time",
+        "type": "container",
+        "results": [
+            {
+                "name": "Top Songs",
+                "type": "songs",
+                "icon": None,
+                "url": reverse("browse-top-songs-all-time"),
+            },
+            {
+                "name": "Top Albums",
+                "type": "albums",
+                "icon": None,
+                "url": reverse("browse-top-albums-all-time"),
+            },
+            {
+                "name": "Top Artists",
+                "type": "artists",
+                "icon": None,
+                "url": reverse("browse-top-artists-all-time"),
+            },
+        ],
+    }
 

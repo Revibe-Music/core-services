@@ -112,6 +112,9 @@ MIDDLEWARE = [
 
     #OAuth Toolkit
     'accounts.middleware.OAuth2TokenOrCookieMiddleware',
+
+    # custom middleware
+    # 'revibe.middleware.sessions.MobileAppSessionLoggingMiddleware',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'

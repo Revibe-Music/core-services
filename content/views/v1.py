@@ -19,6 +19,7 @@ from content.models import *
 from content.serializers import v1 as ser_v1
 from content.utils import search
 from content.utils.models import get_tag
+from metrics.utils.models import record_search_async
 
 # -----------------------------------------------------------------------------
 
@@ -131,6 +132,17 @@ class MusicSearch(GenericPlatformViewSet):
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
     }
+
+    def initialize_request(self, request, *args, **kwargs):
+        """
+        """
+        # do the normal thing
+        request = super().initialize_request(request, *args, **kwargs)
+
+        # record the search
+        record_search_async(request.user, get_url_param(request.query_params, 'text'))
+
+        return request
 
     def list(self, request, *args, **kwargs):
         params = request.query_params

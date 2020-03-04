@@ -176,7 +176,7 @@ def recently_uploaded_albums(time_period="last_week", limit=_DEFAULT_LIMIT):
         ).annotate(
             number_of_streams_per_day=F('number_of_streams') / F('days_since_publish')
         ).order_by('-number_of_streams_per_day')[:limit]
-    
+
     return cnt_ser_v1.AlbumSerializer(albums, many=True)
 
 

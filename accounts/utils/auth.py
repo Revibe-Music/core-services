@@ -28,7 +28,7 @@ def change_password(user, old_password, new_password, confirm_new_password):
 
     # ensure that the new passwords match
     if new_password != confirm_new_password:
-        raise PasswordValidationError(f"Passwords do not match")
+        raise PasswordValidationError("Passwords do not match")
 
     # set the new password
     user.set_password(new_password)

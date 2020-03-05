@@ -40,6 +40,7 @@ from accounts.adapter import TokenAuthSupportQueryString
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *
+from accounts.utils.auth import change_password
 from accounts._helpers import validation
 from administration.models import Campaign
 from content.models import Album, Song, SongContributor, AlbumContributor
@@ -1226,7 +1227,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.DELETED()
 
 
-class UserViewSet(generics.GenericAPIView):
+class UserViewSet(viewsets.GenericViewSet):
     serializer_class = UserSerializer
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
@@ -1237,7 +1238,7 @@ class UserViewSet(generics.GenericAPIView):
         'DELETE': [['ADMIN'],['first-party']],
     }
 
-    def get(self, request, *args, **kwargs):
+    def list(self, request, *args, **kwargs):
         return Response(UserSerializer(request.user, context=self.get_serializer_context()).data)
 
     def patch(self, request, *args, **kwargs):
@@ -1250,3 +1251,14 @@ class UserViewSet(generics.GenericAPIView):
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         return responses.DEFAULT_400_RESPONSE()
+    
+    @action(detail=False, methods=['post'], url_path="change-password", url_name="change-password")
+    def change_password(self, request, *args, **kwargs):
+        user = request.user
+        # old_password, new_password, confirm_new_password = request.data["old_password"], request.data["new_password"], request.data["confirm_new_password"]
+
+        change_password(user, **dict(request.data))
+
+        return responses.UPDATED()
+
+

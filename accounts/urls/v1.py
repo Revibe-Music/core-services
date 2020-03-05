@@ -8,6 +8,7 @@ router = routers.DefaultRouter()
 # router.register("user", v1.AuthenticationViewSet, "user")
 router.register("artist", v1.UserArtistViewSet, "artistaccount") # artist portal ONLY
 router.register("linked-accounts", v1.UserLinkedAccounts, 'linked_accounts')
+router.register("profile", v1.UserViewSet, "profile")
 
 
 # artist_urls = [
@@ -26,7 +27,7 @@ urlpatterns = [
     path('logout/', v1.LogoutAPI.as_view(), name="logout"),
     path('logout-all/', v1.LogoutAllAPI.as_view(), name="logout-all"),
     path('refresh-token/', v1.RefreshTokenAPI.as_view(), name="refresh-token"),
-    path("profile/", v1.UserViewSet.as_view(), name="profile"),
+    # path("profile/", v1.UserViewSet.as_view(), name="profile"),
     path('spotify-authentication/', v1.SpotifyConnect.as_view()),
     path('spotify-refresh/', v1.SpotifyRefresh.as_view()),
     path('spotify-logout/', v1.SpotifyLogout.as_view()),

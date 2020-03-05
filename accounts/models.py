@@ -21,6 +21,12 @@ class CustomUser(AbstractUser):
         null=False, blank=True, default=False
     )
 
+    force_change_password = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("force change password"),
+        help_text=_("User must change password on login")
+    )
+
     # def _get_link_url
 
 

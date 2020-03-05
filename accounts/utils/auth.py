@@ -11,7 +11,7 @@ from revibe._errors.accounts import AccountNotFound
 import gc
 
 from accounts.exceptions import PasswordValidationError
-from accounts.models import CustomUser
+from accounts.models import CustomUser, Profile
 
 # -----------------------------------------------------------------------------
 
@@ -33,4 +33,34 @@ def change_password(user, old_password, new_password, confirm_new_password):
     # set the new password
     user.set_password(new_password)
     user.save()
+
+
+def get_user_by_username_or_email(email=None, username=None):
+    """
+    """
+    if username != None:
+        user = CustomUser.objects.get(username=username)
+        return user
+
+    elif email != None:
+        profile = Profile.objects.get(email=email)
+        return profile.user
+    
+    return None
+
+
+def forgot_password(email=None, username=None):
+    """
+    """
+    # get the user by email/username
+    user = get_user_by_username_or_email(email, username)
+    if user == None:
+        raise AccountNotFound("Could not find this user")
+
+    # set temp password
+    user.set_password(...)
+    user.force_change_password = True
+    user.save()
+
+    # send email with temp password
 

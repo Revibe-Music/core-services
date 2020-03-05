@@ -21,7 +21,7 @@ def change_password(user, old_password, new_password, confirm_new_password):
     # reauthenticate the user to validate the old_password
     user_check = authenticate(username=str(user.username), password=old_password)
     if user_check == None or user_check != user:
-        raise AccountNotFound("Could not validate the old password")
+        raise AccountNotFound("Old password is not correct")
 
     del user_check
     gc.collect()

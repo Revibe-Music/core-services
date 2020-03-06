@@ -60,7 +60,7 @@ class YouTube(Platform):
             raise data_err.SerializerValidationError({"album": ["album object must contain an image_refs"]})
 
         album_data = {
-            "name": data['song']['title'] + '-Album',
+            "name": data['song']['title'],
             "image_refs": data['album']['image_refs']
         }
 

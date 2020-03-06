@@ -9,7 +9,7 @@ from django.utils import timesince
 from django.utils.decorators import method_decorator
 from django.utils.html import strip_tags
 from rest_framework import viewsets, permissions, generics, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_auth.registration.views import SocialConnectView
@@ -40,7 +40,7 @@ from accounts.adapter import TokenAuthSupportQueryString
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *
-from accounts.utils.auth import change_password
+from accounts.utils.auth import change_password, reset_password
 from accounts._helpers import validation
 from administration.models import Campaign
 from content.models import Album, Song, SongContributor, AlbumContributor
@@ -1255,10 +1255,16 @@ class UserViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['post'], url_path="change-password", url_name="change-password")
     def change_password(self, request, *args, **kwargs):
         user = request.user
-        # old_password, new_password, confirm_new_password = request.data["old_password"], request.data["new_password"], request.data["confirm_new_password"]
 
         change_password(user, **dict(request.data))
 
         return responses.UPDATED()
 
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def view_reset_password(request, *args, **kwargs):
+    reset_password(**dict(request.data))
+
+    return responses.OK()
 

@@ -6,9 +6,12 @@ Author: Jordan Prechac
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 
-from revibe._errors.accounts import AccountNotFound
-
 import gc
+import random
+import string
+
+from revibe._errors.accounts import AccountNotFound
+from revibe.contrib.email import EmailConfiguration
 
 from accounts.exceptions import PasswordValidationError
 from accounts.models import CustomUser, Profile
@@ -49,7 +52,7 @@ def get_user_by_username_or_email(email=None, username=None):
     return None
 
 
-def forgot_password(email=None, username=None):
+def reset_password(email=None, username=None):
     """
     """
     # get the user by email/username
@@ -57,10 +60,16 @@ def forgot_password(email=None, username=None):
     if user == None:
         raise AccountNotFound("Could not find this user")
 
+    # generate temp password
+    letters = string.ascii_letters + string.digits
+    temp_password = ''.join(random.choice(letters) for i in range(20))
+
     # set temp password
-    user.set_password(...)
+    user.set_password(temp_password)
     user.force_change_password = True
     user.save()
 
     # send email with temp password
+    email = EmailConfiguration(user, [user.profile.email,], 'forgot_password', temp_password=temp_password)
+    email.send_email()
 

@@ -32,4 +32,6 @@ urlpatterns = [
     path('spotify-refresh/', v1.SpotifyRefresh.as_view()),
     path('spotify-logout/', v1.SpotifyLogout.as_view()),
     path('send-email', v1.SendRegisterLink.as_view(), name="send-email"),
+
+    path('profile/reset-password/', v1.view_reset_password, name='reset-password'),
 ]

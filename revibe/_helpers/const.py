@@ -44,3 +44,4 @@ TWITTER_IMAGE = "https://revibe-media.s3.us-east-2.amazonaws.com/email_images/tw
 
 # other links
 API_DOCS_LINK = 'https://documenter.getpostman.com/view/6267328/SWEB1ah6?version=latest'
+SUPPORT_EMAIL = 'support@revibe.tech'

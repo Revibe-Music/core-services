@@ -3,6 +3,7 @@ Created: 5 Mar. 2020
 Author: Jordan Prechac
 """
 
+from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -22,47 +23,72 @@ class EmailConfiguration:
         "twitter_image": const.TWITTER_IMAGE,
         "facebook_image": const.FACEBOOK_IMAGE,
         "instagram_image": const.INSTAGRAM_IMAGE,
+        "support_email": const.SUPPORT_EMAIL,
     }
 
     email_options = {
         # artist stuff
         'artist_invite':  { # general invite for artists
             _template: 'accounts/artist_invite_email',
-            # "subject": ''
+            "subject": '{artist_name} has invited you to join Revibe!',
             "requirements": {"artist": True},
         },
         'contribution': { # invite for contributions, white background
             _template: 'accounts/contribution_invite_email_white',
+            'subject': '{artist_name} has invited you to join Revibe!',
             "requirements": {"artist": True},
         },
         'contribution_black': { # invite for contributions, black background
             _template: 'accounts/contribution_invite_email_black',
+            'subject': '{artist_name} has invited you to join Revibe!',
             "requirements": {"artist": True},
         },
 
         # user management
-        'forgot_password': {
+        'forgot_password': { # forgot password
             _template: 'accounts/forgot_password',
             'subject': 'Temporary Password',
         },
         'password_reset': {
-            _template: 'accounts/password_reset',
+            _template: 'accounts/password_reset', # password has been changed
             'subject': 'Your password has been changed',
         },
     }
 
     from_address = f'"Join Revibe" <{const.ARTIST_FROM_EMAIL}>'
 
-    def __init__(self, user=None, recipients, template, subject=None, *args, **kwargs):
+    def __init__(self, user, recipients, template, subject=None, artist=False, fail_silently=True, *args, **kwargs):
         self.user = user
         self.recipients = recipients
-        self.use_artist = kwargs.get("artist", False)
 
-        template = self.email_options.get(template, None)
+        # kwargs
+        self.use_artist = artist
+        self.fail_silently = fail_silently
+        self.temp_password = kwargs.get('temp_password', None)
+
+        template = self._get_template(template)
+
+    def _get_template(self, template_text):
+        template = self.email_options.get(template_text, None)
         if template == None:
             raise network.BadRequestError("Could not identify the email template to use")
+        
+        requirements = template.get("requirements", None)
+        if requirements != None:
+            # check artist requirement
+            if 'artist' in requirements.keys() and requirements['artist'] != self.use_artist:
+                raise network.ProgramError(f"Sending Artist email, must include kwarg 'artist' when instantiating {self.__class__.__name__}")
+        
         self.template = template
-        self.subject = subject if subject != None else template.get('subject', None)
+
+        # configure subject email
+        self.subject = template.get('subject', "Revibe automated email service") # temp
+        subject = template.get('subject', None)
+        if subject != None:
+            artist_name = self.user.artist.name if getattr(self.user, 'artist', None) != None else None
+            subject = subject.format(artist_name=artist_name, username=self.user.username)
+
+        return template
 
     def get_register_link(self, *args, **kwargs):
         link = "https://artist.revibe.tech/account/register" if self.use_artist else "https://revibe.tech"
@@ -78,15 +104,20 @@ class EmailConfiguration:
 
         context['register_link'] = self.get_register_link()
         context["name"] = self.user.artist.name if self.use_artist else self.user.username
+        context['temp_password'] = self.temp_password
 
         return context
 
     def configure_email(self, *args, **kwargs):
-        name = self.user.artist.name if self.use_artist else self.user.username
-
         html_message = render_to_string(self.template, context=self.configure_context())
+        return html_message
 
-    def send_email(self, subject, fail_silently=True, *args, **kwargs):
+    def send_email(self, *args, **kwargs):
+
+        # only send emails in the cloud
+        if not settings.USE_S3:
+            raise network.BadEnvironmentError("Cannot send emails outside of a cloud environment")
+
         html_message = self.configure_email()
         plain_message = strip_tags(html_message)
 

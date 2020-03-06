@@ -29,7 +29,7 @@ class RequestMetricsMiddleware(BaseMiddleware):
         try:
             if settings.USE_S3:
                 new_request = Request(
-                    url=url,
+                    url,
                     method=method,
                     status_code=status_code
                 )

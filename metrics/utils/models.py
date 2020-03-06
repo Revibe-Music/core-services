@@ -41,18 +41,18 @@ def record_request_async(url, method, status_code):
     if not settings.USE_S3:
         return
 
-    json = {
+    json = [{
         "method": method,
         "status_code": status_code,
         "timestamp": str(datetime.now())
-    }
+    },]
     try:
         request = Request.get(url)
         request.update(actions=[
             Request.requests.append(json)
         ])
     except Request.DoesNotExist as dne:
-        request = Request(url, requests=[json,])
+        request = Request(url, requests=json)
     except Exception as e:
         print(e)
         raise(e)

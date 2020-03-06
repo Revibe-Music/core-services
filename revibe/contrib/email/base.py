@@ -129,7 +129,7 @@ class EmailConfiguration:
                 from_email=self.from_address,
                 recipient_list=[rec,],
                 html_message=html_message,
-                fail_silently=fail_silently
+                fail_silently=self.fail_silently
             )
 
         return num_sent

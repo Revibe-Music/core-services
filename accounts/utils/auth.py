@@ -35,6 +35,7 @@ def change_password(user, old_password, new_password, confirm_new_password):
 
     # set the new password
     user.set_password(new_password)
+    user.force_change_password = False
     user.save()
 
 

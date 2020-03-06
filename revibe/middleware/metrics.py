@@ -29,9 +29,9 @@ class RequestMetricsMiddleware(BaseMiddleware):
         try:
             if settings.USE_S3:
                 new_request = Request(
-                    url=self.m_url,
-                    method=self.m_method,
-                    status_code=self.m_status_code
+                    url=url,
+                    method=method,
+                    status_code=status_code
                 )
                 new_request.save()
         except Exception as e:

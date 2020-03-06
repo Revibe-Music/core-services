@@ -79,6 +79,8 @@ class UserSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(required=False)
     username = serializers.CharField(required=False)
     profile = ProfileSerializer(many=False, required=False)
+    log_in_mobile_app = serializers.BooleanField(required=False)
+    log_in_artist_portal = serializers.BooleanField(required=False)
 
 
     device_id = serializers.CharField(required=False)
@@ -101,7 +103,8 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'username',
             'profile',
-
+            'log_in_mobile_app',
+            'log_in_artist_portal',
 
             'device_id',
             'device_type',

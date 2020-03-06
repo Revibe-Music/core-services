@@ -27,6 +27,17 @@ class CustomUser(AbstractUser):
         help_text=_("User must change password on login")
     )
 
+    log_in_mobile_app = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("logged in to Revibe Music mobile"),
+        help_text=_("Indicates if the user has logged in to the mobile app before")
+    )
+    log_in_artist_portal = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("logged in to Revibe Artist Portal"),
+        help_text=_("Indicates if the user has logged in to the artist portal before/")
+    )
+
     # def _get_link_url
 
 

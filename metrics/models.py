@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from datetime import datetime
+from pynamodb import models as pynamo_models
 
 from revibe._helpers import const
 
@@ -176,6 +177,20 @@ class AppSession(models.Model):
     class Meta:
         verbose_name = _("mobile app session")
         verbose_name_plural = _("mobile app sessions")
+
+
+# -----------------------------------------------------------------------------
+
+class Request(pynamo_models.Model):
+    class Meta:
+        table_name = const.REQUEST_TABLE
+        region = const.AWS_REGION
+        aws_access_key_id = settings.AWS_ACCESS_KEY_ID
+        aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+    
+#     url = 
+#     method = 
+#     response = 
 
 
 # -----------------------------------------------------------------------------

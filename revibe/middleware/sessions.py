@@ -8,19 +8,15 @@ from django.db.models import F, Q
 import datetime
 import threading
 
+from revibe.middleware.base import BaseMiddleware
+
 from metrics.models import AppSession
 
 # -----------------------------------------------------------------------------
 
-class MobileAppSessionLoggingMiddleware:
+class MobileAppSessionLoggingMiddleware(BaseMiddleware):
 
-    def __init__(self, get_response):
-        self.get_response = get_response
-    
-    def __call__(self, request):
-        # Code to be executed for each request before
-        # the view (and later middleware) are called.
-
+    def before_response(self, request):
         # if the request is authenticated, create or add-to a session
         user = getattr(request, 'user', None)
         if user != None and not user.is_anonymous:
@@ -38,10 +34,4 @@ class MobileAppSessionLoggingMiddleware:
                 app_session.interactions = F('interactions') + 0
                 app_session.save()
 
-        response = self.get_response(request)
-
-        # Code to be executed for each request/response after
-        # the view is called.
-
-        return response
 

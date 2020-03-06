@@ -6,7 +6,9 @@ Author: Jordan Prechac
 from django.conf import settings
 from revibe.middleware.base import BaseMiddleware
 
-from metrics.models import Request
+import threading
+
+from metrics.utils.models import record_request_async
 
 # -----------------------------------------------------------------------------
 
@@ -26,15 +28,9 @@ class RequestMetricsMiddleware(BaseMiddleware):
         print("Response status code: " + status_code)
 
         # save the request to DynamoDB
-        try:
-            if settings.USE_S3:
-                new_request = Request(
-                    url,
-                    method=method,
-                    status_code=status_code
-                )
-                new_request.save()
-        except Exception as e:
-            print(e)
-            raise e
+        if settings.USE_S3:
+            # thread = threading.Thread(target=record_request_async, args=[url, method, status_code])
+            # thread.setDaemon(True)
+            # thread.start()
+            record_request_async(url, method, status_code)
 

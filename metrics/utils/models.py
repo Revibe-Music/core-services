@@ -3,13 +3,14 @@ Created: 4 Mar. 2020
 Author: Jordan Prechac
 """
 
+from django.conf import settings
 from django.db import connection
 
 import gc
 import threading
 
 from accounts.models import CustomUser
-from metrics.models import Search
+from metrics.models import Search, Request
 
 # -----------------------------------------------------------------------------
 
@@ -35,6 +36,25 @@ def record_search_async(user, search_text):
     t.setDaemon(True)
     t.start()
 
-def record_request_async():
-    pass
+def record_request_async(url, method, status_code):
+    if not settings.USE_S3:
+        return
+
+    json = {
+        "method": method,
+        "status_code": status_code,
+        "timestamp": datetime.now()
+    }
+    try:
+        request = Request.get(url)
+        request.update(actions=[
+            Request.requests.append(json)
+        ])
+    except Request.DoesNotExist as dne:
+        request = Request(url, requests=[json,])
+    except Exception as e:
+        print(e)
+        raise(e)
+    
+    gc.collect()
 

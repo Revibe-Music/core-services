@@ -44,7 +44,7 @@ def record_request_async(url, method, status_code):
     json = {
         "method": method,
         "status_code": status_code,
-        "timestamp": datetime.now()
+        "timestamp": str(datetime.now())
     }
     try:
         request = Request.get(url)

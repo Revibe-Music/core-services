@@ -45,8 +45,8 @@ class EmailConfiguration:
         },
 
         # user management
-        'forgot_password': { # forgot password
-            _template: 'accounts/forgot_password',
+        'reset_password': { # forgot password
+            _template: 'accounts/reset_password',
             'subject': 'Temporary Password',
         },
         'password_reset': {

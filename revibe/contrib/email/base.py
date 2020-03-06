@@ -109,7 +109,7 @@ class EmailConfiguration:
         return context
 
     def configure_email(self, *args, **kwargs):
-        html_message = render_to_string(self.template[_template], context=self.configure_context())
+        html_message = render_to_string(f"{self.template[_template]}.html", context=self.configure_context())
         return html_message
 
     def send_email(self, *args, **kwargs):

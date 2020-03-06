@@ -19,6 +19,7 @@ class RequestMetricsMiddleware(BaseMiddleware):
     #     # get the request url and method for after_response
 
     def after_response(self, response, request=None):
+        return # temp stopper
         # get the response status code
         url = str(request.path)
         method = str(request.method)
@@ -29,8 +30,8 @@ class RequestMetricsMiddleware(BaseMiddleware):
 
         # save the request to DynamoDB
         if settings.USE_S3:
-            # thread = threading.Thread(target=record_request_async, args=[url, method, status_code])
-            # thread.setDaemon(True)
-            # thread.start()
-            record_request_async(url, method, status_code)
+            thread = threading.Thread(target=record_request_async, args=[url, method, status_code])
+            thread.setDaemon(True)
+            thread.start()
+            # record_request_async(url, method, status_code)
 

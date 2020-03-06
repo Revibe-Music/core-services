@@ -36,4 +36,5 @@ class RequestMetricsMiddleware(BaseMiddleware):
                 new_request.save()
         except Exception as e:
             print(e)
+            raise e
 

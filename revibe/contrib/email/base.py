@@ -3,7 +3,9 @@ Created: 5 Mar. 2020
 Author: Jordan Prechac
 """
 
+from django.core.mail import send_mail
 from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 from revibe._errors import network
 from revibe._helpers import const
@@ -26,6 +28,7 @@ class EmailConfiguration:
         # artist stuff
         'artist_invite':  { # general invite for artists
             _template: 'accounts/artist_invite_email',
+            # "subject": ''
             "requirements": {"artist": True},
         },
         'contribution': { # invite for contributions, white background
@@ -40,13 +43,17 @@ class EmailConfiguration:
         # user management
         'forgot_password': {
             _template: 'accounts/forgot_password',
+            'subject': 'Temporary Password',
         },
         'password_reset': {
             _template: 'accounts/password_reset',
+            'subject': 'Your password has been changed',
         },
     }
 
-    def __init__(self, user=None, recipients, template, *args, **kwargs):
+    from_address = f'"Join Revibe" <{const.ARTIST_FROM_EMAIL}>'
+
+    def __init__(self, user=None, recipients, template, subject=None, *args, **kwargs):
         self.user = user
         self.recipients = recipients
         self.use_artist = kwargs.get("artist", False)
@@ -55,6 +62,7 @@ class EmailConfiguration:
         if template == None:
             raise network.BadRequestError("Could not identify the email template to use")
         self.template = template
+        self.subject = subject if subject != None else template.get('subject', None)
 
     def get_register_link(self, *args, **kwargs):
         link = "https://artist.revibe.tech/account/register" if self.use_artist else "https://revibe.tech"
@@ -73,8 +81,25 @@ class EmailConfiguration:
 
         return context
 
-    def configure_email(subject, *args, **kwargs):
+    def configure_email(self, *args, **kwargs):
         name = self.user.artist.name if self.use_artist else self.user.username
 
-        html_message = render_to_string()
+        html_message = render_to_string(self.template, context=self.configure_context())
+
+    def send_email(self, subject, fail_silently=True, *args, **kwargs):
+        html_message = self.configure_email()
+        plain_message = strip_tags(html_message)
+
+        num_sent = 0
+        for rec in self.recipients:
+            num_sent += send_mail(
+                subject=self.subject,
+                message=plain_message,
+                from_email=self.from_address,
+                recipient_list=[rec,],
+                html_message=html_message,
+                fail_silently=fail_silently
+            )
+
+        return num_sent
 

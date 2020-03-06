@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from revibe._errors.network import ProgramError
+from revibe._helpers import const
 from revibe._helpers.files import add_image_to_obj, add_track_to_song
 from revibe.serializers import CustomDateField
 
@@ -439,6 +440,9 @@ class OtherAlbumSerializer(serializers.ModelSerializer):
             for i in image_refs:
                 im_obj = Image.objects.create(album=album, reference=i["ref"], height=i["height"], width=i["width"], is_original=False)
                 im_obj.save()
+        
+        if album.platform == const.YOUTUBE_STRING:
+            album.type = 'Single'
         
         return album
 

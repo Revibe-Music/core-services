@@ -24,16 +24,25 @@ class RequestMetricsMiddleware(BaseMiddleware):
         url = str(request.path)
         method = str(request.method)
         status_code = str(response.status_code)
-        print("Request url: " + url)
-        print("Request method: " + method)
-        print("Response status code: " + status_code)
+
+        # check to ensure that the request should be saved
+        split_url = url.split('/')
+        denied_urls = ['/', '/hc/']
+
+        # don't record if not in the cloud
+        # only record outside of production
+        # don't record certain urls
+        # don't record admin urls
+        dont_record_request = (not settings.USE_S3) \
+            or (settings.DEBUG == True) \
+            or (url in denied_urls) \
+            or ('admin' in split_url)
+        if dont_record_request:
+            return
 
         # save the request to DynamoDB
-        denied_urls = ['/', '/hc/']
-        # only if using the cloud, and if in production, and if the url is not a denied url
-        if settings.USE_S3 and settings.DEBUG == False and url not in denied_urls:
-            thread = threading.Thread(target=record_request_async, args=[url, method, status_code])
-            thread.setDaemon(True)
-            thread.start()
-            # record_request_async(url, method, status_code) # for testing exceptions
+        thread = threading.Thread(target=record_request_async, args=[url, method, status_code])
+        thread.setDaemon(True)
+        thread.start()
+        # record_request_async(url, method, status_code) # for testing exceptions
 

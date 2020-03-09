@@ -29,7 +29,7 @@ class RequestMetricsMiddleware(BaseMiddleware):
 
         # check to ensure that the request should be saved
         split_url = url.split('/')
-        denied_urls = ['/', '/hc/']
+        denied_urls = ['/', '/hc/', '/favicon.io']
 
         # don't record if not in the cloud
         # only record outside of production

@@ -107,6 +107,7 @@ class SongContributorSerializer(serializers.ModelSerializer, ContributionSeriali
     song_uri = serializers.ReadOnlyField(source='song.uri')
     artist_images = ImageSerializer(source="artist.artist_image", many=True, read_only=True)
     song_tracks = TrackSerializer(source="song.tracks", many=True, read_only=True)
+    platform = serializers.ReadOnlyField(source='artist.platform')
 
     class Meta:
         model = SongContributor
@@ -125,6 +126,7 @@ class SongContributorSerializer(serializers.ModelSerializer, ContributionSeriali
             'song_uri',
             'artist_images',
             'song_tracks',
+            'platform',
         ]
     
     def create(self, validated_data):
@@ -173,6 +175,7 @@ class AlbumContributorSerializer(serializers.ModelSerializer, ContributionSerial
     album_uri = serializers.ReadOnlyField(source='album.uri')
     artist_images = ImageSerializer(source="artist.artist_image", many=True, read_only=True)
     album_images = ImageSerializer(source="album.album_image", many=True, read_only=True)
+    platform = serializers.ReadOnlyField(source='artist.platform')
 
     class Meta:
         model = AlbumContributor
@@ -191,6 +194,7 @@ class AlbumContributorSerializer(serializers.ModelSerializer, ContributionSerial
             'album_uri',
             'artist_images',
             'album_images',
+            'platform',
         ]
     
     def create(self, validated_data):

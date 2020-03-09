@@ -74,3 +74,5 @@ def reset_password(email=None, username=None):
     email = EmailConfiguration(user, [user.profile.email,], 'reset_password', temp_password=temp_password)
     email.send_email()
 
+    return user.profile.email
+

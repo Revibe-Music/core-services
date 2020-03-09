@@ -1264,7 +1264,7 @@ class UserViewSet(viewsets.GenericViewSet):
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def view_reset_password(request, *args, **kwargs):
-    reset_password(**dict(request.data))
+    user_email = reset_password(**dict(request.data))
 
-    return responses.OK()
+    return responses.OK(data={"email": "user_email"})
 

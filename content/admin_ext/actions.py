@@ -1,4 +1,4 @@
-from revibe._helpers.files import add_track_to_song
+from revibe._helpers.files import add_track_to_song, add_image_to_obj
 
 # -----------------------------------------------------------------------------
 
@@ -25,4 +25,15 @@ def reprocess_song(modeladmin, request, queryset):
         original_track = tracks[0]
         add_track_to_song(obj, original_track.file, edit=True)
 reprocess_song.short_description = 'Reprocess selected songs'
+
+def reprocess_image(modeladmin, request, queryset):
+    for obj in queryset:
+        related_name = f"{obj.__class__.__name__.lower()}_image"
+        images = getattr(obj, related_name).filter(is_original=True)
+        if len(images) == 0:
+            continue
+
+        original_iamge = images[0]
+        add_image_to_obj(obj, original_iamge.file, edit=True)
+reprocess_image.short_description = "Reprocess selected objects' images"
 

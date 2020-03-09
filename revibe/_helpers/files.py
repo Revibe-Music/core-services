@@ -78,14 +78,14 @@ def add_image_to_obj(obj, img, *args, **kwargs):
 
         # post processing, creating duplicates, etc...
         # create new thread...
-        t = threading.Thread(target=resize_image, args=[image_obj])
+        t = threading.Thread(target=resize_image_async, args=[image_obj])
         t.setDaemon(True)
         t.start()
 
     return image_obj
 
 
-def resize_image(obj, *args, **kwargs):
+def resize_image_async(obj, *args, **kwargs):
     """
     takes the image from the django object and creates new images of the sizes needed
     """
@@ -101,7 +101,9 @@ def resize_image(obj, *args, **kwargs):
     ext = obj.file.name.split('.')[-1].lower()
     ext = "jpeg" if ext == 'jpg' else ext
 
-    original_image = PILImage.open(obj.file)
+    # open the file as a PIL Image object and 
+    # crop original to a square for resizing
+    original_image = square_image(PILImage.open(obj.file))
 
     # generate a new image for each required dimension
     for dimension in sizes:
@@ -136,6 +138,28 @@ def resize_image(obj, *args, **kwargs):
     gc.collect()
 
     connection.close()
+
+
+def square_image(image):
+    """
+    Squares a PIL Image
+    """
+    width, height = image.size
+    if width == height:
+        return image
+    
+    size = min(width, height)
+
+    extra_width = width - size
+    extra_height = height - size
+
+    # define the box
+    left = extra_width / 2
+    right = left + size
+    upper = extra_height / 2
+    lower = upper + size
+
+    return image.crop((left, upper, right, lower))
 
 
 def add_track_to_song(obj, track, *args, **kwargs):

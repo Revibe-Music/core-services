@@ -4,9 +4,11 @@ Author: Jordan Prechac
 """
 
 from django.conf import settings
-from revibe.middleware.base import BaseMiddleware
 
 import threading
+
+from revibe.middleware.base import BaseMiddleware
+from revibe.utils.urls import replace_url_id
 
 from metrics.utils.models import record_request_async
 
@@ -39,6 +41,9 @@ class RequestMetricsMiddleware(BaseMiddleware):
             or (settings.ADMIN_PATH in split_url)
         if dont_record_request:
             return
+        
+        # check the url for ID's - either int or uuid
+        url = replace_url_id(url)
 
         # save the request to DynamoDB
         thread = threading.Thread(target=record_request_async, args=[url, method, status_code])

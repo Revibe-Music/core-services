@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from datetime import datetime
 from pynamodb import models as pynamo_models
 from pynamodb.attributes import (
-    UnicodeAttribute, JSONAttribute, 
+    UnicodeAttribute, ListAttribute, 
 )
 
 from revibe._helpers import const
@@ -192,7 +192,7 @@ class Request(pynamo_models.Model):
         aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
     
     url = UnicodeAttribute(hash_key=True)
-    requests = JSONAttribute()
+    requests = ListAttribute()
 
 
 # -----------------------------------------------------------------------------

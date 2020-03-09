@@ -29,7 +29,9 @@ class RequestMetricsMiddleware(BaseMiddleware):
         print("Response status code: " + status_code)
 
         # save the request to DynamoDB
-        if settings.USE_S3 and settings.DEBUG == False:
+        denied_urls = ['/', '/hc/']
+        # only if using the cloud, and if in production, and if the url is not a denied url
+        if settings.USE_S3 and settings.DEBUG == False and url not in denied_urls:
             thread = threading.Thread(target=record_request_async, args=[url, method, status_code])
             thread.setDaemon(True)
             thread.start()

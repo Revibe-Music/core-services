@@ -51,8 +51,10 @@ def record_request_async(url, method, status_code):
         request.update(actions=[
             Request.requests.append(json)
         ])
+        request.save()
     except Request.DoesNotExist as dne:
         request = Request(url, requests=[json,])
+        request.save()
     except Exception as e:
         print(e)
         raise(e)

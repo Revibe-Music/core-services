@@ -49,7 +49,7 @@ def record_request_async(url, method, status_code):
     try:
         request = Request.get(url)
         request.update(actions=[
-            Request.requests.append(json)
+            Request.requests.set(Request.requests.append(json))
         ])
         request.save()
     except Request.DoesNotExist as dne:

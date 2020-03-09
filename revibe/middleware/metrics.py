@@ -29,9 +29,9 @@ class RequestMetricsMiddleware(BaseMiddleware):
         print("Response status code: " + status_code)
 
         # save the request to DynamoDB
-        if settings.USE_S3:
-            # thread = threading.Thread(target=record_request_async, args=[url, method, status_code])
-            # thread.setDaemon(True)
-            # thread.start()
-            record_request_async(url, method, status_code)
+        if settings.USE_S3 and settings.DEBUG == False:
+            thread = threading.Thread(target=record_request_async, args=[url, method, status_code])
+            thread.setDaemon(True)
+            thread.start()
+            # record_request_async(url, method, status_code) # for testing exceptions
 

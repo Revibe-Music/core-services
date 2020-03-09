@@ -51,6 +51,7 @@ def record_request_async(url, method, status_code):
         request.update(actions=[
             Request.requests.set(Request.requests.append(json))
         ])
+        # above code provided from https://github.com/pynamodb/PynamoDB/issues/434
         request.save()
     except Request.DoesNotExist as dne:
         request = Request(url, requests=json)

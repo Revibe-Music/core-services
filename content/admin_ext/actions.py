@@ -33,7 +33,7 @@ def reprocess_image(modeladmin, request, queryset):
         if len(images) == 0:
             continue
 
-        original_iamge = images[0]
-        add_image_to_obj(obj, original_iamge.file, edit=True)
+        original_image = images[0]
+        add_image_to_obj(obj, original_image.file.file, edit=True)
 reprocess_image.short_description = "Reprocess selected objects' images"
 

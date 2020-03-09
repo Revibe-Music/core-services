@@ -35,11 +35,13 @@ class RequestMetricsMiddleware(BaseMiddleware):
         # only record outside of production
         # don't record certain urls
         # don't record admin urls
+        # don't record jet urls
         # All of these things -should- be false in the production environment
         dont_record_request = (not settings.USE_S3) \
             or (settings.DEBUG == True) \
             or (url in denied_urls) \
-            or (settings.ADMIN_PATH in split_url)
+            or (settings.ADMIN_PATH in split_url) \
+            or ('jet' in split_url)
         if dont_record_request:
             return
 

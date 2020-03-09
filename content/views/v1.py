@@ -88,9 +88,25 @@ class ArtistViewset(PlatformViewSet):
         serializer = ser_v1.SongContributorSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True)
+    @action(detail=True, methods=['get'], url_path="top-songs", url_name="top-songs")
     def top_songs(self, request, pk=None):
-        return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
+        # return Response(status=status.HTTP_501_NOT_IMPLEMENTED) # temp
+        artist = self.get_object()
+
+        annotation = Count('streams__id')
+        ordering = '-count'
+
+        queryset = self.platform.Songs.filter(uploaded_by=artist) \
+            .annotate(count=annotation) \
+            .order_by(ordering)[:10]
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ser_v1.SongSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = ser_v1.SongSerializer(queryset, many=True)
+        return responses.OK(serializer=serializer)
 
 
 class AlbumViewSet(PlatformViewSet):

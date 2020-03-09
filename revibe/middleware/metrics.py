@@ -19,7 +19,7 @@ class RequestMetricsMiddleware(BaseMiddleware):
     #     # get the request url and method for after_response
 
     def after_response(self, response, request=None):
-        return # temp stopper
+        # return # temp stopper
         # get the response status code
         url = str(request.path)
         method = str(request.method)

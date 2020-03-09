@@ -5,7 +5,7 @@ from rest_framework import serializers
 from revibe._errors.network import ProgramError
 from revibe._helpers import const
 from revibe._helpers.files import add_image_to_obj, add_track_to_song
-from revibe.serializers import CustomDateField
+from revibe.serializers import CustomDateField, ProcessedOnlyListSerializer
 
 from content.models import *
 from content.mixins import ContributionSerializerMixin
@@ -14,6 +14,7 @@ from content.mixins import ContributionSerializerMixin
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
+        list_serializer_class = ProcessedOnlyListSerializer
         model = Image
         fields = [
             'url',

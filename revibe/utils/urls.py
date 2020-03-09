@@ -20,7 +20,7 @@ def replace_url_id(url):
 
     for comp in components:
         if is_valid_uuid(comp) or is_valid_int(comp):
-            components.index(comp) = id_string
-    
+            components[components.index(comp)] = id_string
+
     return sep_char.join(components)
 

@@ -32,7 +32,7 @@ v1_urls = [
     path('administration/', include('administration.urls.v1')),
 ]
 
-admin_path = 'admin/' if settings.DEBUG else '68t9gui2btw4gfesvd89yiugh2354rw/'
+admin_path = settings.ADMIN_PATH
 
 urlpatterns = [
     path(admin_path, admin.site.urls, name="admin"),

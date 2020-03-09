@@ -424,6 +424,9 @@ CORS_ALLOW_CREDENTIALS = True
 # all_auth settings
 ACCOUNT_EMAIL_REQUIRED = False
 
+# admin portal settings
+ADMIN_PATH = 'admin/' if DEBUG else '68t9gui2btw4gfesvd89yiugh2354rw/'
+
 # django-jet settings
 JET_DEFAULT_THEME = 'default'
 JET_THEMES = jet.themes

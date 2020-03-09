@@ -91,6 +91,7 @@ class UserSerializer(serializers.ModelSerializer):
     user_id = serializers.ReadOnlyField(source='id')
     is_artist = serializers.BooleanField(read_only=True)
     is_manager = serializers.BooleanField(read_only=True)
+    force_change_password = serializers.ReadOnlyField()
 
     # write-only
     password = serializers.CharField(write_only=True, required=False)
@@ -113,6 +114,7 @@ class UserSerializer(serializers.ModelSerializer):
             # read-only
             'is_artist',
             'is_manager',
+            'force_change_password',
 
             # write-only
             'password',

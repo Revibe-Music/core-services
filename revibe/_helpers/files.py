@@ -46,6 +46,7 @@ def add_image_to_obj(obj, img, *args, **kwargs):
         t = 'album'
 
     # delete old objects in S3 if editing:
+    reprocess = kwargs.pop('reprocess', False)
     editing = kwargs.pop('edit', False)
     if editing:
         prefix = f"images/{obj.__class__.__name__}/{str(obj.uri)}/"
@@ -60,17 +61,14 @@ def add_image_to_obj(obj, img, *args, **kwargs):
                 if settings.USE_S3:
                     s3.Object(settings.AWS_STORAGE_BUCKET_NAME, item.file.name)#.delete()
                 # else: # delete file locally... who cares...
-            
-            item.delete()
-    
-    # create the object
-    if type(img) == str:
-        image_obj = Image.objects.create(reference=img, is_original=True, height=1, width=1, **objs)
-    elif type(img) == dict:
-        image_obj = Image.objects.create(reference=img['image'], is_original=True, height=image['height'], width=image['width'], **objs)
-    else: # image is the file
-        image_obj = Image.objects.create(file=img, is_original=True, height=1, width=1, **objs) # image is stored in S3
-        # everything after is pulling back that file from S3
+
+            if reprocess:
+                if not item.is_original:
+                    item.delete()
+            else:
+                item.delete()
+
+    def process_image(image_obj):
         width, height = get_image_dimensions(image_obj.file.file)
         image_obj.width = width
         image_obj.height = height
@@ -81,6 +79,20 @@ def add_image_to_obj(obj, img, *args, **kwargs):
         t = threading.Thread(target=resize_image_async, args=[image_obj])
         t.setDaemon(True)
         t.start()
+
+        return image_obj
+
+    # create the object
+    if type(img) == str:
+        image_obj = Image.objects.create(reference=img, is_original=True, height=1, width=1, **objs)
+    elif type(img) == dict:
+        image_obj = Image.objects.create(reference=img['image'], is_original=True, height=image['height'], width=image['width'], **objs)
+    else: # image is the file
+        if reprocess:
+            image_obj = Image.objects.filter(**{f"{t}": obj, 'is_original': True}).first()
+        else:
+            image_obj = Image.objects.create(file=img, is_original=True, height=1, width=1, **objs) # image is stored in S3
+        image_obj = process_image(image_obj)
 
     return image_obj
 

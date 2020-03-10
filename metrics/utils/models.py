@@ -58,7 +58,7 @@ def record_request_async(url, method, status_code):
         request.save()
     except Exception as e:
         print(e)
-        raise(e)
+        # raise(e)
     
     connection.close()
     gc.collect()

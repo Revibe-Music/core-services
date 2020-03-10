@@ -60,5 +60,6 @@ def record_request_async(url, method, status_code):
         print(e)
         raise(e)
     
+    connection.close()
     gc.collect()
 

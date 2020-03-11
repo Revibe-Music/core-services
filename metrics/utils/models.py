@@ -37,7 +37,7 @@ def record_search_async(user, search_text):
     t.setDaemon(True)
     t.start()
 
-def record_request_async(url, method, status_code):
+def record_request(url, method, status_code):
     if not settings.USE_S3:
         return
 
@@ -59,7 +59,4 @@ def record_request_async(url, method, status_code):
     except Exception as e:
         print(e)
         # raise(e)
-    
-    connection.close()
-    gc.collect()
 

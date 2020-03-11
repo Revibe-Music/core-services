@@ -5,13 +5,11 @@ Author: Jordan Prechac
 
 from django.conf import settings
 
-import threading
-
 from revibe.middleware.base import BaseMiddleware
+from revibe.utils.asyncs import perform_async_request
 from revibe.utils.urls import replace_url_id
 
-from metrics.utils.models import record_request_async
-
+from metrics.utils.models import record_request
 # -----------------------------------------------------------------------------
 
 class RequestMetricsMiddleware(BaseMiddleware):
@@ -37,11 +35,11 @@ class RequestMetricsMiddleware(BaseMiddleware):
         # don't record admin urls
         # don't record jet urls
         # All of these things -should- be false in the production environment
-        dont_record_request = (not settings.USE_S3) \
-            or (settings.DEBUG == True) \
-            or (url in denied_urls) \
-            or (settings.ADMIN_PATH in split_url) \
-            or ('jet' in split_url)
+        dont_record_request = (not settings.USE_S3) #\
+            # or (settings.DEBUG == True) \
+            # or (url in denied_urls) \
+            # or (settings.ADMIN_PATH in split_url) \
+            # or ('jet' in split_url)
         if dont_record_request:
             return
 
@@ -49,8 +47,9 @@ class RequestMetricsMiddleware(BaseMiddleware):
         url = replace_url_id(url)
 
         # save the request to DynamoDB
-        thread = threading.Thread(target=record_request_async, args=[url, method, status_code])
-        thread.setDaemon(True)
-        thread.start()
+        perform_async_request(record_request, args=[url, method, status_code])
+        # thread = threading.Thread(target=record_request_async, args=[url, method, status_code])
+        # thread.setDaemon(True)
+        # thread.start()
         # record_request_async(url, method, status_code) # for testing exceptions
 

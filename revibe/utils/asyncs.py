@@ -23,7 +23,7 @@ def perform_async_request(function, *args, **kwargs):
         gc.collect()
         connection.close()
 
-    args = [function] + args
+    args = [function] + [arg for arg in args]
     thread = threading.Thread(target=call_function, args=args, kwargs=kwargs)
     thread.setDaemon(True)
     thread.start()

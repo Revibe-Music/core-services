@@ -38,6 +38,12 @@ class CustomUser(AbstractUser):
         help_text=_("Indicates if the user has logged in to the artist portal before/")
     )
 
+    programmatic_account = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("programmatic account"),
+        help_text=_("Programmatic accounts cannot login by normal means, they can only have access token generated for use in supplemental applications")
+    )
+
     # def _get_link_url
 
 

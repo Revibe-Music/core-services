@@ -13,6 +13,7 @@ class CustomUserAdmin(admin.ModelAdmin):
     list_filter = (
         ('date_joined', admin.DateFieldListFilter),
         ('is_staff', admin.BooleanFieldListFilter),
+        ('programmatic_account', admin.BooleanFieldListFilter),
     )
 
     # customize search

@@ -39,7 +39,7 @@ class CustomUser(AbstractUser):
     )
 
     programmatic_account = models.BooleanField(
-        null=False, blank=True, default=False,
+        null=True, blank=True, default=False,
         verbose_name=_("programmatic account"),
         help_text=_("Programmatic accounts cannot login by normal means, they can only have access token generated for use in supplemental applications")
     )

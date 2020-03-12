@@ -10,7 +10,7 @@ import threading
 from revibe.middleware.base import BaseMiddleware
 from revibe.utils.urls import replace_url_id
 
-from metrics.utils.models import record_request
+from metrics.utils.models import record_request_async
 # -----------------------------------------------------------------------------
 
 class RequestMetricsMiddleware(BaseMiddleware):
@@ -36,11 +36,11 @@ class RequestMetricsMiddleware(BaseMiddleware):
         # don't record admin urls
         # don't record jet urls
         # All of these things -should- be false in the production environment
-        dont_record_request = (not settings.USE_S3) #\
-            # or (settings.DEBUG == True) \
-            # or (url in denied_urls) \
-            # or (settings.ADMIN_PATH in split_url) \
-            # or ('jet' in split_url)
+        dont_record_request = (not settings.USE_S3) \
+            or (settings.DEBUG == True) \
+            or (url in denied_urls) \
+            or (settings.ADMIN_PATH in split_url) \
+            or ('jet' in split_url)
         if dont_record_request:
             return
 

@@ -182,7 +182,8 @@ class Alert(models.Model):
         ("warn", "Warning"),
         ("error", "Error"),
         ("info", "Information"),
-        ("feature", "New Feature")
+        ("feature", "New Feature"),
+        ("event", "Event"),
     )
 
     subject = models.CharField(

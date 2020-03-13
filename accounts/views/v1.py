@@ -45,6 +45,7 @@ from accounts._helpers import validation
 from administration.models import Campaign
 from content.models import Album, Song, SongContributor, AlbumContributor
 from content.serializers import v1 as content_ser_v1
+from content.utils.analytics import calculate_advanced_song_analytics
 from content.utils.models import add_tag_to_song, remove_tag_from_song, add_tag_to_album, remove_tag_from_album
 from metrics.models import Stream
 from music.models import *
@@ -644,7 +645,6 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         return responses.CREATED(serializer)
 
-
     def patch(self, request, *args, **kwargs):
         instance = self.get_current_artist(request)
         serializer = self.get_serializer(data=request.data, instance=instance, partial=True)
@@ -789,9 +789,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
             # only send if user is uploading artist or artist allows advanced
             # data sharing
             if is_uploader or song_object.uploaded_by.artist_profile.share_advanced_data_with_contributors:
-                advanced_metrics = {}
                 # calculate metrics...
-                song['advanced_metrics'] = advanced_metrics
+                song['advanced_metrics'] = calculate_advanced_song_analytics(song_object)
 
         return data
 
@@ -1266,5 +1265,5 @@ class UserViewSet(viewsets.GenericViewSet):
 def view_reset_password(request, *args, **kwargs):
     user_email = reset_password(**dict(request.data))
 
-    return responses.OK(data={"email": "user_email"})
+    return responses.OK(data={"email": str(user_email)})
 

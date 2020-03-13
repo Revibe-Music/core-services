@@ -1,3 +1,4 @@
+from django.db.models import Exists
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -19,6 +20,7 @@ from accounts import models as acc_models
 from accounts.permissions import TokenOrSessionAuthentication, AdminOnlyTokenPermissions
 from administration.models import *
 from administration.serializers import v1 as adm_ser_v1
+from administration.utils.models import see_alert
 from content import models as cnt_models
 
 # -----------------------------------------------------------------------------
@@ -96,8 +98,21 @@ class AlertViewSet(viewsets.ModelViewSet):
     permission_classes = [TokenOrSessionAuthentication]
     pagination_class = CustomLimitOffsetPagination
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["first-party"]]
+        "GET": [["ADMIN"],["first-party"]],
+        "POST": [["ADMIN"],["first-party"]]
     }
+
+    def get_queryset(self):
+        alerts = Alert.display_objects.exclude(users_seen=self.request.user)
+
+        return alerts
+    
+    def create(self, request, *args, **kwargs):
+        user = self.request.user
+        alert = Alert.objects.get(id=request.data["alert_id"])
+        see_alert(user, alert)
+
+        return responses.CREATED()
 
 
 class CompanyViewSet(GenericPlatformViewSet):

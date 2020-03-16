@@ -370,6 +370,11 @@ class Variable(models.Model):
         verbose_name=_("value"),
         help_text=_("value of the key-value pair")
     )
+    rules = models.TextField(
+        null=True, blank=True,
+        verbose_name=_("variable rules"),
+        help_text=_("Detail how to set up this value. Some variables require string formatting, such as 'mobile_app_share_text'.")
+    )
 
     class Meta:
         verbose_name = "variable"

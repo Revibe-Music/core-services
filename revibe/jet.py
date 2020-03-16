@@ -59,6 +59,17 @@ side_menu = [ # A list of application or custom item dicts
         ]
     },
     {
+        "label": _("Administration"),
+        "items": [
+            {"name": 'administration.campaign'},
+            {"name": 'administration.alert'},
+            {"name": 'administration.blog'},
+            {"name": 'administration.contactform'},
+            {"name": 'administration.variable'},
+            {"name": 'administration.youtubekey'},
+        ]
+    },
+    {
         "label": _("Content"),
         "items": [
             {"name": 'content.artist'},
@@ -78,16 +89,14 @@ side_menu = [ # A list of application or custom item dicts
         ]
     },
     {
-        "label": _("Administration"),
+        "label": _("Usage"),
         "items": [
-            {"name": 'administration.contactform'},
-            {"name": 'administration.campaign'},
-            {"name": 'administration.youtubekey'},
-            {"name": 'oauth2_provider.accesstoken'}
+            {"name": 'metrics.stream'},
+            {"name": 'metrics.search'},
         ]
     },
     {
-        "label": _("External Links"), # TODO: make these links work
+        "label": _("External Links"),
         "items": [
             {"label": _("API Docs"), "url": "https://documenter.getpostman.com/view/6267328/SWEB1ah6?version=latest"},
             {"label": _("Website"), "url": "https://revibe.tech"},

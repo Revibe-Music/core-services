@@ -229,7 +229,7 @@ class CompanyViewSet(GenericPlatformViewSet):
 class BlogViewSet(viewsets.ModelViewSet):
     queryset = Blog.display_objects.all()
     serializer_class = adm_ser_v1.BlogSerializer
-    permission_classes = [TokenOrSessionAuthentication]
+    permission_classes = [permissions.AllowAny]
     pagination_class = CustomLimitOffsetPagination
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],

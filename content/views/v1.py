@@ -490,6 +490,15 @@ class Browse(GenericPlatformViewSet):
         return responses.OK(data=result)
 
 
+    # recent
+
+    @action(detail=False, methods=['get'], url_path="recently-uploaded-albums", url_name="recently-uploaded-albums")
+    def recently_uploaded_albums(self, request, *args, **kwargs):
+        # params = request.query_params
+        # time_period = get_url_param(params, "time_period")
+        result = browse.recently_uploaded_albums()
+        return responses.OK(data=result)
+
     # other
 
     @action(detail=False, methods=['get'], url_path="artist-spotlight", url_name="artist-spotlight")

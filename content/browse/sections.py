@@ -144,7 +144,7 @@ def treding_youtube_videos(time_period, limit=_DEFAULT_LIMIT):
 
 def recently_uploaded_albums(time_period="last_week", limit=_DEFAULT_LIMIT):
     assert time_period in time_lookup.keys(), f"Could not find 'time_period' value '{time_period}' in lookup."
-    
+
     # get the albums uploaded this week
     number_of_streams = Count("song__streams__id", filter=Q(song__streams__timestamp__gte=time_lookup[time_period]))
     albums = Album.display_objects.filter(
@@ -159,7 +159,13 @@ def recently_uploaded_albums(time_period="last_week", limit=_DEFAULT_LIMIT):
             number_of_streams_per_day=F('number_of_streams') / F('days_since_publish')
         ).order_by('-number_of_streams_per_day')[:limit]
 
-    return cnt_ser_v1.AlbumSerializer(albums, many=True)
+    options = {
+        _name: "Recently Uploaded Albums",
+        _type: "albums",
+        _results: cnt_ser_v1.AlbumSerializer(albums, many=True).data,
+    }
+
+    return options
 
 
 # -----------------------------------------------------------------------------

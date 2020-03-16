@@ -3,6 +3,9 @@ Created: 4 Mar. 2020
 Author: Jordan Prechac
 """
 
+import logging
+logger = logging.getLogger(__name__)
+
 from . import sections
 
 # -----------------------------------------------------------------------------
@@ -38,15 +41,22 @@ def full_browse_page():
             "function": sections.treding_youtube_videos,
             "kwargs": {"time_period": "last_week", "limit": browse_page_limit}
         },
-        # TODO: recently uploaded albums
+        {
+            # TODO: recently uploaded albums
+            "function": sections.recently_uploaded_albums,
+            "kwargs": {"time_period": "last_week", "limit": browse_page_limit}
+        },
         {
             "function": sections.top_content_container,
             "kwargs": {}
         },
     ]
     for func in browses:
-        function_result = func["function"](**func["kwargs"])
-        if bool(function_result["results"]):
-            output.append(function_result)
+        try:
+            function_result = func["function"](**func["kwargs"])
+            if bool(function_result["results"]):
+                output.append(function_result)
+        except Exception as e:
+            logger.warn(e)
 
     return output

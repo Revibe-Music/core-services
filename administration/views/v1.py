@@ -106,7 +106,7 @@ class AlertViewSet(viewsets.ModelViewSet):
         alerts = Alert.display_objects.exclude(users_seen=self.request.user)
 
         return alerts
-    
+
     def create(self, request, *args, **kwargs):
         user = self.request.user
         alert = Alert.objects.get(id=request.data["alert_id"])
@@ -223,4 +223,14 @@ class CompanyViewSet(GenericPlatformViewSet):
         data['Campaigns'] = serializer.data
 
         return responses.OK(data=data)
+
+
+class BlogViewSet(viewsets.ModelViewSet):
+    queryset = Blog.display_objects.all()
+    serializer_class = adm_ser_v1.BlogSerializer
+    permission_classes = [TokenOrSessionAuthentication]
+    pagination_class = CustomLimitOffsetPagination
+    required_alternate_scopes = {
+        "GET": [["ADMIN"],["first-party"]],
+    }
 

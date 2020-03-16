@@ -6,6 +6,7 @@ import datetime
 from uuid import uuid1
 
 from revibe._helpers import const
+from revibe.utils.language import text
 
 from administration import managers
 
@@ -244,7 +245,7 @@ class Alert(models.Model):
 
     def __str__(self):
         erythang = f"{self._get_subject()} - {self.message}"
-        return erythang[:50] + "..."
+        return text.truncate_string(erythang)
 
 
 class AlertSeen(models.Model):
@@ -298,4 +299,59 @@ class ArtistSpotlight(models.Model):
     class Meta:
         verbose_name = "artist spotlight"
         verbose_name_plural = "artist spotlights"
+
+
+class Blog(models.Model):
+
+    display_style_choices = (
+        (1, "Style A"),
+        (2, "Style B"),
+    )
+
+    subject = models.CharField(
+        max_length=255,
+        null=False, blank=False,
+        verbose_name=_("subject"),
+        help_text=_("subject of the post")
+    )
+    body = models.TextField(
+        null=False, blank=False,
+        verbose_name=_("body"),
+        help_text=_("body of the post")
+    )
+    publish_date = models.DateField(
+        default=datetime.date.today,
+        verbose_name=_("publish date"),
+        help_text=_("date that the post will go live")
+    )
+    header_image = models.FileField(
+        null=True, blank=True,
+        verbose_name=_("header image"),
+        help_text=_("Image to be used at the top of the blog post")
+    )
+    side_image = models.FileField(
+        null=False, blank=True,
+        verbose_name=_("side image"),
+        help_text=_("Image for the side of the blog post")
+    )
+
+    display_style = models.IntegerField(
+        null=False, blank=True, default=1,
+        choices=display_style_choices,
+        verbose_name=_("display style"),
+        help_text=_("Style to display the post in. See documentation for info")
+    )
+
+    objects = models.Manager()
+    display_objects = managers.BlogDisplayManager()
+
+    class Meta:
+        verbose_name = "blog post"
+        verbose_name_plural = "blog posts"
+
+    def __str__(self):
+        return self.subject
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} ({self.__str__()})>"
 

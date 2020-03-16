@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from revibe.admin import html_check_x
+from revibe.utils.language import text
 
 from administration.admin_ext import test_api_key, reset_user_count
 from administration.models import *
@@ -78,6 +79,20 @@ class ArtistSpotlightAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(Blog)
+class BlogAdmin(admin.ModelAdmin):
+    # customize list display
+    list_display = ('sortable_str', 'body_trunc')
+
+    def sortable_str(self, obj):
+        return obj.__str__()
+    sortable_str.short_description = 'blog post'
+    sortable_str.admin_order_field = 'subject'
+
+    def body_trunc(self, obj):
+        return text.truncate_string(obj.body)
+    body_trunc.short_description = 'body'
+    body_trunc.admin_order_field = 'body'
 
 
 

@@ -10,7 +10,7 @@ from content.serializers import v1 as cnt_ser_v1
 
 # -----------------------------------------------------------------------------
 
-_DEFAULT_LIMIT = 25
+_DEFAULT_LIMIT = 50
 _name = "name"
 _type = "type"
 _results = "results"

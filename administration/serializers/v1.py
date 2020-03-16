@@ -118,6 +118,19 @@ class AlertSerializer(serializers.ModelSerializer):
         raise network.BadEnvironmentError("Cannot update an alert from the API")
 
 
+class BlogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Blog
+        fields = '__all__'
+
+    def create(self, validated_data):
+        raise network.BadEnvironmentError("Cannot create a blog post from the API")
+
+    def create(self, validated_data):
+        raise network.BadEnvironmentError("Cannot update a blog post from the API")
+
+
 # metrics information
 
 class UserMetricsSerializer(serializers.ModelSerializer):

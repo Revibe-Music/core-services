@@ -14,3 +14,10 @@ class AlertDisplayManager(models.Manager):
         )
         return super().get_queryset().filter(q_filter)
 
+
+class BlogDisplayManager(models.Manager):
+    def get_queryset(self):
+        q_filter = Q(
+            publish_date__lte=datetime.date.today()
+        )
+        return super().get_queryset().filter(q_filter)

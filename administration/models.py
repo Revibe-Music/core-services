@@ -355,3 +355,29 @@ class Blog(models.Model):
     def __repr__(self):
         return f"<{self.__class__.__name__} ({self.__str__()})>"
 
+
+class Variable(models.Model):
+
+    key = models.CharField(
+        max_length=255,
+        unique=True,
+        null=False, blank=False,
+        verbose_name=_("key"),
+        help_text=_("key of the key-value pair")
+    )
+    value = models.TextField(
+        null=False, blank=False,
+        verbose_name=_("value"),
+        help_text=_("value of the key-value pair")
+    )
+
+    class Meta:
+        verbose_name = "variable"
+        verbose_name_plural = "variables"
+
+    def __str__(self):
+        return self.key
+    
+    def __repr__(self):
+        return f"<{self.__class__.__name__} ({self.__str__()})>"
+

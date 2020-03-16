@@ -95,6 +95,17 @@ class BlogAdmin(admin.ModelAdmin):
     body_trunc.admin_order_field = 'body'
 
 
+@admin.register(Variable)
+class VariableAdmin(admin.ModelAdmin):
+    # customize list display
+    list_display = ('key', 'value')
+
+    # customize search
+    search_fields = [
+        'key',
+        'value',
+    ]
+
 
 # general admin information and changes
 admin.site.empty_value_display = "-empty-"

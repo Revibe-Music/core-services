@@ -26,9 +26,4 @@ def todays_artist_spotlight():
     
     return spotlight.artist
 
-def see_alert(user, alert):
-    try:
-        user.alerts_seen.add(alert)
-    except Exception as e:
-        raise BadRequestError(f"Could not record seeing alert. Error: {e}")
 

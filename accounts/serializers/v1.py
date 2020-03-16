@@ -13,6 +13,7 @@ from revibe._helpers.files import add_image_to_obj
 from revibe.utils.urls import add_query_params
 
 from accounts.models import *
+from administration.utils.models import retrieve_variable
 from content.models import Artist, Image
 from content.serializers.v1 import ImageSerializer
 from music.models import Library
@@ -158,7 +159,7 @@ class UserSerializer(serializers.ModelSerializer):
         """
         """
         # TODO: include getting text from variable
-        base_text = "You should listen to music on Revibe cause it's dope\n\nJoin here: {}"
+        base_text = retrieve_variable('mobile_app_share_text', "You should listen to music on Revibe cause it's dope\n\nJoin here: {}")
 
         base_url = "https://apps.apple.com/us/app/revibe-music/id1500839967"
         params = {"uid": str(obj.id)}

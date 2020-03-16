@@ -71,6 +71,14 @@ class YouTube(Platform):
         Overwrites the base platform save because YouTube content will never
         have an album_id in the data because YouTube does not have albums.
         """
+        # first make sure this song hasn't already been saved...
+        try:
+            song = Song.objects.get(id=data['song']['song_id'])
+            return song
+        except Song.DoesNotExist as dne:
+            pass
+
+        # if not, do it all...
         artist = self.get_artist(data, *args, **kwargs)
         album = self.get_album(data, artist, *args, **kwargs)
         song = self.get_song(data, artist, album, *args, **kwargs)

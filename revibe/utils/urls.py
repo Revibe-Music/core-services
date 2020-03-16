@@ -24,3 +24,28 @@ def replace_url_id(url):
 
     return sep_char.join(components)
 
+
+def add_query_params(url, params):
+    """
+    Takes a string url and a dictionary of parameters and generates a url.
+
+    Arguments
+    ---------
+    url: (str) the base url
+    params: (dict) the url parameters to add to it
+
+    Examples
+    --------
+    >>> add_query_params("api.revibe.tech", {"uid": 2})
+    "api.revibe.tech?uid=2
+    
+    >>> add_query_params("api.revibe.tech", {"uid": 2, "cid": "49gb2"})
+    "api.revibe.tech?uid=2&cid=49gb2"
+    """
+    if url[-1] != "?":
+        url += "?"
+
+    param_string = "&".join([f"{key}={value}" for key, value in params.items()])
+
+    return url + param_string
+

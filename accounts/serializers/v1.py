@@ -10,6 +10,7 @@ from rest_framework import serializers
 
 from revibe._errors.data import ObjectAlreadyExists
 from revibe._helpers.files import add_image_to_obj
+from revibe.utils.urls import add_query_params
 
 from accounts.models import *
 from content.models import Artist, Image
@@ -92,6 +93,7 @@ class UserSerializer(serializers.ModelSerializer):
     is_artist = serializers.BooleanField(read_only=True)
     is_manager = serializers.BooleanField(read_only=True)
     force_change_password = serializers.ReadOnlyField()
+    sharing_link = serializers.SerializerMethodField(method_name='get_sharing_link', read_only=True)
 
     # write-only
     password = serializers.CharField(write_only=True, required=False)
@@ -115,6 +117,7 @@ class UserSerializer(serializers.ModelSerializer):
             'is_artist',
             'is_manager',
             'force_change_password',
+            'sharing_link',
 
             # write-only
             'password',
@@ -150,6 +153,18 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+    
+    def get_sharing_link(self, obj):
+        """
+        """
+        # TODO: include getting text from variable
+        base_text = "You should listen to music on Revibe cause it's dope\n\nJoin here: {}"
+
+        base_url = "https://apps.apple.com/us/app/revibe-music/id1500839967"
+        params = {"uid": str(obj.id)}
+        final_url = add_query_params(base_url, params)
+
+        return base_text.format(final_url)
 
 
 class UserPatchSerializer(serializers.ModelSerializer):

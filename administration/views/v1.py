@@ -1,6 +1,6 @@
 from django.db.models import Exists
 from rest_framework import permissions, status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 
 import datetime
@@ -10,6 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from revibe.pagination import CustomLimitOffsetPagination
+from revibe.sharing import mobile_app_sharing_link
 from revibe.viewsets import GenericPlatformViewSet
 from revibe.utils.params import get_url_param
 from revibe._errors.data import NoKeysError
@@ -233,4 +234,22 @@ class BlogViewSet(viewsets.ModelViewSet):
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
     }
+
+
+class StateVariablesView(viewsets.GenericViewSet):
+    queryset = Variable.objects.all()
+    serializer_class = None
+    permission_classes = [TokenOrSessionAuthentication]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"], ["first-party"]]
+    }
+
+    def list(self, request, *args, **kwargs):
+        user = request.user
+
+        variables = {
+            "share_text": mobile_app_sharing_link(user),
+        }
+
+        return responses.OK(data=variables)
 

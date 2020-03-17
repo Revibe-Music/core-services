@@ -27,3 +27,15 @@ def calculate_advanced_song_analytics(song):
 
     return output
 
+
+def calculate_unique_monthly_listeners(artist):
+    """
+    Computes the average unique monthly listenership of an artist.
+
+    Arguments
+    ---------
+    artist: (<Artist>) the artist to calculate this on
+
+    """
+    pass
+

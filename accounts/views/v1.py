@@ -45,7 +45,7 @@ from accounts._helpers import validation
 from administration.models import Campaign
 from content.models import Album, Song, SongContributor, AlbumContributor
 from content.serializers import v1 as content_ser_v1
-from content.utils.analytics import calculate_advanced_song_analytics
+from content.utils.analytics import calculate_advanced_song_analytics, calculate_unique_monthly_listeners
 from content.utils.models import add_tag_to_song, remove_tag_from_song, add_tag_to_album, remove_tag_from_album
 from metrics.models import Stream
 from music.models import *
@@ -1224,6 +1224,15 @@ class UserArtistViewSet(GenericPlatformViewSet):
             remove_tag_from_album(tags, album)
 
             return responses.DELETED()
+
+    @action(detail=False, methods=['get'], url_path="analytics", url_name="analytics")
+    def artist_analytics(self, request, *args, **kwargs):
+        artist = self.get_current_artist(request)
+
+        output = {}
+        output['unique_monthly_listeners'] = calculate_unique_monthly_listeners(artist, include_contributions=True, split_contributions=True)
+
+        return responses.OK(data=output)
 
 
 class UserViewSet(viewsets.GenericViewSet):

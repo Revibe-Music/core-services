@@ -1,17 +1,16 @@
 from django.core.files.images import get_image_dimensions
-from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from revibe._errors.network import ProgramError
 from revibe._helpers import const
 from revibe._helpers.files import add_image_to_obj, add_track_to_song
-from revibe.contrib.queries.functions import Year, Month
 from revibe.serializers import CustomDateField, ProcessedOnlyListSerializer
 
 from accounts.models import CustomUser
 from content.models import *
 from content.mixins import ContributionSerializerMixin
+from content.utils import analytics
 from metrics.models import Stream
 
 # -----------------------------------------------------------------------------
@@ -46,7 +45,7 @@ class ArtistSerializer(serializers.ModelSerializer):
     # read-only
     images = ImageSerializer(source="artist_image", many=True, read_only=True)
     bio = serializers.SerializerMethodField('_get_artist_bio', read_only=True)
-    # unique_monthly_listeners = serializers.SerializerMethodField('_get_unique_monthly_listeners', read_only=True)
+    unique_monthly_listeners = serializers.SerializerMethodField('_get_unique_monthly_listeners', read_only=True)
 
     # write-only
     image = serializers.FileField(write_only=True, required=False)
@@ -62,7 +61,7 @@ class ArtistSerializer(serializers.ModelSerializer):
             # read-only
             'images',
             "bio",
-            # 'unique_monthly_listeners',
+            'unique_monthly_listeners',
 
             # write-only
             'image',
@@ -100,13 +99,7 @@ class ArtistSerializer(serializers.ModelSerializer):
 
     def _get_unique_monthly_listeners(self, obj):
         try:
-            q_or = Q(song__in=obj.song_uploaded_by.all()) | Q(song__in=obj.song_contributors.all())
-            streams = Stream.objects.filter(q_or).distinct().annotate(
-                year=Year('timestamp'),
-                month=Month('timestamp')
-            ).annotate(user_count=Count('user', distinct=True)).aggregate(user_sum=Avg('user_count'))
-
-            return streams['user_sum']
+            return analytics.calculate_unique_monthly_listeners(obj, aggregate=True)
         except Exception as e:
             # return None
             raise e

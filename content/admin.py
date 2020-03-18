@@ -193,6 +193,10 @@ class TagAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(PlaceholderContribution)
+class PlaceholderContributionAdmin(admin.ModelAdmin):
+    pass
+
 # class TopSongsAdmin(SongAdmin):
 #     def get_queryset(self, request):
 #         return browse.top_songs_all_time()

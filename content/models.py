@@ -416,3 +416,49 @@ class Tag(models.Model):
         return f"<{self.__class__.__name__} - {self.__str__()}>"
 
 
+class PlaceholderContribution(models.Model):
+    song = models.ForeignKey(
+        to='content.song',
+        on_delete=models.CASCADE,
+        related_name='placeholder_contributions',
+        null=True, blank=True,
+        verbose_name=_('song'),
+        help_text=_("The related song")
+    )
+    album = models.ForeignKey(
+        to='content.album',
+        on_delete=models.CASCADE,
+        related_name='placeholder_contributions',
+        null=True, blank=True,
+        verbose_name=_("album"),
+        help_text=_("The related album")
+    )
+
+    email = models.CharField(
+        max_length=255,
+        null=False, blank=False,
+        verbose_name=_("email"),
+        help_text=_("If an artist registers with this email, then will automatically create the contributions")
+    )
+
+    contribution_type = models.CharField(
+        max_length=255,
+        null=False, blank=False,
+        verbose_name=_("contribution type"),
+        help_text=_("the contribution type to be applied when creating the contribution")
+    )
+
+    date_created = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = 'placeholder contribution'
+        verbose_name_plural = 'placeholder contributions'
+
+    def __str__(self):
+        return self.email
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} ({self.__str__()})>"
+

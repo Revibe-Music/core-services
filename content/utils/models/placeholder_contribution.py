@@ -3,9 +3,37 @@ Created: 18 Mar. 2020
 Author: Jordan Prechac
 """
 
-from content.models import PlaceholderContribution, SongContributor, AlbumContributor
+from revibe._errors.network import ExpectationFailedError
+
+from content.models import PlaceholderContribution, SongContributor, AlbumContributor, Song, Album
 
 # -----------------------------------------------------------------------------
+
+def create_placeholder(data):
+    """
+    Creates placeholder contributions.
+
+    Arguments
+    ---------
+    data: (dict-like) the request data that is sent. See Song/Album Serializers
+        for more information about included fields. 
+    """
+    placeholder = PlaceholderContribution(
+        email=data['email'],
+        contribution_type=data['contribution_type']
+    )
+
+    if data.get('song_id', False) != False:
+        song = Song.objects.get(id=data.get('song_id'))
+        placeholder.song = song
+    elif data.get('album_id', False) != False:
+        album = Album.objects.get(id=data.get('album_id'))
+        placeholder.album = album
+    else:
+        raise ExpectationFailedError("Could not find a song or album ID")
+
+    placeholder.save()
+
 
 def create_permananent_contribs(artist):
     """

@@ -43,10 +43,16 @@ from accounts.serializers.v1 import *
 from accounts.utils.auth import change_password, reset_password
 from accounts._helpers import validation
 from administration.models import Campaign
-from content.models import Album, Song, SongContributor, AlbumContributor
+from content.models import Album, Song, SongContributor, AlbumContributor,PlaceholderContribution
 from content.serializers import v1 as content_ser_v1
 from content.utils.analytics import calculate_advanced_song_analytics, calculate_unique_monthly_listeners
-from content.utils.models import add_tag_to_song, remove_tag_from_song, add_tag_to_album, remove_tag_from_album
+from content.utils.models import (
+    # placeholder contribs
+    create_permananent_contribs, create_placeholder,
+
+    # tag stuff
+    add_tag_to_song, remove_tag_from_song, add_tag_to_album, remove_tag_from_album
+)
 from metrics.models import Stream
 from music.models import *
 from music.serializers import v1 as music_ser_v1
@@ -618,30 +624,8 @@ class UserArtistViewSet(GenericPlatformViewSet):
         request.user.is_artist = True
         request.user.save()
 
-        # add contributions from urls
-        params = request.query_params
-
-        # song contributions
-        if 'song_contrib' in params.keys():
-            contribs = params['song_contrib'].split(',')
-            for contrib in contribs:
-                obj = SongContributor.objects.get(id=contrib)
-                # TODO: add some check for like obj.allow_add_on_register or something
-                obj.artist = artist
-                obj.pending = True
-                obj.approved = False
-                obj.save()
-
-        # album contributions
-        if 'album_contrib' in params.keys():
-            contribs = params['album_contrib'].split(',')
-            for contrib in contribs:
-                obj = AlbumContributor.objects.get(id=contrib)
-                # TODO: add some check for like obj.allow_add_on_register or something
-                obj.artist = artist
-                obj.pending = True
-                obj.approved = False
-                obj.save()
+        # check placeholder contributions
+        create_permananent_contribs(artist)
 
         return responses.CREATED(serializer)
 
@@ -985,6 +969,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.OK(data=metrics_data)
 
         elif request.method == 'POST':
+            # ensure that it's not a placeholder contribution
+            if request.data.get('placeholder', False) == True:
+                create_placeholder(request.data)
+                return responses.CREATED()
+
+            # do the normal thing
             serializer = content_ser_v1.AlbumContributorSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()
@@ -1042,6 +1032,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.OK(data=metrics_data)
 
         elif request.method == 'POST':
+            # ensure that it's not a placeholder contribution
+            if request.data.get('placeholder', False) == True:
+                create_placeholder(request.data)
+                return responses.CREATED()
+
+            # do the normal thing
             serializer = content_ser_v1.SongContributorSerializer(data=request.data, *args, **kwargs)
             if serializer.is_valid():
                 serializer.save()

@@ -13,6 +13,24 @@ from metrics.models import Stream
 
 # -----------------------------------------------------------------------------
 
+def song_unique_monthly_listeners(song, aggregate=False):
+    """
+    """
+    numbers = Stream.objects.filter(song=song) \
+        .distinct() \
+        .annotate(
+            year=Year('timestamp'),
+            month=Month('timestamp')
+        ) \
+        .values('year', 'month') \
+        .distinct() \
+        .order_by('year', 'month') \
+        .annotate(count=Count('user', distinct=True))
+    
+    if not aggregate:
+        return numbers
+    else:
+        return numbers.aggregate(avg=Avg('count'))['avg']
 
 def calculate_advanced_song_analytics(song):
     """
@@ -20,11 +38,14 @@ def calculate_advanced_song_analytics(song):
     output = {}
     streams = Stream.objects.filter(song=song)
 
-    # get unique monthly listeners
+    # monthly streams
     output['monthly_streams'] = streams.annotate(
         year=Year('timestamp'),
         month=Month('timestamp')
     ).values('year','month').annotate(count=Count('id'))
+
+    # unique monthly listeners
+    output['unique_monthly_listeners'] = song_unique_monthly_listeners(song, aggregate=False)
 
     return output
 

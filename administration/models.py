@@ -307,7 +307,20 @@ class Blog(models.Model):
         (1, "Style A"),
         (2, "Style B"),
     )
+    category_choices = (
+        ('artist_of_the_week', 'Artist of the Week'),
+        ('education', 'Education'),
+        ('playlist', 'Playlist'),
+        ('other', 'Other'),
+    )
 
+    category = models.CharField(
+        max_length=255,
+        choices=category_choices,
+        null=False, blank=False,
+        verbose_name=_("category"),
+        help_text=_("Which blog this post belongs to")
+    )
     title = models.CharField(
         max_length=255,
         null=False, blank=False,

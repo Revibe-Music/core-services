@@ -308,16 +308,21 @@ class Blog(models.Model):
         (2, "Style B"),
     )
 
-    subject = models.CharField(
+    title = models.CharField(
         max_length=255,
         null=False, blank=False,
-        verbose_name=_("subject"),
-        help_text=_("subject of the post")
+        verbose_name=_("title"),
+        help_text=_("Title of the post")
     )
     body = models.TextField(
         null=False, blank=False,
         verbose_name=_("body"),
         help_text=_("body of the post")
+    )
+    summary = models.TextField(
+        null=True, blank=True,
+        verbose_name=_("summary"),
+        help_text=_("A quick summary of the post")
     )
     publish_date = models.DateField(
         default=datetime.date.today,
@@ -334,12 +339,33 @@ class Blog(models.Model):
         verbose_name=_("side image"),
         help_text=_("Image for the side of the blog post")
     )
+    tags = models.ManyToManyField(
+        to='administration.blogtag',
+        related_name='blogs',
+        blank=True,
+        verbose_name=_("tags"),
+        help_text=_("Associated tags")
+    )
+
+    author = models.ForeignKey(
+        to='accounts.customuser',
+        on_delete=models.SET_NULL,
+        related_name='posted_blogs',
+        limit_choices_to={'is_staff': True},
+        null=True, blank=True,
+        verbose_name=_("author"),
+        help_text=_("The staff member who wrote the article")
+    )
 
     display_style = models.IntegerField(
         null=False, blank=True, default=1,
         choices=display_style_choices,
         verbose_name=_("display style"),
         help_text=_("Style to display the post in. See documentation for info")
+    )
+
+    date_created = models.DateTimeField(
+        auto_now_add=True
     )
 
     objects = models.Manager()
@@ -350,10 +376,23 @@ class Blog(models.Model):
         verbose_name_plural = "blog posts"
 
     def __str__(self):
-        return self.subject
+        return self.title
 
     def __repr__(self):
         return f"<{self.__class__.__name__} ({self.__str__()})>"
+
+
+class BlogTag(models.Model):
+    text = models.CharField(
+        max_length=255,
+        null=False, blank=False,
+        verbose_name=_("text"),
+        help_text=_("Text")
+    )
+
+    date_created = models.DateTimeField(
+        auto_now_add=True
+    )
 
 
 class Variable(models.Model):

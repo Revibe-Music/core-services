@@ -87,7 +87,7 @@ class BlogAdmin(admin.ModelAdmin):
     def sortable_str(self, obj):
         return obj.__str__()
     sortable_str.short_description = 'blog post'
-    sortable_str.admin_order_field = 'subject'
+    sortable_str.admin_order_field = 'title'
 
     def body_trunc(self, obj):
         return text.truncate_string(obj.body)

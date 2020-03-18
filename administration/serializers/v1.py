@@ -122,12 +122,22 @@ class BlogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Blog
-        fields = '__all__'
+        fields = [
+            'id',
+            'title',
+            'body',
+            'summary',
+            'publish_date',
+            'header_image',
+            'side_image',
+            'display_style',
+            'tags',
+        ]
 
     def create(self, validated_data):
         raise network.BadEnvironmentError("Cannot create a blog post from the API")
 
-    def create(self, validated_data):
+    def update(self, validated_data):
         raise network.BadEnvironmentError("Cannot update a blog post from the API")
 
 

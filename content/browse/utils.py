@@ -14,6 +14,7 @@ _DEFAULT_LIMIT = 50
 _name = "name"
 _type = "type"
 _results = "results"
+_endpoint = "endpoint"
 
 def _browse_song(annotation, limit=_DEFAULT_LIMIT, platform=const.REVIBE_STRING, **options):
     songs = Song.display_objects.filter(platform=platform).annotate(count=annotation).order_by('-count')[:limit]

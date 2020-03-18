@@ -23,7 +23,7 @@ from metrics.models import Stream
 
 from .utils import (
     _browse_song, _browse_album, _browse_artist,
-    _DEFAULT_LIMIT, _name, _type, _results,
+    _DEFAULT_LIMIT, _name, _type, _results, _endpoint
 )
 
 # -----------------------------------------------------------------------------
@@ -57,7 +57,8 @@ def top_songs_all_time(limit=_DEFAULT_LIMIT):
 
     options = {
         _name: "Top Songs",
-        _type: "songs"
+        _type: "songs",
+        _endpoint: "browse/top-songs-all-time/"
     }
 
     return _browse_song(annotation, limit, **options)
@@ -70,7 +71,8 @@ def top_albums_all_time(limit=_DEFAULT_LIMIT):
 
     options = {
         _name: "Top Albums",
-        _type: "albums"
+        _type: "albums",
+        _endpoint: "browse/top-albums-all-time/"
     }
 
     return _browse_album(annotation, limit, **options)
@@ -82,7 +84,8 @@ def top_artists_all_time(limit=_DEFAULT_LIMIT):
 
     options = {
         _name: "Top Artists",
-        _type: "artists"
+        _type: "artists",
+        _endpoint: "browse/top-artists-all-time/"
     }
 
     return _browse_artist(annotation, limit, **options)
@@ -91,40 +94,43 @@ def top_artists_all_time(limit=_DEFAULT_LIMIT):
 # -----------------------------------------------------------------------------
 ##### trending #####
 
-def trending_songs(time_period, limit=_DEFAULT_LIMIT):
+def trending_songs(time_period="last_week", limit=_DEFAULT_LIMIT):
     assert time_period in time_lookup.keys(), f"Could not find 'time_period' value '{time_period}' in lookup."
     annotation = Count('streams__id', filter=Q(streams__timestamp__gte=time_lookup[time_period]))
 
     options = {
         _name: "Trending Songs",
-        _type: "songs"
+        _type: "songs",
+        _endpoint: "browse/trending-songs/"
     }
 
     return _browse_song(annotation, limit, **options)
 
-def trending_albums(time_period, limit=_DEFAULT_LIMIT):
+def trending_albums(time_period="last_week", limit=_DEFAULT_LIMIT):
     assert time_period in time_lookup.keys(), f"Could not find 'time_period' value '{time_period}' in lookup."
     annotation = Count('song__streams__id', filter=Q(song__streams__timestamp__gte=time_lookup[time_period]))
 
     options = {
         _name: "Trending Albums",
-        _type: "albums"
+        _type: "albums",
+        _endpoint: "browse/trending-albums/",
     }
 
     return _browse_album(annotation, limit, **options)
 
-def trending_artists(time_period, limit=_DEFAULT_LIMIT):
+def trending_artists(time_period="last_week", limit=_DEFAULT_LIMIT):
     assert time_period in time_lookup.keys(), f"Could not find 'time_period' value '{time_period}' in lookup."
     annotation = Count('song_uploaded_by__streams__id', filter=Q(song_uploaded_by__streams__timestamp__gte=time_lookup[time_period]))
 
     options = {
         _name: "Trending Artists",
-        _type: "artists"
+        _type: "artists",
+        _endpoint: "browse/trending-artists/",
     }
 
     return _browse_artist(annotation, limit, **options)
 
-def treding_youtube_videos(time_period, limit=_DEFAULT_LIMIT):
+def treding_youtube_videos(time_period="last_week", limit=_DEFAULT_LIMIT):
     """
     Similar to the 
     """
@@ -134,6 +140,7 @@ def treding_youtube_videos(time_period, limit=_DEFAULT_LIMIT):
     options = {
         _name: "Popular on Revibe",
         _type: "songs",
+        _endpoint: "browse/trending-youtube/",
     }
 
     return _browse_song(annotation, limit, platform=const.YOUTUBE_STRING, **options)
@@ -162,6 +169,7 @@ def recently_uploaded_albums(time_period="last_week", limit=_DEFAULT_LIMIT):
     options = {
         _name: "Recently Uploaded Albums",
         _type: "albums",
+        _endpoint: "browse/recently-uploaded-albums/",
         _results: cnt_ser_v1.AlbumSerializer(albums, many=True).data,
     }
 
@@ -177,6 +185,7 @@ def artist_spotlight():
     options = {
         _name: "Artist Spotlight",
         _type: "artist",
+        _endpoint: "browse/artist-spotlight/",
         _results: cnt_ser_v1.ArtistSerializer(artist, many=False).data if artist != None else None
     }
 
@@ -191,19 +200,19 @@ def top_content_container():
                 "name": "Top Songs",
                 "type": "songs",
                 "icon": None,
-                "url": reverse("browse-top-songs-all-time"),
+                "url": "browse/top-songs-all-time/",
             },
             {
                 "name": "Top Albums",
                 "type": "albums",
                 "icon": None,
-                "url": reverse("browse-top-albums-all-time"),
+                "url": "browse/top-albums-all-time/",
             },
             {
                 "name": "Top Artists",
                 "type": "artists",
                 "icon": None,
-                "url": reverse("browse-top-artists-all-time"),
+                "url": "browse/top-artists-all-time/",
             },
         ],
     }

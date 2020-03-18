@@ -464,7 +464,7 @@ class Browse(GenericPlatformViewSet):
         params = request.query_params
         time_period = get_url_param(params, "time_period")
         if time_period == None:
-            raise ExpectationFailedError("Could not find parameter 'time_period' in request.")
+            time_period = "last_week"
 
         result = browse.trending_songs(time_period)
         return responses.OK(data=result)
@@ -474,7 +474,7 @@ class Browse(GenericPlatformViewSet):
         params = request.query_params
         time_period = get_url_param(params, "time_period")
         if time_period == None:
-            raise ExpectationFailedError("Could not find parameter 'time_period' in request.")
+            time_period = "last_week"
 
         result = browse.trending_albums(time_period)
         return responses.OK(data=result)
@@ -484,9 +484,19 @@ class Browse(GenericPlatformViewSet):
         params = request.query_params
         time_period = get_url_param(params, "time_period")
         if time_period == None:
-            raise ExpectationFailedError("Could not find parameter 'time_period' in request.")
+            time_period = "last_week"
 
         result = browse.trending_artists(time_period)
+        return responses.OK(data=result)
+
+    @action(detail=False, methods=['get'], url_path="trending-youtube", url_name="trending-youtube")
+    def trending_youtube(self, request, *args, **kwargs):
+        params = request.query_params
+        time_period = get_url_param(params, "time_period")
+        if time_period == None:
+            time_period = "last_week"
+
+        result = browse.treding_youtube_videos(time_period)
         return responses.OK(data=result)
 
 

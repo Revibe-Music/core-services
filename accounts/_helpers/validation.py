@@ -1,7 +1,7 @@
 from logging import getLogger
 logger = getLogger(__name__)
 
-from accounts.models import CustomUser
+from accounts.models import CustomUser, Profile
 
 # -----------------------------------------------------------------------------
 
@@ -20,7 +20,7 @@ def check_email(email):
 
     Effectively makes email unique, if enforced wherever email could be updated.
     """
-    users = CustomUser.objects.filter(email=email)
+    users = Profile.objects.filter(email=email)
     if len(users) > 0:
         logger.warn(f"User with email '{email}' already exists.")
         return False

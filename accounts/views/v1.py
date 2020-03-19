@@ -30,6 +30,7 @@ logger = getLogger(__name__)
 
 from revibe.auth.artist import get_authenticated_artist
 from revibe.viewsets import GenericPlatformViewSet
+from revibe.utils import mailchimp
 from revibe.utils.params import get_url_param
 from revibe._errors import accounts ,network
 from revibe._errors.accounts import AccountNotFound, NotArtistError
@@ -195,6 +196,8 @@ class RegistrationAPI(generics.GenericAPIView):
 
             if device != 'browser':
                 data.update({"refresh_token": refresh_token.token})
+
+            mailchimp.add_new_list_member(user)
 
             return Response(data, status=status.HTTP_200_OK)
 
@@ -626,6 +629,11 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         # check placeholder contributions
         create_permananent_contribs(artist)
+
+        try:
+            mailchimp.update_list_member(artist.artist_user, artist=True)
+        except Exception:
+            pass
 
         return responses.CREATED(serializer)
 

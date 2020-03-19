@@ -6,7 +6,7 @@ from revibe._helpers.symbols import CROSS_MARK, CHECK_MARK
 
 from content import browse
 from content.admin_ext import (
-    approve_contribution, remove_delete, perform_delete, reprocess_song, reprocess_image
+    approve_contribution, remove_delete, perform_delete, reprocess_song, reprocess_image, update_mailchimp_info
 )
 from content.models import *
 
@@ -26,7 +26,7 @@ class ArtistAdmin(admin.ModelAdmin):
     search_fields = ['name', 'platform', 'artist_user__username'] # optional add 'song_uploaded_by__name' and 'album__uploaded_by__name'
 
     # customize actions
-    actions = [reprocess_image, ]
+    actions = [reprocess_image, update_mailchimp_info]
 
     # other stuff
     empty_value_display = '-empty-'

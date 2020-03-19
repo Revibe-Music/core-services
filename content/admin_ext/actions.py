@@ -1,4 +1,5 @@
 from revibe._helpers.files import add_track_to_song, add_image_to_obj
+from revibe.utils import mailchimp
 
 # -----------------------------------------------------------------------------
 
@@ -37,3 +38,11 @@ def reprocess_image(modeladmin, request, queryset):
         add_image_to_obj(obj, original_image.file, edit=True, reprocess=True)
 reprocess_image.short_description = "Reprocess selected objects' images"
 
+
+def update_mailchimp_info(modeladmin, request, queryset):
+    for i in queryset:
+        try:
+            mailchimp.update_list_member(i.artist_user, artist=True)
+        except Exception:
+            pass
+update_mailchimp_info.short_description = "Update Mailchimp list"

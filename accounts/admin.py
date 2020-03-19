@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from accounts.admin_ext import actions
 from accounts.models import *
 
 # -----------------------------------------------------------------------------
@@ -20,7 +21,7 @@ class CustomUserAdmin(admin.ModelAdmin):
     search_fields = ['username', 'first_name', 'last_name']
 
     # customize actions
-    # actions = [change_password]
+    actions = [actions.update_mailchimp_info]#[change_password]
 
     def _full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"

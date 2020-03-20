@@ -11,9 +11,8 @@ class GoodAdmin(admin.ModelAdmin):
 
     # customize list filter
     list_filter = (
-        ('purchaser', admin.RelatedOnlyFieldListFilter),
+        ('available', admin.BooleanFieldListFilter),
         ('seller', admin.RelatedOnlyFieldListFilter),
-        ('sold', admin.BooleanFieldListFilter),
         'category',
     )
 
@@ -23,8 +22,6 @@ class GoodAdmin(admin.ModelAdmin):
         'description',
         'seller__name',
         'seller__artist_user__username',
-        'purchaser__name',
-        'purchaser__artist_user__username',
     ]
 
     def sortable_str(self, obj):
@@ -41,4 +38,26 @@ class GoodAdmin(admin.ModelAdmin):
         return '${:,.2f} ({}%)'.format(obj.discounted_price, obj.discount)
     _format_discounted_price.short_description = 'discounted price'
     _format_discounted_price.admin_order_field = 'discount'
+
+
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+    # customize list display
+    list_display = ('__str__', '_format_sale_price')
+    list_filter = (
+        ('returned', admin.BooleanFieldListFilter),
+        ('buyer', admin.RelatedOnlyFieldListFilter),
+    )
+
+    # customize search
+    search_fields = [
+        'buyer__name',
+        'good__seller__name',
+        'good__name',
+    ]
+
+    def _format_sale_price(self, obj):
+        return '${:,.2f}'.format(obj.sale_price)
+    _format_sale_price.short_description = "sale price"
+    _format_sale_price.admin_order_field = "sale_price"
 

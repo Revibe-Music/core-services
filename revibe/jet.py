@@ -82,6 +82,13 @@ side_menu = [ # A list of application or custom item dicts
         ]
     },
     {
+        "label": _("Marketplace"),
+        "items": [
+            {"name": 'marketplace.good'},
+            {"name": 'marketplace.transaction'},
+        ],
+    },
+    {
         "label": _("Music"),
         "items": [
             {"name": 'music.playlist'},

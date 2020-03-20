@@ -37,19 +37,11 @@ class Good(models.Model):
         help_text=_("Item description")
     )
 
-    image = models.FileField(
-        null=True, blank=True,
-        verbose_name=_("image"),
-        help_text=_("Image to display for this good")
-    )
-    audio = models.FileField(
-        null=True, blank=True,
-        verbose_name=_("audio"),
-        help_text=_("Audio or audio sample for the good")
-    )
+    # images = many-to-one with content.Image
+    # audio_files = many-to-one with content.Track
 
     price = models.DecimalField(
-        max_digits=6, decimal_places=2,
+        max_digits=11, decimal_places=2,
         null=False, blank=False,
         verbose_name=_("price"),
         help_text=_("The price of the product or service")
@@ -66,6 +58,16 @@ class Good(models.Model):
         verbose_name=_("publish date"),
         help_text=_("Date the good will go public")
     )
+    available = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("available"),
+        help_text=_("The item is currently available for sale")
+    )
+    repeating = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("repeating"),
+        help_text=_("The item is not limited to one purchase")
+    )
 
     seller = models.ForeignKey(
         to='content.artist',
@@ -75,25 +77,6 @@ class Good(models.Model):
         null=True, blank=False,
         verbose_name=_("seller"),
         help_text=_("Seller of the good. Must be a Revibe artist")
-    )
-    purchaser = models.ForeignKey(
-        to='content.artist',
-        on_delete=models.SET_NULL,
-        limit_choices_to={'platform': 'Revibe'},
-        related_name="purchased_goods",
-        null=True, blank=True, default=None,
-        verbose_name=_("purchaser"),
-        help_text=_("Purchaser of the good. Must be a Revibe artist")
-    )
-    sold = models.BooleanField(
-        null=False, blank=False, default=False,
-        verbose_name=_("sold status"),
-        help_text=_("Shows the item has been sold or not")
-    )
-    sale_date = models.DateTimeField(
-        null=True, blank=True,
-        verbose_name=_("sale date"),
-        help_text=_("The date and time the good was sold")
     )
 
     date_created = models.DateTimeField(
@@ -118,4 +101,59 @@ class Good(models.Model):
     class Meta:
         verbose_name = "good"
         verbose_name_plural = "goods"
+
+
+class Transaction(models.Model):
+
+    good = models.ForeignKey(
+        to='marketplace.good',
+        on_delete=models.SET_NULL,
+        related_name='transactions',
+        null=True, blank=False,
+        verbose_name=_("good"),
+        help_text=_("Marketplace item")
+    )
+
+    buyer = models.ForeignKey(
+        to='content.artist',
+        on_delete=models.SET_NULL,
+        related_name="transactions",
+        limit_choices_to={"platform": "Revibe"},
+        null=True, blank=False,
+        verbose_name=_("buyer"),
+        help_text=_("Artist who bought the good")
+    )
+
+    posted_price = models.DecimalField(
+        max_digits=11, decimal_places=2,
+        null=False, blank=False,
+        verbose_name=_("posted price"),
+        help_text=_("The listing price (including discounts) at the time of the transaction")
+    )
+    sale_price = models.DecimalField(
+        max_digits=11, decimal_places=2,
+        null=False, blank=False,
+        verbose_name=_("sale price"),
+        help_text=_("The amount actually paid")
+    )
+
+    returned = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("returned"),
+        help_text=_("The purchase was returned and refunded")
+    )
+
+    date_created = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return str(self.good) if self.good else self.buyer if self.buyer else "literally no info on this one..."
+
+    def __repr__(self):
+        return classes.default_repr(self)
+    
+    class Meta:
+        verbose_name = "transaction"
+        verbose_name_plural = "transactions"
 

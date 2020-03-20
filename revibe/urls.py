@@ -26,10 +26,11 @@ from administration.views import base
 
 v1_urls = [
     path('account/', include('accounts.urls.v1')),
-    path('music/', include('music.urls.v1')),
-    path('content/', include('content.urls.v1')),
-    path('metrics/', include('metrics.urls.v1')),
     path('administration/', include('administration.urls.v1')),
+    path('content/', include('content.urls.v1')),
+    path('marketplace/', include('marketplace.urls.v1')),
+    path('metrics/', include('metrics.urls.v1')),
+    path('music/', include('music.urls.v1')),
 ]
 
 admin_path = settings.ADMIN_PATH

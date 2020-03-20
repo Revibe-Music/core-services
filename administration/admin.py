@@ -95,6 +95,12 @@ class BlogAdmin(admin.ModelAdmin):
     body_trunc.admin_order_field = 'body'
 
 
+@admin.register(BlogTag)
+class BlogTagAdmin(admin.ModelAdmin):
+    # customize search
+    search_fields = ['text',]
+
+
 @admin.register(Variable)
 class VariableAdmin(admin.ModelAdmin):
     # customize list display

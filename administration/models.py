@@ -6,6 +6,7 @@ import datetime
 from uuid import uuid1
 
 from revibe._helpers import const
+from revibe.utils import classes
 from revibe.utils.language import text
 
 from administration import managers
@@ -406,6 +407,16 @@ class BlogTag(models.Model):
     date_created = models.DateTimeField(
         auto_now_add=True
     )
+
+    def __str__(self):
+        return self.text
+
+    def __repr__(self):
+        return classes.default_repr(self)
+    
+    class Meta:
+        verbose_name = 'blog tag'
+        verbose_name_plural = 'blog tags'
 
 
 class Variable(models.Model):

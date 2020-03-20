@@ -14,9 +14,37 @@ from administration.utils.models.variable import retrieve_variable
 mailchimp_api_key = retrieve_variable('mailchimp_api_key', '882a0dbeda4d0a1779b865af4125d869-us7')
 mailchimp_api_url = "https://us7.api.mailchimp.com/3.0"
 mailchimp_list_id = "0acdd15301"
+mailchimp_tag_ids = {"Artist": "1407590", "Registered User": "1407602"}
+
 mailchimp_api_list_member_url = f"{mailchimp_api_url}/lists/{mailchimp_list_id}/members"
+mailchimp_api_tag_url = f"{mailchimp_api_url}/lists/{mailchimp_list_id}/segments/"
 
 authentication = HTTPBasicAuth('revibe-api', mailchimp_api_key)
+
+def register_tags(email, artist=False):
+    url = f"{mailchimp_api_tag_url}/{mailchimp_tag_ids['Registered User']}/members"
+
+    r1 = requests.post(
+        url, 
+        auth=authentication,
+        json={"email_address": email},
+        timeout=10
+    )
+    print(r1.status_code)
+    print(r1.text)
+
+    if artist:
+        url = f"{mailchimp_api_tag_url}/{mailchimp_tag_ids['Artist']}/members"
+        r2 = requests.post(
+            url, 
+            auth=authentication,
+            json={"email_address": email},
+            timeout=10
+        )
+
+        print(r2.status_code)
+        print(r2.text)
+
 
 def add_new_list_member(user):
     """
@@ -29,7 +57,6 @@ def add_new_list_member(user):
         "email_address": str(email),
         "email_type": "html",
         "status": "subscribed",
-        "tags": ["Registered User"],
     }
     if fname != None and lname != None:
         data['merge_fields'] = {
@@ -44,12 +71,10 @@ def add_new_list_member(user):
         timeout=10
     )
 
-    try:
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        print(e)
-        print(r.status_code)
-        print(r.text)
+    print(r.status_code)
+    print(r.text)
+
+    register_tags(email, artist=False)
 
 
 def get_sub_hash(email):
@@ -71,16 +96,14 @@ def update_list_member(user, artist=False):
         "email_address": str(email),
         "email_type": 'html',
         "status": "subscribed",
-        "tags": ["Registered User"]
     }
+
     if fname != None and lname != None:
         data['merge_fields'] = {
             "FNAME": fname,
             "LNAME": lname
         }
-    if artist:
-        data['tags'].append("Artist")
-    
+
     r = requests.put(
         f"{mailchimp_api_list_member_url}/{get_sub_hash(email)}",
         auth=authentication,
@@ -90,4 +113,6 @@ def update_list_member(user, artist=False):
 
     print(r.status_code)
     print(r.text)
+
+    register_tags(email, artist=artist)
 

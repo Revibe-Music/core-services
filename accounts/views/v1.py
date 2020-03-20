@@ -197,7 +197,8 @@ class RegistrationAPI(generics.GenericAPIView):
             if device != 'browser':
                 data.update({"refresh_token": refresh_token.token})
 
-            mailchimp.add_new_list_member(user)
+            if not settings.DEBUG:
+                mailchimp.add_new_list_member(user)
 
             return Response(data, status=status.HTTP_200_OK)
 
@@ -630,10 +631,11 @@ class UserArtistViewSet(GenericPlatformViewSet):
         # check placeholder contributions
         create_permananent_contribs(artist)
 
-        try:
-            mailchimp.update_list_member(artist.artist_user, artist=True)
-        except Exception:
-            pass
+        if not settings.DEBUG:
+            try:
+                mailchimp.update_list_member(artist.artist_user, artist=True)
+            except Exception:
+                pass
 
         return responses.CREATED(serializer)
 

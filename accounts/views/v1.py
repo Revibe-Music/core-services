@@ -198,7 +198,10 @@ class RegistrationAPI(generics.GenericAPIView):
                 data.update({"refresh_token": refresh_token.token})
 
             if not settings.DEBUG:
-                mailchimp.add_new_list_member(user)
+                try:
+                    mailchimp.add_new_list_member(user)
+                except Exception:
+                    pass
 
             return Response(data, status=status.HTTP_200_OK)
 

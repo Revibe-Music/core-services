@@ -98,6 +98,13 @@ side_menu = [ # A list of application or custom item dicts
         ]
     },
     {
+        "label": _("Storage"),
+        "items": [
+            {"name": 'cloud_storage.file'},
+            {"name": 'cloud_storage.fileshare'},
+        ]
+    },
+    {
         "label": _("Usage"),
         "items": [
             {"name": 'metrics.stream'},

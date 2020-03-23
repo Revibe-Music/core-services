@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'accounts',
     'administration',
     'content',
+    'cloud_storage',
     'distribution',
     'marketplace',
     'merch',

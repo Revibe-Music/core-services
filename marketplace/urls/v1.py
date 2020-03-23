@@ -13,6 +13,7 @@ from marketplace.views import v1
 
 router = routers.DefaultRouter()
 router.register('goods', v1.GoodViewSet, 'goods')
+router.register('transactions', v1.TransactionViewSet, 'transactions')
 
 urlpatterns = [
     path("", include(router.urls)),

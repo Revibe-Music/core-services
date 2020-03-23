@@ -37,8 +37,14 @@ class Good(models.Model):
         help_text=_("Item description")
     )
 
-    # images = many-to-one with content.Image
-    # audio_files = many-to-one with content.Track
+    file = models.ForeignKey(
+        to='cloud_storage.file',
+        on_delete=models.SET_NULL,
+        related_name='goods',
+        null=True, blank=True,
+        verbose_name=_("file"),
+        help_text=_("Relevant file. Not required.")
+    )
 
     price = models.DecimalField(
         max_digits=11, decimal_places=2,

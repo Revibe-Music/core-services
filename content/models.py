@@ -28,12 +28,6 @@ class Image(models.Model):
         related_name="album_image",
         null=True, blank=True
     )
-    good = models.ForeignKey(
-        to='marketplace.good',
-        on_delete=models.CASCADE,
-        related_name='images',
-        null=True, blank=True
-    )
 
     file = models.FileField(
         help_text="The file that will be uploaded / is uploaded in S3",
@@ -72,8 +66,6 @@ class Image(models.Model):
             return self.artist
         elif self.album:
             return self.album
-        elif self.good:
-            return self.good
         return None
 
     @property
@@ -111,14 +103,6 @@ class Track(models.Model):
         related_name="tracks",
         on_delete=models.CASCADE,
         null=True, blank=True
-    )
-    good = models.ForeignKey(
-        to='marketplace.good',
-        on_delete=models.CASCADE,
-        related_name='audio_files',
-        null=True, blank=True,
-        verbose_name=_("good"),
-        help_text=_("Marketplace item")
     )
 
     file = models.FileField(

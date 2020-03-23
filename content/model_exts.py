@@ -23,7 +23,7 @@ def custom_image_upload(instance, filename):
     ext = filename.split('.')[-1]
 
     folder = instance.obj.__class__.__name__
-    uri = str(instance.obj.uri)
+    uri = str(instance.obj.uri) if hasattr(instance.obj, 'uri') else str(instance.obj.id)
 
     root_path = os.path.join("images", folder, uri)
 

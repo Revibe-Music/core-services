@@ -120,6 +120,8 @@ class AlertSerializer(serializers.ModelSerializer):
 
 class BlogSerializer(serializers.ModelSerializer):
 
+    author = serializers.SerializerMethodField('author_name', read_only=True)
+
     class Meta:
         model = Blog
         fields = [
@@ -132,7 +134,11 @@ class BlogSerializer(serializers.ModelSerializer):
             'side_image',
             'display_style',
             'tags',
+            'author',
         ]
+    
+    def author_name(self, obj):
+        return f"{obj.author.first_name} {obj.author.last_name}"
 
     def create(self, validated_data):
         raise network.BadEnvironmentError("Cannot create a blog post from the API")

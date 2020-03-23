@@ -15,6 +15,7 @@ class StreamSerializer(serializers.ModelSerializer):
     # write-only
     song_id = serializers.CharField(write_only=True)
     user_id = serializers.CharField(write_only=True, required=False)
+    platform = serializers.CharField(write_only=True, required=False, source='alternate_platform')
 
     class Meta:
         model = Stream
@@ -27,6 +28,7 @@ class StreamSerializer(serializers.ModelSerializer):
             'lat',
             'long',
             'source',
+            'platform', 
         ]
     
     def create(self, validate_data):

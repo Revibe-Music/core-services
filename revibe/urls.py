@@ -31,6 +31,7 @@ v1_urls = [
     path('marketplace/', include('marketplace.urls.v1')),
     path('metrics/', include('metrics.urls.v1')),
     path('music/', include('music.urls.v1')),
+    path('storage/', include('cloud_storage.urls.v1')),
 ]
 
 admin_path = settings.ADMIN_PATH

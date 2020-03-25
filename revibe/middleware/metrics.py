@@ -29,6 +29,7 @@ class RequestMetricsMiddleware(BaseMiddleware):
         # check to ensure that the request should be saved
         split_url = url.split('/')
         denied_urls = ['/', '/hc/', '/favicon.io']
+        admin_path = str(settings.ADMIN_PATH).replace("/", "")
 
         # don't record if not in the cloud
         # only record outside of production
@@ -39,7 +40,7 @@ class RequestMetricsMiddleware(BaseMiddleware):
         dont_record_request = (not settings.USE_S3) \
             or (settings.DEBUG == True) \
             or (url in denied_urls) \
-            or (settings.ADMIN_PATH in split_url) \
+            or (admin_path in split_url) \
             or ('jet' in split_url)
         if dont_record_request:
             return

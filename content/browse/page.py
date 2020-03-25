@@ -26,15 +26,15 @@ def full_browse_page():
         },
         {
             "function": sections.trending_songs,
-            "kwargs": {"time_period": "today", "limit": browse_page_limit}
+            "kwargs": {"limit": browse_page_limit}
         },
         {
             "function": sections.trending_albums,
-            "kwargs": {"time_period": "today", "limit": browse_page_limit}
+            "kwargs": {"limit": browse_page_limit}
         },
         {
             "function": sections.trending_artists,
-            "kwargs": {"time_period": "today", "limit": browse_page_limit}
+            "kwargs": {"limit": browse_page_limit}
         },
         {
             # Popular Youtube songs on Revibe

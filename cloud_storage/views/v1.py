@@ -4,8 +4,10 @@ Author: Jordan Prechac
 """
 
 from rest_framework import viewsets
+from rest_framework.decorators import action
 
 from revibe.pagination import CustomLimitOffsetPagination
+from revibe._helpers import responses
 
 from accounts.permissions import TokenOrSessionAuthentication
 from cloud_storage.models import File
@@ -29,3 +31,10 @@ class FileViewSet(viewsets.ModelViewSet):
         artist = self.request.user.artist
         return File.objects.filter(owner=artist)
 
+    @action(detail=False, methods=['get'], url_path="shared", url_name="shared")
+    def shared_files(self, request, *args, **kwargs):
+        artist = self.request.user.artist
+
+        files = File.objects.filter(shared_with=artist).distinct()
+
+        return responses.OK(serializer=cst_ser_v1.FileSerializer(files, many=True))

@@ -89,6 +89,7 @@ class FileShare(models.Model):
         to='content.artist',
         on_delete=models.CASCADE,
         related_name='file_shares',
+        limit_choices_to={"platform": "Revibe"},
         null=False, blank=False,
         verbose_name=_("artist"),
         help_text=_("The Artist the file is shared with")

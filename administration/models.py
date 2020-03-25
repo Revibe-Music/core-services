@@ -56,7 +56,7 @@ class ContactForm(models.Model):
     assigned_to = models.ForeignKey(
         'accounts.CustomUser',
         on_delete=models.SET_NULL,
-        limit_choices_to={'is_staff': True},
+        limit_choices_to={'is_staff': True, "programmatic_account": False},
         related_name='contact_form_assignment',
         help_text=_("Revibe staff member it's assigned to"),
         verbose_name=_("staff member"),

@@ -21,6 +21,7 @@ from content.serializers.v1 import *
 from music.mixins import Version1Mixin
 from music.models import *
 from music.serializers.v1 import *
+from music.utils.models.playlist import bulk_add_songs_to_playlist
 
 # -----------------------------------------------------------------------------
 
@@ -236,4 +237,17 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['post'], url_path="songs/bulk", url_name="songs-bulk")
+    def bulk_add_songs(self, request, *args, **kwargs):
+        playlist_id = request.data.pop('playlist_id', None)
+        songs = request.data.pop('songs', None)
+
+        if playlist_id == None or songs == None:
+            raise network.BadRequestError("Required fields missing")
+
+        result = bulk_add_songs_to_playlist(playlist_id, songs)
+
+        return responses.CREATED(data=result)
+
 

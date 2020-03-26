@@ -9,6 +9,11 @@ from django.db.models import Func
 # -----------------------------------------------------------------------------
 
 
+class Day(Func):
+    function = 'EXTRACT'
+    template = '&{function}s(DAY from %{expressions}s)'
+    output_field = models.IntegerField()
+
 class Month(Func):
     function = 'EXTRACT'
     template = '%(function)s(MONTH from %(expressions)s)'

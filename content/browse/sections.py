@@ -4,9 +4,9 @@ Created: 26 Feb. 2020
 """
 
 from django.db.models import (
-    Count, Expression, F, Q,
+    Count, ExpressionWrapper, F, Q,
     # fields
-    IntegerField
+    IntegerField, CharField, DecimalField
 )
 from django.db.models.functions import ExtractDay
 from django.urls import reverse
@@ -15,6 +15,7 @@ from django.urls import reverse
 import datetime
 
 from revibe._helpers import const
+from revibe.contrib.queries.functions import Day, Month, Year
 
 from .utils import (
     _browse_song, _browse_album, _browse_artist,
@@ -164,18 +165,20 @@ def recently_uploaded_albums(time_period="last_week", limit=None):
     limit = limit if limit else _DEFAULT_LIMIT()
 
     # get the albums uploaded this week
-    number_of_streams = Count("song__streams__id", filter=Q(song__streams__timestamp__gte=time_lookup[time_period]))
+    days_offset = 20198306 + 1 # the 20m whatever number is to counteract the weirdness of the datetime subtraction thing, and the 1 is to avoid dividing by 0
+    number_of_streams = Count('song__streams__id', filter=Q(song__streams__timestamp__gte=time_lookup[time_period]))
     albums = Album.display_objects.filter(
             # filter for only Revibe albums published in the last <time_period>
             platform=const.REVIBE_STRING,
             date_published__gte=time_lookup[time_period]
         ).annotate(
             # divide the number of streams by the number of days it's been out
-            number_of_streams=number_of_streams,
-            days_since_publish=Expression(datetime.datetime.now().date() - F('date_published'))
+            count=number_of_streams,
+            days_since_publish=ExpressionWrapper(datetime.datetime.now().date() - F('date_published') + days_offset, output_field=IntegerField())
         ).annotate(
-            number_of_streams_per_day=F('number_of_streams') / F('days_since_publish')
+            number_of_streams_per_day=ExpressionWrapper(F('count') / F('days_since_publish'), output_field=DecimalField())
         ).order_by('-number_of_streams_per_day')[:limit]
+        # ).order_by('-count')[:limit]
 
     options = {
         _name: "Recently Uploaded Albums",

@@ -10,7 +10,7 @@ from .sections import (
 
     recently_uploaded_albums,
 
-    artist_spotlight,
+    artist_spotlight, revibe_curated_playlists
 )
 
 # -----------------------------------------------------------------------------
@@ -25,6 +25,6 @@ __all__ = [
 
     recently_uploaded_albums,
 
-    artist_spotlight,
+    artist_spotlight, revibe_curated_playlists
 ]
 

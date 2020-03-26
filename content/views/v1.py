@@ -514,4 +514,8 @@ class Browse(GenericPlatformViewSet):
     @action(detail=False, methods=['get'], url_path="artist-spotlight", url_name="artist-spotlight")
     def artist_spotlight(self, request, *args, **kwargs):
         return responses.OK(data=browse.artist_spotlight())
+    
+    @action(detail=False, methods=['get'], url_path="revibe-playlists", url_name="revibe-playlists")
+    def revibe_playlists(self, request, *args, **kwargs):
+        return responses.OK(data=browse.revibe_curated_playlists)
 

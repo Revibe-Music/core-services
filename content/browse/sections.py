@@ -16,15 +16,17 @@ import datetime
 
 from revibe._helpers import const
 
-from administration.utils.models import todays_artist_spotlight
-from content.models import Song, Album, Artist
-from content.serializers import v1 as cnt_ser_v1
-from metrics.models import Stream
-
 from .utils import (
     _browse_song, _browse_album, _browse_artist,
     _DEFAULT_LIMIT, _name, _type, _results, _endpoint
 )
+
+from administration.utils.models import todays_artist_spotlight
+from content.models import Song, Album, Artist
+from content.serializers import v1 as cnt_ser_v1
+from metrics.models import Stream
+from music.models import Playlist
+from music.serializers import v1 as msc_ser_v1
 
 # -----------------------------------------------------------------------------
 
@@ -190,6 +192,24 @@ def artist_spotlight():
     }
 
     return options
+
+
+def revibe_curated_playlists():
+    playlists = Playlist.objects.filter(
+        revibe_curated=True,
+        is_public=True,
+        show_on_browse=True
+    )
+
+    options = {
+        _name: "Curated Playlists",
+        _type: "playlists",
+        _endpoint: "browse/revibe-playlists/",
+        _results: msc_ser_v1.PlaylistSerializer(playlists, many=True).data
+    }
+
+    return options
+
 
 def top_content_container():
     return {

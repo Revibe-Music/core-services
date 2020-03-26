@@ -19,6 +19,7 @@ class PlaylistAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'user', 'html_public')
     list_filter = (
         ('is_public', admin.BooleanFieldListFilter),
+        ('revibe_curated', admin.BooleanFieldListFilter),
     )
 
     # customize search

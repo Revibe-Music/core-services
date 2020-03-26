@@ -8,17 +8,30 @@ logger = logging.getLogger(__name__)
 
 from . import sections
 
+from administration.utils import retrieve_variable
+
 # -----------------------------------------------------------------------------
 
 def full_browse_page():
     output = []
 
-    # time_period = get_url_param(request.query_params, "time_period")
-    # if time_period == None:
-    #     time_period = "today"
+    # get time period
+    default_time_period = "last_week"
+    time_period = retrieve_variable("browse_time_period", default_time_period)
+    if time_period != sections.time_lookup.keys():
+        time_period = default_time_period
+
+    # get limit of items
+    default_browse_page_limit = 5
+    try:
+        browse_page_variable = int(retrieve_variable("browse_page_limit", default_browse_page_limit))
+    except ValueError:
+        browse_page_variable = default_browse_page_limit
+
+    browse_page_limit = max(min(browse_page_variable, 10), 2)
+
 
     # append various browse things
-    browse_page_limit = 5
     browses = [
         {
             "function": sections.artist_spotlight,
@@ -26,25 +39,30 @@ def full_browse_page():
         },
         {
             "function": sections.trending_songs,
-            "kwargs": {"limit": browse_page_limit}
+            "kwargs": {"time_period": time_period, "limit": browse_page_limit}
         },
         {
             "function": sections.trending_albums,
-            "kwargs": {"limit": browse_page_limit}
+            "kwargs": {"time_period": time_period, "limit": browse_page_limit}
         },
         {
             "function": sections.trending_artists,
-            "kwargs": {"limit": browse_page_limit}
+            "kwargs": {"time_period": time_period, "limit": browse_page_limit}
         },
         {
             # Popular Youtube songs on Revibe
             "function": sections.treding_youtube_videos,
-            "kwargs": {"time_period": "last_week", "limit": browse_page_limit}
+            "kwargs": {"time_period": time_period, "limit": browse_page_limit}
         },
         {
             # TODO: recently uploaded albums
             "function": sections.recently_uploaded_albums,
-            "kwargs": {"time_period": "last_week", "limit": browse_page_limit}
+            "kwargs": {"time_period": time_period, "limit": browse_page_limit}
+        },
+        {
+            # Revibe-curated playlists
+            "function": sections.revibe_curated_playlists,
+            "kwargs": {},
         },
         {
             "function": sections.top_content_container,

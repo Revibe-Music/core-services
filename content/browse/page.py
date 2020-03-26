@@ -62,7 +62,7 @@ def full_browse_page():
         {
             # Revibe-curated playlists
             "function": sections.revibe_curated_playlists,
-            "kwargs": {},
+            "kwargs": {"limit": browse_page_limit},
         },
         {
             "function": sections.top_content_container,

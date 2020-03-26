@@ -194,12 +194,12 @@ def artist_spotlight():
     return options
 
 
-def revibe_curated_playlists():
+def revibe_curated_playlists(limit=_DEFAULT_LIMIT):
     playlists = Playlist.objects.filter(
         revibe_curated=True,
         is_public=True,
         show_on_browse=True
-    )
+    )[:limit]
 
     options = {
         _name: "Curated Playlists",

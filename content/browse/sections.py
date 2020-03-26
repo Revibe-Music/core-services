@@ -51,10 +51,12 @@ time_names = {
 # -----------------------------------------------------------------------------
 ##### all-time #####
 
-def top_songs_all_time(limit=_DEFAULT_LIMIT):
+def top_songs_all_time(limit=None):
     """
     Retrieve the top played songs on Revibe of all-time
     """
+    limit = limit if limit else _DEFAULT_LIMIT()
+
     annotation = Count('streams__id')
 
     options = {
@@ -65,10 +67,11 @@ def top_songs_all_time(limit=_DEFAULT_LIMIT):
 
     return _browse_song(annotation, limit, **options)
 
-def top_albums_all_time(limit=_DEFAULT_LIMIT):
+def top_albums_all_time(limit=None):
     """
     Retrieve the top played albums on Revibe of all-time
     """
+    limit = limit if limit else _DEFAULT_LIMIT()
     annotation = Count('song__streams__id')
 
     options = {
@@ -79,9 +82,10 @@ def top_albums_all_time(limit=_DEFAULT_LIMIT):
 
     return _browse_album(annotation, limit, **options)
 
-def top_artists_all_time(limit=_DEFAULT_LIMIT):
+def top_artists_all_time(limit=None):
     """
     """
+    limit = limit if limit else _DEFAULT_LIMIT()
     annotation = Count('song_uploaded_by__streams__id')
 
     options = {
@@ -96,8 +100,9 @@ def top_artists_all_time(limit=_DEFAULT_LIMIT):
 # -----------------------------------------------------------------------------
 ##### trending #####
 
-def trending_songs(time_period="last_week", limit=_DEFAULT_LIMIT):
+def trending_songs(time_period="last_week", limit=None):
     assert time_period in time_lookup.keys(), f"Could not find 'time_period' value '{time_period}' in lookup."
+    limit = limit if limit else _DEFAULT_LIMIT()
     annotation = Count('streams__id', filter=Q(streams__timestamp__gte=time_lookup[time_period]))
 
     options = {
@@ -108,8 +113,9 @@ def trending_songs(time_period="last_week", limit=_DEFAULT_LIMIT):
 
     return _browse_song(annotation, limit, **options)
 
-def trending_albums(time_period="last_week", limit=_DEFAULT_LIMIT):
+def trending_albums(time_period="last_week", limit=None):
     assert time_period in time_lookup.keys(), f"Could not find 'time_period' value '{time_period}' in lookup."
+    limit = limit if limit else _DEFAULT_LIMIT()
     annotation = Count('song__streams__id', filter=Q(song__streams__timestamp__gte=time_lookup[time_period]))
 
     options = {
@@ -120,8 +126,9 @@ def trending_albums(time_period="last_week", limit=_DEFAULT_LIMIT):
 
     return _browse_album(annotation, limit, **options)
 
-def trending_artists(time_period="last_week", limit=_DEFAULT_LIMIT):
+def trending_artists(time_period="last_week", limit=None):
     assert time_period in time_lookup.keys(), f"Could not find 'time_period' value '{time_period}' in lookup."
+    limit = limit if limit else _DEFAULT_LIMIT()
     annotation = Count('song_uploaded_by__streams__id', filter=Q(song_uploaded_by__streams__timestamp__gte=time_lookup[time_period]))
 
     options = {
@@ -132,11 +139,12 @@ def trending_artists(time_period="last_week", limit=_DEFAULT_LIMIT):
 
     return _browse_artist(annotation, limit, **options)
 
-def treding_youtube_videos(time_period="last_week", limit=_DEFAULT_LIMIT):
+def treding_youtube_videos(time_period="last_week", limit=None):
     """
     Similar to the 
     """
     assert time_period in time_lookup.keys(), f"Coulf not find 'time_period' value '{time_period}' in lookup"
+    limit = limit if limit else _DEFAULT_LIMIT()
     annotation = Count('streams__id', filter=Q(streams__timestamp__gte=time_lookup[time_period]))
 
     options = {
@@ -151,8 +159,9 @@ def treding_youtube_videos(time_period="last_week", limit=_DEFAULT_LIMIT):
 # -----------------------------------------------------------------------------
 ##### recently uploaded #####
 
-def recently_uploaded_albums(time_period="last_week", limit=_DEFAULT_LIMIT):
+def recently_uploaded_albums(time_period="last_week", limit=None):
     assert time_period in time_lookup.keys(), f"Could not find 'time_period' value '{time_period}' in lookup."
+    limit = limit if limit else _DEFAULT_LIMIT()
 
     # get the albums uploaded this week
     number_of_streams = Count("song__streams__id", filter=Q(song__streams__timestamp__gte=time_lookup[time_period]))
@@ -194,7 +203,9 @@ def artist_spotlight():
     return options
 
 
-def revibe_curated_playlists(limit=_DEFAULT_LIMIT):
+def revibe_curated_playlists(limit=None):
+    limit = limit if limit else _DEFAULT_LIMIT()
+
     playlists = Playlist.objects.filter(
         revibe_curated=True,
         is_public=True,

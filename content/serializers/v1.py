@@ -2,7 +2,7 @@ from django.core.files.images import get_image_dimensions
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from revibe._errors.network import ProgramError
+from revibe._errors.network import ProgramError, ExpectationFailedError, BadRequestError
 from revibe._helpers import const
 from revibe._helpers.files import add_image_to_obj, add_track_to_song
 from revibe.serializers import CustomDateField, ProcessedOnlyListSerializer
@@ -11,6 +11,7 @@ from accounts.models import CustomUser
 from content.models import *
 from content.mixins import ContributionSerializerMixin
 from content.utils import analytics
+from cloud_storage.models import File
 from metrics.models import Stream
 
 # -----------------------------------------------------------------------------
@@ -331,6 +332,7 @@ class SongSerializer(serializers.ModelSerializer):
     # write-only
     album_id = serializers.CharField(write_only=True, required=False)
     file = serializers.FileField(write_only=True, required=False)
+    stored_file = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = Song
@@ -355,11 +357,11 @@ class SongSerializer(serializers.ModelSerializer):
             # write-only
             'album_id',
             'file',
+            'stored_file',
         ]
     
     def create(self, validated_data):
         album = Album.objects.get(pk=validated_data.pop('album_id'))
-        track = validated_data.pop('file', None)
 
         request = self.context.get('request')
         if request and hasattr(request, 'user'):
@@ -367,6 +369,20 @@ class SongSerializer(serializers.ModelSerializer):
         else:
             raise Exception("some issue") # TODO: custom exception later
 
+        # get the song file
+        track = validated_data.pop('file', None)
+        if not track:
+            file_id = validated_data.pop('stored_file', None)
+            if file_id == None:
+                raise BadRequestError("Request must include either 'file' or 'stored_file'")
+
+            file_obj = File.objects.filter(id=file_id, owner=artist, file_type='audio').first()
+            if file_obj == None:
+                raise ExpectationFailedError("Could not find the stored file. Is the file's type 'audio'?")
+
+            track = file_obj.file
+
+        # save the song
         song = Song(**validated_data, uploaded_by=artist, album=album)
         song.save()
 

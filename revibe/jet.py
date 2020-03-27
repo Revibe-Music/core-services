@@ -61,10 +61,11 @@ side_menu = [ # A list of application or custom item dicts
     {
         "label": _("Administration"),
         "items": [
-            {"name": 'administration.campaign'},
-            {"name": 'administration.alert'},
+            {"name": 'administration.artistspotlight'},
             {"name": 'administration.blog'},
+            {"name": 'administration.campaign'},
             {"name": 'administration.contactform'},
+            {"name": 'administration.alert'},
             {"name": 'administration.variable'},
             {"name": 'administration.youtubekey'},
         ]

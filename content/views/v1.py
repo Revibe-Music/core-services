@@ -20,6 +20,7 @@ from content.serializers import v1 as ser_v1
 from content.utils import search
 from content.utils.models import get_tag
 from metrics.utils.models import record_search_async
+from payments.serializers.v1 import ThirdPartyDonationSerializer
 
 # -----------------------------------------------------------------------------
 
@@ -31,7 +32,15 @@ class ArtistViewset(PlatformViewSet):
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
         "GET": [["ADMIN"],["first-party"]],
+        "POST": [["ADMIN"],["first-party"]],
     }
+
+    def create(self, request, *args, **kwargs):
+        pass
+    def update(self, request, *args, **kwargs):
+        pass
+    def destroy(self, request, *args, **kwargs):
+        pass
 
     def get_queryset(self):
         return self.platform.Artists
@@ -107,6 +116,21 @@ class ArtistViewset(PlatformViewSet):
 
         serializer = ser_v1.SongSerializer(queryset, many=True)
         return responses.OK(serializer=serializer)
+
+    @action(detail=True, methods=['post'], url_path="donate/third-party", url_name='donate-third-party')
+    def donate_third_party(self, request, *args, **kwargs):
+        artist = self.get_object()
+
+        kwargs['context'] = self.get_serializer_context()
+        kwargs.pop('pk')
+
+        serializer = ThirdPartyDonationSerializer(data=request.data, *args, **kwargs)
+        if not serializer.is_valid():
+            raise ExpectationFailedError(detail=serializer.errors)
+
+        instance = serializer.save()
+
+        return responses.CREATED()
 
 
 class AlbumViewSet(PlatformViewSet):

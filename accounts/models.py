@@ -130,6 +130,12 @@ class ArtistProfile(models.Model):
     state = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255, null=True, blank=True)
     zip_code = models.CharField(max_length=255, null=True, blank=True)
+    public_url = models.CharField(
+        max_length=100,
+        null=True, blank=True,
+        verbose_name=_("public url"),
+        help_text=_("The url string to this artist's page in Revibe.tech")
+    )
 
     # account settings
     require_contribution_approval = models.BooleanField(
@@ -163,6 +169,11 @@ class ArtistProfile(models.Model):
     allow_contributors_to_edit_tags = models.BooleanField(
         help_text=_("Allows contributors to content to add/remove tags from that content"),
         null=False, blank=True, default=False
+    )
+    allow_revibe_website_page = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("allow revibe website page"),
+        help_text=_("Determines if the artist has a publicly available page on Revibe.tech")
     )
 
     def __str__(self):

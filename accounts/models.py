@@ -171,6 +171,8 @@ class SocialMedia(models.Model):
     _soundcloud_text = "soundcloud"
     _twitter_text = "twitter"
     _youtube_text = "youtube"
+    _venmo_text = "venmo"
+    _cashapp_text = "cashapp"
     _other_text = "other"
     service_choices = (
         (_facebook_text, "Facebook"),
@@ -178,6 +180,8 @@ class SocialMedia(models.Model):
         (_soundcloud_text, "SoundCloud"),
         (_twitter_text, "Twitter"),
         (_youtube_text, "YouTube"),
+        (_venmo_text, "Venmo"),
+        (_cashapp_text, "Cash App"),
         (_other_text, "Other")
     )
 

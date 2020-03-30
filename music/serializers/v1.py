@@ -36,6 +36,7 @@ class PlaylistSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'curated',
+            'date_created',
             # 'songs',
         ]
     

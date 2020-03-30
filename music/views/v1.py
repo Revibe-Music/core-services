@@ -215,8 +215,12 @@ class PlaylistViewSet(viewsets.ModelViewSet):
             return responses.OK(serializer=serializer)
 
         elif request.method == 'POST':
-            platform = get_platform(request.data.pop('platform','revibe'))
-            playlist = Playlist.objects.get(id=request.data.pop('playlist_id'))
+            platform = get_platform(request.data.get('platform', 'revibe'))
+
+            playlist_id = request.data.get('playlist_id', None)
+            if playlist_id == None:
+                raise network.BadRequestError("No field 'playlist_id' found")
+            playlist = Playlist.objects.get(id=playlist_id)
 
             self.check_playlist_edit_permissions(playlist, request.user)
 

@@ -492,7 +492,7 @@ class OtherSongSerializer(serializers.ModelSerializer):
     # write-only
     platform = serializers.CharField(write_only=True)
     album_id = serializers.CharField(write_only=True)
-    artist_id = serializers.CharField(write_only=True)
+    artist_id = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Song
@@ -519,7 +519,12 @@ class OtherSongSerializer(serializers.ModelSerializer):
     def create(self, validated_data, *args, **kwargs):
         platform = validated_data.pop('platform')
         album = Album.objects.get(id=validated_data.pop('album_id'))
-        artist = Artist.objects.get(id=validated_data.pop('artist_id'))
+
+        artist_id = validated_data.pop('artist_id', None)
+        if artist_id != None:
+            artist = Artist.objects.get(id=artist_id)
+        else:
+            artist = None
 
         song = Song.objects.create(album=album, uploaded_by=artist, platform=platform, **validated_data)
         song.save()

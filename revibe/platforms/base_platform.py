@@ -67,7 +67,7 @@ class Platform:
         self._invalidate_revibe()
 
         # validate data
-        if 'artist' in data.keys():
+        if hasattr(data, 'keys') and 'artist' in data.keys():
             data = data['artist']
 
         data['platform'] = self.__str__()
@@ -84,9 +84,23 @@ class Platform:
         Tries to get the artist with this ID, otherwise creates the artist
         """
         # validate data
-        if 'artist' in data.keys():
+        if hasattr(data, 'keys') and 'artist' in data.keys():
             data = data['artist']
 
+        if isinstance(data, list):
+            # must be a list of contributors
+            contributors = []
+            for artist in data:
+                artist_obj = Artist.objects.filter(id=artist['artist_id'])
+                if artist_obj.count() == 1:
+                    contributors.append(artist_obj.first())
+                else:
+                    contributors.append(self._save_artist(artist))
+
+            return contributors
+
+        
+        # single artist
         artists = Artist.objects.filter(id=data['artist_id'])
         num_returned = artists.count()
         if num_returned == 1:
@@ -113,7 +127,12 @@ class Platform:
         good = True
         if serializer.is_valid():
             instance = serializer.save()
-            instance.uploaded_by = artist
+
+            if isinstance(artist, list):
+                instance.contributors.add(*artist)
+            else:
+                instance.uploaded_by = artist
+
             instance.save()
             return instance
         else:
@@ -143,17 +162,27 @@ class Platform:
             return self._save_album(data, artist, *args, **kwargs)
 
     def _save_song(self, data, artist, album, *args, **kwargs):
+        print(artist)
         self._invalidate_revibe()
         data['platform'] = self.__str__()
         data['album_id'] = str(album.id)
-        data['artist_id'] = str(artist.id)
+        # data['artist_id'] = str(artist.id)
         serializer = self.SongSerializer(data=data, *args, **kwargs)
         if serializer.is_valid():
             instance = serializer.save()
+
+            if isinstance(artist, list):
+                # contributors, not uploader
+                instance.contributors.add(*artist)
+            else:
+                # single uploader
+                instance.uploaded_by = artist
+
+            instance.save()
             return instance
         else:
             raise data_err.SerializerValidationError(detail=serializer.errors)
-    
+
     def get_song(self, data, artist, album, *args, **kwargs):
         """
         Tries to get the song based on the ID, otherwise creates the Song

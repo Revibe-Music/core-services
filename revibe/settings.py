@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'merch',
     'metrics',
     'music',
+    'payments',
 
     # installed apps
     'rest_framework',

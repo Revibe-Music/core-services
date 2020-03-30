@@ -46,6 +46,10 @@ class CustomUser(AbstractUser):
 
     # def _get_link_url
 
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}" if self.first_name and self.last_name else ""
+
 
 class Profile(models.Model):
     id = models.AutoField(primary_key=True)

@@ -205,13 +205,15 @@ class PlaylistViewSet(viewsets.ModelViewSet):
                 raise network.NotFoundError()
             playlist = playlist[0]
 
-            songs = playlist.songs.all()
+            songs = playlist.playlist_to_song.all()
             page = self.paginate_queryset(songs)
             if page is not None:
-                serializer = SongSerializer(page, many=True)
+                # serializer = SongSerializer(page, many=True)
+                serializer = PlaylistSongSerializer(page, many=True)
                 return self.get_paginated_response(serializer.data)
             
-            serializer = SongSerializer(songs, many=True)
+            # serializer = SongSerializer(songs, many=True)
+            serializer = PlaylistSongSerializer(page, many=True)
             return responses.OK(serializer=serializer)
 
         elif request.method == 'POST':

@@ -47,8 +47,8 @@ class Playlist(models.Model):
         help_text=_("Allow this playlist to display on the Browse page. If not checked, it will still be available in search or in a user's followed playlists")
     )
 
-    date_created = models.DateField(
-        auto_now_add=True, editable=False
+    date_created = models.DateTimeField(
+        auto_now_add=True
     )
 
     class Meta:

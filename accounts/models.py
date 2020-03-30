@@ -133,6 +133,7 @@ class ArtistProfile(models.Model):
     public_url = models.CharField(
         max_length=100,
         null=True, blank=True,
+        unique=True,
         verbose_name=_("public url"),
         help_text=_("The url string to this artist's page in Revibe.tech")
     )
@@ -155,7 +156,7 @@ class ArtistProfile(models.Model):
         null=False, blank=True, default=False
     )
     allow_contributors_to_edit_contributions = models.BooleanField(
-        help_text="Allow contributors to edit their contributions to content", # can delete contributions regardless
+        help_text="Allow contributors to edit their contributions to content",
         null=False, blank=True, default=False
     )
     hide_all_content = models.BooleanField(

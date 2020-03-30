@@ -31,13 +31,15 @@ class ThirdPartyDonationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data, *args, **kwargs):
         donor = self.context.get('request').user
+        if donor.profile.allow_donation_data:
+            validated_data['donor'] = donor
 
         recipient_id = validated_data.pop('recipient', None)
         if recipient_id == None:
             raise network.ExpectationFailedError(detail="No value for 'recipient' found")
         recipient = Artist.objects.get(id=recipient_id)
 
-        donation = ThirdPartyDonation.objects.create(recipient=recipient, donor=donor, **validated_data)
+        donation = ThirdPartyDonation.objects.create(recipient=recipient, **validated_data)
 
         return donation
 

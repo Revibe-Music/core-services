@@ -61,6 +61,7 @@ class SocialMediaSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer): # TODO: do this right, please
     allow_explicit = serializers.BooleanField(required=False)
     allow_listening_data = serializers.BooleanField(required=False)
+    allow_donation_data = serializers.BooleanField(required=False)
     allow_email_marketing = serializers.BooleanField(required=False)
     skip_youtube_when_phone_is_locked = serializers.BooleanField(required=False)
     class Meta:
@@ -71,6 +72,7 @@ class ProfileSerializer(serializers.ModelSerializer): # TODO: do this right, ple
             'image',
             'allow_explicit',
             'allow_listening_data',
+            'allow_donation_data',
             'allow_email_marketing',
             'skip_youtube_when_phone_is_locked',
         ]

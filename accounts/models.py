@@ -103,6 +103,11 @@ class Profile(models.Model):
         help_text="Allow this user to be linked to the recorded listening data",
         null=False, blank=True, default=True
     )
+    allow_donation_data = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("allow recording donation data"),
+        help_text=_("Determines if the user's donations will be recorded with their user")
+    )
 
     # notification settings
     allow_email_marketing = models.BooleanField(

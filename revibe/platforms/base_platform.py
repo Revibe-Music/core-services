@@ -221,14 +221,14 @@ class Platform:
                 "artist_id": "...",
                 "artist_uri": ...,
                 "name": ...,
-                "image_ref": ...
+                "image_refs": [...]
                 ...
-            },
+            }, # or 'artist': [{},...]
             "album": {
                 "album_id": ...,
                 "album_uri": ...,
                 "name": ...,
-                "image_ref": ...,
+                "image_refs": [...],
                 ...
             },
             "song": {

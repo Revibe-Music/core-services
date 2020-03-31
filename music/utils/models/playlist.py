@@ -17,6 +17,7 @@ def bulk_add_songs_to_playlist(playlist_id, songs, *args, **kwargs):
 
     songs_added = 0
     failures = 0
+    failure_details = []
 
     for song in songs:
         try:
@@ -27,8 +28,9 @@ def bulk_add_songs_to_playlist(playlist_id, songs, *args, **kwargs):
             ps.save()
 
             songs_added += 1
-        except Exception:
+        except Exception as e:
             failures += 1
+            failure_details.append(str(e))
 
-    return {"songs_added": songs_added, "failures": failures}
+    return {"songs_added": songs_added, "failures": failures, "details": failure_details}
 

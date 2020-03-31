@@ -30,7 +30,14 @@ def bulk_add_songs_to_playlist(playlist_id, songs, *args, **kwargs):
             songs_added += 1
         except Exception as e:
             failures += 1
-            failure_details.append(str(e))
+
+            if hasattr(song, 'song'):
+                song_id = song.get('song').get('song_id')
+            else:
+                song_id = song['song_id']
+
+            details = {"id": song_id, "detail": str(e)}
+            failure_details.append(details)
 
     return {"songs_added": songs_added, "failures": failures, "details": failure_details}
 

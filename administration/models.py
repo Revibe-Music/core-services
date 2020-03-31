@@ -370,6 +370,23 @@ class Blog(models.Model):
         verbose_name=_("author"),
         help_text=_("The staff member who wrote the article")
     )
+    artist = models.ForeignKey(
+        to='content.artist',
+        on_delete=models.SET_NULL,
+        related_name='blogs_single',
+        limit_choices_to={"platform": "Revibe"},
+        null=True, blank=True,
+        verbose_name=_("artist"),
+        help_text=_("Artist related to the blog post, like an 'Artist of the Week'-type post.")
+    )
+    artists = models.ManyToManyField(
+        to='content.artist',
+        related_name='blogs_multiple',
+        limit_choices_to={"platform": 'Revibe'},
+        blank=True,
+        verbose_name=_("artists"),
+        help_text=_("Artists related to the blog post, like weekly featured artists or something like that.")
+    )
 
     display_style = models.IntegerField(
         null=False, blank=True, default=1,

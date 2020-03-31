@@ -38,5 +38,29 @@ class LibrarySongAdmin(admin.ModelAdmin):
 
 @admin.register(PlaylistSong)
 class PlaylistSongAdmin(admin.ModelAdmin):
-    pass
+    # customize list display
+    list_display = (
+        '__str__',
+        '_display_song',
+        '_display_playlist',
+    )
+    list_filter = (
+        ('playlist__is_public', admin.BooleanFieldListFilter),
+        ('playlist__revibe_curated', admin.BooleanFieldListFilter),
+        ('playlist__show_on_browse', admin.BooleanFieldListFilter),
+        ('playlist', admin.RelatedOnlyFieldListFilter),
+        ('song', admin.RelatedOnlyFieldListFilter),
+    )
+
+
+    # functions
+    def _display_song(self, obj):
+        return str(obj.song)
+    _display_song.short_description = 'song'
+    _display_song.admin_order_field = 'song__title'
+
+    def _display_playlist(self, obj):
+        return str(obj.playlist)
+    _display_playlist.short_description = 'playlist'
+    _display_playlist.admin_order_field = 'playlits__name'
 

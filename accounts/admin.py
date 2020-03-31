@@ -57,7 +57,7 @@ class ArtistProfileAdmin(admin.ModelAdmin):
     )
 
     # customize search
-    search_fields = ['artist', 'email',]
+    search_fields = ['artist__name', 'email',]
 
     def get_artist_username(self, obj):
         return obj.artist.artist_user.username

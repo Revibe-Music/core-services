@@ -119,8 +119,13 @@ class AlertSerializer(serializers.ModelSerializer):
 
 
 class BlogSerializer(serializers.ModelSerializer):
+    class BlogTagSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = BlogTag
+            fields = ['text']
 
     author = serializers.SerializerMethodField('author_name', read_only=True)
+    tags = BlogTagSerializer(read_only=True, many=True)
 
     class Meta:
         model = Blog

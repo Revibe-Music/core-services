@@ -8,7 +8,7 @@ import random
 from revibe.pagination import CustomLimitOffsetPagination
 from revibe.viewsets import *
 from revibe.utils.params import get_url_param
-from revibe._errors.network import ProgramError, ExpectationFailedError
+from revibe._errors.network import ProgramError, ExpectationFailedError, PageUnavailableError, BadRequestError
 from revibe._helpers import const, responses
 from revibe._helpers.platforms import get_platform
 
@@ -542,4 +542,39 @@ class Browse(GenericPlatformViewSet):
     @action(detail=False, methods=['get'], url_path="revibe-playlists", url_name="revibe-playlists")
     def revibe_playlists(self, request, *args, **kwargs):
         return responses.OK(data=browse.revibe_curated_playlists)
+
+
+class PublicArtistViewSet(PlatformViewSet):
+    platform = 'Revibe'
+    queryset = Artist.objects.filter(
+        platform='Revibe',
+        artist_profile__allow_revibe_website_page=True,
+        artist_profile__public_url__isnull=False
+    )
+    serializer_class = ser_v1.ArtistSerializer
+    pagination_class = CustomLimitOffsetPagination
+    permission_classes = [permissions.AllowAny]
+    
+    def retrieve(self, request, *args, **kwargs):
+        pass
+    def create(self, request, *args, **kwargs):
+        pass
+    def update(self, request, *args, **kwargs):
+        pass
+    def destroy(self, request, *args, **kwargs):
+        pass
+    
+    def list(self, request, *args, **kwargs):
+        params = request.query_params
+        artist_url = get_url_param(params, "artist", *args, **kwargs)
+        if artist_url == None:
+            raise BadRequestError("Parameter 'artist' must be included")
+
+        try:
+            artist = self.queryset.get(artist_profile__public_url=artist_url)
+        except Artist.DoesNotExist:
+            raise PageUnavailableError("Artist page is not available at this time")
+
+        serializer = ser_v1.ArtistSerializer(artist)
+        return responses.OK(serializer=serializer)
 

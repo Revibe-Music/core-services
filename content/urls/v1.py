@@ -10,6 +10,7 @@ router.register('album', v1.AlbumViewSet, "album")
 router.register('song', v1.SongViewSet, "song")
 router.register('search', v1.MusicSearch, "search")
 router.register('browse', v1.Browse, 'browse')
+router.register('public', v1.PublicArtistViewSet, 'public')
 
 urlpatterns = [
     path("", include(router.urls)),

@@ -8,6 +8,7 @@ from revibe._helpers.files import add_image_to_obj, add_track_to_song
 from revibe.serializers import CustomDateField, ProcessedOnlyListSerializer
 
 from accounts.models import CustomUser
+from accounts.serializers.base import BaseSocialMediaSerializer
 from content.models import *
 from content.mixins import ContributionSerializerMixin
 from content.utils import analytics
@@ -47,6 +48,8 @@ class ArtistSerializer(serializers.ModelSerializer):
     images = ImageSerializer(source="artist_image", many=True, read_only=True)
     bio = serializers.SerializerMethodField('_get_artist_bio', read_only=True)
     unique_monthly_listeners = serializers.SerializerMethodField('_get_unique_monthly_listeners', read_only=True)
+    # social_media = BaseSocialMediaSerializer(source='_get_social_media', read_only=True)
+    social_media = serializers.SerializerMethodField(source='get_social_media', read_only=True)
 
     # write-only
     image = serializers.FileField(write_only=True, required=False)
@@ -63,6 +66,7 @@ class ArtistSerializer(serializers.ModelSerializer):
             'images',
             "bio",
             'unique_monthly_listeners',
+            'social_media',
 
             # write-only
             'image',
@@ -102,8 +106,16 @@ class ArtistSerializer(serializers.ModelSerializer):
         try:
             return analytics.calculate_unique_monthly_listeners(obj, aggregate=True)
         except Exception as e:
-            # return None
-            raise e
+            return None
+            # raise e
+
+    def get_social_media(self, obj):
+        if obj.platform != 'Revibe':
+            return None
+        
+        social_medias = obj.artist_profile.social_media.all()
+        serialized_data = BaseSocialMediaSerializer(social_medias, many=True)
+        return serialized_data.data
 
 
 class SongContributorSerializer(serializers.ModelSerializer, ContributionSerializerMixin):

@@ -65,3 +65,9 @@ class ProgramError(APIException):
     status_code = status.HTTP_512_PROGRAM_ERROR
     default_detail = "Server error, please try again later"
     default_code = 'program_error'
+
+class PageUnavailableError(APIException):
+    status_code = status.HTTP_513_PAGE_UNAVAILABLE
+    default_detail = "Page is unavailable"
+    default_code = "page_unavailable"
+

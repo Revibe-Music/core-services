@@ -82,8 +82,22 @@ class ArtistSpotlightAdmin(admin.ModelAdmin):
 @admin.register(Blog)
 class BlogAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('sortable_str', 'body_trunc')
+    list_display = ('sortable_str', 'body_trunc', 'author', 'publish_date', )
+    list_filter = (
+        'category',
+        ('author', admin.RelatedOnlyFieldListFilter),
+        ('publish_date', admin.DateFieldListFilter),
+    )
 
+    # customize search
+    search_fields = [
+        'title',
+        'body',
+        'summary',
+    ]
+
+
+    # functions
     def sortable_str(self, obj):
         return obj.__str__()
     sortable_str.short_description = 'blog post'
@@ -93,6 +107,12 @@ class BlogAdmin(admin.ModelAdmin):
         return text.truncate_string(obj.body)
     body_trunc.short_description = 'body'
     body_trunc.admin_order_field = 'body'
+
+    def display_author(self, obj):
+        try:
+            return f"{obj.first_name} {obj.last_name}"
+        except Exception:
+            return str(obj)
 
 
 @admin.register(BlogTag)

@@ -10,6 +10,7 @@ from pynamodb.attributes import (
 )
 
 from revibe._helpers import const
+from revibe.utils.classes import default_repr
 
 # -----------------------------------------------------------------------------
 
@@ -180,6 +181,29 @@ class AppSession(models.Model):
     class Meta:
         verbose_name = _("mobile app session")
         verbose_name_plural = _("mobile app sessions")
+
+
+class ArtistPublicURLClicks(models.Model):
+
+    artist = models.ForeignKey(
+        to='content.artist',
+        on_delete=models.SET_NULL,
+        related_name='url_clicks',
+        limit_choices_to={'platform': 'Revibe'},
+        null=True, blank=True,
+        verbose_name=_("artist"),
+        help_text=_("Artist whose page was clicked on")
+    )
+    timestamp = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __repr__(self):
+        return default_repr(self)
+    
+    class Meta:
+        verbose_name = "artist public URL click"
+        verbose_name_plural = "artist public URL clicks"
 
 
 # -----------------------------------------------------------------------------

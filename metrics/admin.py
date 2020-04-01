@@ -53,3 +53,15 @@ class AppSessionAdmin(admin.ModelAdmin):
         return f"{round(obj.session_time, 2)} minutes"
     _display_session_time.short_description = "session minutes"
 
+
+@admin.register(ArtistPublicURLClicks)
+class ArtistPublicURLClicksAdmin(admin.ModelAdmin):
+    # customize list display
+    list_display = (
+        '__str__',
+        'artist',
+    )
+    list_filter = (
+        ('timestamp', admin.DateFieldListFilter),
+    )
+

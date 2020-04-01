@@ -9,6 +9,7 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 from revibe.utils.aws.s3 import delete_s3_object
+from revibe.utils.classes import default_repr
 
 from content import model_exts as ext
 from content.managers import *
@@ -248,10 +249,10 @@ class Album(models.Model):
         return result["count_streams__sum"]
 
     def __str__(self):
-        return "{}".format(self.name)
-    
+        return "{}".format(self.name) + "*" if self.is_deleted else ""
+
     def __repr__(self):
-        return "<Album: {} {}>".format(self.name, self.id)
+        return default_repr(self)
 
     def delete(self):
         songs = Song.objects.filter(album=self)
@@ -349,10 +350,10 @@ class Song(models.Model):
         return int(getattr(self, 'streams').all().count())
 
     def __str__(self):
-        return "{}".format(self.title)
+        return "{}".format(self.title) + "*" if self.is_deleted else ""
     
     def __repr__(self):
-        return "<Song: {} {}>".format(self.title, self.id)
+        return default_repr(self)
     
     def delete(self):
         tracks = self.tracks.all()

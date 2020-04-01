@@ -19,7 +19,7 @@ from content.models import *
 from content.serializers import v1 as ser_v1
 from content.utils import search
 from content.utils.models import get_tag
-from metrics.models import ArtistPublicURLClicks
+from metrics.models import ArtistPublicURLClick
 from metrics.utils.models import record_search_async
 from payments.serializers.v1 import ThirdPartyDonationSerializer
 
@@ -579,7 +579,7 @@ class PublicArtistViewSet(PlatformViewSet):
         serializer = ser_v1.ArtistSerializer(artist)
 
         # record that their page was looked at
-        url_click = ArtistPublicURLClicks.objects.create(artist=artist)
+        url_click = ArtistPublicURLClick.objects.create(artist=artist)
         url_click.save()
 
         return responses.OK(serializer=serializer)

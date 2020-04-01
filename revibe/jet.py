@@ -108,6 +108,7 @@ side_menu = [ # A list of application or custom item dicts
     {
         "label": _("Usage"),
         "items": [
+            {"name": 'metrics.artistpublicurlclick'},
             {"name": 'metrics.stream'},
             {"name": 'metrics.search'},
         ]

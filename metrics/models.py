@@ -183,7 +183,7 @@ class AppSession(models.Model):
         verbose_name_plural = _("mobile app sessions")
 
 
-class ArtistPublicURLClicks(models.Model):
+class ArtistPublicURLClick(models.Model):
 
     artist = models.ForeignKey(
         to='content.artist',

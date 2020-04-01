@@ -54,8 +54,8 @@ class AppSessionAdmin(admin.ModelAdmin):
     _display_session_time.short_description = "session minutes"
 
 
-@admin.register(ArtistPublicURLClicks)
-class ArtistPublicURLClicksAdmin(admin.ModelAdmin):
+@admin.register(ArtistPublicURLClick)
+class ArtistPublicURLClickAdmin(admin.ModelAdmin):
     # customize list display
     list_display = (
         '__str__',

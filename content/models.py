@@ -249,7 +249,7 @@ class Album(models.Model):
         return result["count_streams__sum"]
 
     def __str__(self):
-        return "{}".format(self.name) + "*" if self.is_deleted else ""
+        return "{}".format(self.name) + ("*" if self.is_deleted else "")
 
     def __repr__(self):
         return default_repr(self)
@@ -350,7 +350,7 @@ class Song(models.Model):
         return int(getattr(self, 'streams').all().count())
 
     def __str__(self):
-        return "{}".format(self.title) + "*" if self.is_deleted else ""
+        return "{}".format(self.title) + ("*" if self.is_deleted else "")
     
     def __repr__(self):
         return default_repr(self)

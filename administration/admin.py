@@ -84,9 +84,10 @@ class BlogAdmin(admin.ModelAdmin):
     # customize list display
     list_display = ('sortable_str', 'body_trunc', 'author', 'publish_date', )
     list_filter = (
-        'category',
-        ('author', admin.RelatedOnlyFieldListFilter),
+        ('tags', admin.RelatedOnlyFieldListFilter),
         ('publish_date', admin.DateFieldListFilter),
+        ('author', admin.RelatedOnlyFieldListFilter),
+        'category',
     )
 
     # customize search

@@ -158,6 +158,9 @@ if 'RDS_DB_NAME' in os.environ:
                 'PASSWORD': os.environ['RDS_PASSWORD'],
                 'HOST': os.environ['RDS_HOSTNAME'],
                 'PORT': os.environ['RDS_PORT'],
+                'OPTIONS': {
+                    'charset': 'utf8mb4'
+                }
             }
         }
     else: # production environment
@@ -183,6 +186,7 @@ if 'RDS_DB_NAME' in os.environ:
                 'PORT': os.environ['RDS_PORT'],
                 'OPTIONS': {
                     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+                    'charset': 'utf8mb4',
                 },
             },
             const.READ_DATABASE_NAME: { # read
@@ -194,6 +198,7 @@ if 'RDS_DB_NAME' in os.environ:
                 'PORT': os.environ['RDS_PORT'],
                 'OPTIONS': {
                     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+                    'charset': 'utf8mb4',
                 },
             }
         }
@@ -207,7 +212,10 @@ else: # local environment
             'PORT':'3306',
             'NAME':'revibe',
             'USER':'django',
-            'PASSWORD':'django'
+            'PASSWORD':'django',
+            'OPTIONS': {
+                'charset': 'utf8mb4'
+            }
         }
     }
 

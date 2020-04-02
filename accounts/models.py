@@ -189,21 +189,41 @@ class Social(models.Model):
 class SocialMedia(models.Model):
     _facebook_text = "facebook"
     _instagram_text = "instagram"
-    _soundcloud_text = "soundcloud"
     _twitter_text = "twitter"
+
+    _spotify_text = "spotify"
+    _apple_music_text = "applemusic"
+    _amazon_music_text = "amazonmusic"
     _youtube_text = "youtube"
+    _soundcloud_text = "soundcloud"
+    _tidal_text = "tidal"
+    _google_play_music_text = "googleplaymusic"
+
     _venmo_text = "venmo"
     _cashapp_text = "cashapp"
+
     _other_text = "other"
+
     service_choices = (
+        # social media
         (_facebook_text, "Facebook"),
         (_instagram_text, "Instagram"),
-        (_soundcloud_text, "SoundCloud"),
         (_twitter_text, "Twitter"),
+
+        # music
+        (_spotify_text, "Spotify"),
+        (_apple_music_text, "Apple Music"),
+        (_amazon_music_text, "Amazon Music"),
         (_youtube_text, "YouTube"),
+        (_soundcloud_text, "SoundCloud"),
+        (_tidal_text, "Tidal"),
+        (_google_play_music_text, "Google Play Music"),
+
+        # payment
         (_venmo_text, "Venmo"),
         (_cashapp_text, "Cash App"),
-        (_other_text, "Other")
+
+        (_other_text, "Other"),
     )
 
 

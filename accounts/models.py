@@ -231,6 +231,12 @@ class SocialMedia(models.Model):
         help_text=_("Social media handle or URL")
     )
 
+    order = models.IntegerField(
+        null=True, blank=True,
+        verbose_name=_("order"),
+        help_text=_("The order to display the links in, if any")
+    )
+
     def __str__(self):
         return f"{self._get_service()} - {self.handle}"
 

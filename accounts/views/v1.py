@@ -1167,7 +1167,20 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.CREATED(serializer=serializer)
 
         elif request.method == 'PATCH':
-            pass
+            media_id = request.data.get('socialmedia_id')
+            instance = SocialMedia.objects.get(id=media_id)
+
+            if artist.artist_profile != instance.artist_profile:
+                raise ForbiddenError("You cannot edit this linked account")
+
+            kwargs['context'] = self.get_serializer_context()
+            serializer = SocialMediaSerializer(instance=instance, data=request.data, *args, **kwargs)
+            if not serializer.is_valid():
+                raise ExpectationFailedError(detail=serializer.errors)
+
+            serializer.save()
+            
+            return responses.OK(serializer=serializer)
 
         elif request.method == 'DELETE':
             social_media = SocialMedia.objects.get(id=request.data['socialmedia_id'])

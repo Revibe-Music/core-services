@@ -13,3 +13,5 @@ def retrieve_variable(variable, default):
         return var.value
     except Variable.DoesNotExist as dne:
         return default
+    except Exception:
+        return default

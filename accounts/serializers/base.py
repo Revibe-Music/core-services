@@ -14,6 +14,8 @@ from ..models import SocialMedia
 
 class BaseSocialMediaSerializer(serializers.ModelSerializer):
 
+    order = serializers.IntegerField(required=False)
+
     # read-only
     id = serializers.ReadOnlyField()
     social_media = serializers.CharField(source='_get_service', read_only=True)
@@ -28,12 +30,13 @@ class BaseSocialMediaSerializer(serializers.ModelSerializer):
             'id', # read-only
             'social_media', # read-only
             'handle',
+            'order',
 
             # write-only
             'description',
             'service',
         ]
-    
+
     def create(self, validated_data):
         # get artist profile
         request = self.context.get("request")

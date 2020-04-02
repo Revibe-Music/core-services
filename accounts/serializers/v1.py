@@ -22,6 +22,9 @@ from music.models import Library
 
 class SocialMediaSerializer(serializers.ModelSerializer):
 
+    handle = serializers.CharField(required=False)
+    order = serializers.IntegerField(required=False)
+
     # read-only
     id = serializers.ReadOnlyField()
     social_media = serializers.CharField(source='_get_service', read_only=True)
@@ -36,6 +39,7 @@ class SocialMediaSerializer(serializers.ModelSerializer):
             'id', # read-only
             'social_media', # read-only
             'handle',
+            'order',
 
             # write-only
             'description',

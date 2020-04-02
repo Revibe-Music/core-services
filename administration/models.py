@@ -456,6 +456,12 @@ class Variable(models.Model):
         help_text=_("Detail how to set up this value. Some variables require string formatting, such as 'mobile_app_share_text'.")
     )
 
+    browse = models.BooleanField(
+        null=False, blank=False, default=False,
+        verbose_name=_("browse"),
+        help_text=_("Indicates that this variable is for the browse page. Simply makes filtering easier.")
+    )
+
     class Meta:
         verbose_name = "variable"
         verbose_name_plural = "variables"

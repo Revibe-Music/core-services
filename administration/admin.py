@@ -126,6 +126,9 @@ class BlogTagAdmin(admin.ModelAdmin):
 class VariableAdmin(admin.ModelAdmin):
     # customize list display
     list_display = ('key', 'value')
+    list_filter = (
+        ('browse', admin.BooleanFieldListFilter),
+    )
 
     # customize search
     search_fields = [

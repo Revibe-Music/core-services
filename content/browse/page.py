@@ -36,40 +36,55 @@ def full_browse_page():
         {
             "function": sections.artist_spotlight,
             "kwargs": {},
+            "variable": "browse_artist_spotlight",
         },
         {
             "function": sections.trending_songs,
-            "kwargs": {"time_period": time_period, "limit": browse_page_limit}
+            "kwargs": {"time_period": time_period, "limit": browse_page_limit},
+            "variable": "browse_trending_songs",
         },
         {
             "function": sections.trending_albums,
-            "kwargs": {"time_period": time_period, "limit": browse_page_limit}
+            "kwargs": {"time_period": time_period, "limit": browse_page_limit},
+            "variable": "browse_trending_albums",
         },
         {
             "function": sections.trending_artists,
-            "kwargs": {"time_period": time_period, "limit": browse_page_limit}
+            "kwargs": {"time_period": time_period, "limit": browse_page_limit},
+            "variable": "browse_trending_artists",
         },
         {
             # Popular Youtube songs on Revibe
             "function": sections.treding_youtube_videos,
-            "kwargs": {"time_period": time_period, "limit": browse_page_limit}
+            "kwargs": {"time_period": time_period, "limit": browse_page_limit},
+            "variable": "browse_treding_youtube_videos",
         },
         {
             # TODO: recently uploaded albums
             "function": sections.recently_uploaded_albums,
-            "kwargs": {"time_period": time_period, "limit": browse_page_limit}
+            "kwargs": {"time_period": time_period, "limit": browse_page_limit},
+            "variable": "browse_recently_uploaded_albums",
         },
         {
             # Revibe-curated playlists
             "function": sections.revibe_curated_playlists,
             "kwargs": {"limit": browse_page_limit},
+            "variable": "browse_curated_playlists",
         },
         {
             "function": sections.top_content_container,
-            "kwargs": {}
+            "kwargs": {},
+            "variable": "browse_top_content",
         },
     ]
     for func in browses:
+        # skip this section if the admin variable says to skip it
+        if 'variable' in func.keys():
+            run = retrieve_variable(func.get('variable'), True, is_bool=True)
+            print(run)
+            if not run:
+                continue
+
         try:
             function_result = func["function"](**func["kwargs"])
             if bool(function_result["results"]):

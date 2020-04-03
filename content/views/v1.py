@@ -6,6 +6,7 @@ from rest_framework.response import Response
 import random
 
 from revibe.pagination import CustomLimitOffsetPagination
+from revibe.permissions.scopes.third_party import content
 from revibe.viewsets import *
 from revibe.utils.params import get_url_param
 from revibe._errors.network import ProgramError, ExpectationFailedError, PageUnavailableError, BadRequestError
@@ -32,7 +33,7 @@ class ArtistViewset(PlatformViewSet):
     pagination_class = CustomLimitOffsetPagination
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["first-party"]],
+        "GET": [["ADMIN"],["first-party"], content.read_content, content.read_artists],
         "POST": [["ADMIN"],["first-party"]],
     }
 
@@ -140,7 +141,7 @@ class AlbumViewSet(PlatformViewSet):
     pagination_class = CustomLimitOffsetPagination
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
-        "GET": [["ADMIN"], ['first-party']],
+        "GET": [["ADMIN"], ['first-party'], content.read_content, content.read_album],
     }
 
     def get_queryset(self):
@@ -160,7 +161,7 @@ class SongViewSet(PlatformViewSet):
     pagination_class = CustomLimitOffsetPagination
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["first-party"]],
+        "GET": [["ADMIN"],["first-party"], content.read_content, content.read_song],
     }
 
     def get_queryset(self):
@@ -171,7 +172,7 @@ class MusicSearch(GenericPlatformViewSet):
     platform = 'Revibe'
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["first-party"]],
+        "GET": [["ADMIN"],["first-party"], content.read_content, content.read_search],
     }
 
     def initialize_request(self, request, *args, **kwargs):
@@ -455,7 +456,7 @@ class Browse(GenericPlatformViewSet):
     platform = 'Revibe'
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {
-        "GET": [["ADMIN"],["first-party"]]
+        "GET": [["ADMIN"],["first-party"], content.read_content, content.read_browse]
     }
 
     def list(self, request, *args, **kwargs):

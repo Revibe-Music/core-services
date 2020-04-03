@@ -10,7 +10,7 @@ from accounts.models import *
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__', '_full_name', 'date_joined')
+    list_display = ('__str__', '_full_name', 'date_joined', 'id')
     list_filter = (
         ('date_joined', admin.DateFieldListFilter),
         ('is_staff', admin.BooleanFieldListFilter),

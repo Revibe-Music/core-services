@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     # my apps
     'accounts',
     'administration',
+    'communication',
     'content',
     'cloud_storage',
     'distribution',
@@ -89,6 +90,8 @@ INSTALLED_APPS = [
     'rest_auth',
     # 'knox',
     'storages',
+
+    'channels',
 
     # all auth stuff
     'allauth',
@@ -125,6 +128,7 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 SITE_ID = 1
 
 ROOT_URLCONF = 'revibe.urls'
+ASGI_APPLICATION = 'revibe.routing.application'
 
 TEMPLATES = [
     {

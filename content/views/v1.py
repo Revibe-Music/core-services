@@ -549,39 +549,59 @@ class Browse(GenericPlatformViewSet):
 class PublicArtistViewSet(PlatformViewSet):
     platform = 'Revibe'
     queryset = Artist.objects.filter(
-        platform='Revibe',
-        artist_profile__allow_revibe_website_page=True,
-        artist_profile__public_url__isnull=False
+        platform='Revibe'#,
+        # disabled because the public url field is not currently available in the Artist Portal
+        # artist_profile__allow_revibe_website_page=True,
+        # artist_profile__public_url__isnull=False
     )
     serializer_class = ser_v1.ArtistSerializer
     pagination_class = CustomLimitOffsetPagination
     permission_classes = [permissions.AllowAny]
-    
-    def retrieve(self, request, *args, **kwargs):
-        pass
+
     def create(self, request, *args, **kwargs):
         pass
     def update(self, request, *args, **kwargs):
         pass
     def destroy(self, request, *args, **kwargs):
         pass
-    
+
     def list(self, request, *args, **kwargs):
         params = request.query_params
         artist_url = get_url_param(params, "artist", *args, **kwargs)
-        if artist_url == None:
-            raise BadRequestError("Parameter 'artist' must be included")
+        if artist_url != None:
+            artist = self.get_artist(artist_url)
+            serializer = ser_v1.ArtistSerializer(artist)
 
-        try:
-            artist = self.queryset.get(artist_profile__public_url=artist_url)
-        except Artist.DoesNotExist:
-            raise PageUnavailableError("Artist page is not available at this time")
+            # record that their page was looked at
+            url_click = ArtistPublicURLClick.objects.create(artist=artist)
+            url_click.save()
+
+        else:
+            page = self.paginate_queryset(self.queryset)
+            if page is not None:
+                serializer = ser_v1.ArtistSerializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+            serializer = ser_v1.ArtistSerializer(self.queryset, many=True)
+            
+
+        return responses.OK(serializer=serializer)
+
+    def retrieve(self, request, *args, **kwargs):
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        id_or_url = self.kwargs[lookup_url_kwarg]
+
+        artist = self.get_artist(id_or_url)
 
         serializer = ser_v1.ArtistSerializer(artist)
 
-        # record that their page was looked at
-        url_click = ArtistPublicURLClick.objects.create(artist=artist)
-        url_click.save()
-
         return responses.OK(serializer=serializer)
+
+    def get_artist(self, id_or_url):
+        q_object = Q(artist_profile__public_url=id_or_url) | Q(id=id_or_url)
+        try:
+            artist = self.queryset.get(q_object)
+        except Artist.DoesNotExist:
+            raise PageUnavailableError("No artist found")
+
+        return artist
 

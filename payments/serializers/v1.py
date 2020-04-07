@@ -3,6 +3,7 @@ Created: 30 Mar. 2020
 Author: Jordan Prechac
 """
 
+from django.contrib.auth.models import AnonymousUser
 from rest_framework import serializers
 
 from revibe._errors import network
@@ -30,8 +31,10 @@ class ThirdPartyDonationSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data, *args, **kwargs):
-        donor = self.context.get('request').user
-        if donor.profile.allow_donation_data:
+        request = self.context.get('request')
+        donor = getattr(request, "user", None)
+        skip_donor = not (donor == None or isinstance(donor, AnonymousUser))
+        if skip_donor and donor.profile.allow_donation_data:
             validated_data['donor'] = donor
 
         recipient_id = validated_data.pop('recipient', None)

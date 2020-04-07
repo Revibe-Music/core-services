@@ -121,11 +121,11 @@ class ArtistViewset(PlatformViewSet):
         return responses.OK(serializer=serializer)
 
     @action(detail=True, methods=['post'], url_path="donate/third-party", url_name='donate-third-party')
-    def donate_third_party(self, request, *args, **kwargs):
+    def donate_third_party(self, request, pk=None, *args, **kwargs):
         artist = self.get_object()
 
         kwargs['context'] = self.get_serializer_context()
-        kwargs.pop('pk')
+        kwargs.pop('pk', None)
 
         serializer = ThirdPartyDonationSerializer(data=request.data, *args, **kwargs)
         if not serializer.is_valid():
@@ -559,6 +559,9 @@ class PublicArtistViewSet(PlatformViewSet):
     pagination_class = CustomLimitOffsetPagination
     permission_classes = [permissions.AllowAny]
 
+    cashapp_or_venmo = Q(artist_profile__social_media__service=SocialMedia._cashapp_text) | Q(artist_profile__social_media__service=SocialMedia._venmo_text)
+    donate_queryset = queryset.filter(cashapp_or_venmo).distinct()
+
     def create(self, request, *args, **kwargs):
         pass
     def update(self, request, *args, **kwargs):
@@ -610,8 +613,7 @@ class PublicArtistViewSet(PlatformViewSet):
     @action(detail=False, methods=['get'], url_path="artists/donate", url_name="artists-donate")
     def artists_donate(self, request, *args, **kwargs):
         # re-establish the queryset
-        cashapp_or_venmo = Q(artist_profile__social_media__service=SocialMedia._cashapp_text) | Q(artist_profile__social_media__service=SocialMedia._venmo_text)
-        queryset = self.queryset.filter(cashapp_or_venmo).distinct()
+        queryset = self.donate_queryset
 
         params = request.query_params
         artist_url = get_url_param(params, "artist", *args, **kwargs)
@@ -624,9 +626,35 @@ class PublicArtistViewSet(PlatformViewSet):
                 return self.get_paginated_response(serializer.data)
             serializer = ser_v1.ArtistSerializer(queryset, many=True)
         else: # get details on one artist
-            artist = self.get_artist(artist_url, queryset=queryset)
-            serializer = ser_v1.ArtistSerializer(artist)
+            return self.artists_donate_detail(request, artist_id=artist_url)
 
         return responses.OK(serializer=serializer)
+
+    @action(detail=False, methods=['get','post'], url_path=r"artists/donate/(?P<artist_id>[a-zA-Z0-9-]+)", url_name="artist-donate-detail")
+    def artists_donate_detail(self, request, artist_id=None, *args, **kwargs):
+        queryset = self.donate_queryset
+        artist = self.get_artist(artist_id, queryset=queryset)
+
+        if request.method == 'GET':
+            # get artist details
+            serializer = ser_v1.ArtistSerializer(artist)
+            return responses.OK(serializer=serializer)
+
+        elif request.method == 'POST':
+            kwargs['context'] = self.get_serializer_context()
+            serializer = ThirdPartyDonationSerializer(request.data, *args, **kwargs)
+
+            data = request.data
+            data['recipient'] = str(artist.id)
+
+            serializer = ThirdPartyDonationSerializer(data=request.data, *args, **kwargs)
+            if not serializer.is_valid():
+                raise ExpectationFailedError(detail=serializer.errors)
+
+            instance = serializer.save()
+
+            return responses.CREATED()
+
+        raise ProgramError("Could not identify request method")
 
 

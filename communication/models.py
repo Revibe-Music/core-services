@@ -4,6 +4,8 @@ from django.utils.translation import gettext_lazy as _
 from revibe.utils.classes import default_repr
 from revibe.utils.language.text import truncate_string
 
+from .managers import ChatManager
+
 # -----------------------------------------------------------------------------
 
 
@@ -32,8 +34,14 @@ class Chat(models.Model):
         auto_now=True
     )
 
+    @property
+    def group_name(self):
+        return f"chat_{str(self.id)}"
+
+    objects = ChatManager()
+
     def __str__(self):
-        return f"{first.username} - {second.username}"
+        return f"{self.first.username} - {self.second.username}"
 
     def __repr__(self):
         return default_repr(self)

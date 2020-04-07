@@ -128,7 +128,6 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 SITE_ID = 1
 
 ROOT_URLCONF = 'revibe.urls'
-ASGI_APPLICATION = 'revibe.routing.application'
 
 TEMPLATES = [
     {
@@ -447,3 +446,22 @@ JET_THEMES = jet.themes
 JET_SIDE_MENU_ITEMS = jet.side_menu
 
 JET_INDEX_DASHBOARD = 'revibe.dashboard.CustomIndexDashboard'
+
+# django channels settings
+ASGI_APPLICATION = 'revibe.routing.application'
+# channel layers
+if DEBUG == True: # local and dev environments
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
+else: # production environment
+    # "default": {
+    #     "BACKEND": "channels_redis.core.RedisChannelLayer",
+    #     "CONFIG": {
+    #         "hosts": [("", )] # EC2 instance with Redis server
+    #     }
+    # }
+    pass
+

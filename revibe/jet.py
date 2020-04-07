@@ -71,6 +71,13 @@ side_menu = [ # A list of application or custom item dicts
         ]
     },
     {
+        "label": _("Communications"),
+        "items": [
+            {"name": 'communication.chat'},
+            {"name": 'communication.message'},
+        ]
+    },
+    {
         "label": _("Content"),
         "items": [
             {"name": 'content.artist'},
@@ -109,6 +116,7 @@ side_menu = [ # A list of application or custom item dicts
         "label": _("Usage"),
         "items": [
             {"name": 'metrics.artistpublicurlclick'},
+            {"name": 'metrics.appsession'},
             {"name": 'metrics.stream'},
             {"name": 'metrics.search'},
         ]

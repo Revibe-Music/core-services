@@ -32,6 +32,16 @@ class Chat(models.Model):
         auto_now=True
     )
 
+    def __str__(self):
+        return f"{first.username} - {second.username}"
+
+    def __repr__(self):
+        return default_repr(self)
+
+    class Meta:
+        verbose_name = "chat"
+        verbose_name_plural = "chats"
+
 
 class Message(models.Model):
     chat = models.ForeignKey(
@@ -62,7 +72,11 @@ class Message(models.Model):
 
     def __str__(self):
         return truncate_string(self.message)
-    
+
     def __repr__(self):
         return default_repr(self)
+
+    class Meta:
+        verbose_name = "message"
+        verbose_name_plural = "messages"
 

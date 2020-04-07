@@ -14,6 +14,7 @@ from revibe._helpers import const, responses
 from revibe._helpers.platforms import get_platform
 
 from accounts.permissions import TokenOrSessionAuthentication
+from accounts.models import SocialMedia
 from content import browse
 from content.mixins import V1Mixin
 from content.models import *
@@ -596,12 +597,36 @@ class PublicArtistViewSet(PlatformViewSet):
 
         return responses.OK(serializer=serializer)
 
-    def get_artist(self, id_or_url):
+    def get_artist(self, id_or_url, queryset=None):
         q_object = Q(artist_profile__public_url=id_or_url) | Q(id=id_or_url)
+        queryset = self.queryset if queryset == None else queryset
         try:
-            artist = self.queryset.get(q_object)
+            artist = queryset.get(q_object)
         except Artist.DoesNotExist:
             raise PageUnavailableError("No artist found")
 
         return artist
+
+    @action(detail=False, methods=['get'], url_path="artists/donate", url_name="artists-donate")
+    def artists_donate(self, request, *args, **kwargs):
+        # re-establish the queryset
+        cashapp_or_venmo = Q(artist_profile__social_media__service=SocialMedia._cashapp_text) | Q(artist_profile__social_media__service=SocialMedia._venmo_text)
+        queryset = self.queryset.filter(cashapp_or_venmo).distinct()
+
+        params = request.query_params
+        artist_url = get_url_param(params, "artist", *args, **kwargs)
+
+        # list them all
+        if artist_url == None:
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = ser_v1.ArtistSerializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+            serializer = ser_v1.ArtistSerializer(queryset, many=True)
+        else: # get details on one artist
+            artist = self.get_artist(artist_url, queryset=queryset)
+            serializer = ser_v1.ArtistSerializer(artist)
+
+        return responses.OK(serializer=serializer)
+
 

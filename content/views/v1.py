@@ -547,13 +547,10 @@ class Browse(GenericPlatformViewSet):
         return responses.OK(data=browse.revibe_curated_playlists)
 
 
-class PublicArtistViewSet(PlatformViewSet):
+class PublicArtistViewSet(ReadOnlyPlatformViewSet):
     platform = 'Revibe'
     queryset = Artist.objects.filter(
-        platform='Revibe'#,
-        # disabled because the public url field is not currently available in the Artist Portal
-        # artist_profile__allow_revibe_website_page=True,
-        # artist_profile__public_url__isnull=False
+        platform='Revibe'
     )
     serializer_class = ser_v1.ArtistSerializer
     pagination_class = CustomLimitOffsetPagination
@@ -561,13 +558,6 @@ class PublicArtistViewSet(PlatformViewSet):
 
     cashapp_or_venmo = Q(artist_profile__social_media__service=SocialMedia._cashapp_text) | Q(artist_profile__social_media__service=SocialMedia._venmo_text)
     donate_queryset = queryset.filter(cashapp_or_venmo).distinct()
-
-    def create(self, request, *args, **kwargs):
-        pass
-    def update(self, request, *args, **kwargs):
-        pass
-    def destroy(self, request, *args, **kwargs):
-        pass
 
     def list(self, request, *args, **kwargs):
         params = request.query_params

@@ -24,6 +24,9 @@ class LibrarySerializer(serializers.ModelSerializer):
 
 
 class PlaylistSerializer(serializers.ModelSerializer):
+
+    description = serializers.CharField(required=False)
+
     # read-only
     curated = serializers.BooleanField(source='revibe_curated', read_only=True)
     # songs = SongSerializer(many=True, read_only=True)
@@ -35,6 +38,7 @@ class PlaylistSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'name',
+            'description',
             'curated',
             'date_created',
             # 'songs',
@@ -60,7 +64,7 @@ class PlaylistSerializer(serializers.ModelSerializer):
             raise data.TooManyObjectsReturnedError() # 512
 
         # create the playlist
-        playlist = Playlist.objects.create(name=name, user=user)
+        playlist = Playlist.objects.create(user=user, **validated_data)
         playlist.save()
         return playlist
 

@@ -26,6 +26,11 @@ class Playlist(models.Model):
     name = models.CharField("Name", null=True, blank=False, max_length=255)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     songs = models.ManyToManyField('content.song', through='PlaylistSong', related_name='playlist_songs')
+    description = models.TextField(
+        null=True, blank=True,
+        verbose_name=_("description"),
+        help_text=_("Playlist description")
+    )
 
     is_public = models.BooleanField(null=False, blank=True, default=False)
     followers = models.ManyToManyField(

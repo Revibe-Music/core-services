@@ -27,8 +27,19 @@ class ChatConsumer(AsyncConsumer):
 
         user = self.scope['user']
         other_username = self.scope['url_route']['kwargs']['username']
-        chat = await self.get_chat(user, other_username)
 
+        # check if users are friends, or allow random messages
+
+        chat = await self.get_chat(user, other_username)
+        self.chat = chat
+
+        # add self to channel layer group
+        await self.channel_layer.group_add(
+            chat.group_name,
+            self.channel_name
+        )
+
+        # tell the client that the connection has been accepted
         await self.send({
             "type": "websocket.send",
             "text": "Hello, World"
@@ -36,9 +47,44 @@ class ChatConsumer(AsyncConsumer):
 
     async def websocket_receive(self, event):
         print("received", event)
+        message_body = json.loads(event.get('text', None))
+
+        # echo the message
+        await self.send({
+            "type": "websocket.send",
+            "text": message_body
+        })
+
+        # send message to the group
+        await self.channel_layer.group_send(
+            self.chat.group_name,
+            {
+                "type": "chat.receive",
+                "text": message_body
+            }
+        )
+
+    async def chat_receive(self, event):
+        """
+        Received message from the group, send that message to the clients
+        """
+        print("messaged", event)
+        message_body = json.loads(event.get('text', None))
+
+        # send the message to the clients
+        await self.send({
+            "type": "websocket.send",
+            "text": message_body
+        })
 
     async def websocket_disconnect(self, event):
         print("disconnected", event)
+
+        # leave the group
+        self.channel_layer.group_discard(
+            self.chat.group_name,
+            self.channel_name
+        )
 
         await self.send({
             "type": "websocket.close"

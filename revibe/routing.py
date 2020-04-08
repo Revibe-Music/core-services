@@ -9,6 +9,8 @@ from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator, OriginValidator
 
+import asyncio
+
 from revibe.middleware.channels import ChannelsTokenAuthMiddleware
 
 # from communication.consumers.v1 import ChatConsumer

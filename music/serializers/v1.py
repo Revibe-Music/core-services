@@ -150,6 +150,7 @@ class LibrarySongSerializer(serializers.ModelSerializer):
 
 
 class PlaylistSongSerializer(serializers.ModelSerializer):
+    order = serializers.IntegerField(required=False)
     # read-only fields
     playlist = serializers.ReadOnlyField(source='playlist.id')
     song = SongSerializer(read_only=True)
@@ -162,6 +163,7 @@ class PlaylistSongSerializer(serializers.ModelSerializer):
             'playlist',
             'song',
             'date_saved',
+            'order',
             # write-only fields
             'song_id',
             'playlist_id',
@@ -176,8 +178,8 @@ class PlaylistSongSerializer(serializers.ModelSerializer):
     def create(self, validated_data, *args, **kwargs):
         user = self.get_user()
 
-        song_id = validated_data['song_id']
-        playlist_id = validated_data["playlist_id"]
+        song_id = validated_data.pop('song_id', None)
+        playlist_id = validated_data.pop("playlist_id", None)
         user_playlists = Playlist.objects.filter(user=user)
         if len(user_playlists) == 0:
             raise network.BadRequestError("The user has not playlists")
@@ -190,7 +192,8 @@ class PlaylistSongSerializer(serializers.ModelSerializer):
         if song in playlist.songs.all():
             return data.ObjectAlreadyExists("{} is already in playlist {}".format(song.title, playlist.name))
 
-        ps = PlaylistSong.objects.create(playlist=playlist, song=song)
+        print(validated_data)
+        ps = PlaylistSong.objects.create(playlist=playlist, song=song, **validated_data)
         ps.save()
 
         return ps

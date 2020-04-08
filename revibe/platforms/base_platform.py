@@ -288,7 +288,7 @@ class Platform:
 
         song = self.save(data, *args, **kwargs)
 
-        instance = PlaylistSong.objects.create(song=song, playlist=playlist)
+        instance = PlaylistSong.objects.create(song=song, playlist=playlist, **data)
         instance.save()
 
         return instance

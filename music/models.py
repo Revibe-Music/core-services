@@ -88,11 +88,18 @@ class PlaylistSong(models.Model):
     playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='playlist_to_song')
     song = models.ForeignKey('content.song', on_delete=models.CASCADE, related_name='song_to_playlist')
 
+    order = models.IntegerField(
+        null=False, blank=True, default=0,
+        verbose_name=_("order"),
+        help_text=_("Order to display the songs in. If multiple are equal, will order by date_saved")
+    )
+
     date_saved = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'playlist song'
         verbose_name_plural = 'playlist songs'
+        ordering = ['order', '-date_saved']
 
     def __str__(self):
         return "{} in {}".format(self.song, self.playlist)

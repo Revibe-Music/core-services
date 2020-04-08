@@ -79,3 +79,8 @@ class SocialMediaAdmin(admin.ModelAdmin):
     _get_artist.short_description = "artist"
     _get_artist.admin_order_field = "artist_profile__artist__name"
 
+
+@admin.register(Friendship)
+class FriendshipAdmin(admin.ModelAdmin):
+    pass
+

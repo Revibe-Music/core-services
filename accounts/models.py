@@ -6,6 +6,8 @@ from django.dispatch import receiver
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
+from revibe.utils.classes import default_repr
+
 # -----------------------------------------------------------------------------
 
 
@@ -42,6 +44,16 @@ class CustomUser(AbstractUser):
         null=True, blank=True, default=False,
         verbose_name=_("programmatic account"),
         help_text=_("Programmatic accounts cannot login by normal means, they can only have access token generated for use in supplemental applications")
+    )
+
+    friends = models.ManyToManyField(
+        to='accounts.customuser',
+        through='accounts.friendship',
+        symmetrical=False,
+        related_name='related_to+',
+        blank=True,
+        verbose_name=_("friends"),
+        help_text=_("User's friends")
     )
 
     # def _get_link_url
@@ -272,5 +284,51 @@ class SocialMedia(models.Model):
     _generate_html_link.short_description = "link to page"
 
     # _get_service.short_description = "Social Media"
+
+
+class Friendship(models.Model):
+    first = models.ForeignKey(
+        to='accounts.customuser',
+        on_delete=models.CASCADE,
+        related_name='friends_first',
+        limit_choices_to={"programmatic_account": False},
+        null=False, blank=False,
+        verbose_name=_("first"),
+        help_text=_("First user, the one that instigated the friendship")
+    )
+    second = models.ForeignKey(
+        to='accounts.customuser',
+        on_delete=models.CASCADE,
+        related_name='friends_second',
+        limit_choices_to={"programmatic_account": False},
+        null=False, blank=False,
+        verbose_name=_("second"),
+        help_text=_("Second user")
+    )
+
+    accepted = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("accepted status"),
+        help_text=_("Whether or not the friend request has been accepted")
+    )
+
+    created = models.DateTimeField(
+        auto_now_add=True
+    )
+    updated = models.DateTimeField(
+        auto_now=True
+    )
+    accepted_datetime = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name=_("accepted datetime"),
+        help_text=_("The date & time the request was accepted")
+    )
+
+    def __repr__(self):
+        return default_repr(self)
+    
+    class Meta:
+        verbose_name = "friendship"
+        verbose_name_plural = "friendships"
 
 

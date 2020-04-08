@@ -53,7 +53,7 @@ class Image(models.Model):
         super().delete()
 
     def __str__(self):
-        return f"{self.obj.name} ({self.dimensions})"
+        return f"{self.obj.name if self.obj else '-no object-'} ({self.dimensions})"
     
     def __repr__(self):
         if self.file_path:

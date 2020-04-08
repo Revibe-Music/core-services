@@ -4,7 +4,7 @@ Author: Jordan Prechac
 """
 
 from django.contrib.auth import get_user_model
-from channels.consumer import AsyncConsumer
+from channels.consumer import AsyncConsumer, SyncConsumer
 from channels.db import database_sync_to_async
 
 import asyncio
@@ -19,13 +19,12 @@ class ChatConsumer(AsyncConsumer):
     # please ignore this functionality, there's not a lot of functionality here anyway
 
     async def websocket_connect(self, event):
-        print("connected", event)
+        print("Connected!", event)
 
-        await self.send({
-            "type": "websocket.accept"
-        })
 
-        user = self.scope['user']
+        user = self.scope.get('user', None)
+        if user == None:
+            raise Exception("No User Found")
         other_username = self.scope['url_route']['kwargs']['username']
 
         # check if users are friends, or allow random messages
@@ -41,13 +40,19 @@ class ChatConsumer(AsyncConsumer):
 
         # tell the client that the connection has been accepted
         await self.send({
-            "type": "websocket.send",
-            "text": "Hello, World"
+            "type": "websocket.accept"
         })
 
     async def websocket_receive(self, event):
-        print("received", event)
-        message_body = json.loads(event.get('text', None))
+        print("Received!", event)
+
+        text_data = event['text']
+
+        if not isinstance(text_data, (list, dict)):
+            text_data_json = json.loads(text_data)
+        else:
+            text_data_json = text_data
+        message_body = text_data_json['message']
 
         # echo the message
         await self.send({
@@ -55,16 +60,16 @@ class ChatConsumer(AsyncConsumer):
             "text": message_body
         })
 
-        # send message to the group
-        await self.channel_layer.group_send(
-            self.chat.group_name,
-            {
-                "type": "chat.receive",
-                "text": message_body
-            }
-        )
+        # # send message to the group
+        # await self.channel_layer.group_send(
+        #     self.chat.group_name,
+        #     {
+        #         "type": "chat_message",
+        #         "text": message_body
+        #     }
+        # )
 
-    async def chat_receive(self, event):
+    async def chat_message(self, event):
         """
         Received message from the group, send that message to the clients
         """
@@ -77,8 +82,8 @@ class ChatConsumer(AsyncConsumer):
             "text": message_body
         })
 
-    async def websocket_disconnect(self, event):
-        print("disconnected", event)
+    async def websocket_disconnect(self, close_code):
+        print("Disconnected!", close_code)
 
         # leave the group
         self.channel_layer.group_discard(

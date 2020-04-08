@@ -15,12 +15,15 @@ Including another URLconf
 """
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, re_path, include
 
 from logging import getLogger
 logger = getLogger(__name__)
 
 from administration.views import base
+
+# temp
+from communication import views
 
 # -----------------------------------------------------------------------------
 
@@ -43,4 +46,8 @@ urlpatterns = [
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('hc/', base.home, name="health_check"),
     path('v1/', include(v1_urls)),
+
+    # temp
+    path('communication/', views.index, name="index"),
+    path('communication/<str:room_name>/', views.room,  name="room"),
 ]

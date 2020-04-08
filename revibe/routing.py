@@ -4,27 +4,25 @@ Author: Jordan Prechac
 """
 
 from django.conf.urls import url
+from django.urls import re_path
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator, OriginValidator
 
 from revibe.middleware.channels import ChannelsTokenAuthMiddleware
 
-from communication.consumers.v1 import ChatConsumer
+# from communication.consumers.v1 import ChatConsumer
+import communication.routing.v1
 
 # -----------------------------------------------------------------------------
 
 application = ProtocolTypeRouter({
     # empty for now
     'websocket': AllowedHostsOriginValidator(
-        # AuthMiddlewareStack(
-            ChannelsTokenAuthMiddleware(
-                URLRouter(
-                    [
-                        url(r"v1/communication/chat/^(?P<username>[/w.@+-])/?", ChatConsumer) # ws://api.revibe.tech/v1/communication/chat/<username>/
-                    ]
-                )
+        ChannelsTokenAuthMiddleware(
+            URLRouter(
+                communication.routing.v1.wesocket_urlpatterns
             )
-        # )
+        )
     )
 })

@@ -49,3 +49,22 @@ def add_query_params(url, params):
 
     return url + param_string
 
+
+def split_query_params(url, full=False):
+    """
+    Returns a dict of stuff
+    """
+    output = {}
+
+    if full:
+        param_string = url.split('?')[1] # get only the end of the url
+    else:
+        param_string = url
+
+    params = param_string.split('&')
+    for param in params:
+        thing = param.split('=')
+        output.update({thing[0]: thing[1]})
+
+    return output
+

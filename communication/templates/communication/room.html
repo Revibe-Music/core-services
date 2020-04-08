@@ -12,7 +12,8 @@
     {{ room_name|json_script:"room-name" }}
     <script>
         var username = JSON.parse(document.getElementById('room-name').textContent);
-        var websocket_endpoint = 'ws://127.0.0.1:8000/ws/v1/communication/chat/' + username + '/?authorization=k8Bshewg0LkMdx8YX8iuHwpTN5gsTw';
+        host = window.location.host;
+        var websocket_endpoint = 'ws://' + host + '/ws/v1/communication/chat/' + username + '/?authorization=k8Bshewg0LkMdx8YX8iuHwpTN5gsTw';
         const chatSocket = new WebSocket(websocket_endpoint);
 
         chatSocket.onopen = function(e) {

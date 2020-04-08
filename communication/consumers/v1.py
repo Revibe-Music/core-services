@@ -25,7 +25,6 @@ class ChatConsumer(AsyncConsumer):
         user = self.scope.get('user', None)
         if user == None:
             raise Exception("No User Found")
-        print(user)
         other_username = self.scope['url_route']['kwargs']['username']
 
         # check if users are friends, or allow random messages

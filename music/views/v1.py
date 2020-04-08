@@ -200,7 +200,10 @@ class PlaylistViewSet(viewsets.ModelViewSet):
                 raise data.ParameterMissingError("parameter 'playlist_id' not found, please check the docs for request requirements")
             platform = params['playlist_id']
 
-            playlist = self.get_queryset().filter(id=params['playlist_id'])
+            queryset = self.get_queryset() | Playlist.objects.filter(is_public=True)
+            queryset = queryset.distinct()
+
+            playlist = queryset.filter(id=params['playlist_id'])
             if playlist.count() != 1:
                 raise network.NotFoundError()
             playlist = playlist[0]

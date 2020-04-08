@@ -24,12 +24,12 @@ def bulk_add_songs_to_playlist(playlist_id, songs, *args, **kwargs):
             platform = get_platform(song.get('platform', 'revibe'))
             song_object = platform.save(song)
 
-            remove_kwargs = ['platform', 'song', 'artist', 'album']
-            valid_data = song
-            for kwarg in remove_kwargs:
-                valid_data.pop(kwarg, None)
+            # remove_kwargs = ['platform', 'song', 'artist', 'album']
+            # valid_data = song
+            # for kwarg in remove_kwargs:
+            #     valid_data.pop(kwarg, None)
 
-            ps = PlaylistSong.objects.create(playlist=playlist, song=song_object, **valid_data)
+            ps = PlaylistSong.objects.create(playlist=playlist, song=song_object)
             ps.save()
 
             songs_added += 1

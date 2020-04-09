@@ -162,8 +162,14 @@ class UserMetricsSerializer(serializers.ModelSerializer):
     last_login = serializers.ReadOnlyField()
     is_staff = serializers.ReadOnlyField()
     date_joined = serializers.ReadOnlyField()
+
+    # profile information
     campaign = serializers.SerializerMethodField(method_name='get_campaign', read_only=True)
     referrer = serializers.SerializerMethodField(method_name='get_referrer', read_only=True)
+    country = serializers.SerializerMethodField(method_name='_get_country', read_only=True)
+    state = serializers.SerializerMethodField(method_name='_get_state', read_only=True)
+    city = serializers.SerializerMethodField(method_name='_get_city', read_only=True)
+    zip_code = serializers.SerializerMethodField(method_name='_get_zip_code', read_only=True)
 
     class Meta:
         model = acc_models.CustomUser
@@ -176,10 +182,16 @@ class UserMetricsSerializer(serializers.ModelSerializer):
             'is_staff',
             'date_joined',
             'artist_id',
+
+            # profile information
             'referrer',
             'campaign',
+            'country',
+            'state',
+            'city',
+            'zip_code',
         ]
-    
+
     def _get_profile(self, obj):
         return getattr(obj, 'profile', None)
     
@@ -190,8 +202,7 @@ class UserMetricsSerializer(serializers.ModelSerializer):
         referrer = getattr(profile, 'referrer', None)
         if referrer == None:
             return None
-        return getattr(referrer, 'id', None)
-    
+        return getattr(referrer, 'id', None)    
     def get_campaign(self, obj):
         profile = self._get_profile(obj)
         if profile == None:
@@ -200,7 +211,18 @@ class UserMetricsSerializer(serializers.ModelSerializer):
         if campaign == None:
             return None
         return getattr(campaign, 'id', None)
-
+    def _get_country(self, obj):
+        profile = self._get_profile(obj)
+        return getattr(profile, "country", None)
+    def _get_state(self, obj):
+        profile = self._get_profile(obj)
+        return getattr(profile, "state", None)
+    def _get_city(self, obj):
+        profile = self._get_profile(obj)
+        return getattr(profile, "city", None)
+    def _get_zip_code(self, obj):
+        profile = self._get_profile(obj)
+        return getattr(profile, "zip_code", None)
 
 class ArtistMetricsSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
@@ -274,6 +296,7 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
         artist_profile = self._get_artist_profile(obj)
         code = getattr(artist_profile, "zip_code", None)
         return code
+
 
 class AlbumMetricsSerializer(serializers.ModelSerializer):
 

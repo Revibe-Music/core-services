@@ -214,6 +214,7 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
     country = serializers.SerializerMethodField('_get_country', read_only=True)
     state = serializers.SerializerMethodField('_get_state', read_only=True)
     city = serializers.SerializerMethodField('_get_city', read_only=True)
+    zip_code = serializers.SerializerMethodField('_get_zip_code', read_only=True)
 
     class Meta:
         model = cnt_models.Artist
@@ -227,6 +228,7 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
             'country',
             'state',
             'city',
+            'zip_code',
         ]
     
     def _get_profile(self, obj):
@@ -268,7 +270,10 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
         artist_profile = self._get_artist_profile(obj)
         city = getattr(artist_profile, "city", None)
         return city
-
+    def _get_zip_code(self, obj):
+        artist_profile = self._get_artist_profile(obj)
+        code = getattr(artist_profile, "zip_code", None)
+        return code
 
 class AlbumMetricsSerializer(serializers.ModelSerializer):
 

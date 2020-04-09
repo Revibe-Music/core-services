@@ -210,6 +210,11 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField('get_user_id', read_only=True)
     campaign = serializers.SerializerMethodField('get_campaign_id', read_only=True)
 
+    # from artist profile
+    country = serializers.SerializerMethodField('_get_country', read_only=True)
+    state = serializers.SerializerMethodField('_get_state', read_only=True)
+    city = serializers.SerializerMethodField('_get_city', read_only=True)
+
     class Meta:
         model = cnt_models.Artist
         fields = [
@@ -219,6 +224,9 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
             'date_joined',
             'user_id',
             'campaign',
+            'country',
+            'state',
+            'city',
         ]
     
     def _get_profile(self, obj):
@@ -244,6 +252,22 @@ class ArtistMetricsSerializer(serializers.ModelSerializer):
         if campaign == None:
             return None
         return getattr(campaign, 'id', None)
+    
+    def _get_artist_profile(self, obj):
+        return getattr(obj, "artist_profile", None)
+    
+    def _get_country(self, obj):
+        artist_profile = self._get_artist_profile(obj)
+        country = getattr(artist_profile, "country", None)
+        return country
+    def _get_state(self, obj):
+        artist_profile = self._get_artist_profile(obj)
+        state = getattr(artist_profile, "state", None)
+        return state
+    def _get_city(self, obj):
+        artist_profile = self._get_artist_profile(obj)
+        city = getattr(artist_profile, "city", None)
+        return city
 
 
 class AlbumMetricsSerializer(serializers.ModelSerializer):

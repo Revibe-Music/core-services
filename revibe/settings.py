@@ -450,7 +450,7 @@ JET_INDEX_DASHBOARD = 'revibe.dashboard.CustomIndexDashboard'
 # django channels settings
 ASGI_APPLICATION = 'revibe.routing.application'
 # channel layers
-if DEBUG == True: # local and dev environments
+if USE_S3:#DEBUG == True: # local and dev environments
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels.layers.InMemoryChannelLayer"

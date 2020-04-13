@@ -457,11 +457,10 @@ if DEBUG == True: # local and dev environments
         }
     }
 else: # production environment
-    # "default": {
-    #     "BACKEND": "channels_redis.core.RedisChannelLayer",
-    #     "CONFIG": {
-    #         "hosts": [("", )] # EC2 instance with Redis server
-    #     }
-    # }
-    pass
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("api-communication-redis.7pqvq5.ng.0001.use2.cache.amazonaws.com", 6379)] # EC2 instance with Redis server
+        }
+    }
 

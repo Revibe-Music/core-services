@@ -132,12 +132,13 @@ class Platform:
                 instance.contributors.add(*artist)
             else:
                 instance.uploaded_by = artist
+                instance.contributors.add(*[artist])
 
             instance.save()
             return instance
         else:
             raise data.SerializerValidationError(detail=serializer.errors)
-    
+
     def get_album(self, data, artist, *args, **kwargs):
         """
         Tries to get an album based on the ID, otherwise creates an Album
@@ -177,6 +178,7 @@ class Platform:
             else:
                 # single uploader
                 instance.uploaded_by = artist
+                instance.contributors.add(*[artist])
 
             instance.save()
             return instance

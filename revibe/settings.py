@@ -119,7 +119,7 @@ MIDDLEWARE = [
     'accounts.middleware.OAuth2TokenOrCookieMiddleware',
 
     # custom middleware
-    'revibe.middleware.metrics.RequestMetricsMiddleware',
+    # 'revibe.middleware.metrics.RequestMetricsMiddleware',
     # 'revibe.middleware.sessions.MobileAppSessionLoggingMiddleware',
 ]
 

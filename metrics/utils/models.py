@@ -23,11 +23,19 @@ def record_search_async(user, search_text):
     def record_search(user_id, search_text):
         """
         """
+        # set the data
+        data = {
+            "search_text": search_text
+        }
+
         # get the user object
         user = CustomUser.objects.get(id=user_id)
+        # check permissions
+        if user.profile.allow_search_data:
+            data['user'] = user
 
         # set the search
-        search = Search.objects.create(user=user, search_text=search_text)
+        search = Search.objects.create(**data)
 
         # close out the thread
         gc.collect()

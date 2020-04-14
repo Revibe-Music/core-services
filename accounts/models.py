@@ -115,6 +115,11 @@ class Profile(models.Model):
         help_text="Allow this user to be linked to the recorded listening data",
         null=False, blank=True, default=True
     )
+    allow_search_data = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("allow search data"),
+        help_text=_("Allow this user to be linked the recorded search data")
+    )
     allow_donation_data = models.BooleanField(
         null=False, blank=True, default=True,
         verbose_name=_("allow recording donation data"),

@@ -9,6 +9,7 @@ from revibe._errors.random import ValidationError
 from accounts import models as acc_models
 from administration.models import *
 from content import models as cnt_models
+from metrics.models import Stream
 
 # -----------------------------------------------------------------------------
 
@@ -385,3 +386,25 @@ class CampaignMetricsSerializer(serializers.ModelSerializer):
             'spent',
             'destination',
         ]
+
+
+class StreamMetricsSerializer(serializers.ModelSerializer):
+
+    song_id = serializers.ReadOnlyField(source='song.id')
+    user_id = serializers.ReadOnlyField(source='user.id')
+
+    class Meta:
+        model = Stream
+        fields = [
+            'id',
+            'song_id',
+            'user_id',
+            'alternate_platform',
+            'timestamp',
+            'stream_duration',
+            'is_downloaded',
+            'is_saved',
+            'source',
+        ]
+
+

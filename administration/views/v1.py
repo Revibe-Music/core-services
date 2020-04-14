@@ -23,6 +23,7 @@ from administration.models import *
 from administration.serializers import v1 as adm_ser_v1
 from administration.utils.models import see_alert
 from content import models as cnt_models
+from metrics.models import Stream
 
 # -----------------------------------------------------------------------------
 
@@ -222,6 +223,20 @@ class CompanyViewSet(GenericPlatformViewSet):
 
         serializer = serializer_class(queryset, many=True)
         data['Campaigns'] = serializer.data
+
+        return responses.OK(data=data)
+
+
+    @action(detail=False, methods=['get'], url_path="stream-metrics", url_name="stream-metrics")
+    def stream_metrics(self, request, *args, **kwargs):
+        queryset = Stream.objects.filter(song__isnull=False)
+        serializer_class = adm_ser_v1.StreamMetricsSerializer
+
+        data = {}
+        data['Stream Count'] = queryset.count()
+
+        serializer = serializer_class(queryset, many=True)
+        data['Streams'] = serializer.data
 
         return responses.OK(data=data)
 

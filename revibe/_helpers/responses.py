@@ -30,12 +30,21 @@ def log_request(response, request_code):
 def OK(serializer=None, detail=None, data=None, *args, **kwargs):
     assert not (serializer and data), "cannot have both a serializer and data in a request"
     response = Response(status=HTTP_200_OK)
+
     if not isinstance(serializer, NoneType):
         response.data = serializer.data
+
     elif not isinstance(detail, NoneType):
         response.data = {"detail": detail}
+
     elif not isinstance(data, NoneType):
-        response.data = data
+
+        # make sure the object passed is not a function
+        if type(data) == 'function':
+            response.data = data()
+        else:
+            response.data = data
+
     return response
 
 def UPDATED(serializer=None, *args, **kwargs):

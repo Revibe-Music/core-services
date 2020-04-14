@@ -229,7 +229,7 @@ class CompanyViewSet(GenericPlatformViewSet):
 
     @action(detail=False, methods=['get'], url_path="stream-metrics", url_name="stream-metrics")
     def stream_metrics(self, request, *args, **kwargs):
-        queryset = Stream.objects.filter(song__isnull=False)
+        queryset = Stream.metrics_objects.filter(song__isnull=False)
         serializer_class = adm_ser_v1.StreamMetricsSerializer
 
         data = {}

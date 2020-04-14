@@ -12,6 +12,8 @@ from pynamodb.attributes import (
 from revibe._helpers import const
 from revibe.utils.classes import default_repr
 
+from . import managers
+
 # -----------------------------------------------------------------------------
 
 class Stream(models.Model):
@@ -106,6 +108,10 @@ class Stream(models.Model):
         null=True, blank=True,
         verbose_name=_("longitude")
     )
+
+    # managers
+    objects = models.Manager()
+    metrics_objects = managers.StreamMetricsManager()
 
     def __str__(self):
         first_part = self.song.title if self.song else f"<{self.alternate_id}>"

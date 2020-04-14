@@ -392,6 +392,7 @@ class StreamMetricsSerializer(serializers.ModelSerializer):
 
     song_id = serializers.ReadOnlyField(source='song.id')
     user_id = serializers.ReadOnlyField(source='user.id')
+    stream_percentage = serializers.ReadOnlyField()
 
     class Meta:
         model = Stream
@@ -402,6 +403,7 @@ class StreamMetricsSerializer(serializers.ModelSerializer):
             'alternate_platform',
             'timestamp',
             'stream_duration',
+            'stream_percentage',
             'is_downloaded',
             'is_saved',
             'source',

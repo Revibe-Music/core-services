@@ -10,6 +10,8 @@ logger = getLogger(__name__)
 
 from revibe._helpers import const
 from revibe._helpers.test import RevibeTestCase
+from revibe.utils.urls import add_query_params
+
 from content import models as cnt_models
 
 # -----------------------------------------------------------------------------
@@ -115,13 +117,7 @@ class TestSearch(RevibeTestCase):
     
     def _get_url(self, **params):
         base = "/v1/content/search/"
-        if params:
-            start = True
-            for key, value in params.items():
-                connector = "?" if start else "&"
-                base += f"{connector}{key}={value}"
-                start = False
-        return base
+        return add_query_params(base, params)
 
     def test_search(self):
         """
@@ -159,4 +155,28 @@ class TestSearch(RevibeTestCase):
 
         response = self.client.get(url, format="json", **self._get_headers())
         self.assertEqual(response.status_code, status.HTTP_417_EXPECTATION_FAILED)
+
+
+class TestBrowse(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._create_song()
+    
+    def _get_url(self, **params):
+        base = "/v1/content/browse/"
+        return add_query_params(base, params)
+
+    def test_browse_page(self):
+        """
+        Basic test to make sure anything is returned and in the proper format
+        """
+        url = self._get_url()
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert200(response.status_code)
+        self.assertReturnList(response, msg="Response is not the correct type")
 

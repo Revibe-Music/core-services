@@ -78,6 +78,9 @@ class TestStatusMixin:
     def assert409(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 409)
     
+    def assert417(self, arg1, *args, **kwargs):
+        self._assert_status_code(arg1, 417)
+    
     # 5xx
     def assert501(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 501)
@@ -264,7 +267,12 @@ class SuperUserMixin:
 
 class ContentMixin:
     def _create_artist(self):
+        # create the artist
         self.content_artist = Artist.objects.create(name="Test Artist Content", platform="Revibe")
+
+        # create their artist profile
+        ArtistProfile.objects.create(artist=self.content_artist)
+
         return self.content_artist
 
     def _create_album(self):

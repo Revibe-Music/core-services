@@ -112,8 +112,11 @@ class ArtistSerializer(serializers.ModelSerializer):
     def get_social_media(self, obj):
         if obj.platform != 'Revibe':
             return None
-        
-        social_medias = obj.artist_profile.social_media.all()
+
+        try:
+            social_medias = obj.artist_profile.social_media.all()
+        except Exception:
+            return None
         serialized_data = BaseSocialMediaSerializer(social_medias, many=True)
         return serialized_data.data
 

@@ -30,8 +30,6 @@ def register_tags(email, artist=False):
         json={"email_address": email},
         timeout=10
     )
-    print(r1.status_code)
-    print(r1.text)
 
     if artist:
         url = f"{mailchimp_api_tag_url}/{mailchimp_tag_ids['Artist']}/members"
@@ -41,9 +39,6 @@ def register_tags(email, artist=False):
             json={"email_address": email},
             timeout=10
         )
-
-        print(r2.status_code)
-        print(r2.text)
 
 
 def add_new_list_member(user):
@@ -70,9 +65,6 @@ def add_new_list_member(user):
         json=data,
         timeout=10
     )
-
-    print(r.status_code)
-    print(r.text)
 
     register_tags(email, artist=False)
 
@@ -110,9 +102,6 @@ def update_list_member(user, artist=False):
         json=data,
         timeout=10
     )
-
-    print(r.status_code)
-    print(r.text)
 
     register_tags(email, artist=artist)
 

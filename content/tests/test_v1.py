@@ -326,4 +326,33 @@ class TestPublicContent(RevibeTestCase):
             response.data['count'], number_of_artists,
             msg="Incorrect number of artists returned"
         )
+    
+    def test_retrieve_artist(self):
+        url = reverse("public-detail", args=[self.content_artist.id])
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnDict(response)
+
+    def test_public_donation_artists(self):
+        url = reverse("public-artists-donate")
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnDict(response)
+
+    def test_public_donate_details_unavailable(self):
+        url = reverse("public-artist-donate-detail", args=[self.content_artist.id])
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert513(response)
 

@@ -7,23 +7,39 @@ Author: Jordan Prechac
 
 # -----------------------------------------------------------------------------
 
-def get_url_param(params, var, default=None, *args, **kwargs):
+def get_url_param(params, var, default=None, type_=None, *args, **kwargs):
     """
     Wrapper for getting a variable from a url parameter. 
 
     Necessary because url params can be registered as lists, so this will get a single value if it can be found
     """
-    param = params.get(var, None)
-    if param == None:
-        return default
+    def perform_get_url_param(params, var, *args, **kwargs):
+        param = params.get(var, None)
+        if param == None:
+            return None
 
-    if type(param) == list:
-        if len(param) > 1:
-            return param
-        else:
-            param = param[0]
-    
-    return param
+        if type(param) == list:
+            if len(param) > 1:
+                return param
+            else:
+                param = param[0]
+        
+        return param
+
+    result = perform_get_url_param(params, var, *args, **kwargs)
+
+    # check for default values
+    if default != None and result == None:
+        result = default
+
+    # specified a return type
+    if type_ != None:
+        try:
+            result = type_(result)
+        except Exception:
+            pass
+
+    return result
 
 
 def convert_param_to_bool(params, var, default=None, *args, **kwargs):

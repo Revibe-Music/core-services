@@ -257,4 +257,22 @@ class TestBrowse(RevibeTestCase):
             self._section_tster(endpoint=sec.pop('endpoint'), type_=sec.pop('type'), **sec)
 
 
+    def test_section_limit(self):
+        """
+        Test the top songs endpoint with a 'limit' param of 1
+        """
+        limit = 1
+        url = self.base_url + f"top-songs-all-time/?limit={str(limit)}"
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            len(response.data['results']), limit,
+            msg="The 'limit' param is not working for browse sections"
+        )
+
 

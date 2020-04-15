@@ -483,93 +483,13 @@ class Browse(GenericPlatformViewSet):
         options = {}
         optional_params = ['time_period', 'limit']
         for p in optional_params:
-            param = get_url_param(params, p)
+            param = get_url_param(params, p, type_=(int if p=='limit' else None))
             if param != None:
                 options.update({p:param})
-        
+
         # return the proper data
         data = func(**options)
         return responses.OK(data=data)
-
-    # all-time
-
-    # @action(detail=False, methods=['get'], url_path="top-songs-all-time", url_name="top-songs-all-time")
-    # def top_songs_all_time(self, request, *args, **kwargs):
-    #     result = browse.top_songs_all_time()
-    #     return responses.OK(data=result)
-
-    # @action(detail=False, methods=['get'], url_path="top-albums-all-time", url_name="top-albums-all-time")
-    # def top_albums_all_time(self, request, *args, **kwargs):
-    #     result = browse.top_albums_all_time()
-    #     return responses.OK(data=result)
-
-    # @action(detail=False, methods=['get'], url_path="top-artists-all-time", url_name="top-artists-all-time")
-    # def top_artists_all_time(self, request, *args, **kwargs):
-    #     result = browse.top_artists_all_time()
-    #     return responses.OK(data=result)
-
-
-    # # trending
-
-    # @action(detail=False, methods=['get'], url_path="trending-songs", url_name="trending-songs")
-    # def trending_songs(self, request, *args, **kwargs):
-    #     params = request.query_params
-    #     time_period = get_url_param(params, "time_period")
-    #     if time_period == None:
-    #         time_period = "last_week"
-
-    #     result = browse.trending_songs(time_period)
-    #     return responses.OK(data=result)
-    
-    # @action(detail=False, methods=['get'], url_path="trending-albums", url_name="trending-albums")
-    # def trending_albums(self, request, *args, **kwargs):
-    #     params = request.query_params
-    #     time_period = get_url_param(params, "time_period")
-    #     if time_period == None:
-    #         time_period = "last_week"
-
-    #     result = browse.trending_albums(time_period)
-    #     return responses.OK(data=result)
-    
-    # @action(detail=False, methods=['get'], url_path="trending-artists", url_name="trending-artists")
-    # def trending_artists(self, request, *args, **kwargs):
-    #     params = request.query_params
-    #     time_period = get_url_param(params, "time_period")
-    #     if time_period == None:
-    #         time_period = "last_week"
-
-    #     result = browse.trending_artists(time_period)
-    #     return responses.OK(data=result)
-
-    # @action(detail=False, methods=['get'], url_path="trending-youtube", url_name="trending-youtube")
-    # def trending_youtube(self, request, *args, **kwargs):
-    #     params = request.query_params
-    #     time_period = get_url_param(params, "time_period")
-    #     if time_period == None:
-    #         time_period = "last_week"
-
-    #     result = browse.treding_youtube(time_period)
-    #     return responses.OK(data=result)
-
-
-    # # recent
-
-    # @action(detail=False, methods=['get'], url_path="recently-uploaded-albums", url_name="recently-uploaded-albums")
-    # def recently_uploaded_albums(self, request, *args, **kwargs):
-    #     # params = request.query_params
-    #     # time_period = get_url_param(params, "time_period")
-    #     result = browse.recently_uploaded_albums()
-    #     return responses.OK(data=result)
-
-    # # other
-
-    # @action(detail=False, methods=['get'], url_path="artist-spotlight", url_name="artist-spotlight")
-    # def artist_spotlight(self, request, *args, **kwargs):
-    #     return responses.OK(data=browse.artist_spotlight())
-    
-    # @action(detail=False, methods=['get'], url_path="revibe-playlists", url_name="revibe-playlists")
-    # def revibe_playlists(self, request, *args, **kwargs):
-    #     return responses.OK(data=browse.revibe_playlists())
 
 
 class PublicArtistViewSet(ReadOnlyPlatformViewSet):

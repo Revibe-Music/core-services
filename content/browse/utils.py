@@ -26,7 +26,7 @@ def _DEFAULT_LIMIT():
         limit_variable = int(limit_variable)
         return max(min(limit_variable, 100), 10)
     except ValueError as ve:
-        print("Could not read browse sectin default limit variable")
+        print("Could not read browse section default limit variable")
         print(ve)
     
     return 50

@@ -81,7 +81,6 @@ def full_browse_page():
         # skip this section if the admin variable says to skip it
         if 'variable' in func.keys():
             run = retrieve_variable(func.get('variable'), True, is_bool=True)
-            print(run)
             if not run:
                 continue
 

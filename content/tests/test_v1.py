@@ -162,9 +162,13 @@ class TestBrowse(RevibeTestCase):
         self._get_application()
         self._get_user()
         self._create_song()
-    
-    def _get_url(self, **params):
-        base = "/v1/content/browse/"
+
+        self.base_url = "/v1/content/browse/"
+        self.songs_type = "songs"
+        self.albums_type = "albums"
+        self.artist_type = "artists"
+
+    def _get_url(self, base="/v1/content/browse/", **params):
         return add_query_params(base, params)
 
     def test_browse_page(self):
@@ -179,4 +183,78 @@ class TestBrowse(RevibeTestCase):
         # validate response
         self.assert200(response.status_code)
         self.assertReturnList(response, msg="Response is not the correct type")
+    
+    # Browse Sections
+    def _section_tster(self, endpoint, type_, *args, **kwargs):
+        """
+        utility function for testing all endpoints
+        """
+        url = self._get_url(base=self.base_url+endpoint+"/")
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # configure validation
+        return_type = kwargs.pop('return_type', 'return_dict')
+
+        # validate response
+        self.assert200(response)
+
+        if return_type == 'return_dict':
+            self.assertReturnDict(response)
+        elif return_type == 'return_list':
+            self.assertReturnList(response)
+
+        self.assertEqual(
+            response.data['type'], type_,
+            msg=f"Response 'type' is not {type_}"
+        )
+        self.assertTrue(
+            response.data['endpoint'] in url,
+            msg=f"The returned 'endpoint' value {response.data['endpoint']} is not within the request url {url}"
+        )
+
+
+    def test_all_sections(self):
+        # self._section_tster("top-songs-all-time", self.songs_type)
+
+        sections = [
+            {
+                "endpoint": "top-songs-all-time",
+                "type": self.songs_type
+            },{
+                "endpoint": "top-albums-all-time",
+                "type": self.albums_type
+            }, {
+                "endpoint": "top-artists-all-time",
+                "type": self.artist_type
+            }, {
+                "endpoint": "trending-songs",
+                "type": self.songs_type
+            }, {
+                "endpoint": "trending-albums",
+                "type": self.albums_type
+            }, {
+                "endpoint": "trending-artists",
+                "type": self.artist_type
+            },{
+                "endpoint": "trending-youtube",
+                "type": self.songs_type
+            },{
+                "endpoint": "recently-uploaded-albums",
+                "type": self.albums_type
+            },{
+                "endpoint": "artist-spotlight",
+                "type": "artist",
+                "return_type": "return_dict"
+            },{
+                "endpoint": "revibe-playlists",
+                "type": "playlists"
+            }
+        ]
+
+        for sec in sections:
+            self._section_tster(endpoint=sec.pop('endpoint'), type_=sec.pop('type'), **sec)
+
+
 

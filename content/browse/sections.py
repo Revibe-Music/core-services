@@ -52,7 +52,7 @@ time_names = {
 # -----------------------------------------------------------------------------
 ##### all-time #####
 
-def top_songs_all_time(limit=None):
+def top_songs_all_time(limit=None, **kwargs):
     """
     Retrieve the top played songs on Revibe of all-time
     """
@@ -68,7 +68,7 @@ def top_songs_all_time(limit=None):
 
     return _browse_song(annotation, limit, **options)
 
-def top_albums_all_time(limit=None):
+def top_albums_all_time(limit=None, **kwargs):
     """
     Retrieve the top played albums on Revibe of all-time
     """
@@ -83,7 +83,7 @@ def top_albums_all_time(limit=None):
 
     return _browse_album(annotation, limit, **options)
 
-def top_artists_all_time(limit=None):
+def top_artists_all_time(limit=None, **kwargs):
     """
     """
     limit = limit if limit else _DEFAULT_LIMIT()
@@ -101,7 +101,7 @@ def top_artists_all_time(limit=None):
 # -----------------------------------------------------------------------------
 ##### trending #####
 
-def trending_songs(time_period="last_week", limit=None):
+def trending_songs(time_period="last_week", limit=None, **kwargs):
     assert time_period in time_lookup.keys(), f"Could not find 'time_period' value '{time_period}' in lookup."
     limit = limit if limit else _DEFAULT_LIMIT()
     annotation = Count('streams__id', filter=Q(streams__timestamp__gte=time_lookup[time_period]))
@@ -114,7 +114,7 @@ def trending_songs(time_period="last_week", limit=None):
 
     return _browse_song(annotation, limit, **options)
 
-def trending_albums(time_period="last_week", limit=None):
+def trending_albums(time_period="last_week", limit=None, **kwargs):
     assert time_period in time_lookup.keys(), f"Could not find 'time_period' value '{time_period}' in lookup."
     limit = limit if limit else _DEFAULT_LIMIT()
     annotation = Count('song__streams__id', filter=Q(song__streams__timestamp__gte=time_lookup[time_period]))
@@ -127,7 +127,7 @@ def trending_albums(time_period="last_week", limit=None):
 
     return _browse_album(annotation, limit, **options)
 
-def trending_artists(time_period="last_week", limit=None):
+def trending_artists(time_period="last_week", limit=None, **kwargs):
     assert time_period in time_lookup.keys(), f"Could not find 'time_period' value '{time_period}' in lookup."
     limit = limit if limit else _DEFAULT_LIMIT()
     annotation = Count('song_uploaded_by__streams__id', filter=Q(song_uploaded_by__streams__timestamp__gte=time_lookup[time_period]))
@@ -140,7 +140,7 @@ def trending_artists(time_period="last_week", limit=None):
 
     return _browse_artist(annotation, limit, **options)
 
-def treding_youtube_videos(time_period="last_week", limit=None):
+def trending_youtube(time_period="last_week", limit=None, **kwargs):
     """
     Similar to the 
     """
@@ -160,7 +160,7 @@ def treding_youtube_videos(time_period="last_week", limit=None):
 # -----------------------------------------------------------------------------
 ##### recently uploaded #####
 
-def recently_uploaded_albums(time_period="last_week", limit=None):
+def recently_uploaded_albums(time_period="last_week", limit=None, **kwargs):
     assert time_period in time_lookup.keys(), f"Could not find 'time_period' value '{time_period}' in lookup."
     limit = limit if limit else _DEFAULT_LIMIT()
 
@@ -193,7 +193,7 @@ def recently_uploaded_albums(time_period="last_week", limit=None):
 # -----------------------------------------------------------------------------
 ##### other #####
 
-def artist_spotlight():
+def artist_spotlight(**kwargs):
     artist = todays_artist_spotlight()
 
     options = {
@@ -206,7 +206,7 @@ def artist_spotlight():
     return options
 
 
-def revibe_curated_playlists(limit=None):
+def revibe_playlists(limit=None, **kwargs):
     limit = limit if limit else _DEFAULT_LIMIT()
 
     playlists = Playlist.objects.filter(
@@ -225,7 +225,7 @@ def revibe_curated_playlists(limit=None):
     return options
 
 
-def top_content_container():
+def top_content_container(**kwargs):
     return {
         "name": "Top Hits - All-Time",
         "type": "container",

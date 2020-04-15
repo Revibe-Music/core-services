@@ -7,7 +7,7 @@ Author: Jordan Prechac
 
 # -----------------------------------------------------------------------------
 
-def get_url_param(params, var, *args, **kwargs):
+def get_url_param(params, var, default=None, *args, **kwargs):
     """
     Wrapper for getting a variable from a url parameter. 
 
@@ -15,7 +15,7 @@ def get_url_param(params, var, *args, **kwargs):
     """
     param = params.get(var, None)
     if param == None:
-        return None
+        return default
 
     if type(param) == list:
         if len(param) > 1:

@@ -55,7 +55,7 @@ def full_browse_page():
         },
         {
             # Popular Youtube songs on Revibe
-            "function": sections.treding_youtube_videos,
+            "function": sections.trending_youtube,
             "kwargs": {"time_period": time_period, "limit": browse_page_limit},
             "variable": "browse_treding_youtube_videos",
         },
@@ -67,7 +67,7 @@ def full_browse_page():
         },
         {
             # Revibe-curated playlists
-            "function": sections.revibe_curated_playlists,
+            "function": sections.revibe_playlists,
             "kwargs": {"limit": browse_page_limit},
             "variable": "browse_curated_playlists",
         },

@@ -37,13 +37,19 @@ class TestLibrary(RevibeTestCase):
         }
         response = self.client.post(url, data, format="json", **self._get_headers())
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(type(response.data), ReturnDict)
-        self.assertEqual(response.data['song'], str(self.content_song.id))
+        self.assert201(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            response.data['song']['song_id'], str(self.content_song.id),
+            msg="The returned song ID is not the sent song ID"
+        )
         
         # check that the song is in fact in the user's library
         library = Library.objects.get(user=self.user, platform="Revibe")
-        self.assertTrue(str(self.content_song.id) == str(library.songs.all()[0].id)) # have to cast ID's as strings, the object ID's come back as UUIID and str, respectively
+        self.assertTrue(
+            str(self.content_song.id) == str(library.songs.all()[0].id), # have to cast ID's as strings, the object ID's come back as UUIID and str, respectively
+            msg="The song is not stored in the library"
+        )
 
     def test_save_youtube_song(self):
         # send request
@@ -242,10 +248,18 @@ class TestPlaylists(RevibeTestCase):
                 "artist_id": "456y2urj3kef",
                 "artist_uri": "u7q3iaervo83thiger",
                 "name": "YouTube Guy",
-                "image_ref": "hello.com/hello.png"
+                "image_refs": [{
+                    "ref": "hello.com/hello.png",
+                    "height": "10",
+                    "width": "10"
+                }]
             },
             "album": {
-                "image_ref": "9ui3wrsg.com/h3otgnerv.jpg"
+                "image_refs": [{
+                    "ref": "9ui3wrsg.com/h3otgnerv.jpg",
+                    "height": "10",
+                    "width": "10"
+                }]
             },
             "song": {
                 "song_id": "2346790",
@@ -280,5 +294,92 @@ class TestPlaylists(RevibeTestCase):
         response = self.client.delete(url, data, format="json", **self._get_headers())
         self.assert204(response.status_code)
         self.assertEqual(playlist_songs_before - 1, len(Playlist.objects.get(id=playlist.id).songs.all()))
+    
+    def test_add_multiple_songs(self):
+        if not self.created_playlist:
+            self.test_create_playlist()
+        if not self.created_playlist:
+            self.fail("Could not verify that a playlist was created")
+        
+        url = reverse('playlist-songs-bulk')
+        data = {
+            "playlist_id": self.playlist_id,
+            "songs": [
+                {
+                    "platform": "spotify",
+                    "artist": [
+                        {
+                            "artist_id": "21wesdfgyhui90",
+                            "artist_uri": "pw8vy54tn",
+                            "name": "Hello Boiiiiissss",
+                            "image_refs": [{
+                                "ref": "hello.com/hello.jpg",
+                                "height": 1,
+                                "width": 1
+                            }]
+                        },{
+                            "artist_id": "qcin4yt",
+                            "artist_uri": "cqw3mn498c",
+                            "name": "Not You",
+                            "image_refs": [{
+                                "ref": "vwnieuro.com/qcv3ui4n",
+                                "height": 10000,
+                                "width": 10000
+                            }]
+                        }
+                    ],
+                    "album": {
+                        "album_id": "q8n349tcyoyctqn",
+                        "album_uri": "lni7w4fcdt4y3",
+                        "name": "It's me again",
+                        "image_refs": [{
+                            "ref": "oiefiofe.aoi;fn/oaoiefg.ed",
+                            "height": 2,
+                            "width": 2
+                        }]
+                    },
+                    "song": {
+                        "song_id": "akerunf",
+                        "song_uri": "ouoian",
+                        "title": "Bois in the back",
+                        "duration": "179",
+                        "genre": "Indie-Folk"
+                    }
+                },{
+                    "platform": "youtube",
+                    "artist": {
+                        "artist_id": "ajkv",
+                        "artist_uri": "cqt3iun4",
+                        "name": "Vivo Xi",
+                        "image_refs": [{
+                            "ref": "qcw4niuo4yiuchnet4w",
+                            "height": 2,
+                            "width": 2
+                        }]
+                    },
+                    "album": {
+                        "image_refs": [{
+                            "ref": "qc4wu",
+                            "height": 3,
+                            "width": 3
+                        }]
+                    },
+                    "song": {
+                        "song_id": "awxf4f",
+                        "song_uri": "ax3r22",
+                        "title": "Ping my Pong",
+                        "duration": "451"
+                    }
+                }
+            ]
+        }
+
+        # send request
+        response = self.client.post(url, data=data, format="json", **self._get_headers())
+
+        # validate response
+        print(response.data)
+        self.assert201(response)
+        self.assertReturnDict(response)
 
 

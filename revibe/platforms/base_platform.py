@@ -77,7 +77,7 @@ class Platform:
             instance = serializer.save()
             return instance
         else:
-            raise data.SerializerValidationError(detail=serializer.errors)
+            raise data_err.SerializerValidationError(detail=serializer.errors)
 
     def get_artist(self, data, *args, **kwargs):
         """

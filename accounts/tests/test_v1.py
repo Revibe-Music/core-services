@@ -119,8 +119,10 @@ class TestUserAccount(RevibeTestCase):
         self._get_application()
         self._get_user()
 
+        self.base_url = "/v1/account/profile/"
+
     def test_get_profile(self):
-        url = reverse('profile')
+        url = self.base_url
         response = self.client.get(url, **self._get_headers())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -134,7 +136,7 @@ class TestUserAccount(RevibeTestCase):
             assert profile_field in response.data['profile'].keys(), "Expected {} in response profile fields".format(profile_field)
 
     def test_edit_profile(self):
-        url = reverse('profile')
+        url = self.base_url
         data = {"first_name": "John", "last_name": "Snow", "profile": {"country": "extremely cool country!"}}
         response = self.client.patch(url, data, format="json", **self._get_headers())
 
@@ -1054,7 +1056,7 @@ class TagSongsTestCase(RevibeTestCase):
         # validate request
         self.assert201(response)
         self.assertEqual(
-            Tag.objects.get(text="Testy").text, "Testy",
+            Tag.objects.get(text="Testy").text, "testy",
             msg="Could not find the tag that should have been created"
         )
 

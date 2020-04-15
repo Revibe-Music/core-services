@@ -13,6 +13,7 @@ from revibe._helpers.test import RevibeTestCase
 from revibe.utils.urls import add_query_params
 
 from content import models as cnt_models
+from payments.models import ThirdPartyDonation
 
 # -----------------------------------------------------------------------------
 
@@ -59,6 +60,31 @@ class TestArtists(RevibeTestCase):
         self.assert200(response.status_code)
         self.assertEqual(type(response.data['results']), ReturnList, msg="Artist songs not returned in correct format")
         self.assertEqual(len(response.data['results']), cnt_models.Song.objects.filter(uploaded_by=self.content_artist, is_displayed=True, is_deleted=False).count(), msg="Artist songs not returning as much data as it should be")
+
+    def test_artist_donate(self):
+        url = reverse('artist-donate-third-party', args=[self.content_artist.id])
+        data = {
+            "recipient": str(self.content_artist.id),
+            "service": "venmo",
+            "amount": "15.00",
+            "other": False
+        }
+
+        # send request
+        response = self.client.post(url, data=data, format="json", **self._get_headers())
+
+        # validate response
+        self.assert201(response)
+        self.assertEqual(
+            response.data, None,
+            msg=f"Unexpected value in response data: {response.data}"
+        )
+        # get the payment that was just made
+        donations = ThirdPartyDonation.objects.filter(recipient=self.content_artist, service="venmo", other=False)
+        self.assertTrue(
+            donations.count() >= 1,
+            msg="The donation was not recorded"
+        )
 
 
 class TestAlbums(RevibeTestCase):
@@ -275,4 +301,29 @@ class TestBrowse(RevibeTestCase):
             msg="The 'limit' param is not working for browse sections"
         )
 
+
+class TestPublicContent(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._create_song()
+    
+    def test_get_all_artists(self): #paginated
+        url = "/v1/content/public/"
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            response.data['count'], len(response.data['results']),
+            msg="The pagination did not count properly"
+        )
+        number_of_artists = cnt_models.Artist.objects.filter(platform="Revibe").count()
+        self.assertEqual(
+            response.data['count'], number_of_artists,
+            msg="Incorrect number of artists returned"
+        )
 

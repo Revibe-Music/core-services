@@ -47,6 +47,10 @@ class ThirdPartyDonation(models.Model):
         help_text=_("Indicates that the user picked an 'other' payment amount")
     )
 
+    timestamp = models.DateTimeField(
+        auto_now_add=True
+    )
+
     def __str__(self):
         return str(self.id)
         # return str(self.recipient) if self.recipient else '-no longer an artist-'

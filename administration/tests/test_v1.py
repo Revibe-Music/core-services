@@ -13,7 +13,7 @@ from revibe._helpers.test import RevibeTestCase
 from revibe.utils.urls import add_query_params
 
 from accounts.models import CustomUser, Profile
-from administration.models import ContactForm, YouTubeKey
+from administration.models import Alert, AlertSeen, ContactForm, YouTubeKey
 from content.models import Artist, Album, Song
 
 # -----------------------------------------------------------------------------
@@ -202,3 +202,65 @@ class TestYoutubeKeyViews(RevibeTestCase):
             YouTubeKey.objects.get(key=str(self.key.key)).number_of_users, 0,
             msg="Number of users was not decreased by one"
         )
+
+
+class TestAlertViews(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._get_alert()
+    
+    def test_get_alerts(self):
+        # make sure there are alerts to see
+        print("number of alerts", Alert.objects.all().count())
+        self.assertTrue(
+            Alert.objects.all().count() > 0,
+            msg="There are no alerts to see"
+        )
+
+        # prep request
+        url = reverse('alerts-list')
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert200(response)
+        self.assertTrue(
+            len(response.data['results']) > 0,
+            msg="No alerts are recorded"
+        )
+    
+    def test_see_alert(self):
+        url = reverse('alerts-list')
+        data = {
+            "alert_id": str(self.alert.id)
+        }
+
+        # send request
+        response = self.client.post(url, data=data, format="json", **self._get_headers())
+
+        # validate response
+        self.assert201(response)
+        self.assertTrue(
+            AlertSeen.objects.all().count() > 0,
+            msg="The alert was not recorded as having been seen"
+        )
+
+    def test_get_alerts_seen_one(self):
+        url = reverse('alerts-list')
+
+        # pre-record seeing the alert
+        AlertSeen.objects.create(alert=self.alert, user=self.user, has_seen=True)
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert200(response)
+        self.assertTrue(
+            response.data['results'] == [],
+            msg="The alert still came up"
+        )
+
+

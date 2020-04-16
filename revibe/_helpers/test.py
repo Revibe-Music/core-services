@@ -9,6 +9,7 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 from oauth2_provider.models import Application
 
+import datetime
 import io
 from PIL import Image as PILImage
 import sys
@@ -16,7 +17,7 @@ import sys
 from revibe._helpers import status
 
 from accounts.models import CustomUser, Profile, ArtistProfile
-from administration.models import Campaign, YouTubeKey
+from administration.models import Alert, Campaign, YouTubeKey
 from content.models import *
 
 # -----------------------------------------------------------------------------
@@ -314,8 +315,17 @@ class AdministrationMixin:
         except Exception:
             key = YouTubeKey.objects.create(key="hellooooooooooooo")
 
-        print(key)
         self.key = key
+    
+    def _get_alert(self):
+        try:
+            alert = Alert.objects.get(subject="111")
+        except Exception:
+            start = datetime.datetime.now() - datetime.timedelta(days=30)
+            end = datetime.datetime.now() + datetime.timedelta(days=30)
+            alert = Alert.objects.create(subject="111", message="alert message", category=Alert._category_choices[0][0], enabled=True, start_date=start, end_date=end)
+        
+        self.alert = alert
 
 
 class MetricsMixin:

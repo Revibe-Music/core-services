@@ -181,7 +181,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if request.user != instance.user:
-            raise network.ForbiddenError()
+            raise network.ForbiddenError("You cannot delete this playlist")
 
         self.perform_destroy(instance)
         return responses.DELETED()
@@ -192,7 +192,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         given playlist.
         """
         if user != playlist.user:
-            raise network.ForbiddenError("you are not authorized to add/remove content from this playlist")
+            raise network.ForbiddenError("You cannot make changes to this playlist")
 
     @action(detail=False, methods=['get','post', 'delete'])
     def songs(self, request, pk=None, *args, **kwargs):        
@@ -202,7 +202,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
             params = request.query_params
 
             if 'playlist_id' not in params:
-                raise data.ParameterMissingError("parameter 'playlist_id' not found, please check the docs for request requirements")
+                raise data.ParameterMissingError("parameter 'playlist_id' not found")
             platform = params['playlist_id']
 
             queryset = self.get_queryset() | Playlist.objects.filter(is_public=True)
@@ -221,7 +221,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
                 # serializer = SongSerializer(page, many=True)
                 serializer = PlaylistSongSerializer(page, many=True)
                 return self.get_paginated_response(serializer.data)
-            
+
             # serializer = SongSerializer(songs, many=True)
             serializer = PlaylistSongSerializer(page, many=True)
             return responses.OK(serializer=serializer)
@@ -253,7 +253,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-    
+
     @action(detail=False, methods=['post'], url_path="songs/bulk", url_name="songs-bulk")
     def bulk_add_songs(self, request, *args, **kwargs):
         playlist_id = request.data.pop('playlist_id', None)

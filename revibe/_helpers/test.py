@@ -68,29 +68,32 @@ class TestStatusMixin:
     # 4xx
     def assert400(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 400)
-    
+
     def assert401(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 401)
 
     def assert403(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 403)
-    
+
+    def assert404(self, arg1, *args, **kwargs):
+        self._assert_status_code(arg1, 404)
+
     def assert409(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 409)
     
     def assert417(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 417)
-    
+
     # 5xx
     def assert501(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 501)
-    
+
     def assert503(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 503)
-    
+
     def assert512(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 512)
-    
+
     def assert513(self, arg1, *args, **kwargs):
         self._assert_status_code(arg1, 513)
 

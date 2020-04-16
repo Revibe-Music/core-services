@@ -162,6 +162,7 @@ class TestPlaylists(RevibeTestCase):
         self._get_application()
         self._get_user()
         self._create_song()
+        self._get_superuser()
 
         self.added_songs = False
         self.created_playlist = False
@@ -363,4 +364,46 @@ class TestPlaylists(RevibeTestCase):
         self.assert201(response)
         self.assertReturnDict(response)
 
+    def test_get_public_playlist_songs(self):
+        """
+        """
+        public_playlist = Playlist.objects.create(user=self.superuser, name="Public Playlist", is_public=True)
 
+        url = add_query_params(reverse('playlist-songs'), {"playlist_id": str(public_playlist.id)})
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert200(response)
+
+    def test_get_public_playlist_songs_fail(self):
+        """
+        """
+        public_playlist = Playlist.objects.create(user=self.superuser, name="Public Playlist Failure")
+
+        url = add_query_params(reverse('playlist-songs'), {"playlist_id": str(public_playlist.id)})
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert404(response)
+
+
+    def test_delete_playlist(self):
+        playlist = Playlist.objects.create(user=self.user, name="Yee ole playlist 24")
+        url = reverse('playlist-detail', args=[str(playlist.id)])
+
+        # send request
+        response = self.client.delete(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert204(response)
+        # ensure it's actually deleted
+        try:
+            Playlist.objects.get(id=playlist.id)
+        except Playlist.DoesNotExist:
+            pass
+        else:
+            self.fail(msg="The playlist was not deleted")

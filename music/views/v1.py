@@ -204,8 +204,10 @@ class PlaylistViewSet(viewsets.ModelViewSet):
             queryset = queryset.distinct()
 
             playlist = queryset.filter(id=params['playlist_id'])
-            if playlist.count() != 1:
+            if playlist.count() < 1:
                 raise network.NotFoundError("Could not find the specified playlist")
+            elif playlist.count() > 1:
+                raise network.ConflictError("Found too many playlists")
             playlist = playlist[0]
 
             songs = playlist.playlist_to_song.all()

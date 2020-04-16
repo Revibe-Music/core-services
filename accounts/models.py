@@ -45,6 +45,11 @@ class CustomUser(AbstractUser):
         verbose_name=_("programmatic account"),
         help_text=_("Programmatic accounts cannot login by normal means, they can only have access token generated for use in supplemental applications")
     )
+    temporary_account = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("temporary account"),
+        help_text=_("Temporary accounts are people who have downloaded the app but have not yet fully registered for an account.")
+    )
 
     friends = models.ManyToManyField(
         to='accounts.customuser',

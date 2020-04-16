@@ -390,7 +390,6 @@ class TestPlaylists(RevibeTestCase):
         # validate response
         self.assert404(response)
 
-
     def test_delete_playlist(self):
         playlist = Playlist.objects.create(user=self.user, name="Yee ole playlist 24")
         url = reverse('playlist-detail', args=[str(playlist.id)])

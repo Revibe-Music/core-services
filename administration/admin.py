@@ -127,13 +127,14 @@ class VariableAdmin(admin.ModelAdmin):
     # customize list display
     list_display = ('key', 'value')
     list_filter = (
-        ('browse', admin.BooleanFieldListFilter),
+        'category',
     )
 
     # customize search
     search_fields = [
         'key',
         'value',
+        'category',
     ]
 
 

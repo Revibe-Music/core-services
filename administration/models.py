@@ -438,6 +438,13 @@ class BlogTag(models.Model):
 
 class Variable(models.Model):
 
+    _category_choices = (
+        ('browse', 'Browse'),
+        ('search', 'Search'),
+        ('social', 'Social'),
+        ('util', 'Utils'),
+    )
+
     key = models.CharField(
         max_length=255,
         unique=True,
@@ -456,10 +463,12 @@ class Variable(models.Model):
         help_text=_("Detail how to set up this value. Some variables require string formatting, such as 'mobile_app_share_text'.")
     )
 
-    browse = models.BooleanField(
-        null=False, blank=False, default=False,
-        verbose_name=_("browse"),
-        help_text=_("Indicates that this variable is for the browse page. Simply makes filtering easier.")
+    category = models.CharField(
+        max_length=255,
+        choices=_category_choices,
+        null=True, blank=True,
+        verbose_name=_("category"),
+        help_text=_("Type of variable this is. Only used for sorting/filtering in the admin portal.")
     )
 
     class Meta:

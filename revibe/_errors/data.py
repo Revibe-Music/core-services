@@ -1,28 +1,23 @@
-from rest_framework.exceptions import APIException
-
-from logging import getLogger
-logger = getLogger(__name__)
-
-from revibe._errors import network
+from . import base
 from revibe._helpers import const, status
 
 # -----------------------------------------------------------------------------
 
-class ParameterMissingError(network.ExpectationFailedError):
+class ParameterMissingError(base.ExpectationFailedError):
     default_detail = "missing paramter, please check the docs for request requirements"
 
 
-class SerializerValidationError(network.ExpectationFailedError):
+class SerializerValidationError(base.ExpectationFailedError):
     default_detail = "misc. serializer error, please try again"
 
 
-class TooManyObjectsReturnedError(network.ProgramError):
+class TooManyObjectsReturnedError(base.ProgramError):
     default_detail = "Too many objects found, please try again"
 
 
-class ObjectAlreadyExists(network.AlreadyReportedError):
+class ObjectAlreadyExists(base.AlreadyReportedError):
     default_detail = "The request object already exists"
 
 
-class NoKeysError(network.BadEnvironmentError):
+class NoKeysError(base.ServiceUnavailableError):
     default_detail = "Could not find any valid keys"

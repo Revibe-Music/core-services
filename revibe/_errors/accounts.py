@@ -18,7 +18,5 @@ class AccountNotFound(network.UnauthorizedError):
 class NotArtistError(network.ForbiddenError):
     default_detail = "Could not identify the current artist"
 
-class ProfileNotFoundError(APIException):
-    status_code = status.HTTP_404_NOT_FOUND
+class ProfileNotFoundError(network.ExpectationFailedError):
     default_detail = "The user's profile information could not be found"
-    default_code = "not_found"

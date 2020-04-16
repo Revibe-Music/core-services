@@ -1,8 +1,5 @@
 from rest_framework.exceptions import APIException
 
-from logging import getLogger
-logger = getLogger(__name__)
-
 from revibe._errors import network
 from revibe._helpers import const, status
 

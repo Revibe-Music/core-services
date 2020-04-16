@@ -67,13 +67,13 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
 
             # parameter 'platform' required in request
             if 'platform' not in params:# and 'id' not in params:
-                raise data.ParameterMissingError("parameter 'platform' not found, please check the docs for request requirements")
+                raise data.ParameterMissingError("parameter 'platform' not found")
             platform = params['platform']
 
-            library = self.get_queryset().filter(platform=platform)
-            if library.count() != 1:
+            try:
+                library = self.get_queryset().get(platform=platform)
+            except Library.DoesNotExist as e:
                 raise network.NotFoundError()
-            library = library[0]
 
             songs = library.library_to_song.all()
             page = self.paginate_queryset(songs)
@@ -114,14 +114,19 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
         # get the album from the ID if it's not a GET request
         album = None
         if request.method != 'GET':
-            album = get_object_or_404(Album.objects.all(), pk=request.data['album_id'])
+            if 'album_id' not in request.data.keys():
+                raise network.BadRequestError("Field 'album_id' cannot be null")
+            try:
+                album = Album.hidden_objects.get(pk=request.data['album_id'])
+            except Album.DoesNotExist:
+                raise network.NotFoundError(f"Album with ID '{request.data['album_id']}' not found")
 
             kwargs['context'] = self.get_serializer_context()
 
         # handle all the requests
         if request.method == 'GET':
             return Response(status=status.HTTP_501_NOT_IMPLEMENTED)
-        
+
         elif request.method == 'POST':
             # add all songs to the library
             for song in album.song_set.all():
@@ -129,8 +134,8 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
                 serializer.is_valid(raise_exception=True)
                 serializer.save()
 
-            return Response(status=status.HTTP_201_CREATED)
-        
+            return responses.CREATED()
+
         elif request.method == 'DELETE':
             # delete all songs from the library
             for song in album.song_set.all():
@@ -138,8 +143,8 @@ class LibraryViewSet(viewsets.ModelViewSet, Version1Mixin):
                 serializer = LibrarySongSerializer(data=data, *args, **kwargs)
                 serializer.is_valid(raise_exception=True)
                 serializer.delete(data=data)
-            
-            return Response(status=status.HTTP_204_NO_CONTENT)
+
+            return responses.DELETED()
 
         else:
             return Reponse(status=status.HTTP_400_BAD_REQUEST)

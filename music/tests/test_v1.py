@@ -8,9 +8,10 @@ logger = getLogger(__name__)
 
 from revibe._helpers import const, status
 from revibe._helpers.test import RevibeTestCase
+from revibe.utils.urls import add_query_params
 
 from content.models import Album
-from music.models import Library, Playlist
+from music.models import Library, LibrarySong, Playlist
 
 # -----------------------------------------------------------------------------
 
@@ -28,15 +29,27 @@ class TestLibrary(RevibeTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(type(response.data), ReturnList)
         self.assertEqual(len(response.data), 2)
-    
+
+    def test_get_library_songs(self):
+        url = add_query_params(reverse("library-songs"), {"platform": "Revibe"})
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert200(response)
+
     def test_save_revibe_song(self):
         url = reverse('library-songs')
         data = {
             "platform": "Revibe",
             "song_id": self.content_song.id
         }
+
+        # send request
         response = self.client.post(url, data, format="json", **self._get_headers())
 
+        # validate response
         self.assert201(response)
         self.assertReturnDict(response)
         self.assertEqual(
@@ -102,78 +115,47 @@ class TestLibrary(RevibeTestCase):
                 msg=f"{field} not in response fields"
             )
 
-    def test_save_spotify_song(self):
-        """
-        Creates a Spotify library for the user first
-        """
-        # create the spotify library
-        lib = Library.objects.create(platform='Spotify', user=self.user)
-        lib.save()
+    def test_delete_song_from_library(self):
+        # save the song to the library
+        library = Library.objects.get(user=self.user, platform="Revibe")
+        LibrarySong.objects.create(library=library, song=self.content_song)
+
+        # prep request
+        url = reverse('library-songs')
+        data = {"song_id": str(self.content_song.id)}
 
         # send request
-        url = reverse('library-songs')
-        data = {
-            "platform":"spotify",
-            "artist": {
-                "artist_id": "28pwovyrh",
-                "artist_uri":"918q3y9ptfrh",
-                "name":"Spotify Boi",
-                "image_ref": "83yetu.com/yaboi.png"
-            },
-            "album": {
-                "album_id": "8tj89frjyegnufh8ui",
-                "album_uri": "hygjou9ehtj",
-                "name":"Dat Boi the Album",
-                "image_ref": "jywefrtni.hua"
-            },
-            "song": {
-                "song_id": "75ythjgvo9r48uyhrtjfio",
-                "song_uri": "uhtjgkocdieu3hrjkfdox9",
-                "title": "dat Boi's song",
-                "duration": "430"
-            }
-        }
-        response = self.client.post(url, data, format="json", **self._get_headers())
+        response = self.client.delete(url, data=data, format="json", **self._get_headers())
 
         # validate response
-        if response.status_code != 201:
-            print(response.data)
+        self.assert204(response)
+        try:
+            LibrarySong.objects.get(library=library, song=self.content_song)
+        except LibrarySong.DoesNotExist:
+            pass
+        else:
+            self.fail(msg="Song is still in the library")
+
+    def test_save_album(self):
+        url = reverse('library-albums')
+        data = {"album_id": str(self.content_album.id)}
+
+        # send the request
+        response = self.client.post(url, data=data, format="json", **self._get_headers())
+
+        # validate the response
         self.assert201(response)
 
-        # delete that library
-        lib.delete()
+    def test_delete_album(self):
+        url = reverse('library-albums')
+        data = {"album_id": str(self.content_album.id)}
 
-    def test_save_spotify_song_no_library(self):
-        """
-        Save a spotify song when the user does not have a spotify library
-        """
-        # send request
-        url = reverse('library-songs')
-        data = {
-            "platform":"spotify",
-            "artist": {
-                "artist_id": "28pwovyrh",
-                "artist_uri":"918q3y9ptfrh",
-                "name":"Spotify Boi",
-                "image_ref": "83yetu.com/yaboi.png"
-            },
-            "album": {
-                "album_id": "8tj89frjyegnufh8ui",
-                "album_uri": "hygjou9ehtj",
-                "name":"Dat Boi the Album",
-                "image_ref": "jywefrtni.hua"
-            },
-            "song": {
-                "song_id": "75ythjgvo9r48uyhrtjfio",
-                "song_uri": "uhtjgkocdieu3hrjkfdox9",
-                "title": "dat Boi's song",
-                "duration": "430"
-            }
-        }
-        response = self.client.post(url, data, format="json", **self._get_headers())
+        # send the request
+        response = self.client.delete(url, data=data, format="json", **self._get_headers())
 
-        # validate response
-        self.assert400(response)
+        # validate the response
+        self.assert204(response)
+
 
 class TestPlaylists(RevibeTestCase):
     def setUp(self):
@@ -378,7 +360,6 @@ class TestPlaylists(RevibeTestCase):
         response = self.client.post(url, data=data, format="json", **self._get_headers())
 
         # validate response
-        print(response.data)
         self.assert201(response)
         self.assertReturnDict(response)
 

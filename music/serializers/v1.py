@@ -1,6 +1,9 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
+import logging
+logger = logging.getLogger(__name__)
+
 from revibe._errors import auth, data, network
 from revibe._helpers.debug import debug_print
 
@@ -131,7 +134,9 @@ class LibrarySongSerializer(serializers.ModelSerializer):
         return lib_song
     
     def delete(self, data):
-        assert data['song_id'], "'song_id' must be passed with this endpoint"
+        # assert data['song_id'], "'song_id' must be passed with this endpoint"
+        if 'song_id' not in data.keys():
+            raise network.BadRequestError("Field 'song_id' is required")
 
         # get the current song
         song = get_object_or_404(Song.objects.all(), pk=data["song_id"])
@@ -141,12 +146,12 @@ class LibrarySongSerializer(serializers.ModelSerializer):
         
         library = self.get_library(platform)
 
-        lib_song = LibrarySong.objects.filter(library=library, song=song)
-        if len(lib_song) != 1:
-            raise serializers.ValidationError("error retrieving song from library")
-        lib_song = lib_song[0]
+        try:
+            lib_song = LibrarySong.objects.get(library=library, song=song)
+            lib_song.delete()
+        except LibrarySong.DoesNotExist:
+            logger.debug(f"Could not find LibrarySong. Library: {library}. Song: {song}")
 
-        lib_song.delete()
 
 
 class PlaylistSongSerializer(serializers.ModelSerializer):

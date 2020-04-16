@@ -231,8 +231,11 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
             playlist_id = request.data.get('playlist_id', None)
             if playlist_id == None:
-                raise network.BadRequestError("No field 'playlist_id' found")
-            playlist = Playlist.objects.get(id=playlist_id)
+                raise network.BadRequestError("Field 'playlist_id' not found")
+            try:
+                playlist = Playlist.objects.get(id=playlist_id)
+            except Playlist.DoesNotExist:
+                raise network.NotFoundError()
 
             self.check_playlist_edit_permissions(playlist, request.user)
 
@@ -242,8 +245,11 @@ class PlaylistViewSet(viewsets.ModelViewSet):
             return responses.CREATED(serializer=serializer)
 
         elif request.method == 'DELETE':
-            song = Song.objects.get(id=request.data['song_id'])
-            playlist = Playlist.objects.get(id=request.data['playlist_id'])
+            try:
+                song = Song.objects.get(id=request.data['song_id'])
+                playlist = Playlist.objects.get(id=request.data['playlist_id'])
+            except (Song.DoesNotExist, Playlist.DoesNotexist) as e:
+                raise network.NotFoundError()
             self.check_playlist_edit_permissions(playlist, request.user)
 
             instance = PlaylistSong.objects.get(playlist=playlist, song=song)

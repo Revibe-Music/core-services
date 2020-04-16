@@ -16,7 +16,7 @@ import sys
 from revibe._helpers import status
 
 from accounts.models import CustomUser, Profile, ArtistProfile
-from administration.models import Campaign
+from administration.models import Campaign, YouTubeKey
 from content.models import *
 
 # -----------------------------------------------------------------------------
@@ -307,6 +307,15 @@ class AdministrationMixin:
             campaign = Campaign.objects.create(name="example campaign", budget=0, spent=0)
             campaign.save()
         self.campaign = campaign
+
+    def _get_youtube_key(self):
+        try:
+            key = YouTubeKey.objects.get(key="hellooooooooooooo")
+        except Exception:
+            key = YouTubeKey.objects.create(key="hellooooooooooooo")
+
+        print(key)
+        self.key = key
 
 
 class MetricsMixin:

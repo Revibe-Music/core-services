@@ -1,5 +1,5 @@
 from django.db import models # models.Manager
-from django.db.models import Q
+from django.db.models import F, Q
 
 import datetime
 
@@ -21,3 +21,13 @@ class BlogDisplayManager(models.Manager):
             publish_date__lte=datetime.date.today()
         )
         return super().get_queryset().filter(q_filter)
+
+
+class YouTubeKeyManager(models.Manager):
+    def get_queryset(self):
+        points_per_user = models.ExpressionWrapper(
+            F('point_budget') / F('number_of_users'),
+            output_field = models.DecimalField()
+        )
+        annotation = {"points_per_user": points_per_user}
+        return super().get_queryset().annotate(**annotation)

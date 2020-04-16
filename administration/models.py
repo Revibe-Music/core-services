@@ -159,9 +159,6 @@ class YouTubeKey(models.Model):
         auto_now_add=True
     )
 
-    def __str__(self):
-        return str(self.key)
-
     @property
     def is_valid(self):
         """
@@ -171,6 +168,11 @@ class YouTubeKey(models.Model):
             return False
         else:
             return True
+
+    objects = managers.YouTubeKeyManager()
+
+    def __str__(self):
+        return str(self.key)
 
     class Meta:
         verbose_name = 'YouTube Key'

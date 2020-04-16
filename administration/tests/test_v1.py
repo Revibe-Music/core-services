@@ -7,26 +7,21 @@ from oauth2_provider.models import Application
 
 import unittest
 
-import logging
-logger = logging.getLogger(__name__)
-
 from revibe._errors import auth, permissions
 from revibe._helpers import const
-from revibe._helpers.test import AuthorizedAPITestCase
+from revibe._helpers.test import RevibeTestCase
+from revibe.utils.urls import add_query_params
 
 from accounts.models import CustomUser, Profile
-from administration.models import ContactForm
+from administration.models import ContactForm, YouTubeKey
 from content.models import Artist, Album, Song
 
 # -----------------------------------------------------------------------------
 
-class TestContactForms(AuthorizedAPITestCase):
+class TestContactForms(RevibeTestCase):
     def setUp(self):
         self._get_application()
         self._get_user()
-
-    def _get_headers(self):
-        return {"Authorization": "Bearer {}".format(self.access_token)}
 
     def test_submit_contact_form_user_id(self):
         url = reverse('forms-contact-form')
@@ -75,11 +70,15 @@ class TestContactForms(AuthorizedAPITestCase):
             "subject":"Uh oh",
             "message":"This won't work"
         }
+
+        # send response
         response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_417_EXPECTATION_FAILED)
+
+        # validate response
+        self.assert400(response)
 
 
-class TestCompanyViews(AuthorizedAPITestCase):
+class TestCompanyViews(RevibeTestCase):
     help = "Tests the CompanyViewSet functions in the Administration namespace"
 
     def setUp(self):
@@ -162,3 +161,44 @@ class TestCompanyViews(AuthorizedAPITestCase):
         broken = self.client.get(url, format="json", **self._get_headers())
         self.assert403(broken, msg="Contact Form Metrics endpoint does not restrict to only Revibe staff")
 
+
+class TestYoutubeKeyViews(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._get_youtube_key()
+    
+    def test_get_key(self):
+        url = reverse('youtubekey-list')
+        users = self.key.number_of_users
+
+        # send the request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert200(response)
+        self.assertTrue(
+            'key' in response.data.keys(),
+            msg="There is no 'key' field in the response"
+        )
+
+        updated_key = YouTubeKey.objects.get(**response.data)
+        self.assertEqual(
+            users+1, updated_key.number_of_users,
+            msg="The number of users was not increased by one"
+        )
+    
+    def test_send_bad_key_get_none(self):
+        url = add_query_params(reverse('youtubekey-list'), {"old_key": str(self.key.key)})
+        self.key.number_of_users = 1
+        self.key.save()
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate the response
+        self.assert503(response)
+        self.assertEqual(
+            YouTubeKey.objects.get(key=str(self.key.key)).number_of_users, 0,
+            msg="Number of users was not decreased by one"
+        )

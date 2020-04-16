@@ -13,6 +13,7 @@ from revibe.pagination import CustomLimitOffsetPagination
 from revibe.sharing import mobile_app_sharing_link
 from revibe.viewsets import GenericPlatformViewSet
 from revibe.utils.params import get_url_param
+from revibe._errors import network
 from revibe._errors.data import NoKeysError
 from revibe._errors.random import ValidationError
 from revibe._helpers import const, responses
@@ -43,10 +44,10 @@ class FormViewSet(viewsets.GenericViewSet):
             try:
                 serializer.save()
             except ValidationError as err:
-                return responses.SERIALIZER_ERROR_RESPONSE(detail=str(err))
-            return responses.CREATED(serializer)
+                raise network.BadRequestError(str(err))
+            return responses.CREATED(serializer=serializer)
         else:
-            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
+            raise network.BadRequestError(serializer.errors)
         return responses.NO_REQUEST_TYPE()
 
 
@@ -60,7 +61,7 @@ class YouTubeKeyViewSet(viewsets.GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         # get the key with the most points
-        choices = YouTubeKey.objects.order_by('number_of_users')
+        choices = YouTubeKey.objects.order_by('-points_per_user')
         if len(choices) == 0:
             raise NoKeysError()
 

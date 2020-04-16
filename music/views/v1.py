@@ -205,7 +205,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
 
             playlist = queryset.filter(id=params['playlist_id'])
             if playlist.count() != 1:
-                raise network.NotFoundError()
+                raise network.NotFoundError("Could not find the specified playlist")
             playlist = playlist[0]
 
             songs = playlist.playlist_to_song.all()

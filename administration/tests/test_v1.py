@@ -5,6 +5,7 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework.utils.serializer_helpers import ReturnList, ReturnDict
 from oauth2_provider.models import Application
 
+import datetime
 import unittest
 
 from revibe._errors import auth, permissions
@@ -13,7 +14,7 @@ from revibe._helpers.test import RevibeTestCase
 from revibe.utils.urls import add_query_params
 
 from accounts.models import CustomUser, Profile
-from administration.models import Alert, AlertSeen, ContactForm, YouTubeKey
+from administration.models import Alert, AlertSeen, Blog, ContactForm, YouTubeKey
 from content.models import Artist, Album, Song
 
 # -----------------------------------------------------------------------------
@@ -262,5 +263,54 @@ class TestAlertViews(RevibeTestCase):
             response.data['results'] == [],
             msg="The alert still came up"
         )
+
+
+class TestBlogViews(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._get_superuser()
+        self._get_blog()
+
+    def test_retrieve_posts(self):
+        # configure test
+        url = reverse('blog-list')
+
+        # send request
+        response = self.client.get(url, format="json")
+
+        # send response
+        self.assert200(response)
+        self.assertEqual(
+            str(response.data['results'][0]['id']), str(self.blog.id),
+            msg="The correct blog was not returned"
+        )
+
+    def test_retrieve_single_post(self):
+        # configure test
+        url = reverse('blog-detail', args=[self.blog.id])
+
+        # send request
+        response = self.client.get(url, format="json")
+
+        # validate response
+        self.assert200(response)
+        self.assertEqual(
+            str(response.data['id']), str(self.blog.id),
+            msg="The correct blog was not returned"
+        )
+    
+    def test_retrieve_wrong_post(self):
+        date = datetime.date.today() + datetime.timedelta(days=2)
+        new_blog = Blog.objects.create(category="other", title="test2", body="test2", publish_date=date, author=self.superuser)
+
+        # configure test
+        url = reverse('blog-detail', args=[new_blog.id])
+
+        # send request
+        response = self.client.get(url, format="json")
+
+        # validate response
+        self.assert404(response)
 
 

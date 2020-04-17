@@ -17,7 +17,7 @@ import sys
 from revibe._helpers import status
 
 from accounts.models import CustomUser, Profile, ArtistProfile
-from administration.models import Alert, Campaign, YouTubeKey
+from administration.models import Alert, Blog, Campaign, YouTubeKey
 from content.models import *
 
 # -----------------------------------------------------------------------------
@@ -326,6 +326,14 @@ class AdministrationMixin:
             alert = Alert.objects.create(subject="111", message="alert message", category=Alert._category_choices[0][0], enabled=True, start_date=start, end_date=end)
         
         self.alert = alert
+    
+    def _get_blog(self):
+        try:
+            blog = Blog.objects.get(title="test1")
+        except Exception:
+            publish = datetime.date.today() - datetime.timedelta(days=1)
+            blog = Blog.objects.create(category="other", title="test1", body="test1", publish_date=publish, author=self.superuser)
+        self.blog = blog
 
 
 class MetricsMixin:

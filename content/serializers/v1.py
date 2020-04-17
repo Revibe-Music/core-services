@@ -123,6 +123,9 @@ class ArtistSerializer(serializers.ModelSerializer):
         return serialized_data.data
     
     def _get_relink_url(self, obj):
+        if obj.platform != 'Revibe':
+            return None
+
         try:
             return f"https://revibe.tech/relink/{obj.artist_profile.relink_url()}"
         except Exception:

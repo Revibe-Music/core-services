@@ -67,6 +67,14 @@ class CustomUser(AbstractUser):
     def full_name(self):
         return f"{self.first_name} {self.last_name}" if self.first_name and self.last_name else ""
 
+    def _link_to_self(self):
+        return format_html(
+            "<a href='/{}/accounts/customuser/{}'>{}</a>",
+            settings.ADMIN_PATH,
+            self.id,
+            self.__str__()
+        )
+
 
 class Profile(models.Model):
     id = models.AutoField(primary_key=True)
@@ -136,6 +144,14 @@ class Profile(models.Model):
         help_text="Allow Revibe to send email to the user for marketing purposes",
         null=False, blank=True, default=True
     )
+
+    def _link_to_self(self):
+        return format_html(
+            "<a href='/{}/accounts/profile/{}'>{}</a>",
+            settings.ADMIN_PATH,
+            self.id,
+            self.__str__()
+        )
 
     def __str__(self):
         return "{}'s User Profile".format(self.user)

@@ -30,7 +30,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__', 'email', 'user')
+    list_display = ('__str__', 'email', '_get_link_user')
     list_filter = (
         ('user__is_staff', admin.BooleanFieldListFilter),
         ('campaign', admin.RelatedOnlyFieldListFilter),
@@ -39,6 +39,11 @@ class ProfileAdmin(admin.ModelAdmin):
 
     # customize search
     search_fields = ['user__username', 'user__first_name', 'user__last_name', 'email']
+
+    def _get_link_user(self, obj):
+        return obj.user._link_to_self()
+    _get_link_user.short_description = "user"
+    _get_link_user.allow_tags = True
 
 
 @admin.register(Social)
@@ -60,8 +65,9 @@ class ArtistProfileAdmin(admin.ModelAdmin):
     search_fields = ['artist__name', 'email',]
 
     def get_artist_username(self, obj):
-        return obj.artist.artist_user.username
-    get_artist_username.short_description = 'username'
+        return obj.artist.artist_user._link_to_self()
+    get_artist_username.allow_tags = True
+    get_artist_username.short_description = 'user'
 
 
 @admin.register(SocialMedia)

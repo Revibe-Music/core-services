@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -162,12 +163,16 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         "DELETE": [["ADMIN"],["first-party"]],
     }
 
-    def get_queryset(self):
+    def get_queryset(self, public=False):
         """
         Return the current user's playlists
         """
         user = self.request.user
-        return Playlist.objects.filter(user=user)
+        if not public:
+            return Playlist.objects.filter(user=user)
+        else:
+            q_filter = Q(user=user) | Q(is_public=True)
+            return Playlist.objects.filter(q_filter)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -205,8 +210,7 @@ class PlaylistViewSet(viewsets.ModelViewSet):
                 raise data.ParameterMissingError("parameter 'playlist_id' not found")
             platform = params['playlist_id']
 
-            queryset = self.get_queryset() | Playlist.objects.filter(is_public=True)
-            queryset = queryset.distinct()
+            queryset = self.get_queryset(public=True)
 
             playlist = queryset.filter(id=params['playlist_id'])
             if playlist.count() < 1:

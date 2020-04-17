@@ -112,7 +112,10 @@ class AlertViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         user = self.request.user
-        alert = Alert.objects.get(id=request.data["alert_id"])
+        try:
+            alert = Alert.objects.get(id=request.data["alert_id"])
+        except Alert.DoesNotExist:
+            raise network.NotFoundError(f"Alert with ID '{request.data['alert_id']}' not found")
         see_alert(user, alert)
 
         return responses.CREATED()

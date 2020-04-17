@@ -17,7 +17,7 @@ import sys
 from revibe._helpers import status
 
 from accounts.models import CustomUser, Profile, ArtistProfile
-from administration.models import Alert, Blog, Campaign, YouTubeKey
+from administration.models import Alert, Blog, Campaign, YouTubeKey, Variable
 from content.models import *
 
 # -----------------------------------------------------------------------------
@@ -334,6 +334,13 @@ class AdministrationMixin:
             publish = datetime.date.today() - datetime.timedelta(days=1)
             blog = Blog.objects.create(category="other", title="test1", body="test1", publish_date=publish, author=self.superuser)
         self.blog = blog
+    
+    def _get_variable(self):
+        try:
+            variable = Variable.objects.get()
+        except Exception:
+            variable = Variable.objects.create(key="testing", value="testing value thing")
+        self.variable = variable
 
 
 class MetricsMixin:

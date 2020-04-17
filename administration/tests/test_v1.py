@@ -314,3 +314,22 @@ class TestBlogViews(RevibeTestCase):
         self.assert404(response)
 
 
+class TestVariablesViews(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+    
+    def test_get_variables(self):
+        # setup test
+        url = reverse('variables-list')
+
+        # send request
+        response = self.client.get(url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert200(response)
+        self.assertTrue(
+            'share_text' in response.data.keys(),
+            msg="The share text is not in the response"
+        )
+

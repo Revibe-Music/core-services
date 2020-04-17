@@ -49,7 +49,8 @@ class ArtistSerializer(serializers.ModelSerializer):
     bio = serializers.SerializerMethodField('_get_artist_bio', read_only=True)
     unique_monthly_listeners = serializers.SerializerMethodField('_get_unique_monthly_listeners', read_only=True)
     # social_media = BaseSocialMediaSerializer(source='_get_social_media', read_only=True)
-    social_media = serializers.SerializerMethodField(source='get_social_media', read_only=True)
+    social_media = serializers.SerializerMethodField('_get_social_media', read_only=True)
+    relink_url = serializers.SerializerMethodField('_get_relink_url', read_only=True)
 
     # write-only
     image = serializers.FileField(write_only=True, required=False)
@@ -67,6 +68,7 @@ class ArtistSerializer(serializers.ModelSerializer):
             "bio",
             'unique_monthly_listeners',
             'social_media',
+            'relink_url',
 
             # write-only
             'image',
@@ -109,7 +111,7 @@ class ArtistSerializer(serializers.ModelSerializer):
             return None
             # raise e
 
-    def get_social_media(self, obj):
+    def _get_social_media(self, obj):
         if obj.platform != 'Revibe':
             return None
 
@@ -119,6 +121,12 @@ class ArtistSerializer(serializers.ModelSerializer):
             return None
         serialized_data = BaseSocialMediaSerializer(social_medias, many=True)
         return serialized_data.data
+    
+    def _get_relink_url(self, obj):
+        try:
+            return f"https://revibe.tech/relink/{obj.artist_profile.relink_url()}"
+        except Exception:
+            return None
 
 
 class SongContributorSerializer(serializers.ModelSerializer, ContributionSerializerMixin):

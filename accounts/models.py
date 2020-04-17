@@ -215,6 +215,9 @@ class ArtistProfile(models.Model):
         help_text=_("Determines if the artist has a publicly available page on Revibe.tech")
     )
 
+    def relink_url(self):
+        return self.public_url if self.public_url != None else self.artist.id
+
     def __str__(self):
         return "{}'s Artist Profile".format(self.artist)
 

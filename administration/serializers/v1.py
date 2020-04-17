@@ -8,6 +8,7 @@ from revibe._errors.random import ValidationError
 
 from accounts import models as acc_models
 from administration.models import *
+from administration.utils import retrieve_variable
 from content import models as cnt_models
 from metrics.models import Stream
 
@@ -144,7 +145,11 @@ class BlogSerializer(serializers.ModelSerializer):
         ]
     
     def author_name(self, obj):
-        return f"{obj.author.first_name} {obj.author.last_name}"
+        if obj.author and obj.author != None:
+            return f"{obj.author.first_name} {obj.author.last_name}"
+        else:
+            default_name = retrieve_variable("blog_default_author_name", "Revibe")
+            return default_name
 
     def create(self, validated_data):
         raise network.BadEnvironmentError("Cannot create a blog post from the API")

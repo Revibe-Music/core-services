@@ -151,7 +151,7 @@ class AlbumViewSet(PlatformViewSet):
     @action(detail=True)
     def songs(self, request, pk=None, url_name="album-songs"):
         album = self.get_object()
-        queryset = self.platform.Songs.filter(album=album)
+        queryset = self.platform.Songs.filter(album=album).order_by('album_order')
         serializer = ser_v1.SongSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -310,6 +310,11 @@ class Song(models.Model):
     genre = models.CharField(max_length=255, null=True, blank=True)
     platform = models.CharField(max_length=255, null=True)
     is_explicit = models.BooleanField(null=False, blank=True, default=False)
+    album_order = models.IntegerField(
+        null=False, blank=True, default=0,
+        verbose_name=_("order"),
+        help_text=_("The order in which the songs will be displayed in the app.")
+    )
     # tracks = one-to-many with 'Track'
 
     is_displayed = models.BooleanField(

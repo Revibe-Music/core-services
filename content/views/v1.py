@@ -503,12 +503,15 @@ class PublicArtistViewSet(ReadOnlyPlatformViewSet):
 
     cashapp_or_venmo = Q(artist_profile__social_media__service=SocialMedia._cashapp_text) | Q(artist_profile__social_media__service=SocialMedia._venmo_text)
     donate_queryset = queryset.filter(cashapp_or_venmo).distinct()
+    
+    public_filter = Q(artist_profile__allow_revibe_website_page=True)
+    public_queryset = queryset.filter(public_filter).distinct()
 
     def list(self, request, *args, **kwargs):
         params = request.query_params
         artist_url = get_url_param(params, "artist", *args, **kwargs)
         if artist_url != None:
-            artist = self.get_artist(artist_url)
+            artist = self.get_artist(artist_url, queryset=self.public_queryset)
             serializer = ser_v1.ArtistSerializer(artist)
 
             # record that their page was looked at
@@ -516,11 +519,11 @@ class PublicArtistViewSet(ReadOnlyPlatformViewSet):
             url_click.save()
 
         else:
-            page = self.paginate_queryset(self.queryset)
+            page = self.paginate_queryset(self.public_queryset)
             if page is not None:
                 serializer = ser_v1.ArtistSerializer(page, many=True)
                 return self.get_paginated_response(serializer.data)
-            serializer = ser_v1.ArtistSerializer(self.queryset, many=True)
+            serializer = ser_v1.ArtistSerializer(self.public_queryset, many=True)
             
 
         return responses.OK(serializer=serializer)

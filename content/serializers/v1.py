@@ -274,14 +274,14 @@ class AlbumSerializer(serializers.ModelSerializer):
     type = serializers.CharField(required=False)
     platform = serializers.CharField(required=False)
     is_displayed = serializers.BooleanField(required=False)
-    # date_published = serializers.DateField(required=False)
-    date_published = CustomDateField(required=False, format="%Y-%m-%d")
+    date_published = serializers.DateTimeField(required=False)
+    # date_published = CustomDateField(required=False, format="%Y-%m-%d")
 
     # read-only
     uploaded_by = ArtistSerializer(read_only=True)
     contributors = AlbumContributorSerializer(source='album_to_artist', many=True, read_only=True)
-    uploaded_date = serializers.DateField(read_only=True)
-    last_changed = serializers.DateField(read_only=True)
+    uploaded_date = serializers.DateTimeField(read_only=True)
+    last_changed = serializers.DateTimeField(read_only=True)
     images = ImageSerializer(source="album_image", many=True, read_only=True)
 
     # write-only

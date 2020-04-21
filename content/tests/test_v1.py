@@ -321,7 +321,7 @@ class TestPublicContent(RevibeTestCase):
             response.data['count'], len(response.data['results']),
             msg="The pagination did not count properly"
         )
-        number_of_artists = cnt_models.Artist.objects.filter(platform="Revibe").count()
+        number_of_artists = cnt_models.Artist.objects.filter(platform="Revibe", artist_profile__allow_revibe_website_page=True).count()
         self.assertEqual(
             response.data['count'], number_of_artists,
             msg="Incorrect number of artists returned"

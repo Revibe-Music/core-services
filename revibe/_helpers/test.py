@@ -278,7 +278,7 @@ class ContentMixin:
         self.content_artist = Artist.objects.create(name="Test Artist Content", platform="Revibe")
 
         # create their artist profile
-        ArtistProfile.objects.create(artist=self.content_artist)
+        ArtistProfile.objects.create(artist=self.content_artist, allow_revibe_website_page=True)
 
         return self.content_artist
 

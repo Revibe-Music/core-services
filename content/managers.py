@@ -1,7 +1,6 @@
 from django.db import models # models.Manager
 from django.db.models import Q
-
-import datetime
+from django.utils.timezone import now
 
 # -----------------------------------------------------------------------------
 
@@ -19,7 +18,7 @@ class AlbumNotHiddenNotDeletedManager(NotHiddenNotDeletedManager):
     def get_queryset(self):
         return super(AlbumNotHiddenNotDeletedManager, self) \
             .get_queryset().filter(
-                Q(date_published=None) | Q(date_published__lte=datetime.date.today())
+                Q(date_published=None) | Q(date_published__lte=now())
             )
 
 
@@ -30,7 +29,7 @@ class SongNotHiddenNotDeletedManager(NotHiddenNotDeletedManager):
             .get_queryset().filter(
                 Q(album__is_displayed=True),
                 Q(album__is_deleted=False),
-                Q(album__date_published=None) | Q(album__date_published__lte=datetime.date.today())
+                Q(album__date_published=None) | Q(album__date_published__lte=now())
             )
 
 

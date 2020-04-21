@@ -218,9 +218,9 @@ class Album(models.Model):
     platform = models.CharField(max_length=255, null=False, blank=False)
     # album_image = one-to-many with 'Image'
 
-    uploaded_date = models.DateField(auto_now_add=True, null=True, editable=False)
-    last_changed = models.DateField(auto_now=True, null=True)
-    date_published = models.DateField(null=True, blank=True, default=now)
+    uploaded_date = models.DateTimeField(auto_now_add=True, null=True, editable=False)
+    last_changed = models.DateTimeField(auto_now=True, null=True)
+    date_published = models.DateTimeField(null=True, blank=True, default=now)
     is_displayed = models.BooleanField(
         null=False, blank=True, default=True,
         verbose_name=_("display status")

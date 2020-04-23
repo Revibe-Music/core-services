@@ -75,3 +75,15 @@ class SongContributorDisplayManager(SongContributorManager):
     def get_queryset(self):
         return super(SongContributorDisplayManager, self).get_queryset() \
             .filter(approved=True, song__is_deleted=False)
+
+
+class GenreManager(models.Manager):
+    def get_or_create(self, text):
+        text = text.lower()
+        try:
+            genre = self.get(text=text)
+        except:
+            genre = self.create(text=text)
+        
+        return genre
+

@@ -52,7 +52,9 @@ from content.utils.models import (
     create_permananent_contribs, create_placeholder,
 
     # tag stuff
-    add_tag_to_song, remove_tag_from_song, add_tag_to_album, remove_tag_from_album
+    add_tag_to_song, remove_tag_from_song, add_tag_to_album, remove_tag_from_album,
+    # genre stuff
+    add_genres_to_object, remove_genres_from_object
 )
 from metrics.models import Stream
 from music.models import *
@@ -1195,12 +1197,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
         else:
             return responses.NO_REQUEST_TYPE()
 
-    # tag content
-    @action(detail=False, methods=['post', 'delete'], url_path="songs/tags", url_name="tag_song")
+    # genre & tag content
+    @action(detail=False, methods=['post', 'delete'], url_path=r"songs/(?P<song_id>[a-zA-Z0-9-_]+)/tags", url_name="tag-song")
     def tag_song(self, request, *args, **kwargs):
         # stuff for all requests
         artist = self.get_current_artist(request)
-        song = Song.objects.get(id=request.data['song_id'])
+        song = Song.objects.get(id=song_id)
 
         if request.method == 'POST':
             # check that the artist can add taqs to a song
@@ -1222,11 +1224,11 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             return responses.DELETED()
 
-    @action(detail=False, methods=['post', 'delete'], url_path="albums/tags", url_name="tag_album")
-    def tag_album(self, request, *args, **kwargs):
+    @action(detail=False, methods=['post', 'delete'], url_path=r"albums/(?P<album_id>[a-zA-Z0-9-_]+)/tags", url_name="tag-album")
+    def tag_album(self, request, album_id=None, *args, **kwargs):
         # stuff for all request
         artist = self.get_current_artist(request)
-        album = Album.objects.get(id=request.data['album_id'])
+        album = Album.objects.get(id=album_id)
 
         if request.method == 'POST':
             # check that the artist can add tags to the album
@@ -1245,6 +1247,58 @@ class UserArtistViewSet(GenericPlatformViewSet):
             # remove the tags from the album
             tags = [str(x) for x in request.data['tags']]
             remove_tag_from_album(tags, album)
+
+            return responses.DELETED()
+
+    @action(detail=False, methods=['post', 'delete'], url_path=r"songs/(?P<song_id>[a-zA-Z0-9-_]+)/genres", url_name="genre-song")
+    def genre_song(self, request, song_id=None, *args, **kwargs):
+        # stuff for all requests
+        artist = self.get_current_artist(request)
+        song = Song.objects.get(id=song_id)
+
+        if request.method == 'POST':
+            # check that the artist can add genres to a song
+            self.check_tagging_permissions(artist, song)
+            
+            # add the genres to the song
+            genres = [str(x) for x in request.data['genres']]
+            add_genres_to_object(genres, song)
+
+            return responses.CREATED()
+        
+        elif request.method == 'DELETE':
+            # check that the artist can remove genres
+            self.check_tagging_permissions(artist, song)
+
+            # remove the genres
+            genres = [str(x) for x in request.data['genres']]
+            remove_genres_from_object(genres, song)
+
+            return responses.DELETED()
+        
+    @action(detail=False, methods=['post','delete'], url_path=r"albums/(?P<album_id>[a-zA-Z0-9-_]+)/genres", url_name="genre-album")
+    def genre_album(self, request, album_id=None, *args, **kwargs):
+        # stuff for all requests
+        artist = self.get_current_artist(request)
+        album = Album.objects.get(id=album_id)
+
+        if request.method == 'POST':
+            # check that the artist can add genres
+            self.check_tagging_permissions(artist, album)
+
+            # add the genres
+            genres = [str(x) for x in request.data['genres']]
+            add_genres_to_object(genres, album)
+
+            return responses.CREATED()
+        
+        elif request.method == 'DELETE':
+            # check that the artist can remove genres
+            self.check_tagging_permissions(artist, album)
+
+            # add the genres
+            genres = [str(x) for x in request.data['genres']]
+            remove_genres_from_object(genres, album)
 
             return responses.DELETED()
 

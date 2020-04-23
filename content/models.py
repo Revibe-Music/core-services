@@ -232,6 +232,11 @@ class Album(models.Model):
 
     uploaded_by = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="album_uploaded_by")
     contributors = models.ManyToManyField(Artist, through='AlbumContributor')
+    genres = models.ManyToManyField(
+        to='content.genre',
+        related_name='albums',
+        blank=True
+    )
     tags = models.ManyToManyField(
         to='content.tag',
         related_name='albums',
@@ -307,7 +312,7 @@ class Song(models.Model):
     uri = models.CharField('URI', default=uuid.uuid4, unique=True, editable=False, max_length=255)
     title = models.CharField('Name', max_length=255, null=False)
     duration = models.DecimalField('Duration', null=True, blank=True, max_digits=6, decimal_places=2) # in seconds
-    genre = models.CharField(max_length=255, null=True, blank=True)
+    # genre = models.CharField(max_length=255, null=True, blank=True) # deprecated in favor of multiple genres
     platform = models.CharField(max_length=255, null=True)
     is_explicit = models.BooleanField(null=False, blank=True, default=False)
     album_order = models.IntegerField(
@@ -335,6 +340,11 @@ class Song(models.Model):
         on_delete=models.SET_NULL,
         related_name="song_uploaded_by",
         null=True, blank=True
+    )
+    genres = models.ManyToManyField(
+        to='content.genre',
+        related_name='songs',
+        blank=True
     )
     tags = models.ManyToManyField(
         to='content.tag',
@@ -472,4 +482,15 @@ class PlaceholderContribution(models.Model):
 
     def __repr__(self):
         return f"<{self.__class__.__name__} ({self.__str__()})>"
+
+
+class Genre(models.Model):
+    text = models.CharField(
+        max_length=255,
+        null=False, blank=False,
+        verbose_name=_("text"),
+        help_text=_("The genre itself")
+    )
+
+    objects = GenreManager()
 

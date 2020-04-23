@@ -78,7 +78,7 @@ class SongAdmin(admin.ModelAdmin):
         ('is_displayed', admin.BooleanFieldListFilter),
         ('album', admin.RelatedOnlyFieldListFilter),
         ('uploaded_by', admin.RelatedOnlyFieldListFilter),
-        'genre',
+        # 'genre',
         'platform',
     )
 
@@ -190,6 +190,11 @@ class TrackAdmin(admin.ModelAdmin):
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Genre)
+class GenreAdmin(admin.ModelAdmin):
     pass
 
 

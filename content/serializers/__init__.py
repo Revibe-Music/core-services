@@ -1,11 +1,19 @@
 """
 """
 
-from .base import BaseArtistSerializer, BaseSongSerializer
+from .base import (
+    BaseArtistSerializer,
+    BaseGenreSerializer,
+    BaseSongSerializer,
+    BaseTagSerializer,
+)
 
 # -----------------------------------------------------------------------------
 
 
 __all__ = [
-    BaseArtistSerializer, BaseSongSerializer
+    BaseArtistSerializer,
+    BaseGenreSerializer,
+    BaseSongSerializer,
+    BaseTagSerializer,
 ]

@@ -15,6 +15,8 @@ from content.utils import analytics, models
 from cloud_storage.models import File
 from metrics.models import Stream
 
+from . import BaseGenreSerializer, BaseTagSerializer
+
 # -----------------------------------------------------------------------------
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -35,14 +37,6 @@ class TrackSerializer(serializers.ModelSerializer):
         fields = [
             'url',
             'is_original',
-        ]
-
-
-class GenreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Genre
-        fields = [
-            'text'
         ]
 
 
@@ -290,7 +284,8 @@ class AlbumSerializer(serializers.ModelSerializer):
     contributors = AlbumContributorSerializer(source='album_to_artist', many=True, read_only=True)
     uploaded_date = serializers.DateTimeField(read_only=True)
     last_changed = serializers.DateTimeField(read_only=True)
-    genres = GenreSerializer(many=True, read_only=True)
+    genres = BaseGenreSerializer(many=True, read_only=True)
+    tags = BaseTagSerializer(many=True, read_only=True)
     images = ImageSerializer(source="album_image", many=True, read_only=True)
 
     # write-only
@@ -313,6 +308,7 @@ class AlbumSerializer(serializers.ModelSerializer):
             'uploaded_date',
             'last_changed',
             'genres',
+            'tags',
             'images',
 
             # write-only
@@ -330,7 +326,6 @@ class AlbumSerializer(serializers.ModelSerializer):
         img = validated_data.pop('image', None)
 
         album = Album(**validated_data, uploaded_by=artist)
-        album.is_displayed = True
         album.save()
 
         album_contrib = AlbumContributor.objects.create(artist=artist, album=album, contribution_type="Artist", primary_artist=True)
@@ -363,7 +358,8 @@ class SongSerializer(serializers.ModelSerializer):
     contributors = SongContributorSerializer(source='song_to_artist', many=True, read_only=True)
     uploaded_date = serializers.DateField(read_only=True)
     last_changed = serializers.DateField(read_only=True)
-    genres = GenreSerializer(many=True, read_only=True)
+    genres = BaseGenreSerializer(many=True, read_only=True)
+    tags = BaseTagSerializer(many=True, read_only=True)
     tracks = TrackSerializer(read_only=True, many=True)
 
     # write-only
@@ -390,6 +386,7 @@ class SongSerializer(serializers.ModelSerializer):
             'uploaded_date',
             'last_changed',
             'genres',
+            'tags',
             'tracks',
 
             # write-only
@@ -540,7 +537,6 @@ class OtherSongSerializer(serializers.ModelSerializer):
             'song_uri',
             'title',
             'duration',
-            'genre',
             'platform',
             'is_explicit',
 

@@ -5,7 +5,7 @@ Author: Jordan Prechac
 
 from rest_framework import serializers
 
-from content.models import Album, Artist, Song
+from content.models import Album, AlbumContributor, Artist, Genre, Song, SongContributor, Tag
 
 # -----------------------------------------------------------------------------
 
@@ -48,3 +48,29 @@ class BaseSongSerializer(serializers.ModelSerializer):
         pass
 
 
+class BaseGenreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Genre
+        fields = [
+            'text'
+        ]
+    
+    def create(self, validated_data, *args, **kwargs):
+        pass
+    def update(self, validated_data, *args, **kwargs):
+        pass
+
+
+class BaseTagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Tag
+        fields = [
+            'text'
+        ]
+
+    def create(self, validated_data, *args, **kwargs):
+        pass
+    def update(self, validated_data, *args, **kwargs):
+        pass

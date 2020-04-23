@@ -217,8 +217,10 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
     share_data_with_contributors = serializers.BooleanField(required=False)
     share_advanced_data_with_contributors = serializers.BooleanField(required=False)
     allow_contributors_to_edit_contributions = serializers.BooleanField(required=False)
+    hide_all_content = serializers.BooleanField(required=False)
     display_other_platform_content_on_revibe_page = serializers.BooleanField(required=False)
     allow_contributors_to_edit_tags = serializers.BooleanField(required=False)
+    allow_revibe_website_page = serializers.BooleanField(required=False)
 
     # read-only
     profile_id = serializers.ReadOnlyField(source='id')
@@ -243,8 +245,10 @@ class UserArtistProfileSerializer(serializers.ModelSerializer):
             'share_data_with_contributors',
             'share_advanced_data_with_contributors',
             'allow_contributors_to_edit_contributions',
+            'hide_all_content',
             'display_other_platform_content_on_revibe_page',
             'allow_contributors_to_edit_tags',
+            'allow_revibe_website_page',
 
             # social media
             'social_media',
@@ -277,8 +281,10 @@ class UserArtistSerializer(serializers.ModelSerializer):
     share_data_with_contributors = serializers.BooleanField(source="artist_profile.share_data_with_contributors", write_only=True)
     share_advanced_data_with_contributors = serializers.BooleanField(source="artist_profile.share_advanced_data_with_contributors", write_only=True)
     allow_contributors_to_edit_contributions = serializers.BooleanField(source="artist_profile.allow_contributors_to_edit_contributions", write_only=True)
+    hide_all_content = serializers.BooleanField(source="artist_profile.hide_all_content", write_only=True)
     display_other_platform_content_on_revibe_page = serializers.BooleanField(source="artist_profile.display_other_platform_content_on_revibe_page", write_only=True)
     allow_contributors_to_edit_tags = serializers.BooleanField(source="artist_profile.allow_contributors_to_edit_tags", write_only=True)
+    allow_revibe_website_page = serializers.BooleanField(source="artist_profile.allow_revibe_website_page", write_only=True)
 
     class Meta:
         model = Artist
@@ -310,8 +316,10 @@ class UserArtistSerializer(serializers.ModelSerializer):
             'share_data_with_contributors',
             'share_advanced_data_with_contributors',
             'allow_contributors_to_edit_contributions',
+            'hide_all_content',
             'display_other_platform_content_on_revibe_page',
             'allow_contributors_to_edit_tags',
+            'allow_revibe_website_page',
         ]
     
     def _get_artist_profile_fields(self):

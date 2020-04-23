@@ -1037,21 +1037,22 @@ class TagSongsTestCase(RevibeTestCase):
         self._get_user()
         self._get_artist_user()
         self._create_song()
-        self.url = reverse('artistaccount-tag_song')
+        # self.url = reverse('artistaccount-tag-song')
 
     def test_add_tag(self):
-        Song.objects.create(title='test', duration=100, uploaded_by=self.artist_user.artist, album=self.content_album)
+        song = Song.objects.create(title='test', duration=100, uploaded_by=self.artist_user.artist, album=self.content_album)
         # get song ID
-        song_id = self.artist_user.artist.song_uploaded_by.all()[0].id
+        song_id = song.id
+
+        url = reverse('artistaccount-tag-song', args=[str(song_id)])
 
         # send request
         data = {
-            "song_id": str(song_id),
             "tags": [
                 "Testy"
             ]
         }
-        response = self.client.post(self.url, data, format="json", **self._get_headers(artist=True))
+        response = self.client.post(url, data, format="json", **self._get_headers(artist=True))
 
         # validate request
         self.assert201(response)

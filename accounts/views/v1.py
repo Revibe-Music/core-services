@@ -1199,7 +1199,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
     # genre & tag content
     @action(detail=False, methods=['post', 'delete'], url_path=r"songs/(?P<song_id>[a-zA-Z0-9-_]+)/tags", url_name="tag-song")
-    def tag_song(self, request, *args, **kwargs):
+    def tag_song(self, request, song_id=None, *args, **kwargs):
         # stuff for all requests
         artist = self.get_current_artist(request)
         song = Song.objects.get(id=song_id)

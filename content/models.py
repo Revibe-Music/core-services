@@ -434,7 +434,7 @@ class Tag(models.Model):
         return self.text
     
     def __repr__(self):
-        return f"<{self.__class__.__name__} - {self.__str__()}>"
+        return default_repr(self)
 
 
 class PlaceholderContribution(models.Model):
@@ -493,4 +493,14 @@ class Genre(models.Model):
     )
 
     objects = GenreManager()
+
+    def __str__(self):
+        return self.text
+    
+    def __repr__(self):
+        return default_repr(self)
+    
+    class Meta:
+        verbose_name = "genre"
+        verbose_name_plural = "genres"
 

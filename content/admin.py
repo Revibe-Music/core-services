@@ -72,7 +72,16 @@ class AlbumAdmin(admin.ModelAdmin):
 @admin.register(Song)
 class SongAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('sortable_str','platform', 'album','uploaded_by', '_display_status', '_deletion_status', 'get_original_track')
+    list_display = (
+        'sortable_str',
+        'platform',
+        'album',
+        'uploaded_by',
+        '_display_status',
+        '_deletion_status',
+        # 'get_original_track',
+        '_number_of_tracks',
+    )
     list_filter = (
         ('is_deleted', admin.BooleanFieldListFilter),
         ('is_displayed', admin.BooleanFieldListFilter),
@@ -103,6 +112,10 @@ class SongAdmin(admin.ModelAdmin):
             return ts[0]._link_url()
         return None
     get_original_track.short_description = 'original track'
+
+    def _number_of_tracks(self, obj):
+        return obj.tracks.all().count()
+    _number_of_tracks.short_description = 'tracks'
 
     def sortable_str(self, obj):
         return obj.__str__()

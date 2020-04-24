@@ -917,12 +917,11 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 request.data._mutable = _mutable
 
             serializer = content_ser_v1.SongSerializer(data=request.data, *args, **kwargs)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-            return responses.DEFAULT_400_RESPONSE()
+            if not serializer.is_valid():
+                return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
+
+            serializer.save()
+            return responses.CREATED(serializer=serializer)
 
         elif request.method == 'PATCH':
             instance = Song.objects.get(pk=song_id)

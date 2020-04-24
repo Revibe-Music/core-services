@@ -20,6 +20,7 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 from revibe.utils.aws.s3 import delete_s3_object
+from revibe._errors import network
 
 from content.models import Artist, Album, Image, Track
 
@@ -177,18 +178,24 @@ def square_image(image):
 def add_track_to_song(obj, track, *args, **kwargs):
     """
     """
+    print("adding track to song...")
+    editing = kwargs.pop('edit', False)
+    admin_edit = kwargs.pop('admin_edit', False)
+
     # skip everyting if there is no Track
-    if not track:
+    if not track and not admin_edit:
+        print("No track found")
         return None
 
     objs = {
         "song": obj
     }
 
-    editing = kwargs.pop('edit', False)
-    if editing:
-        prefix = f"audio/songs/{str(obj.uri)}/"
-        tracks = obj.tracks.all()
+    # delete the old processed files, if there are any
+    if editing or admin_edit:
+        # delete all the existing tracks
+        # unless admin editing, then only delete processed tracks
+        tracks = obj.tracks.all() if editing else obj.tracks.filter(is_original=False)
         for t in tracks:
             t.delete()
 
@@ -196,16 +203,25 @@ def add_track_to_song(obj, track, *args, **kwargs):
         track_obj = Track.objects.create(reference=track, is_original=True, **objs)
     elif type(track) == dict:
         track_obj = Track.objects.create(reference=track['track'], is_original=True, **objs)
-    else:
-        track_obj = Track.objects.create(file=track, is_original=True, **objs)
+    else: # it's a file
+        if not admin_edit:
+            track_obj = Track.objects.create(file=track, is_original=True, **objs)
+        else:
+            # get the original track. If one doesn't exist, raise an error
+            try:
+                track_obj = Track.objects.get(is_original=True, song=obj)
+            except Track.DoesNotExist:
+                raise network.ExpectationFailedError("The song does not have an original track")
         # convert_audio_file(track_obj)
 
         # create other audio files in a thread
+        print("starting thread...")
         t = threading.Thread(target=convert_audio_file, args=[track_obj])
         t.setDaemon(True)
         t.start()
-    
+
     track_obj.save()
+    print("Finished adding track to song!")
     return track_obj
 
 
@@ -214,7 +230,9 @@ def convert_audio_file(obj, *args, **kwargs):
     Takes an input audio file and converts it to 3 different quality AAc files.
     """
     # pass
+    print("new thread!")
     if not obj.file:
+        print('no obj.file')
         return None
 
     ext = obj.file.name.split('.')[-1]
@@ -254,7 +272,6 @@ def convert_audio_file(obj, *args, **kwargs):
 
         value = output.getvalue()
         file_name = f"{f['filename']}.{f['format']}"
-        # file_name = f"fuckyeah.{f}"
 
         track = Track.objects.create(is_original=False, song=obj.song)
         track.file.save(file_name, ContentFile(value))

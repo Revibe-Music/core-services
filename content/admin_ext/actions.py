@@ -24,8 +24,8 @@ def reprocess_song(modeladmin, request, queryset):
             continue
 
         original_track = tracks[0]
-        add_track_to_song(obj, original_track.file, edit=True)
-reprocess_song.short_description = 'Reprocess selected songs'
+        add_track_to_song(obj, None, admin_edit=True)
+reprocess_song.short_description = 'Reprocess selected song(s)'
 
 def reprocess_image(modeladmin, request, queryset):
     for obj in queryset:

@@ -130,8 +130,11 @@ class Track(models.Model):
         super().delete()
 
     def __str__(self):
-        ext = self.url.split('/')[-1]
-        return f"{self.song.title} ({ext})"
+        try:
+            ext = self.url.split('/')[-1]
+            return f"{self.song.title} ({ext})"
+        except Exception:
+            return str(self.file)
 
     @property
     def url(self):

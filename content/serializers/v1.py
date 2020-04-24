@@ -349,7 +349,7 @@ class SongSerializer(serializers.ModelSerializer):
     song_id = serializers.CharField(source='id', required=False)
     song_uri = serializers.CharField(source='uri', required=False)
     is_explicit = serializers.BooleanField(required=False)
-    is_displayed = serializers.BooleanField(required=False)
+    is_displayed = serializers.BooleanField(required=False, default=True)
     album_order = serializers.IntegerField(required=False)
 
     # read-only
@@ -417,6 +417,7 @@ class SongSerializer(serializers.ModelSerializer):
 
             track = file_obj.file
 
+        print(validated_data)
         # save the song
         song = Song(**validated_data, uploaded_by=artist, album=album)
         song.save()
@@ -430,6 +431,7 @@ class SongSerializer(serializers.ModelSerializer):
         return song
     
     def update(self, instance, validated_data, *args, **kwargs):
+        print(validated_data)
         img = validated_data.pop('file', None)
 
         instance = super().update(instance, validated_data, *args, **kwargs)

@@ -177,8 +177,6 @@ class Artist(models.Model):
 
     date_joined = models.DateTimeField(auto_now_add=True, null=True, blank=True, editable=False)
 
-    objects = models.Manager()
-
     @property
     def number_of_streams_from_uploads(self):
         """
@@ -198,6 +196,9 @@ class Artist(models.Model):
     @property
     def number_of_streams(self):
         return self.number_of_streams_from_uploads + self.number_of_streams_from_contributions
+
+    objects = models.Manager()
+    display_objects = ArtistDisplayManager()
 
     def __str__(self):
         return "{}".format(self.name)

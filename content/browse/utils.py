@@ -52,7 +52,7 @@ def _browse_album(annotation, limit=None, **options):
 
 def _browse_artist(annotation, limit=None, **options):
     limit = limit if limit else _DEFAULT_LIMIT()
-    artists = Artist.objects.filter(platform=const.REVIBE_STRING).annotate(count=annotation).order_by('-count')[:limit]
+    artists = Artist.display_objects.filter(platform=const.REVIBE_STRING).annotate(count=annotation).order_by('-count')[:limit]
     options[_results] = cnt_ser_v1.ArtistSerializer(artists, many=True).data
 
     return options

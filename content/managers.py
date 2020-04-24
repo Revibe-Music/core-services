@@ -10,7 +10,8 @@ class NotHiddenNotDeletedManager(models.Manager):
         return super(NotHiddenNotDeletedManager, self) \
             .get_queryset().filter(
                 is_displayed=True,
-                is_deleted=False
+                is_deleted=False,
+                uploaded_by__artist_profile__hide_all_content=False
             )
 
 # album display objects
@@ -31,6 +32,14 @@ class SongNotHiddenNotDeletedManager(NotHiddenNotDeletedManager):
                 Q(album__is_deleted=False),
                 Q(album__date_published=None) | Q(album__date_published__lte=now())
             )
+
+
+# artist display objects
+class ArtistDisplayManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            Q(artist_profile__hide_all_content=False)
+        )
 
 
 # song hidden objects

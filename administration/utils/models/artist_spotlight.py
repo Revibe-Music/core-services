@@ -24,6 +24,9 @@ def todays_artist_spotlight():
     except ArtistSpotlight.DoesNotExist as e:
         return None
     
+    if spotlight.artist.artist_profile.hide_all_content == True:
+        return None
+    
     return spotlight.artist
 
 

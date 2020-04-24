@@ -26,7 +26,7 @@ class Platform:
 
     def _get_queries(self):
         p = self.__str__()
-        self.Artists = Artist.objects.filter(platform=p)
+        self.Artists = Artist.display_objects.filter(platform=p)
         self.Albums = Album.display_objects.filter(platform=p)
         self.Songs = Song.display_objects.filter(platform=p)
         self.AlbumContributors = AlbumContributor.display_objects.filter(album__platform=p)

@@ -40,15 +40,16 @@ class FormViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['post'], url_path="contact-form", url_name="contact-form")
     def contact_form(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, *args, **kwargs)
-        if serializer.is_valid():
-            try:
-                serializer.save()
-            except ValidationError as err:
-                raise network.BadRequestError(str(err))
-            return responses.CREATED(serializer=serializer)
-        else:
+
+        if not serializer.is_valid():
             raise network.BadRequestError(serializer.errors)
-        return responses.NO_REQUEST_TYPE()
+
+        try:
+            serializer.save()
+        except ValidationError as err:
+            raise network.BadRequestError(str(err))
+
+        return responses.CREATED(serializer=serializer)
 
 
 class YouTubeKeyViewSet(viewsets.GenericViewSet):
@@ -92,7 +93,7 @@ class YouTubeKeyViewSet(viewsets.GenericViewSet):
             choice.save()
             return responses.OK(data={'key': str(choice.key)})
         
-        raise NoKeysError("Could identify any valid keys")
+        raise NoKeysError("Could not identify any valid keys")
 
 
 class AlertViewSet(viewsets.ModelViewSet):

@@ -335,6 +335,8 @@ class SongMetricsSerializer(serializers.ModelSerializer):
     album_id = serializers.ReadOnlyField(source='album.id')
     artist_id = serializers.ReadOnlyField(source='uploaded_by.id')
 
+    genre = serializers.SerializerMethodField(method_name="_get_genre")
+
     class Meta:
         model = cnt_models.Song
         fields = [
@@ -353,6 +355,10 @@ class SongMetricsSerializer(serializers.ModelSerializer):
             'album_id',
             'artist_id',
         ]
+    
+    def _get_genre(self, obj):
+        genre = obj.genres.all().first()
+        return genre.text if genre else None
 
 
 class ContactFormMetricsSerializer(serializers.ModelSerializer):

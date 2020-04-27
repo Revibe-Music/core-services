@@ -291,7 +291,7 @@ class ContentMixin:
     def _create_song(self):
         artist = self.content_artist if hasattr(self, 'content_artist') else self._create_artist()
         album = self.content_album if hasattr(self, 'content_album') else self._create_album()
-        self.content_song = Song.objects.create(title="Test Song Content", album=album, uploaded_by=artist, platform="Revibe")
+        self.content_song = Song.objects.create(title="Test Song Content", album=album, uploaded_by=artist, platform="Revibe", duration=100)
         SongContributor.objects.create(artist=artist, song=self.content_song, contribution_type="Artist", primary_artist=True)
         return self.content_song
 

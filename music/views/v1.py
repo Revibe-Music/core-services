@@ -171,7 +171,8 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         if not public:
             return Playlist.objects.filter(user=user)
         else:
-            q_filter = Q(user=user) | Q(is_public=True)
+            # q_filter = Q(user=user) | Q(is_public=True)
+            q_filter = (Q(user=user) | Q(is_public=True))
             return Playlist.objects.filter(q_filter)
 
     def create(self, request, *args, **kwargs):

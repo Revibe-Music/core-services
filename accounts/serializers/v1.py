@@ -91,6 +91,7 @@ class UserSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(many=False, required=False)
     log_in_mobile_app = serializers.BooleanField(required=False)
     log_in_artist_portal = serializers.BooleanField(required=False)
+    temporary_account = serializers.BooleanField(required=False)
 
 
     device_id = serializers.CharField(required=False)
@@ -116,6 +117,7 @@ class UserSerializer(serializers.ModelSerializer):
             'profile',
             'log_in_mobile_app',
             'log_in_artist_portal',
+            'temporary_account',
 
             'device_id',
             'device_type',

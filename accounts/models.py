@@ -50,6 +50,11 @@ class CustomUser(AbstractUser):
         verbose_name=_("temporary account"),
         help_text=_("Temporary accounts are people who have downloaded the app but have not yet fully registered for an account.")
     )
+    date_registered = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name=_("date registered"),
+        help_text=_("The datetime the user claimed their account")
+    )
 
     friends = models.ManyToManyField(
         to='accounts.customuser',

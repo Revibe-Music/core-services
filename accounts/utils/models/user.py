@@ -21,6 +21,8 @@ from accounts._helpers import validation
 from accounts.serializers import v1 as act_ser_v1
 from administration.utils.models import retrieve_variable
 
+from .tokens import delete_old_tokens
+
 # -----------------------------------------------------------------------------
 
 def generate_sharing_link(user):
@@ -107,6 +109,7 @@ def register_new_user(data, params, old_user=None, *args, **kwargs):
     device = data['device_type']
     application = Application.objects.get(name="Revibe First Party Application")
 
+    # perform the save
     try:
         user = serializer.save()
     except IntegrityError as err:
@@ -115,6 +118,11 @@ def register_new_user(data, params, old_user=None, *args, **kwargs):
     # check query params for referral info
     attach_referrer(params, user.profile)
 
+    # additional checks and stuff
+    if not user.temporary_account:
+        user.date_registered = timezone.now()
+
+    # get the tokens set up
     time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME
     expire = timezone.now() + datetime.timedelta(hours=time)
 
@@ -130,17 +138,16 @@ def register_new_user(data, params, old_user=None, *args, **kwargs):
         application=application,
         scope=scope
     )
-
     refresh_token = RefreshToken.objects.create(
         user=user,
         token=common.generate_token(),
         application=application,
         access_token=access_token
     )
-
     access_token.source_refresh_token = refresh_token
     access_token.save()
 
+    # prep return information
     data = {
         "user": user,
         "access_token": access_token,
@@ -160,6 +167,58 @@ def register_new_user(data, params, old_user=None, *args, **kwargs):
 
 def create_permanent_account(user, data, *args, **kwargs):
     """
+    This can only happen from the mobile app
     """
-    print("WE ARE CREATING A USER FROM A TEMP ACCOUNT")
+    # raise exception if this is not a temp account
+    if user.temporary_account == False:
+        raise network.ForbiddenError("This account cannot be claimed")
+
+    # validate request data
+    if 'username' not in data.keys():
+        raise network.BadRequestError("Field 'username' is required")
+    if 'password' not in data.keys():
+        raise network.BadRequestError("Field 'password' is required")
+
+    application = Application.objects.get(name="Revibe First Party Application")
+
+    # reset user's information
+    username = data.get("username")
+    password = data.get("password")
+
+    user.username = username
+    user.set_password(password)
+    user.force_change_password = False
+    user.temporary_account = False
+    user.date_registered = timezone.now()
+    user.save()
+
+    # generate new tokens
+    delete_old_tokens(user)
+
+    time = const.DEFAULT_EXPIRY_TIME
+    expire = timezone.now() + datetime.timedelta(hours=time)
+
+    scopes = ['first-party']
+    scope = " ".join(scopes)
+
+    access_token = AccessToken.objects.create(
+        user=user,
+        expires=expire,
+        token=common.generate_token(),
+        application=application,
+        scope=scope
+    )
+    refresh_token = RefreshToken.objects.create(
+        user=user,
+        token=common.generate_token(),
+        application=application,
+        access_token=access_token
+    )
+    access_token.source_refresh_token = refresh_token
+    access_token.save()
+
+    return {
+        "user": user,
+        "access_token": access_token
+    }
 

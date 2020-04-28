@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.core.mail import send_mail, send_mass_mail
 from django.db import IntegrityError
@@ -42,6 +43,7 @@ from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *
 from accounts.utils.auth import change_password, reset_password
+from accounts.utils.models import register_new_user
 from accounts._helpers import validation
 from administration.models import Campaign
 from content.models import Album, Song, SongContributor, AlbumContributor,PlaceholderContribution
@@ -103,113 +105,24 @@ class RegistrationAPI(generics.GenericAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
-    def attach_referer(self, params, profile, *args, **kwargs):
-        # check for marketing campaign
-        cid = get_url_param(params, 'cid')
-        if cid != None:
-            try:
-                campaign = Campaign.objects.get(uri=cid)
-                profile.campaign = campaign
-                profile.save()
-            except Exception as e:
-                pass
-
-        # check for user referral
-        uid = get_url_param(params, 'uid')
-        if uid != None:
-            try:
-                referrer = CustomUser.objects.get(id=uid)
-                profile.referrer = referrer
-                profile.save()
-            except Exception as e:
-                raise e
-
-        return profile
 
     def post(self, request, *args, **kwargs):
-        # check expectations
-        username = request.data['username']
-        email = request.data.get('email', None)
+        data = request.data
+        params = request.query_params
+        old_user = request.user if not isinstance(request.user, AnonymousUser) else None
 
-        errors = {}
-        # check if username already exists
-        if not validation.check_username(username):
-            errors['username'] = []
-            err = f"Username '{username}' already exists.'"
-            errors['username'].append(err)
+        # perform registration
+        register_data = register_new_user(data, params, old_user, *args, **kwargs)
 
-        if email and (not validation.check_email(email)):
-            errors['email'] = []
-            err = f"A user with email '{email}' already exists."
-            errors['email'].append(err)
+        # format the data from register_new_user
+        return_data = {
+            "user": UserSerializer(instance=register_data['user']).data,
+            "access_token": register_data['access_token'].token
+        }
+        if "refresh_token" in register_data.keys():
+            return_data.update({"refresh_token": register_data['refresh_token'].token})
 
-        if errors != {}:
-            raise ConflictError(detail=errors)
-
-        # run registration
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-
-            device = request.data['device_type']
-
-            application = Application.objects.get(name="Revibe First Party Application")
-
-            try:
-                user=serializer.save()
-            except IntegrityError as err:
-                return responses.CONFLICT(detail=str(err))
-
-            # check query params for referrals and/or marketing campaign
-            params = request.query_params
-            self.attach_referer(params, user.profile)
-
-            time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME
-            expire = timezone.now() + datetime.timedelta(hours=time)
-
-            scopes = ['first-party']
-            if device == 'browser':
-                scopes.append('artist')
-            scope = " ".join(scopes)
-
-            access_token = AccessToken(
-                user=user,
-                expires=expire,
-                token=common.generate_token(),
-                application=application,
-                scope=scope
-            )
-            access_token.save()
-
-            refresh_token = RefreshToken(
-                user=user,
-                token=common.generate_token(),
-                application=application,
-                access_token=access_token
-            )
-            refresh_token.save()
-
-            access_token.source_refresh_token = refresh_token
-            access_token.save()
-
-            data = {
-                "user": UserSerializer(user, context=self.get_serializer_context()).data,
-                "access_token": access_token.token,
-            }
-
-            if device != 'browser':
-                data.update({"refresh_token": refresh_token.token})
-
-            if not settings.DEBUG:
-                try:
-                    mailchimp.add_new_list_member(user)
-                except Exception:
-                    pass
-
-            return Response(data, status=status.HTTP_200_OK)
-
-        else:
-            return responses.SERIALIZER_ERROR_RESPONSE(serializer)
-        return responses.DEFAULT_400_RESPONSE()
+        return responses.CREATED(data=return_data)
 
 
 @method_decorator(csrf_exempt, name="dispatch")

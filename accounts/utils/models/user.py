@@ -3,8 +3,22 @@ Created: 16 Mar. 2020
 Author: Jordan Prechac
 """
 
-from revibe.utils.urls import add_query_params
+from django.conf import settings
+from django.db import IntegrityError
+from django.utils import timezone
+from oauth2_provider.models import Application, AccessToken, RefreshToken
+from oauthlib import common
 
+import datetime
+
+from revibe.utils import mailchimp
+from revibe.utils.params import get_url_param
+from revibe.utils.urls import add_query_params
+from revibe._errors import network
+from revibe._helpers import const
+
+from accounts._helpers import validation
+from accounts.serializers import v1 as act_ser_v1
 from administration.utils.models import retrieve_variable
 
 # -----------------------------------------------------------------------------
@@ -17,3 +31,135 @@ def generate_sharing_link(user):
     final_url = add_query_params(base_url, params)
 
     return final_url
+
+
+def attach_referrer(params, profile, *args, **kwargs):
+    """
+    Looks in the params for a user or campaign referral and attaches it to the profile.
+    """
+    # check for marketing campaign
+    cid = get_url_param(params, 'cid')
+    if cid != None:
+        try:
+            campaign = Campaign.objects.get(uri=cid)
+            profile.campaign = campaign
+            profile.save()
+        except Exception as e:
+            pass
+
+    # check for user referral
+    uid = get_url_param(params, 'uid')
+    if uid != None:
+        try:
+            referrer = CustomUser.objects.get(id=uid)
+            profile.referrer = referrer
+            profile.save()
+        except Exception as e:
+            raise e
+
+    return profile
+
+
+def validate_username_and_email(username, email):
+    errors = {}
+    useranme_errors = []
+    email_errors = []
+
+    # username validation
+    if not username:
+        username_errors.append("Field 'username' is required")
+    if not validation.check_username(username):
+        useranme_errors.append(f"Username '{username}' already exists")
+    # add any errors to the errors dict
+    if useranme_errors != []:
+        errors['username'] = useranme_errors
+
+    # email validation
+    if email and (not validation.check_email(email)):
+        email_errors.append(f"Email '{email}' is already in use")
+    # add any errors to the errors dict
+    if email_errors != []:
+        errors['email'] = email_errors
+    
+    # raise an error if there are errors
+    if errors != {}:
+        raise network.ConflictError(detail=errors)
+
+
+def register_new_user(data, params, old_user=None, *args, **kwargs):
+    """
+    """
+    # check if this is a temporary account upgrade
+    if old_user:
+        data = create_permanent_account(old_user, data, *args, **kwargs)
+        return data
+    
+    # check for username and email
+    username = data.get('username', None)
+    email = data.get('email', None)
+    # validate username and email
+    validate_username_and_email(username, email)
+
+    serializer = act_ser_v1.UserSerializer(data=data)
+    if not serializer.is_valid():
+        raise network.BadRequestError(detail=serializer.errors)
+    
+    device = data['device_type']
+    application = Application.objects.get(name="Revibe First Party Application")
+
+    try:
+        user = serializer.save()
+    except IntegrityError as err:
+        raise network.ProgramError(detail=str(err))
+
+    # check query params for referral info
+    attach_referrer(params, user.profile)
+
+    time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME
+    expire = timezone.now() + datetime.timedelta(hours=time)
+
+    scopes = ['first-party']
+    if device == 'browser':
+        scopes.append('artist')
+    scope = " ".join(scopes)
+
+    access_token = AccessToken.objects.create(
+        user=user,
+        expires=expire,
+        token=common.generate_token(),
+        application=application,
+        scope=scope
+    )
+
+    refresh_token = RefreshToken.objects.create(
+        user=user,
+        token=common.generate_token(),
+        application=application,
+        access_token=access_token
+    )
+
+    access_token.source_refresh_token = refresh_token
+    access_token.save()
+
+    data = {
+        "user": user,
+        "access_token": access_token,
+    }
+
+    if device != 'browser':
+        data.update({"refresh_token": refresh_token})
+    
+    if not settings.DEBUG:
+        try:
+            mailchimp.add_new_list_member(user)
+        except Exception:
+            pass
+    
+    return data
+
+
+def create_permanent_account(user, data, *args, **kwargs):
+    """
+    """
+    print("WE ARE CREATING A USER FROM A TEMP ACCOUNT")
+

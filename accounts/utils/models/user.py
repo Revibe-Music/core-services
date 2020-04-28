@@ -18,8 +18,10 @@ from revibe._errors import network
 from revibe._helpers import const
 
 from accounts._helpers import validation
+from accounts.models import CustomUser
 from accounts.serializers import v1 as act_ser_v1
 from administration.utils.models import retrieve_variable
+from administration.models import Campaign
 
 from .tokens import delete_old_tokens
 
@@ -57,7 +59,7 @@ def attach_referrer(params, profile, *args, **kwargs):
             profile.referrer = referrer
             profile.save()
         except Exception as e:
-            raise e
+            pass
 
     return profile
 
@@ -102,18 +104,18 @@ def register_new_user(data, params, old_user=None, *args, **kwargs):
     # validate username and email
     validate_username_and_email(username, email)
 
+    # perform the save
     serializer = act_ser_v1.UserSerializer(data=data)
     if not serializer.is_valid():
         raise network.BadRequestError(detail=serializer.errors)
-    
-    device = data['device_type']
-    application = Application.objects.get(name="Revibe First Party Application")
-
-    # perform the save
     try:
         user = serializer.save()
     except IntegrityError as err:
         raise network.ProgramError(detail=str(err))
+    
+    device = data['device_type']
+    application = Application.objects.get(name="Revibe First Party Application")
+
 
     # check query params for referral info
     attach_referrer(params, user.profile)

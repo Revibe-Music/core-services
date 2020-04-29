@@ -16,6 +16,7 @@ from revibe._errors import data, network
 from revibe._helpers import responses
 from revibe._helpers.debug import debug_print
 from revibe.platforms import get_platform, linked_platforms
+from revibe.utils.params import get_url_param
 
 from accounts.permissions import TokenOrSessionAuthentication
 from content.serializers.v1 import *
@@ -171,9 +172,9 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         if not public:
             return Playlist.objects.filter(user=user)
         else:
-            # q_filter = Q(user=user) | Q(is_public=True)
-            q_filter = (Q(user=user) | Q(is_public=True))
-            return Playlist.objects.filter(q_filter)
+            return Playlist.objects.filter(
+                Q(user=user) | Q(is_public=True)
+            )
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -207,18 +208,16 @@ class PlaylistViewSet(viewsets.ModelViewSet):
         if request.method == 'GET':
             params = request.query_params
 
-            if 'playlist_id' not in params:
+            playlist_id = get_url_param(params, "playlist_id")
+            if playlist_id == None:
                 raise data.ParameterMissingError("parameter 'playlist_id' not found")
-            platform = params['playlist_id']
 
             queryset = self.get_queryset(public=True)
 
-            playlist = queryset.filter(id=params['playlist_id'])
-            if playlist.count() < 1:
+            try:
+                playlist = queryset.get(id=playlist_id)
+            except Playlist.DoesNotExist:
                 raise network.NotFoundError("Could not find the specified playlist")
-            elif playlist.count() > 1:
-                raise network.ConflictError("Found too many playlists")
-            playlist = playlist[0]
 
             songs = playlist.playlist_to_song.all()
             page = self.paginate_queryset(songs)

@@ -28,6 +28,7 @@ urlpatterns = [
     path('logout-all/', v1.LogoutAllAPI.as_view(), name="logout-all"),
     path('refresh-token/', v1.RefreshTokenAPI.as_view(), name="refresh-token"),
     # path("profile/", v1.UserViewSet.as_view(), name="profile"),
+    path("google-authentication/", v1.GoogleLogin.as_view(), name="google-login"),
     path('spotify-authentication/', v1.SpotifyConnect.as_view()),
     path('spotify-refresh/', v1.SpotifyRefresh.as_view()),
     path('spotify-logout/', v1.SpotifyLogout.as_view()),

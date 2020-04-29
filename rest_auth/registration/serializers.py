@@ -149,6 +149,8 @@ class SocialLoginSerializer(serializers.Serializer):
             login.save(request, connect=True)
 
         attrs['user'] = login.account.user
+        # Revibe addition:
+        # TODO: create a user profile for the user in attrs['user']
 
         return attrs
 

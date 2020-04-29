@@ -97,8 +97,10 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.spotify',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.openid',
+    'allauth.socialaccount.providers.spotify',
 ]
 
 MIDDLEWARE = [
@@ -295,15 +297,15 @@ SOCIALACCOUNT_STORE_TOKENS=True
 
 #Social Account Settings
 SOCIALACCOUNT_PROVIDERS = {
-    #  'google': {
-    #     'SCOPE': [
-    #         'profile',
-    #         'email',
-    #     ],
-    #     'AUTH_PARAMS': {
-    #         'access_type': 'online',
-    #     }
-    # },
+     'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'offline',
+        }
+    },
     'spotify': {
         'SCOPE': [
             "user-read-private",

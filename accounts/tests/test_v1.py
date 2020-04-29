@@ -35,7 +35,7 @@ class TestRegister(RevibeTestCase):
             "profile": {},
         }
         response = self.client.post(url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert201(response)
         self.assertEqual(CustomUser.objects.get(username=data['username']).username, data['username'])
     
     def test_register_with_referral(self):
@@ -54,7 +54,7 @@ class TestRegister(RevibeTestCase):
 
         # validate response
         response = self.client.post(url, data, format="json")
-        self.assert200(response)
+        self.assert201(response)
 
         referrer = self.user
         new_user = CustomUser.objects.get(username=response.data['user']['username'])
@@ -80,10 +80,11 @@ class TestRegister(RevibeTestCase):
 
         # validate response
         response = self.client.post(url, data, format="json")
-        self.assert200(response)
+        self.assert201(response)
 
         campaign = Campaign.objects.get(name='example campaign')
         new_user = CustomUser.objects.get(username=response.data['user']['username'])
+        print(new_user.profile.campaign)
         self.assertTrue(
             bool(getattr(new_user.profile, 'campaign', False)),
             msg="Could not find the profile's campaign"
@@ -92,6 +93,23 @@ class TestRegister(RevibeTestCase):
             str(campaign.id), str(new_user.profile.campaign.id),
             msg="The expected campaign is not listed as the user's campaign"
         )
+
+    def test_register_temp_account(self):
+        # configure test
+        url = reverse('register')
+        data = {
+            "username": "fakeusername",
+            "password": "fakepassword",
+            "profile": {},
+            "device_type": "browser",
+            "temporary_account": True
+        }
+
+        # send request
+        response = self.client.post(url, data, format="json")
+
+        # validate response
+        self.assert201(response)
 
 
 class TestLogin(RevibeTestCase):

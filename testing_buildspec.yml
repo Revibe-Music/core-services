@@ -1,0 +1,46 @@
+version: 0.2
+
+env:
+  variables:
+    DB_ROOT_PASSWORD: "password"
+    DB_HOST: "localhost"
+    DB_PASSWORD: "password"
+    DB_SOCKET: "/var/run/mysqld/mysqld.sock"
+    KEYID: "5072E1F5"
+
+phases:
+  pre_build:
+    commands:
+      - echo "Before running tests"
+      - echo ${PATH}
+      - ls /root
+      - pip install -r requirements.txt
+      - echo "mysql-server mysql-server/root_password password ${DB_ROOT_PASSWORD}" |debconf-set-selections
+      - echo "mysql-server mysql-server/root_password_again password ${DB_ROOT_PASSWORD}" |debconf-set-selections
+      - apt-key adv --keyserver hkp://keys.gnupg.net --recv-keys ${KEYID} || apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${KEYID}
+      - chmod a+x ./server_configs/scripts/add_mysql.sh
+      - ./server_configs/scripts/add_mysql.sh
+      - apt-get install -y mysql-server
+      - service mysql start
+      - mysql -hlocalhost -uroot -ppassword -P3306 -e "show databases;"
+
+  build:
+    commands:
+      - echo "Running all unit tests"
+      - python manage.py test accounts administration content metrics music
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+
+artifacts:
+  files:
+    - '**/*'
+
+cache:
+  paths:
+    - '/root/.cache/pip/**/*'
+    - '/var/cache/apt/archives/**/*'
+    - '/var/lib/apt/lists/**/*'
+    - '/etc/apt/sources.list.d/mysql.list'
+    - '/etc/apt/sources.list'

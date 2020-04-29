@@ -3,11 +3,11 @@ Created: 16 Mar. 2020
 Author: Jordan Prechac
 """
 
-from .user import *
+from .user import generate_sharing_link, register_new_user
 
 # -----------------------------------------------------------------------------
 
 __all__ = [
     # user
-    generate_sharing_link,
+    generate_sharing_link, register_new_user,
 ]

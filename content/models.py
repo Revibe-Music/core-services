@@ -312,13 +312,41 @@ class AlbumContributor(models.Model):
 
 
 class Song(models.Model):
-    id = models.CharField(primary_key=True, default=uuid.uuid4, editable=False, max_length=255)
-    uri = models.CharField('URI', default=uuid.uuid4, unique=True, editable=False, max_length=255)
-    title = models.CharField('Name', max_length=255, null=False)
-    duration = models.DecimalField('Duration', null=True, blank=True, max_digits=6, decimal_places=2) # in seconds
-    # genre = models.CharField(max_length=255, null=True, blank=True) # deprecated in favor of multiple genres
-    platform = models.CharField(max_length=255, null=True)
-    is_explicit = models.BooleanField(null=False, blank=True, default=False)
+    id = models.CharField(
+        primary_key=True,
+        max_length=255,
+        editable=False, default=uuid.uuid4
+    )
+    uri = models.CharField(
+        max_length=255,
+        unique=True, editable=False, default=uuid.uuid4,
+        verbose_name=_('URI'),
+        help_text=_("Secondary unique identifier")
+    )
+    isrc_code = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        verbose_name=_("ISRC code"),
+        help_text=_("Internationally recognized identifier for the song")
+    )
+    title = models.CharField(
+        max_length=255,
+        null=False, blank=False,
+        verbose_name=_("title")
+    )
+    duration = models.DecimalField(
+        max_digits=6, decimal_places=2,
+        null=True, blank=True,
+        verbose_name=_("duration"),
+        help_text=_("Duration of the song in seconds")
+    ) # in seconds
+    platform = models.CharField(
+        max_length=255,
+        null=True
+    )
+    is_explicit = models.BooleanField(
+        null=False, blank=True, default=False
+    )
     album_order = models.IntegerField(
         null=False, blank=True, default=0,
         verbose_name=_("order"),

@@ -19,6 +19,8 @@ from ..utils import (
 )
 from . import app_settings
 
+from accounts.models import Profile
+
 
 class DefaultSocialAccountAdapter(object):
 
@@ -45,7 +47,16 @@ class DefaultSocialAccountAdapter(object):
         e.g. the flow from within a signal handler is bad -- multiple
         handlers may be active and are executed in undetermined order.
         """
-        pass
+        # create the user's profile, if it doesn't exist already
+        user = sociallogin.user
+        profile = getattr(user, 'profile', None)
+        if profile == None:
+            try:
+                profile = Profile.objects.create(user=user, email=user.email)
+            except Exception:
+                pass
+        
+
 
     def authentication_error(self,
                              request,

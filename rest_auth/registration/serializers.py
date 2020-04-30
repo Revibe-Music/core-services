@@ -151,6 +151,7 @@ class SocialLoginSerializer(serializers.Serializer):
         attrs['user'] = login.account.user
         # Revibe addition:
         # TODO: create a user profile for the user in attrs['user']
+        # NOTE: creation of user profile was pushed to the complete_social_login() method, line 129 of this file
 
         return attrs
 

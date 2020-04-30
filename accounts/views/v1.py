@@ -413,6 +413,8 @@ class GoogleLogin(SocialLoginView):
     Creates user from Google profile or logs user in from Google profile
     """
     adapter_class = GoogleOAuth2Adapter
+    callback_url = "http://127.0.0.1:8000/v1/account/google-authentication/callback/"
+    client_class = OAuth2Client
 
 
 # Linked Account Views

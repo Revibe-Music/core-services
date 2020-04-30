@@ -1,6 +1,8 @@
 from django.urls import path
 from django.conf.urls import include
 from rest_framework import routers
+from allauth.socialaccount.providers.oauth2.views import OAuth2CallbackView
+
 from accounts.views import v1, v1_reference
 # from knox import views as knox_views
 
@@ -28,11 +30,14 @@ urlpatterns = [
     path('logout-all/', v1.LogoutAllAPI.as_view(), name="logout-all"),
     path('refresh-token/', v1.RefreshTokenAPI.as_view(), name="refresh-token"),
     # path("profile/", v1.UserViewSet.as_view(), name="profile"),
-    path("google-authentication/", v1.GoogleLogin.as_view(), name="google-login"),
     path('spotify-authentication/', v1.SpotifyConnect.as_view()),
     path('spotify-refresh/', v1.SpotifyRefresh.as_view()),
     path('spotify-logout/', v1.SpotifyLogout.as_view()),
     path('send-email', v1.SendRegisterLink.as_view(), name="send-email"),
+
+    # social authentication
+    path("google-authentication/", v1.GoogleLogin.as_view(), name="google-login"),
+    path("google-authentication/callback/", OAuth2CallbackView.adapter_view(v1.GoogleOAuth2Adapter), name="google-callback"),
 
     path('profile/reset-password/', v1.view_reset_password, name='reset-password'),
 ]

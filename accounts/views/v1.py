@@ -18,6 +18,7 @@ from oauth2_provider.views import TokenView, RevokeTokenView
 from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope,TokenMatchesOASRequirements, TokenHasScope
 from oauth2_provider.models import Application, AccessToken, RefreshToken
 from oauthlib import common
+from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
@@ -432,6 +433,29 @@ class GoogleLogin(SocialLoginView):
         
         return f"{method}{root}/v1/account/google-authentication/callback/"
 
+
+class FacebookLogin(SocialLoginView):
+    """
+    """
+    adapter_class = FacebookOAuth2Adapter
+    client_class = OAuth2Client
+
+    @property
+    def callback_url(self):
+        method = "http://"
+        root = ""
+        if settings.DEBUG == False:
+            # production
+            method = "https://"
+            root = "api.revibe.tech"
+        elif settings.USE_S3 == True:
+            # test
+            root = "test-env.myrpupud2p.us-east-2.elasticbeanstalk.com"
+        else:
+            # local
+            root = "127.0.0.1:8000"
+
+        return f"{method}{root}/v1/account/facebook-authentication/callback/"
 
 
 # Linked Account Views

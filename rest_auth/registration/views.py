@@ -31,6 +31,12 @@ from rest_auth.utils import jwt_encode
 from rest_auth.views import LoginView
 from .app_settings import RegisterSerializer, register_permission_classes
 
+from revibe._helpers import responses
+
+from accounts.models import Profile
+from accounts.serializers.v1 import UserSerializer
+from accounts.utils.models import create_access_token
+
 sensitive_post_parameters_m = method_decorator(
     sensitive_post_parameters('password1', 'password2')
 )
@@ -125,6 +131,38 @@ class SocialLoginView(LoginView):
 
     def process_login(self):
         get_adapter(self.request).login(self.request, self.user)
+
+    def post(self, request, *args, **kwargs):
+        self.request = request
+        self.serializer = self.get_serializer(data=self.request.data,
+                                              context={'request': request})
+        self.serializer.is_valid(raise_exception=True)
+
+        self.login()
+
+        # add profile object to user
+        try:
+            self.user = self.serializer.validated_data['user']
+            user_email = getattr(self.user, 'email', None)
+            Profile.objects.create(user=self.user, email=user_email)
+        except Exception as e:
+            print(e)
+
+        return self.get_response()
+
+    def get_response(self):
+        response_data = super().get_response().data
+
+        user_data = UserSerializer(instance=self.user).data
+        access_token, refresh_token = create_access_token(self.user)
+
+        response_data.update({
+            "user": user_data,
+            "access_token": access_token.token,
+            "refresh_token": refresh_token.token,
+        })
+
+        return responses.OK(data=response_data)
 
 
 class SocialConnectView(LoginView):

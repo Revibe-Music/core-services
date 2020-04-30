@@ -38,6 +38,8 @@ urlpatterns = [
     # social authentication
     path("google-authentication/", v1.GoogleLogin.as_view(), name="google-login"),
     path("google-authentication/callback/", OAuth2CallbackView.adapter_view(v1.GoogleOAuth2Adapter), name="google-callback"),
+    path("facebook-authentication/", v1.FacebookLogin.as_view(), name="facebook-login"),
+    path("facebook-authentication/callback/", OAuth2CallbackView.adapter_view(v1.FacebookOAuth2Adapter), name="facebook-callback"),
 
     path('profile/reset-password/', v1.view_reset_password, name='reset-password'),
 ]

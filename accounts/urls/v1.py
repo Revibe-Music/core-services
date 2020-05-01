@@ -9,6 +9,7 @@ from accounts.views import v1, v1_reference
 router = routers.DefaultRouter()
 # router.register("user", v1.AuthenticationViewSet, "user")
 router.register("artist", v1.UserArtistViewSet, "artistaccount") # artist portal ONLY
+router.register("artist/analytics", v1.ArtistAnalyticsViewSet, "artist-analytics")
 router.register("linked-accounts", v1.UserLinkedAccounts, 'linked_accounts')
 router.register("profile", v1.UserViewSet, "profile")
 

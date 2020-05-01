@@ -41,6 +41,7 @@ from revibe._errors.network import ConflictError, ForbiddenError, NotImplemented
 from revibe._helpers import responses, const
 
 from accounts.adapter import TokenAuthSupportQueryString
+from accounts.artist.analytics import BarChart, CardChart, LineChart
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *
@@ -1265,14 +1266,64 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
             return responses.DELETED()
 
-    @action(detail=False, methods=['get'], url_path="analytics", url_name="analytics")
-    def artist_analytics(self, request, *args, **kwargs):
-        artist = self.get_current_artist(request)
+    # @action(detail=False, methods=['get'], url_path="analytics", url_name="analytics")
+    # def artist_analytics(self, request, *args, **kwargs):
+    #     artist = self.get_current_artist(request)
 
-        output = {}
-        output['unique_monthly_listeners'] = calculate_unique_monthly_listeners(artist, include_contributions=True, split_contributions=True)
+    #     output = {}
+    #     output['unique_monthly_listeners'] = calculate_unique_monthly_listeners(artist, include_contributions=True, split_contributions=True)
 
-        return responses.OK(data=output)
+    #     return responses.OK(data=output)
+
+
+class ArtistAnalyticsViewSet(GenericPlatformViewSet):
+    platform = "revibe"
+    permission_classes = [TokenOrSessionAuthentication]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"], ["first-party", "artist"]]
+    }
+
+    def initial(self, request, *args, **kwargs):
+        whatever = super().initial(request, *args, **kwargs)
+
+        self.artist = get_authenticated_artist(request)
+
+        return whatever
+
+    def list(self, request, *args, **kwargs):
+        pass
+        # page = analytics.dashboard.full_dashboard()
+
+        # return responses.OK(data=page)
+    
+    @action(detail=False, methods=['get'], url_path=r"(?P<endpoint>[a-zA-Z0-9-]+)", url_name="charts")
+    def analytics_endpoint(self, request, endpoint=None, *args, **kwargs):
+        # get optional param values
+        params = request.query_params
+        type_ = get_url_param(params, 'type')
+        extras = {
+            "time_period": get_url_param(params, 'time_period'),
+            "time_interval": get_url_param(params, 'time_interval'),
+            "num_bars": get_url_param(params, 'num_bars', type_=int),
+        }
+
+        # get the chart class
+        stripped_endpoint = endpoint.split('-')[0].split('_')[0]
+        endpoints = {
+            "bar": BarChart,
+            "card": CardChart,
+            "line": LineChart
+        }
+        chart_class = endpoints.get(stripped_endpoint, None)
+        if chart_class == None:
+            raise network.BadRequestError(f"Could not find a chart type from '{endpoint}'")
+
+        # get the chart data
+        chart = chart_class(artist=self.artist, type_=type_, **extras)
+
+        # return the stuff
+        return responses.OK(data=chart.data)
+
 
 
 class UserViewSet(viewsets.GenericViewSet):

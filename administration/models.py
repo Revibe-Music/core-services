@@ -441,6 +441,7 @@ class BlogTag(models.Model):
 class Variable(models.Model):
 
     _category_choices = (
+        ('artist-portal', 'Artist Portal Dashboard'),
         ('browse', 'Browse'),
         ('search', 'Search'),
         ('social', 'Social'),

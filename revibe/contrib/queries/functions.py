@@ -8,10 +8,19 @@ from django.db.models import Func
 
 # -----------------------------------------------------------------------------
 
+class Hour(Func):
+    function = 'EXTRACT'
+    template = '%(function)s(HOUR from %(expressions)s)'
+    output_field = models.IntegerField()
 
 class Day(Func):
     function = 'EXTRACT'
-    template = '&{function}s(DAY from %{expressions}s)'
+    template = '%(function)s(DAY from %(expressions)s)'
+    output_field = models.IntegerField()
+
+class Week(Func):
+    function = 'EXTRACT'
+    template = '%(function)s(WEEK from %(expressions)s)'
     output_field = models.IntegerField()
 
 class Month(Func):

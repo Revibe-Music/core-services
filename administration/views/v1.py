@@ -195,6 +195,23 @@ class CompanyViewSet(GenericPlatformViewSet):
     @action(detail=False, methods=['get'], url_path='song-metrics', url_name="song-metrics")
     def song_metrics(self, request, *args, **kwargs):
         queryset = cnt_models.Song.objects.filter(platform=const.REVIBE_STRING)
+
+
+        params = request.query_params
+        print(params)
+        for key, not_value in params.items():
+            values = get_url_param(params, key)
+            print("Values: ", values)
+            expression, value = values.split('.')
+            from django.db import models
+            try:
+                expression = getattr(models, expression)
+                queryset = queryset.annotate(**{key: expression(value)})
+            except Exception as e:
+                # pass
+                print(e)
+
+
         serializer_class = adm_ser_v1.SongMetricsSerializer
 
         data = {}

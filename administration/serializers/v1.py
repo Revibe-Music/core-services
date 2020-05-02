@@ -337,6 +337,8 @@ class SongMetricsSerializer(serializers.ModelSerializer):
 
     genre = serializers.SerializerMethodField(method_name="_get_genre")
 
+    stream_count = serializers.SerializerMethodField(method_name="_get_stream_count")
+
     class Meta:
         model = cnt_models.Song
         fields = [
@@ -354,11 +356,17 @@ class SongMetricsSerializer(serializers.ModelSerializer):
 
             'album_id',
             'artist_id',
+
+            # extras
+            'stream_count',
         ]
     
     def _get_genre(self, obj):
         genre = obj.genres.all().first()
         return genre.text if genre else None
+    
+    def _get_stream_count(self, obj):
+        return getattr(obj, "stream_count", None)
 
 
 class ContactFormMetricsSerializer(serializers.ModelSerializer):

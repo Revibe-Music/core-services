@@ -839,6 +839,16 @@ class UserArtistViewSet(GenericPlatformViewSet):
         else:
             return responses.NO_REQUEST_TYPE()
 
+    @action(detail=False, methods=['post'], url_path=r"albums/(?P<album_id>[a-zA-Z0-9-_]+)/post", url_name="album_post-upload")
+    def album_post_upload(self, request, album_id=None, *args, **kwargs):
+        artist = self.get_current_artist(request)
+        try:
+            album = Album.hidden_objects.get(id=album_id)
+        except Album.DoesNotExist:
+            raise network.NotFoundError()
+
+        raise NotImplementedError()
+
     @action(detail=False, methods=['get','post','patch','delete'])
     def songs(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
@@ -989,7 +999,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         else:
             return responses.NO_REQUEST_TYPE()
 
-    @action(detail=False, url_path='contributions/songs', methods=['get','post','patch','delete'], url_name="song_contributions")
+    @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/songs', url_name="song_contributions")
     def song_contributions(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
 
@@ -1051,7 +1061,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         else:
             return responses.NO_REQUEST_TYPE()
 
-    @action(detail=False, url_path="contributions/approve", methods=['post'])
+    @action(detail=False, methods=['post'], url_path="contributions/approve")
     def approve_contribution(self, request, *args, **kwargs):
         """
         Approves or denies song and album contributions.
@@ -1239,7 +1249,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
             remove_genres_from_object(genres, song)
 
             return responses.DELETED()
-        
+
     @action(detail=False, methods=['post','delete'], url_path=r"albums/(?P<album_id>[a-zA-Z0-9-_]+)/genres", url_name="genre-album")
     def genre_album(self, request, album_id=None, *args, **kwargs):
         # stuff for all requests
@@ -1323,7 +1333,6 @@ class ArtistAnalyticsViewSet(GenericPlatformViewSet):
 
         # return the stuff
         return responses.OK(data=chart.data)
-
 
 
 class UserViewSet(viewsets.GenericViewSet):

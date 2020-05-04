@@ -138,6 +138,11 @@ class VariableAdmin(admin.ModelAdmin):
     ]
 
 
+@admin.register(ArtistAnalyticsCalculation)
+class ArtistAnalyticsCalculationAdmin(admin.ModelAdmin):
+    pass
+
+
 # general admin information and changes
 admin.site.empty_value_display = "-empty-"
 admin.site.site_header = "Revibe Administration"

@@ -11,7 +11,9 @@ import datetime
 from revibe.contrib.queries.functions import Year, Month, Week, Day, Hour
 from revibe._errors import network
 
-from administration.utils import retrieve_variable
+from administration.models import ArtistAnalyticsCalculation
+from administration.utils.models import retrieve_calculation, retrieve_variable
+from content.models import Song
 from metrics.models import Stream
 
 from .serializers import DashboardSongSerializer
@@ -25,9 +27,6 @@ class Chart:
         self.initial()
 
         self.artist = artist
-        # self.type_ = type_
-        if type_ not in self._annotation_lookup.keys():
-            raise network.BadRequestError(f"Improper type value: '{type_}'")
         self.type_ = type_
 
         self.include_contributions = include_contributions
@@ -37,10 +36,11 @@ class Chart:
         self.get_time_interval(time_interval)
 
         # configure lookup stuff
-        self._lookup_dict = self._annotation_lookup.get(self.type_)
-        self.lookup = self._lookup_dict.get('lookup')
-        self.lookup_distinct = self._lookup_dict.get('distinct', False)
-        self.lookup_calc = self._lookup_dict.get('calc', Count)
+        self._lookup()
+        # self._lookup_dict = self._annotation_lookup.get(self.type_)
+        # self.lookup = self._lookup_dict.get('lookup')
+        # self.lookup_distinct = self._lookup_dict.get('distinct', False)
+        # self.lookup_calc = self._lookup_dict.get('calc', Count)
 
         # configure graph options
         options = kwargs.get('options', None)
@@ -76,7 +76,17 @@ class Chart:
 
     @property
     def songs(self):
-        pass
+        filter_upload  = Q(uploaded_by=self.artist)
+        filter_contrib = Q(contributors=self.artist)
+
+        song_filter = filter_upload
+        if self.include_contributions:
+            song_filter = song_filter | filter_contrib
+
+        songs = Song.hidden_objects \
+            .filter(song_filter)
+        
+        return songs
 
     def get_time_period(self, time_period):
         periods = self._time_periods
@@ -130,20 +140,12 @@ class Chart:
             "year": "year"
         }
 
-    @property
-    def _annotation_lookup(self):
-        return {
-            "listeners": {
-                "lookup": "user",
-                "distinct": True,
-                "bar-name": "num_listeners",
-            },
-            "streams": {
-                "lookup": "id",
-                "distinct": False,
-                "bar-name": "num_streams",
-            }
-        }
+    def _lookup(self):
+        _ = retrieve_calculation(self.type_)
+        if _ == None:
+            raise ArtistAnalyticsCalculation.DoesNotExist(f"Cannot find calculation for type '{self.type_}'")
+        self.calculation = _
+        return self.calculation
 
     def _calculate(self):
         # actually create the graphs n shit
@@ -157,26 +159,57 @@ class Chart:
         return self.format_data(data)
 
     def _calculate_over_time(self):
+        annotation = {
+            self.calculation.name: self.calculation.calculation(self.calculation.lookup, distinct=self.calculation.distinct)
+        }
+
         numbers = self.streams \
             .annotate(
                 **self.time_interval_annotation
             ) \
             .values(*self.time_interval_values) \
             .order_by(*self.time_interval_values) \
-            .annotate(value=self.lookup_calc(self.lookup, distinct=self.lookup_distinct))
-        
+            .annotate(**annotation)
+
         return numbers
     default_calc = _calculate_over_time
 
     def _calculate_static(self):
+        aggregation = {
+            self.calculation.name: self.calculation.calculation(self.calculation.lookup, distinct=self.calculation.distinct)
+        }
+
         numbers = self.streams \
-            .aggregate(value=self.lookup_calc(self.lookup, distinct=self.lookup_distinct)) \
+            .aggregate(**aggregation) \
         
         return numbers
 
     def _calculate_bars(self):
-        numbers = DashboardSongSerializer(self.songs, many=True).data
+        if self.time_period:
+            stream_filter = Q(streams__timestamp__gte=self.time_period)
+            annotation = {
+                self.calculation.name: self.calculation.calculation(
+                    self.calculation.stream_lookup,
+                    distinct=self.calculation.distinct,
+                    filter=stream_filter
+                )
+            }
+        else:
+            annotation = {
+                self.calculation.name: self.calculation.calculation(
+                    self.calculation.stream_lookup,
+                    distinct=self.calculation.distinct
+                )
+            }
 
+        songs = self.songs \
+            .annotate(**annotation) \
+            .order_by('-' + self.calculation.name) \
+            [:self.num_bars]
+
+
+        context = {"extra_fields": [self.calculation.name]}
+        numbers = DashboardSongSerializer(songs, many=True, context=context).data
         return numbers
 
     def format_data(self, data):

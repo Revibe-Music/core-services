@@ -66,30 +66,6 @@ class BarChart(Chart):
     def initial(self):
         self.calculation_function = self._calculate_bars
 
-    @property
-    def songs(self):
-        filter_upload  = Q(uploaded_by=self.artist)
-        filter_contrib = Q(contributors=self.artist)
-
-        song_filter = filter_upload
-        if self.include_contributions:
-            song_filter = song_filter | filter_contrib
-
-        count_string = f"streams__{self.lookup}"
-        if self.time_period:
-            stream_filter = Q(streams__timestamp__gte=self.time_period)
-            value_expression = Count(count_string, distinct=self.lookup_distinct, filter=stream_filter)
-        else:
-            value_expression = Count(count_string, distinct=self.lookup_distinct)
-
-        songs = Song.hidden_objects \
-            .filter(song_filter) \
-            .annotate(value=value_expression) \
-            .order_by('-value') \
-            [:self.num_bars]
-        
-        return songs
-
     def format_data(self, data):
         # configure y axis
         y_axis_title = getattr(self, 'type_', 'value').title()

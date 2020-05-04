@@ -12,7 +12,16 @@ from content.serializers.base import BaseSongSerializer
 
 class DashboardSongSerializer(BaseSongSerializer):
 
-    value = serializers.SerializerMethodField(method_name='_get_value', read_only=True)
+    def __init__(self, *args, **kwargs):
+        super(DashboardSongSerializer, self).__init__(*args, **kwargs)
+
+        extra_fields = self.context.get('extra_fields', None)
+        if extra_fields is not None:
+            for field_name in extra_fields:
+                # TODO: Build in security check to make sure user's can't access improper data, like passwords n shit
+                exec(f"""DashboardSongSerializer.get_{field_name} = lambda self, obj : getattr(obj, '{field_name}', None)""")
+                self.fields[field_name] = serializers.SerializerMethodField(read_only=True)
+
 
     class Meta:
         model = Song
@@ -20,8 +29,5 @@ class DashboardSongSerializer(BaseSongSerializer):
             'id',
             'uri',
             'title',
-            'value',
         ]
     
-    def _get_value(self, obj):
-        return getattr(obj, 'value', None)

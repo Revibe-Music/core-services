@@ -484,3 +484,76 @@ class Variable(models.Model):
     def __repr__(self):
         return f"<{self.__class__.__name__} ({self.__str__()})>"
 
+
+class ArtistAnalyticsCalculation(models.Model):
+    _root_choices = (
+        ('Album', 'Albums'),
+        ('LibrarySong', 'Library'),
+        ('PlaylistSong', 'Playlists'),
+        ('Stream', 'Streams'),
+        ('Song', 'Songs'),
+    )
+    _calculation_choices = (
+        ('Avg', 'Average'),
+        ('Max', 'Maximum'),
+        ('Min', 'Minimum'),
+        ('Count', 'Count'),
+        ('Sum', 'Sum'),
+    )
+
+    root_object = models.CharField(
+        max_length=50,
+        choices=_root_choices,
+        null=False, blank=False,
+        verbose_name=_("root object"),
+        help_text=_("The root object for calculations")
+    )
+    name = models.CharField(
+        null=False, blank=False, unique=True,
+        max_length=255,
+        verbose_name=_("name")
+    )
+    lookup = models.CharField(
+        max_length=255,
+        null=False, blank=False,
+        verbose_name=_("lookup field"),
+        help_text=_("The string to use when looking up the calculation field")
+    )
+    _calculation = models.CharField(
+        max_length=50,
+        choices=_calculation_choices,
+        null=False, blank=True, default="Count",
+        verbose_name=_("calculation"),
+        help_text=_("The aggregation function to use")
+    )
+    distinct = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("distinct"),
+        help_text=_("Should the aggregation function only look for distinct values?")
+    )
+    bar_name = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        verbose_name=_("bar name"),
+        help_text=_("I honestly don't remember what this is here to do...")
+    )
+
+    @property
+    def calculation(self):
+        calc = getattr(models, self._calculation, None)
+        return calc
+    
+    @property
+    def stream_lookup(self):
+        return "streams__" + self.lookup
+
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        return classes.default_repr(self)
+    
+    class Meta:
+        verbose_name = _("artist analytics calculation")
+        verbose_name_plural = _("artist analytics calculations")
+

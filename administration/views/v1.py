@@ -19,6 +19,7 @@ from revibe._errors.random import ValidationError
 from revibe._helpers import const, responses
 
 from accounts import models as acc_models
+from accounts.artist import analytics
 from accounts.permissions import TokenOrSessionAuthentication, AdminOnlyTokenPermissions
 from administration.models import *
 from administration.serializers import v1 as adm_ser_v1
@@ -179,6 +180,42 @@ class CompanyViewSet(GenericPlatformViewSet):
 
         return responses.OK(data=data)
 
+    @action(detail=False, methods=['get'], url_path=r"artist-metrics/(?P<artist_id>[a-zA-Z0-9-_]+)")
+    def individual_artist_metrics(self, request, *args, **kwargs):
+        raise network.NotImplementedError()
+
+    @action(detail=False, methods=['get'], url_path=r"artist-metrics/(?P<artist_id>[a-zA-Z0-9-_]+)/(?P<chart_type>[a-z-_]+)")
+    def individual_artist_chart(self, request, artist_id=None, chart_type=None, *args, **kwargs):
+        # raise network.NotImplementedError()
+        try:
+            artist = cnt_models.Artist.objects.filter(platform="Revibe").get(id=artist_id)
+        except cnt_models.Artist.DoesNotExist:
+            raise network.NotFoundError(f"Could not find artist with id '{artist_id}'")
+
+        params = request.query_params
+        type_ = get_url_param(params, 'type')
+        extras = {
+            "time_period": get_url_param(params, 'time_period'),
+            "time_interval": get_url_param(params, 'time_interval'),
+            "num_bars": get_url_param(params, 'num_bars', type_=int),
+        }
+
+        # get the chart class
+        stripped_endpoint = chart_type.split('-')[0].split('_')[0]
+        endpoints = {
+            "bar": analytics.BarChart,
+            "card": analytics.CardChart,
+            "line": analytics.LineChart,
+        }
+        chart_class = endpoints.get(stripped_endpoint, None)
+        if chart_class == None:
+            raise network.BadRequestError(f"Could not find a chart type from '{chart_type}'")
+    
+        chart = chart_class(artist=artist, type_=type_, **extras)
+
+        return responses.OK(data=chart.data)
+
+
     @action(detail=False, methods=['get'], url_path="album-metrics", url_name="album-metrics")
     def album_metrics(self, request, *args, **kwargs):
         queryset = cnt_models.Album.objects.filter(platform=const.REVIBE_STRING)
@@ -247,7 +284,6 @@ class CompanyViewSet(GenericPlatformViewSet):
         data['Campaigns'] = serializer.data
 
         return responses.OK(data=data)
-
 
     @action(detail=False, methods=['get'], url_path="stream-metrics", url_name="stream-metrics")
     def stream_metrics(self, request, *args, **kwargs):

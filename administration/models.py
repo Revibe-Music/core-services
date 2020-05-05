@@ -10,6 +10,9 @@ from revibe.utils import classes
 from revibe.utils.language import text
 
 from administration import managers
+from content.models import Album, Song
+from metrics.models import Stream
+from music.models import Library, Playlist
 
 # -----------------------------------------------------------------------------
 
@@ -487,11 +490,11 @@ class Variable(models.Model):
 
 class ArtistAnalyticsCalculation(models.Model):
     _root_choices = (
-        ('Album', 'Albums'),
-        ('LibrarySong', 'Library'),
-        ('PlaylistSong', 'Playlists'),
-        ('Stream', 'Streams'),
-        ('Song', 'Songs'),
+        ('albums', 'Albums'),
+        ('libraries', 'Library'),
+        ('playlists', 'Playlists'),
+        ('streams', 'Streams'),
+        ('songs', 'Songs'),
     )
     _calculation_choices = (
         ('Avg', 'Average'),
@@ -538,6 +541,12 @@ class ArtistAnalyticsCalculation(models.Model):
         help_text=_("I honestly don't remember what this is here to do...")
     )
 
+    notes = models.TextField(
+        null=True, blank=True,
+        verbose_name=_("notes"),
+        help_text=_("Notes about this calculation")
+    )
+
     @property
     def calculation(self):
         calc = getattr(models, self._calculation, None)
@@ -546,6 +555,16 @@ class ArtistAnalyticsCalculation(models.Model):
     @property
     def stream_lookup(self):
         return "streams__" + self.lookup
+    
+    # @property
+    # def related_obj(self):
+    #     relations = {
+    #         "albums": Album,
+    #         "libraries": Library,
+    #         "playlists": Playlist,
+    #         "songs": Song, 
+    #         "streams": Stream,
+    #     }
 
     def __str__(self):
         return self.name

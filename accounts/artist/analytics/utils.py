@@ -13,8 +13,9 @@ from revibe._errors import network
 
 from administration.models import ArtistAnalyticsCalculation
 from administration.utils.models import retrieve_calculation, retrieve_variable
-from content.models import Song
+from content.models import Album, Song
 from metrics.models import Stream
+from music.models import Library, Playlist
 
 from .serializers import DashboardSongSerializer
 
@@ -29,18 +30,24 @@ class Chart:
         self.artist = artist
         self.type_ = type_
 
+        # configure lookup stuff
+        self._lookup()
+        time_fields = {
+            "albums": "uploaded_date",
+            "libraries": None,
+            "playlists": "date_created",
+            "streams": "timestamp",
+            "songs": "date_created",
+        }
+        self.time_field = time_fields.get(self.calculation.root_object, None)
+
         self.include_contributions = include_contributions
         self.num_bars = num_bars if num_bars else retrieve_variable('artist-dashboard_bar-chart_num-bars', 5)
 
         self.get_time_period(time_period)
         self.get_time_interval(time_interval)
 
-        # configure lookup stuff
-        self._lookup()
-        # self._lookup_dict = self._annotation_lookup.get(self.type_)
-        # self.lookup = self._lookup_dict.get('lookup')
-        # self.lookup_distinct = self._lookup_dict.get('distinct', False)
-        # self.lookup_calc = self._lookup_dict.get('calc', Count)
+        self.root_object = getattr(self, self.calculation.root_object)
 
         # configure graph options
         options = kwargs.get('options', None)
@@ -88,6 +95,39 @@ class Chart:
         
         return songs
 
+    @property
+    def libraries(self):
+        lib_filter = {
+            "platform": "Revibe",
+            "songs__id__in": self.songs,
+            # "library_to_song__song__in": self.artist.song_uploaded_by,
+        }
+
+        if self.time_period:
+            lib_filter['library_to_song__date_saved__gte'] = self.time_period
+
+        libraries = Library.objects.filter(**lib_filter).distinct()
+
+        return libraries
+
+    @property
+    def playlists(self):
+        plist_filter = {
+            "songs__id__in": self.songs,
+        }
+
+        if self.time_period:
+            plist_filter['playlist_to_song__date_saved__gte'] = self.time_period
+        
+        playlists = Playlist.objects.filter(**plist_filter).distinct()
+
+        return playlists
+
+    @property
+    def albums(self):
+        pass
+
+
     def get_time_period(self, time_period):
         periods = self._time_periods
         time_period = time_period if time_period in periods.keys() else 'month'
@@ -107,7 +147,7 @@ class Chart:
         intervals = {}
         values = []
         for op in options:
-            intervals.update({op[0]: op[1]('timestamp')})
+            intervals.update({op[0]: op[1](self.time_field)})
             values.append(op[0])
             if op[0] == self.time_interval:
                 break
@@ -163,7 +203,7 @@ class Chart:
             self.calculation.name: self.calculation.calculation(self.calculation.lookup, distinct=self.calculation.distinct)
         }
 
-        numbers = self.streams \
+        numbers = self.root_object \
             .annotate(
                 **self.time_interval_annotation
             ) \
@@ -179,9 +219,9 @@ class Chart:
             self.calculation.name: self.calculation.calculation(self.calculation.lookup, distinct=self.calculation.distinct)
         }
 
-        numbers = self.streams \
+        numbers = self.root_object \
             .aggregate(**aggregation) \
-        
+
         return numbers
 
     def _calculate_bars(self):

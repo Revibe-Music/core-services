@@ -40,6 +40,9 @@ v1_urls = [
 admin_path = settings.ADMIN_PATH
 
 urlpatterns = [
+    # home path
+    path("", base.blank_request, name="home"),
+
     path(admin_path, admin.site.urls, name="admin"),
     path('jet/', include('jet.urls', namespace="jet")),
     path('jet/dashboard/', include('jet.dashboard.urls', namespace='jet-dashboard')),

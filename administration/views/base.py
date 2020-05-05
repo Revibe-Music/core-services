@@ -3,6 +3,7 @@ Author: Jordan Prechac
 Created: 06 Jan, 2020
 """
 
+from django.http import HttpResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
@@ -26,3 +27,6 @@ def home(request):
     # check database connection
     # ...
     return responses.OK()
+
+def blank_request(request, *args, **kwargs):
+    return HttpResponse(status=200)

@@ -19,6 +19,11 @@ class DashboardSongSerializer(BaseSongSerializer):
         if extra_fields is not None:
             for field_name in extra_fields:
                 # TODO: Build in security check to make sure user's can't access improper data, like passwords n shit
+                # security check
+                if 'password' in field_name:
+                    continue
+
+                # create method for getting the additional field
                 exec(f"""DashboardSongSerializer.get_{field_name} = lambda self, obj : getattr(obj, '{field_name}', None)""")
                 self.fields[field_name] = serializers.SerializerMethodField(read_only=True)
 

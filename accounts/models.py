@@ -149,6 +149,16 @@ class Profile(models.Model):
         help_text="Allow Revibe to send email to the user for marketing purposes",
         null=False, blank=True, default=True
     )
+    allow_email_notifications = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("allow email notifications"),
+        help_text=_("Allow notifications to be sent by email")
+    )
+    allow_email_reminders = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("allow email reminders"),
+        help_text=_("Allow reminders sent by email")
+    )
 
     def _link_to_self(self):
         return format_html(

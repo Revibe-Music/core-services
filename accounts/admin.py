@@ -76,7 +76,7 @@ class StaffProfileAdmin(admin.ModelAdmin):
     list_display = (
         '_sortable_string',
         'job_title',
-        'supervisor',
+        '_supervisor_display_name',
     )
     list_filter = (
         ('start_date', admin.DateFieldListFilter),
@@ -100,6 +100,13 @@ class StaffProfileAdmin(admin.ModelAdmin):
         return obj.__str__()
     _sortable_string.short_description = "staff account"
     _sortable_string.admin_order_field = "display_name"
+
+    def _supervisor_display_name(self, obj):
+        # return obj.supervisor.display_name or None
+        sup = getattr(obj, 'supervisor', None)
+        if sup:
+            return getattr(getattr(sup, 'staff_account', getattr(sup, 'full_name', None)), 'display_name', None)
+    _supervisor_display_name.short_description = "supervisor"
 
 
 @admin.register(SocialMedia)

@@ -15,7 +15,7 @@ from administration.models import ArtistAnalyticsCalculation
 from administration.utils.models import retrieve_calculation, retrieve_variable
 from content.models import Album, Song
 from metrics.models import Stream
-from music.models import Library, Playlist
+from music.models import Library, Playlist, PlaylistSong
 
 from .serializers import DashboardSongSerializer
 
@@ -36,6 +36,7 @@ class Chart:
             "albums": "uploaded_date",
             "libraries": None,
             "playlists": "date_created",
+            "playlistsongs": "date_saved",
             "streams": "timestamp",
             "songs": "date_created",
         }
@@ -122,6 +123,19 @@ class Chart:
         playlists = Playlist.objects.filter(**plist_filter).distinct()
 
         return playlists
+
+    @property
+    def playlistsongs(self):
+        psong_filter = {
+            "song__id__in": self.songs,
+        }
+
+        if self.time_period:
+            psong_filter['date_saved__gte'] = self.time_period
+        
+        playlistsongs = PlaylistSong.objects.filter(**psong_filter).distinct()
+
+        return playlistsongs
 
     @property
     def albums(self):

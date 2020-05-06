@@ -296,7 +296,7 @@ class StaffProfile(models.Model):
     )
 
     def __str__(self):
-        return self.display_name if self.display_name else self.user.full_name
+        return self.display_name if self.display_name else (self.user.full_name if self.user.full_name != "" else self.user.__str__())
     
     def __repr__(self):
         return default_repr(self)

@@ -493,6 +493,7 @@ class ArtistAnalyticsCalculation(models.Model):
         ('albums', 'Albums'),
         ('libraries', 'Library'),
         ('playlists', 'Playlists'),
+        ('playlistsongs', 'Playlist Songs'),
         ('streams', 'Streams'),
         ('songs', 'Songs'),
     )

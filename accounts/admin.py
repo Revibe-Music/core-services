@@ -72,7 +72,34 @@ class ArtistProfileAdmin(admin.ModelAdmin):
 
 @admin.register(StaffProfile)
 class StaffProfileAdmin(admin.ModelAdmin):
-    pass
+    # customize list display
+    list_display = (
+        '_sortable_string',
+        'job_title',
+        'supervisor',
+    )
+    list_filter = (
+        ('start_date', admin.DateFieldListFilter),
+        ('job_start_date', admin.DateFieldListFilter),
+    )
+
+    # customize search
+    search_fields = [
+        'display_name',
+        'job_title',
+        'user__username',
+        'user__first_name',
+        'user__last_name',
+        'supervisor__username',
+        'supervisor__first_name',
+        'supervisor__last_name',
+    ]
+
+
+    def _sortable_string(self, obj):
+        return obj.__str__()
+    _sortable_string.short_description = "staff account"
+    _sortable_string.admin_order_field = "display_name"
 
 
 @admin.register(SocialMedia)

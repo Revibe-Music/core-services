@@ -10,6 +10,7 @@ import datetime
 
 from revibe.contrib.queries.functions import Year, Month, Week, Day, Hour
 from revibe._errors import network
+from revibe.exceptions import db
 
 from administration.models import ArtistAnalyticsCalculation
 from administration.utils.models import retrieve_calculation, retrieve_variable
@@ -240,6 +241,9 @@ class Chart:
         # actually create the graphs n shit
         try:
             func = getattr(self, 'calculation_function', self.default_calc)
+        except db.AnnotationError as e:
+            # probably an issue with a .annotate() somewhere
+            raise e
         except Exception as e:
             print("Uh oh spaghettio")
             raise e
@@ -252,13 +256,16 @@ class Chart:
             self.calculation.name: self.calculation.calculation(self.calculation.lookup, distinct=self.use_distinct)
         }
 
-        numbers = self.root_object \
-            .annotate(
-                **self.time_interval_annotation
-            ) \
-            .values(*self.time_interval_values) \
-            .order_by(*self.time_interval_values) \
-            .annotate(**annotation)
+        try:
+            numbers = self.root_object \
+                .annotate(
+                    **self.time_interval_annotation
+                ) \
+                .values(*self.time_interval_values) \
+                .order_by(*self.time_interval_values) \
+                .annotate(**annotation)
+        except KeyError as e:
+            raise db.AnnotationError(str(e))
 
         return numbers
     default_calc = _calculate_over_time
@@ -268,8 +275,11 @@ class Chart:
             self.calculation.name: self.calculation.calculation(self.calculation.lookup, distinct=self.use_distinct)
         }
 
-        numbers = self.root_object \
-            .aggregate(**aggregation) \
+        try:
+            numbers = self.root_object \
+                .aggregate(**aggregation)
+        except KeyError as e:
+            raise db.AnnotationError(str(e))
 
         return numbers
 
@@ -292,10 +302,13 @@ class Chart:
                 )
             }
 
-        songs = self.songs \
-            .annotate(**annotation) \
-            .order_by('-' + self.calculation.name) \
-            [:self.num_bars]
+        try:
+            songs = self.songs \
+                .annotate(**annotation) \
+                .order_by('-' + self.calculation.name) \
+                [:self.num_bars]
+        except KeyError as e:
+            raise db.AnnotationError(str(e))
 
 
         context = {"extra_fields": [self.calculation.name]}

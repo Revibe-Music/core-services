@@ -227,6 +227,85 @@ class ArtistProfile(models.Model):
         return "{}'s Artist Profile".format(self.artist)
 
 
+class StaffProfile(models.Model):
+    # relationships
+    _user_choices = {"is_staff": True, "programmatic_account": False, "temporary_account": False}
+    user = models.OneToOneField(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="staff_profile",
+        limit_choices_to=_user_choices,
+        null=False, blank=False,
+        verbose_name=_("user"),
+        help_text=_("User account")
+    )
+    supervisor = models.ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name=_("reports"),
+        limit_choices_to=_user_choices,
+        null=True, blank=True,
+        verbose_name=_("supervisor"),
+        help_text=_("Staff member's supervisor")
+    )
+
+    # job information
+    job_title = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        verbose_name=_("job title"),
+        help_text=_("Staff's job title")
+    )
+    display_name = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        verbose_name=_("display name"),
+        help_text=_("Staff display name. Used for things like blog posts")
+    )
+
+    # pay information
+    _pay_type_choices = (
+        ("salary", "Salary"),
+        ("wage", "Hourly Wage"),
+    )
+    pay_type = models.CharField(
+        max_length=20,
+        choices=_pay_type_choices,
+        null=True, blank=True,
+        verbose_name=_("pay type"),
+        help_text=_("How the staff member is paid")
+    )
+    pay = models.DecimalField(
+        max_digits=11, decimal_places=2,
+        null=True, blank=True,
+        verbose_name=_("pay"),
+        help_text=_("How much the staff member is paid, either hourly or yearly")
+    )
+
+
+    # date information
+    start_date = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name=_("start date"),
+        help_text=_("Staff's start date at Revibe")
+    )
+    job_start_date = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name=_("job start date"),
+        help_text=_("Date staff member started their current role")
+    )
+
+    def __str__(self):
+        return self.display_name if self.display_name else self.user.full_name
+    
+    def __repr__(self):
+        return default_repr(self)
+    
+    class Meta:
+        verbose_name = "staff account"
+        verbose_name_plural = "staff accounts"
+
+
 class Social(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='user_social')
     platform = models.CharField(max_length=255, null=True)

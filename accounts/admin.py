@@ -70,6 +70,11 @@ class ArtistProfileAdmin(admin.ModelAdmin):
     get_artist_username.short_description = 'user'
 
 
+@admin.register(StaffProfile)
+class StaffProfileAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(SocialMedia)
 class SocialMediaAdmin(admin.ModelAdmin):
     # customize list display

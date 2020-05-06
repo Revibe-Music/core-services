@@ -211,12 +211,16 @@ class Chart:
         today = now - datetime.timedelta(days=1)
         week = now - datetime.timedelta(days=7)
         month = now - datetime.timedelta(days=30)
+        month_3 = now - datetime.timedelta(days=30*3)
+        month_6 = now - datetime.timedelta(days=30*6)
         year = now - datetime.timedelta(days=365)
 
         return {
             "day": today,
             "week": week,
             "month": month,
+            "month_3": month_3,
+            "month_6": month_6,
             "year": year,
             "all-time": None
         }

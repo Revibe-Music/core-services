@@ -129,7 +129,7 @@ class CompanyViewSet(GenericPlatformViewSet):
     serializer_class = adm_ser_v1.ContactFormSerializer
     permission_classes = [AdminOnlyTokenPermissions]
     required_alternate_scopes = {
-        "GET": [["ADMIN"]]
+        "GET": [["ADMIN"], ["business-intelligence", "first-party"], ["business-intelligence", "third-party"]]
     }
 
     @action(detail=False, methods=['get'], url_path='basic-metrics', url_name="basic-metrics")

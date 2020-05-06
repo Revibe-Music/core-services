@@ -140,7 +140,17 @@ class VariableAdmin(admin.ModelAdmin):
 
 @admin.register(ArtistAnalyticsCalculation)
 class ArtistAnalyticsCalculationAdmin(admin.ModelAdmin):
-    pass
+    # customize list display
+    list_display = (
+        '__str__',
+        'root_object',
+        '_calculation',
+        'distinct',
+    )
+    list_filter = (
+        'root_object',
+        '_calculation',
+    )
 
 
 # general admin information and changes

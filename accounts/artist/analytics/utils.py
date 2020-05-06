@@ -15,7 +15,7 @@ from administration.models import ArtistAnalyticsCalculation
 from administration.utils.models import retrieve_calculation, retrieve_variable
 from content.models import Album, Song
 from metrics.models import Stream
-from music.models import Library, Playlist, PlaylistSong
+from music.models import Library, LibrarySong, Playlist, PlaylistSong
 
 from .serializers import DashboardSongSerializer
 
@@ -24,7 +24,7 @@ from .serializers import DashboardSongSerializer
 
 
 class Chart:
-    def __init__(self, artist, type_, include_contributions=False, time_period=None, time_interval=None, num_bars=None, **kwargs):
+    def __init__(self, artist, type_, include_contributions=False, time_period=None, time_interval=None, num_bars=None, distinct=None, **kwargs):
         self.initial()
 
         self.artist = artist
@@ -32,15 +32,36 @@ class Chart:
 
         # configure lookup stuff
         self._lookup()
-        time_fields = {
-            "albums": "uploaded_date",
-            "libraries": None,
-            "playlists": "date_created",
-            "playlistsongs": "date_saved",
-            "streams": "timestamp",
-            "songs": "date_created",
+        field_options = {
+            "albums": {
+                "time_field": "uploaded_date",
+                "related_song_field": "album"
+            },
+            "libraries": {
+                "related_song_field": "library_songs",
+            },
+            "librarysongs": {
+                "time_field": "date_saved",
+                "related_song_field": "song_to_library",
+            },
+            "playlists": {
+                "time_field": "date_created",
+                "related_song_field": "playlist_songs",
+            },
+            "playlistsongs": {
+                "time_field": "date_saved",
+                "related_song_field": "song_to_playlist",
+            },
+            "streams": {
+                "time_field": "timestamp",
+                "related_song_field": "streams",
+            },
+            "songs": {
+                "time_field": "date_created",
+            },
         }
-        self.time_field = time_fields.get(self.calculation.root_object, None)
+        self.time_field = field_options.get(self.calculation.root_object, None).get('time_field', None)
+        self.related_song_field = field_options.get(self.calculation.root_object, None).get('related_song_field', None)
 
         self.include_contributions = include_contributions
         self.num_bars = num_bars if num_bars else retrieve_variable('artist-dashboard_bar-chart_num-bars', 5)
@@ -49,6 +70,7 @@ class Chart:
         self.get_time_interval(time_interval)
 
         self.root_object = getattr(self, self.calculation.root_object)
+        self.use_distinct = distinct if distinct else self.calculation.distinct
 
         # configure graph options
         options = kwargs.get('options', None)
@@ -110,6 +132,19 @@ class Chart:
         libraries = Library.objects.filter(**lib_filter).distinct()
 
         return libraries
+
+    @property
+    def librarysongs(self):
+        lsong_filter = {
+            "song__id__in": self.songs,
+        }
+
+        if self.time_period:
+            lsong_filter['date_saved__gte'] = self.time_period
+        
+        librarysongs = LibrarySong.objects.filter(**lsong_filter).distinct()
+
+        return librarysongs
 
     @property
     def playlists(self):
@@ -214,7 +249,7 @@ class Chart:
 
     def _calculate_over_time(self):
         annotation = {
-            self.calculation.name: self.calculation.calculation(self.calculation.lookup, distinct=self.calculation.distinct)
+            self.calculation.name: self.calculation.calculation(self.calculation.lookup, distinct=self.use_distinct)
         }
 
         numbers = self.root_object \
@@ -230,7 +265,7 @@ class Chart:
 
     def _calculate_static(self):
         aggregation = {
-            self.calculation.name: self.calculation.calculation(self.calculation.lookup, distinct=self.calculation.distinct)
+            self.calculation.name: self.calculation.calculation(self.calculation.lookup, distinct=self.use_distinct)
         }
 
         numbers = self.root_object \
@@ -240,19 +275,20 @@ class Chart:
 
     def _calculate_bars(self):
         if self.time_period:
-            stream_filter = Q(streams__timestamp__gte=self.time_period)
+            obj_filter_keys = [self.related_song_field, self.time_field, 'gte'] if self.root_object != song else [self.time_field, 'gte']
+            obj_filter = Q(**{"__".join(obj_filter_keys): self.time_period})
             annotation = {
                 self.calculation.name: self.calculation.calculation(
-                    self.calculation.stream_lookup,
-                    distinct=self.calculation.distinct,
+                    '__'.join([self.related_song_field, self.calculation.lookup]),
+                    distinct=self.use_distinct,
                     filter=stream_filter
                 )
             }
         else:
             annotation = {
                 self.calculation.name: self.calculation.calculation(
-                    self.calculation.stream_lookup,
-                    distinct=self.calculation.distinct
+                    '__'.join([self.related_song_field, self.calculation.lookup]),
+                    distinct=self.use_distinct
                 )
             }
 

@@ -492,6 +492,7 @@ class ArtistAnalyticsCalculation(models.Model):
     _root_choices = (
         ('albums', 'Albums'),
         ('libraries', 'Library'),
+        ('librarysongs', 'Library Songs'),
         ('playlists', 'Playlists'),
         ('playlistsongs', 'Playlist Songs'),
         ('streams', 'Streams'),

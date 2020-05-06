@@ -1311,11 +1311,10 @@ class ArtistAnalyticsViewSet(GenericPlatformViewSet):
         # get optional param values
         params = request.query_params
         type_ = get_url_param(params, 'type')
-        extras = {
-            "time_period": get_url_param(params, 'time_period'),
-            "time_interval": get_url_param(params, 'time_interval'),
-            "num_bars": get_url_param(params, 'num_bars', type_=int),
-        }
+
+        possible_extras = ['time_period', 'time_interval', ('num_bars', int), ('distinct', bool)]
+        get_param = lambda key : get_url_param(params, key) if isinstance(key, str) else get_url_param(params, key[0], type_=key[1])
+        extras = {(key if isinstance(key, str) else key[0]): get_param(key) for key in possible_extras}
 
         # get the chart class
         stripped_endpoint = endpoint.split('-')[0].split('_')[0]

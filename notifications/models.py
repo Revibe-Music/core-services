@@ -15,7 +15,6 @@ from revibe.utils.classes import default_repr
 
 class Event(models.Model):
     # relationships
-    # success_action = models.ForeignKey()
 
     # core fields
     name = models.CharField(
@@ -69,6 +68,43 @@ class Event(models.Model):
     class Meta:
         verbose_name = "event"
         verbose_name_plural = "events"
+
+
+class Reminder(models.Model):
+    # relationships
+    # success_action = models.ForeignKey()
+
+    # core fields
+    name = models.CharField(
+        max_length=255,
+        null=False, blank=False, unique=True,
+        verbose_name=_("name"),
+        help_text=_("Name of the reminder")
+    )
+    desired_action = models.CharField(
+        max_length=255,
+        null=False, blank=False,
+        verbose_name=_("desired action"),
+        help_text=_("ACtion the user is desired to take after receiving this reminder")
+    )
+    automation_order = models.IntegerField(
+        null=True, blank=True, unique=True,
+        verbose_name=_("automation order"),
+        help_text=_("Order in the automation stack that this reminder will be executed")
+    )
+
+    # extras
+    description = models.TextField(
+        null=False, blank=False,
+        verbose_name=_("description"),
+        help_text=_("Text explanation of the reminder")
+    )
+    date_created = models.DateTimeField(
+        auto_now_add=True
+    )
+    last_changed = models.DateTimeField(
+        auto_now=True
+    )
 
 
 class NotificationTemplate(models.Model):

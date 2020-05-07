@@ -27,6 +27,28 @@ class EventAdmin(admin.ModelAdmin):
     ]
 
 
+@admin.register(Reminder)
+class ReminderAdmin(admin.ModelAdmin):
+    # customizee list dispay
+    list_display = (
+        'name',
+        'desired_action',
+        'automation_order',
+        'active',
+    )
+    list_filter = (
+        ('active', admin.BooleanFieldListFilter),
+        ('for_artists', admin.BooleanFieldListFilter),
+    )
+
+    # customize search
+    search_fields = [
+        'name',
+        'desired_action',
+        'description',
+    ]
+
+
 @admin.register(NotificationTemplate)
 class NotificationTemplateAdmin(admin.ModelAdmin):
     # customize list display

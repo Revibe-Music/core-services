@@ -92,8 +92,18 @@ class Reminder(models.Model):
         verbose_name=_("automation order"),
         help_text=_("Order in the automation stack that this reminder will be executed")
     )
+    for_artists = models.BooleanField(
+        null=False, blank=False,
+        verbose_name=_("for artists"),
+        help_text=_("This notification is for artists, not listeners.")
+    )
 
     # extras
+    active = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("active"),
+        help_text=_("The reminder is active and will send notifications. Please set this to False rather than deleting the object; deleting the object will inhibit analysis.")
+    )
     description = models.TextField(
         null=False, blank=False,
         verbose_name=_("description"),
@@ -105,6 +115,16 @@ class Reminder(models.Model):
     last_changed = models.DateTimeField(
         auto_now=True
     )
+
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        return default_repr(self)
+    
+    class Meta:
+        verbose_name = "reminder"
+        verbose_name_plural = "reminders"
 
 
 class NotificationTemplate(models.Model):

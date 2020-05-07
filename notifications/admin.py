@@ -78,6 +78,7 @@ class NotificationAdmin(admin.ModelAdmin):
     list_display = (
         'user',
         '_event_name',
+        'seen',
         'action_taken',
     )
     list_filter = (
@@ -85,6 +86,7 @@ class NotificationAdmin(admin.ModelAdmin):
         ('date_of_action', admin.DateFieldListFilter),
         ('user', admin.RelatedOnlyFieldListFilter),
         ('action_taken', admin.BooleanFieldListFilter),
+        ('seen', admin.BooleanFieldListFilter),
         ('event_template__event', admin.RelatedOnlyFieldListFilter),
     )
 

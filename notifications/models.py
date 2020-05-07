@@ -200,6 +200,11 @@ class Notification(models.Model):
         verbose_name=_("is artist"),
         help_text=_("The event is an artist notification, not a user notification")
     )
+    seen = models.BooleanField(
+        null=False, blank=True, default=False,
+        verbose_name=_("seen"),
+        help_text=_("The notified user has seen the notification")
+    )
     action_taken = models.BooleanField(
         null=True, blank=True, default=None,
         verbose_name=_("action taken"),

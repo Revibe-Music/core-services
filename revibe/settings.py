@@ -469,3 +469,9 @@ else: # production environment
         }
     }
 
+# celery config
+CELERY_BROKER_URL = ''
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+

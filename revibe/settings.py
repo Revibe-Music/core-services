@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     'merch',
     'metrics',
     'music',
+    'notifications',
     'payments',
 
     # installed apps

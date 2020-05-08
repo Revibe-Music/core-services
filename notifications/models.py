@@ -40,6 +40,12 @@ class Event(models.Model):
         verbose_name=_("desired action"),
         help_text=_("Action the user is desired to take after receiving this notification")
     )
+    sent_address = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        verbose_name=_("sent address"),
+        help_text=_("Email address the message is sent from. If ANY templates of this event use email notifications, this field CANNOT be blank!")
+    )
 
     # extras
     active = models.BooleanField(
@@ -70,63 +76,6 @@ class Event(models.Model):
         verbose_name_plural = "events"
 
 
-class Reminder(models.Model):
-    # relationships
-    # success_action = models.ForeignKey()
-
-    # core fields
-    name = models.CharField(
-        max_length=255,
-        null=False, blank=False, unique=True,
-        verbose_name=_("name"),
-        help_text=_("Name of the reminder")
-    )
-    desired_action = models.CharField(
-        max_length=255,
-        null=False, blank=False,
-        verbose_name=_("desired action"),
-        help_text=_("ACtion the user is desired to take after receiving this reminder")
-    )
-    automation_order = models.IntegerField(
-        null=True, blank=True, unique=True,
-        verbose_name=_("automation order"),
-        help_text=_("Order in the automation stack that this reminder will be executed")
-    )
-    for_artists = models.BooleanField(
-        null=False, blank=False,
-        verbose_name=_("for artists"),
-        help_text=_("This notification is for artists, not listeners.")
-    )
-
-    # extras
-    active = models.BooleanField(
-        null=False, blank=True, default=True,
-        verbose_name=_("active"),
-        help_text=_("The reminder is active and will send notifications. Please set this to False rather than deleting the object; deleting the object will inhibit analysis.")
-    )
-    description = models.TextField(
-        null=False, blank=False,
-        verbose_name=_("description"),
-        help_text=_("Text explanation of the reminder")
-    )
-    date_created = models.DateTimeField(
-        auto_now_add=True
-    )
-    last_changed = models.DateTimeField(
-        auto_now=True
-    )
-
-    def __str__(self):
-        return self.name
-    
-    def __repr__(self):
-        return default_repr(self)
-    
-    class Meta:
-        verbose_name = "reminder"
-        verbose_name_plural = "reminders"
-
-
 class NotificationTemplate(models.Model):
     # relationships
     event = models.ForeignKey(
@@ -140,18 +89,36 @@ class NotificationTemplate(models.Model):
 
     # core fields
     # notification_method = models.
-    text_template = models.TextField(
-        null=False, blank=False,
-        verbose_name=_("text template"),
-        help_text=_("The core text template of the notification. This is all that will be sent unless using email notifications, in which case this will the main text of the email in the email template.")
+    _medium_choices = (
+        ('email', 'Email'),
+        ('in_app', 'In-App'),
+        ('push', 'Push'),
+        ('sms', 'Text Message'),
     )
-    html = models.TextField(
+    medium = models.CharField(
+        max_length=255,
+        choices=_medium_choices,
+        null=False, blank=False, 
+        verbose_name=_("medium"),
+        help_text=_("The medium by which to send the notification")
+    )
+    subject = models.TextField(
         null=True, blank=True,
-        verbose_name=_("HTML template"),
-        help_text=_("The HTML template to send as the email. If not sending email notification, the template will not be used. See the documentation for proper configuration of notification HTML templates.")
+        verbose_name=_("subject"),
+        help_text=_("Notification subject. If sending an email message this field CANNOT be blank!")
+    )
+    body = models.TextField(
+        null=False, blank=False,
+        verbose_name=_("body"),
+        help_text=_("The format-string message to send to the user. If this is an email template, paste the HTML here.")
     )
 
     # extras
+    active = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("active"),
+        help_text=_("The template is active and will be used for notifications")
+    )
     description = models.TextField(
         null=True, blank=True,
         verbose_name=_("description"),

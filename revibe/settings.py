@@ -464,14 +464,17 @@ else: # production environment
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [("api-communication-redis.7pqvq5.ng.0001.use2.cache.amazonaws.com", 6379)] # EC2 instance with Redis server
+                "hosts": [("api-communication-redis.7pqvq5.ng.0001.use2.cache.amazonaws.com", 6379)]
             }
         }
     }
 
 # celery config
-CELERY_BROKER_URL = ''
+CELERY_BROKER_URL = 'redis://api-communication-redis.7pqvq5.ng.0001.use2.cache.amazonaws.com:6379' if not DEBUG else 'redis://127.0.0.1:6379'
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
 

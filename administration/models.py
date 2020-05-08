@@ -446,6 +446,7 @@ class Variable(models.Model):
     _category_choices = (
         ('artist-portal', 'Artist Portal Dashboard'),
         ('browse', 'Browse'),
+        ('notifications', 'Notifications'),
         ('search', 'Search'),
         ('social', 'Social'),
         ('util', 'Utils'),

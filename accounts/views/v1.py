@@ -64,6 +64,7 @@ from content.utils.models import (
 from metrics.models import Stream
 from music.models import *
 from music.serializers import v1 as music_ser_v1
+from notifications.decorators import notifier
 
 # -----------------------------------------------------------------------------
 
@@ -109,6 +110,7 @@ class RegistrationAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
 
 
+    @notifier(trigger="register", user_after_request=True, force=True, medium="email")
     def post(self, request, *args, **kwargs):
         data = request.data
         params = request.query_params
@@ -125,7 +127,7 @@ class RegistrationAPI(generics.GenericAPIView):
         if "refresh_token" in register_data.keys():
             return_data.update({"refresh_token": register_data['refresh_token'].token})
 
-        return responses.CREATED(data=return_data)
+        return responses.CREATED(data=return_data), register_data['user']
 
 
 @method_decorator(csrf_exempt, name="dispatch")

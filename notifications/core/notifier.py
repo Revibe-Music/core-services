@@ -137,8 +137,8 @@ class Notifier:
 
     def send_notification(self, *args, **kwargs):
         # only send notifications when running in a cloud environment
-        # if not settings.USE_S3:
-        #     raise EnvironmentError("Can only send notifications in a cloud environment")
+        if not settings.USE_S3:
+            raise EnvironmentError("Can only send notifications in a cloud environment")
 
         # check that we can even send the user something
         if not self.force:

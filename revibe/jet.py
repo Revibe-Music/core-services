@@ -106,6 +106,14 @@ side_menu = [ # A list of application or custom item dicts
         ]
     },
     {
+        "label": _("Notifications"),
+        "items": [
+            {"name": 'notifications.event'},
+            {"name": 'notifications.notificationtemplate'},
+            {"name": 'notifications.notification'},
+        ]
+    },
+    {
         "label": _("Storage"),
         "items": [
             {"name": 'cloud_storage.file'},

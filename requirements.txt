@@ -51,12 +51,13 @@ protobuf==3.11.2
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.19
+pycurl==7.43.0.2
 pydub==0.23.1
 PyHamcrest==2.0.2
 pynamodb==4.2.0
 pyOpenSSL==19.1.0
 python-crontab==2.4.2
-python-dateutil==2.8.1
+python-dateutil==2.8.0
 python3-openid==3.1.0
 pytz==2019.3
 redis==3.5.0

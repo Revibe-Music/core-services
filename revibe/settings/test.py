@@ -83,12 +83,12 @@ CHANNEL_LAYERS = {
     }
 }
 
-CELERY_BROKER_URL = "https://sqs.us-east-2.amazonaws.com/330923929935/test-env-celery"
+CELERY_BROKER_URL = "sqs://"
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_BROKER_TRANSPORT_OPTIONS = {
     'region': 'us-east-2',
     'visibility_timeout': 3600,
-    'polling_interval': 10,
-    'queue_name_prefix': f'{ENV}',
+    # 'polling_interval': 10,
+    'queue_name_prefix': f'celery-{ENV}',
     'CELERYD_PREFETCH_MULTIPLIER': 0,
 }

@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'storages',
 
     'channels',
+    'django_celery_beat',
 
     # all auth stuff
     'allauth',

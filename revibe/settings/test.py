@@ -72,15 +72,15 @@ LOGGING = {
 }
 
 
-redis_url = "test-env-redis.7pqvq5.ng.0001.use2.cache.amazonaws.com"
-redis_port = 6379
+_redis_url = "test-env-redis.7pqvq5.ng.0001.use2.cache.amazonaws.com"
+_redis_port = 6379
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [(redis_url, redis_port)]
+            "hosts": [(_redis_url, _redis_port)]
         }
     }
 }
-CELERY_BROKER_URL = f"redis://{redis_url}:{redis_port}"
+CELERY_BROKER_URL = f"redis://{_redis_url}:{_redis_port}"
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL

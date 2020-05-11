@@ -81,5 +81,5 @@ CHANNEL_LAYERS = {
         }
     }
 }
-CELERY_BROKER_URL = f"{redis_url}:{redis_port}"
+CELERY_BROKER_URL = f"redis://{redis_url}:{redis_port}"
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL

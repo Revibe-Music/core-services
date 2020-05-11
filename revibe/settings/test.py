@@ -1,6 +1,7 @@
 from revibe.settings.base import *
 
 
+ENV = 'TEST'
 DEBUG = True
 
 ALLOWED_HOSTS = [

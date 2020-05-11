@@ -5,6 +5,7 @@ Author: Jordan Prechac
 
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
+from rest_framework.request import Request
 
 from functools import wraps
 
@@ -42,12 +43,15 @@ def notifier(trigger, user_after_request=False, *args, **kwargs):
                 # check the args for a request
                 if USER == None:
                     for arg in func_args:
-                        if isinstance(arg, HttpRequest):
+                        print(arg)
+                        if isinstance(arg, (HttpRequest, Request)):
                             # the argument is a request
                             user = get_user_from_request(arg)
                             if user != None:
                                 USER = user
+                                break
 
+                print(USER)
                 if USER != None:
                     # we found a user in a request somewhere
                     user_id = USER.id

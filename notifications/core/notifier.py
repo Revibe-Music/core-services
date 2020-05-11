@@ -84,6 +84,8 @@ class Notifier:
 
     def send_email(self):
         config = self._configure_kwargs()
+        config['user'] = self.user
+        config['username'] = self.user.username
 
         notification_template = random_object(self.templates.filter(medium='email'))
 

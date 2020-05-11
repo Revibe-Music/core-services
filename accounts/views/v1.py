@@ -265,6 +265,7 @@ class LogoutAPI(generics.GenericAPIView, RevokeTokenView):
 class LogoutAllAPI(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @notifier(trigger='logout-all', force=True, medium='email')
     def post(self, request, *args, **kwargs):
         user = request.user
 

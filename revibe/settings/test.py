@@ -82,5 +82,6 @@ CHANNEL_LAYERS = {
         }
     }
 }
-CELERY_BROKER_URL = f"redis://{_redis_url}:{_redis_port}"
+
+CELERY_BROKER_URL = "https://sqs.us-east-2.amazonaws.com/330923929935/test-env-celery"
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL

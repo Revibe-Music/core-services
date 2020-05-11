@@ -84,7 +84,6 @@ CHANNEL_LAYERS = {
 }
 
 CELERY_BROKER_URL = "sqs://"
-CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_BROKER_TRANSPORT_OPTIONS = {
     'region': 'us-east-2',
     'visibility_timeout': 3600,

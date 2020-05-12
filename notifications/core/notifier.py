@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 from revibe._helpers import const
 from revibe.contrib.queries.querysets import random_object
 
+from administration.utils import retrieve_variable
 from notifications.models import Event, Notification
 
 from .config import base_email_config

@@ -21,6 +21,8 @@ DATABASES = {
     }
 }
 
+USE_S3=False
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 AWS_ACCESS_KEY_ID = None

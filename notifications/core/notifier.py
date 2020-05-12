@@ -102,7 +102,7 @@ class Notifier:
         plain_message = strip_tags(html_message)
 
         try:
-            send_mail(
+            sent = send_mail(
                 subject=subject,
                 message=plain_message,
                 from_email=from_address,
@@ -115,12 +115,20 @@ class Notifier:
         except Exception as e:
             self.mail_exception = e
             # return False
-        # else:
-        Notification.objects.create(
-            user=self.user,
-            event_template=notification_template,
-            is_artist=bool(getattr(self, 'artist', False))
-        )
+        else:
+            if (not sent) and settings.DEBUG:
+                send_mail(
+                    subject="Failed message",
+                    message=f"Failed to send email message. Sent: '{sent}'",
+                    from_email=from_address,
+                    recipient_list=["jordanprechac@revibe.tech",]
+                )
+            else:
+                Notification.objects.create(
+                    user=self.user,
+                    event_template=notification_template,
+                    is_artist=bool(getattr(self, 'artist', False))
+                )
 
         return True
 

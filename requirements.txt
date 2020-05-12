@@ -51,7 +51,7 @@ protobuf==3.11.2
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.19
-pycurl==7.43.0.5 --global-option="--with-nss"
+pycurl==7.43.0.5 --install-option="--with-openssl"
 pydub==0.23.1
 PyHamcrest==2.0.2
 pynamodb==4.2.0

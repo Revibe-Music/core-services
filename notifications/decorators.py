@@ -43,7 +43,6 @@ def notifier(trigger, user_after_request=False, *args, **kwargs):
                 # check the args for a request
                 if USER == None:
                     for arg in func_args:
-                        print(arg)
                         if isinstance(arg, (HttpRequest, Request)):
                             # the argument is a request
                             user = get_user_from_request(arg)
@@ -51,7 +50,6 @@ def notifier(trigger, user_after_request=False, *args, **kwargs):
                                 USER = user
                                 break
 
-                print(USER)
                 if USER != None:
                     # we found a user in a request somewhere
                     user_id = USER.id
@@ -63,6 +61,7 @@ def notifier(trigger, user_after_request=False, *args, **kwargs):
                 result = result[0]
                 if isinstance(expect_user, CustomUser):
                     user_id = expect_user.id
+                    send_notification(user_id, trigger, *args, **kwargs)
                     send_notification.delay(user_id, trigger, *args, **kwargs)
     
             return result

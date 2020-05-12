@@ -579,3 +579,47 @@ class ArtistAnalyticsCalculation(models.Model):
         verbose_name = _("artist analytics calculation")
         verbose_name_plural = _("artist analytics calculations")
 
+
+class Survey(models.Model):
+    # relationships
+    user = models.ForeignKey(
+        to='accounts.customuser',
+        on_delete=models.SET_NULL,
+        related_name="surveys",
+        limit_choices_to={"programmatic_account": False},
+        null=True, blank=True,
+        verbose_name=_("user"),
+        help_text=_("User that filled out the survey")
+    )
+
+    # core fields
+    name = models.CharField(
+        max_length=255,
+        null=False, blank=False, unique=True,
+        verbose_name=_("name"),
+        help_text=_("Name of the survey. Must be unique")
+    )
+    response = models.TextField(
+        null=False, blank=False,
+        verbose_name=_("response"),
+        help_text=_("Survey response. Should be stored as JSON")
+    )
+
+    # extras
+    date_created = models.DateTimeField(
+        auto_now_add=True
+    )
+    last_changed = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return f"{self.name} ({self.id})"
+
+    def __repr__(self):
+        return classes.default_repr(self)
+
+    class Meta:
+        verbose_name = "survey"
+        verbose_name_plural = "surveys"
+

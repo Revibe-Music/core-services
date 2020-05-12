@@ -153,6 +153,11 @@ class ArtistAnalyticsCalculationAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(Survey)
+class SurveyAdmin(admin.ModelAdmin):
+    pass
+
+
 # general admin information and changes
 admin.site.empty_value_display = "-empty-"
 admin.site.site_header = "Revibe Administration"

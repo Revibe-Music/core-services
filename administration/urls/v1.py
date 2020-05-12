@@ -12,6 +12,7 @@ router.register('youtubekey', v1.YouTubeKeyViewSet, 'youtubekey')
 router.register('alerts', v1.AlertViewSet, 'alerts')
 router.register('blog', v1.BlogViewSet, 'blog')
 router.register('variables', v1.StateVariablesView, 'variables')
+router.register('surveys', v1.SurveyViewSet, 'surveys')
 
 urlpatterns = [
     path('', include(router.urls)),

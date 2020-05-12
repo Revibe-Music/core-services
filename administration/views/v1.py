@@ -326,3 +326,19 @@ class StateVariablesView(viewsets.GenericViewSet):
 
         return responses.OK(data=variables)
 
+
+class SurveyViewSet(viewsets.ModelViewSet):
+    queryset = Survey.objects.all()
+    serializer_class = adm_ser_v1.SurveySerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = CustomLimitOffsetPagination
+
+    def list(self, request, *args, **kwargs):
+        raise network.ForbiddenError()
+    def retrieve(self, request, *args, **kwargs):
+        raise network.ForbiddenError()
+    def update(self, request, *args, **kwargs):
+        pass
+    def destroy(self, request, *args, **kwargs):
+        pass
+

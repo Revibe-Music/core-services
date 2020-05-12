@@ -158,6 +158,32 @@ class BlogSerializer(serializers.ModelSerializer):
         raise network.BadEnvironmentError("Cannot update a blog post from the API")
 
 
+class SurveySerializer(serializers.ModelSerializer):
+
+    response = serializers.JSONField()
+
+    class Meta:
+        model = Survey
+        fields = [
+            'name',
+            'response',
+        ]
+
+    def create(self, validated_data, *args, **kwargs):
+        instance = super().create(validated_data, *args, **kwargs)
+
+        request = self.context.get('request', None)
+        if request and hasattr(request, 'user'):
+            if request.user.is_authenticated:
+                try:
+                    instance.user = request.user
+                    instance.save()
+                except Exception:
+                    pass
+
+        return instance
+
+
 # metrics information
 
 class UserMetricsSerializer(serializers.ModelSerializer):

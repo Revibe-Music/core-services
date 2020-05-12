@@ -1,0 +1,3 @@
+https://stackoverflow.com/questions/54377193/celery-workers-failing-in-aws-elastic-beanstalk-exited-celeryd-worker-exit-st
+https://stackoverflow.com/questions/41161691/how-to-run-a-celery-worker-with-django-app-scalable-by-aws-elastic-beanstalk/41161692#41161692
+https://stackoverflow.com/questions/36339529/pip-requirements-txt-global-option-causing-installation-errors-with-other-pack/41097851#41097851

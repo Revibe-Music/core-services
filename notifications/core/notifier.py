@@ -115,7 +115,7 @@ class Notifier:
             return False
         except Exception as e:
             self.mail_exception = e
-            # return False
+            return False
         else:
             if (not sent) and settings.DEBUG:
                 send_mail(
@@ -124,7 +124,7 @@ class Notifier:
                     from_email=from_address,
                     recipient_list=["jordanprechac@revibe.tech",]
                 )
-            else:
+            elif sent:
                 Notification.objects.create(
                     user=self.user,
                     event_template=notification_template,

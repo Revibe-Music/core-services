@@ -63,7 +63,7 @@ def notifier(trigger, user_after_request=False, *args, **kwargs):
                     user_id = expect_user.id
                     send_notification(user_id, trigger, *args, **kwargs)
                     send_notification.delay(user_id, trigger, *args, **kwargs)
-    
+
             return result
 
         return wrapper

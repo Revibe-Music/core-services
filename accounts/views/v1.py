@@ -434,8 +434,12 @@ class GoogleLogin(SocialLoginView):
         else:
             # local
             root = "127.0.0.1:8000"
-        
+
         return f"{method}{root}/v1/account/google-authentication/callback/"
+
+    @notifier(trigger="social-register", force=True, medium='email')
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
 
 class FacebookLogin(SocialLoginView):
@@ -461,6 +465,10 @@ class FacebookLogin(SocialLoginView):
 
         return f"{method}{root}/v1/account/facebook-authentication/callback/"
 
+    @notifier(trigger="social-register", force=True, medium='email')
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
 
 # Linked Account Views
 
@@ -485,6 +493,10 @@ class SpotifyConnect(SocialConnectView):
         social_account = SocialAccount.objects.get(user=self.user,provider="spotify")
         spotify_token = SocialToken.objects.get(account=social_account)
         return Response({'access_token':spotify_token.token,'refresh_token':spotify_token.token_secret,"expires_in": 3600}, status=status.HTTP_200_OK)
+
+    @notifier(trigger="spotify-connect", force=True, medium='email')
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -529,6 +541,7 @@ class SpotifyLogout(generics.GenericAPIView):
         'POST': [['ADMIN'], ['first-party']]
     }
 
+    @notifier(trigger="spotify-disconnect", force=True, medium='email')
     def post(self, request, *args, **kwargs):
         if SocialAccount.objects.filter(user=request.user,provider="spotify").exists():
             social_account = SocialAccount.objects.get(user=request.user,provider="spotify")
@@ -556,7 +569,7 @@ class UserLinkedAccounts(viewsets.ModelViewSet):
 
 class UserArtistViewSet(GenericPlatformViewSet):
     """
-    Artist Portal ONLY
+    Contains the core functionality for the Artist Portal
     """
     platform = 'Revibe'
     queryset = CustomUser.objects.all()
@@ -1290,6 +1303,9 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
 
 class ArtistAnalyticsViewSet(GenericPlatformViewSet):
+    """
+    Contains the endpoints for the Artist Portal Dashboards
+    """
     platform = "revibe"
     permission_classes = [TokenOrSessionAuthentication]
     required_alternate_scopes = {

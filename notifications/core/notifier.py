@@ -18,6 +18,7 @@ from revibe._helpers import const
 from revibe.contrib.queries.querysets import random_object
 
 from administration.utils import retrieve_variable
+from content.models import Album, Song
 from notifications.models import Event, Notification
 
 from .config import base_email_config
@@ -42,6 +43,14 @@ class Notifier:
 
         self.event = self._get_event(trigger)
         self.templates = self.event.templates.filter(active=True)
+
+        if 'album_id' in kwargs.keys():
+            try:
+                self.album = Album.objects.get(id=kwargs['album_id'])
+            except Album.DoesNotExist:
+                self.album = None
+        else:
+            self.album = None
 
 
     def _get_event(self, trigger):
@@ -80,6 +89,13 @@ class Notifier:
         config = base_email_config
         config['user'] = self.user
         config['artist'] = getattr(self, 'artist', None)
+
+        if config['artist'] not in  [None, False]:
+            config['artist_name'] = self.user.artist.name
+
+        if self.album:
+            config['album_name'] = self.album.name
+            config['album_songs_count'] = self.album.songs.count()
 
         return config
 

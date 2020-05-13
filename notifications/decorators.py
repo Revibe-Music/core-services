@@ -16,7 +16,7 @@ from .tasks import send_notification
 # -----------------------------------------------------------------------------
 
 
-def notifier(trigger, user_after_request=False, *args, **kwargs):
+def notifier(trigger, user_after_request=False, album=False, *args, **kwargs):
     """ Sends a notification to the user referenced """
 
     def decorator(func):
@@ -24,7 +24,12 @@ def notifier(trigger, user_after_request=False, *args, **kwargs):
         @wraps(func)
         def wrapper(*func_args, **func_kwargs):
             result = func(*func_args, **func_kwargs)
-            
+
+            # check for extra stuff to pass to the Notifier class
+            if album:
+                kwargs['album_id'] = result['album_id']
+
+            # do the normal check for a request
             if not user_after_request:
                 def get_user_from_request(request):
                     user = getattr(request, 'user', None)
@@ -61,7 +66,6 @@ def notifier(trigger, user_after_request=False, *args, **kwargs):
                 result = result[0]
                 if isinstance(expect_user, CustomUser):
                     user_id = expect_user.id
-                    send_notification(user_id, trigger, *args, **kwargs)
                     send_notification.delay(user_id, trigger, *args, **kwargs)
 
             return result

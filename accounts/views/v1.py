@@ -437,7 +437,7 @@ class GoogleLogin(SocialLoginView):
 
         return f"{method}{root}/v1/account/google-authentication/callback/"
 
-    @notifier(trigger="social-register", force=True, medium='email')
+    @notifier(trigger="social-register", force=True, medium='email', skip_first=True)
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -465,7 +465,7 @@ class FacebookLogin(SocialLoginView):
 
         return f"{method}{root}/v1/account/facebook-authentication/callback/"
 
-    @notifier(trigger="social-register", force=True, medium='email')
+    @notifier(trigger="social-register", force=True, medium='email', skip_first=True)
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
@@ -775,6 +775,11 @@ class UserArtistViewSet(GenericPlatformViewSet):
         return data
 
     @action(detail=False, methods=['get','post','patch','delete'])
+    @notifier(
+        trigger='album-upload',
+        methods=['post'], album=True, 
+        force=True, medium='email', artist=True, check_first=True
+    )
     def albums(self, request, *args, **kwargs):
         """
         """
@@ -953,6 +958,11 @@ class UserArtistViewSet(GenericPlatformViewSet):
             'albums': album_serializer.data
         })
 
+    @notifier(
+        trigger='new-contribution',
+        methods=['post'], album=True,
+        force=True, medium='email', artist=True, check_first=True
+    )
     @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums', url_name="album_contributions")
     def album_contributions(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
@@ -1016,6 +1026,16 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.NO_REQUEST_TYPE()
 
     @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/songs', url_name="song_contributions")
+    @notifier(
+        trigger='inverse-new-contribution', user_target="data.artist_id.artist_user",
+        methods=['post'], song=True,
+        force=True, medium='email', artsit=True, check_first=True
+    )
+    @notifier(
+        trigger='new-contribution',
+        methods=['post'], song=True,
+        force=True, medium='email', artist=True, check_first=True
+    )
     def song_contributions(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
 
@@ -1114,13 +1134,6 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         return responses.UPDATED(serializer(instance=contribution))
 
-
-        artist = self.get_current_artist(request)
-
-        if request.method == 'GET':
-            raise NotImplementedError()
-
-        return responses.NO_REQUEST_TYPE()
 
     # register social media
     @action(detail=False, methods=['post', 'patch', 'delete'], url_path="social-media", url_name="social_media")
@@ -1291,15 +1304,6 @@ class UserArtistViewSet(GenericPlatformViewSet):
             remove_genres_from_object(genres, album)
 
             return responses.DELETED()
-
-    # @action(detail=False, methods=['get'], url_path="analytics", url_name="analytics")
-    # def artist_analytics(self, request, *args, **kwargs):
-    #     artist = self.get_current_artist(request)
-
-    #     output = {}
-    #     output['unique_monthly_listeners'] = calculate_unique_monthly_listeners(artist, include_contributions=True, split_contributions=True)
-
-    #     return responses.OK(data=output)
 
 
 class ArtistAnalyticsViewSet(GenericPlatformViewSet):

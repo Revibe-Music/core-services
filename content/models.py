@@ -257,24 +257,24 @@ class Album(models.Model):
         result = getattr(self, 'song_set').all().annotate(count_streams=models.Count('streams__id')).aggregate(models.Sum('count_streams'))
         return result["count_streams__sum"]
 
+    def delete(self):
+        songs = Song.objects.filter(album=self)
+        for s in songs:
+            s.delete()
+
+        images = Image.objects.filter(album=self)
+        for i in images:
+            i.delete()
+
+        self.is_displayed = False
+        self.is_deleted = True
+        self.save()
+
     def __str__(self):
         return "{}".format(self.name) + ("*" if self.is_deleted else "")
 
     def __repr__(self):
         return default_repr(self)
-
-    def delete(self):
-        songs = Song.objects.filter(album=self)
-        for s in songs:
-            s.delete()
-        
-        images = Image.objects.filter(album=self)
-        for i in images:
-            i.delete()
-        
-        self.is_displayed = False
-        self.is_deleted = True
-        self.save()
 
     class Meta:
         verbose_name = 'album'

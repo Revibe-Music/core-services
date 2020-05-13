@@ -11,6 +11,8 @@ import datetime
 
 from revibe.utils.classes import default_repr
 
+from . import managers
+
 # -----------------------------------------------------------------------------
 
 class Event(models.Model):
@@ -64,6 +66,10 @@ class Event(models.Model):
     last_changed = models.DateTimeField(
         auto_now=True
     )
+
+    # model stuff
+    objects = managers.EventManager()
+    active_objects = managers.ActiveEventManager()
 
     def __str__(self):
         return self.name

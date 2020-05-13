@@ -5,11 +5,14 @@ Author: Jordan Prechac
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db.models import Q
 from django.utils.html import strip_tags
 
 import datetime
 import random
+import re
 import smtplib
+import sys
 
 import logging
 logger = logging.getLogger(__name__)
@@ -19,14 +22,18 @@ from revibe.contrib.queries.querysets import random_object
 
 from administration.utils import retrieve_variable
 from content.models import Album, Song
+from notifications.exceptions import NotificationException
 from notifications.models import Event, Notification
+from notifications.utils.models.event import get_event, get_events
 
 from .config import base_email_config
 
 # -----------------------------------------------------------------------------
 
 class Notifier:
-    def __init__(self, user, trigger, artist=False, force=False, medium='email', *args, **kwargs):
+    def __init__(self, user, trigger, artist=False, force=False, medium='email', check_first=False, *args, **kwargs):
+        """
+        """
         self.user = user
 
         self.email = getattr(user.profile, 'email')
@@ -41,25 +48,40 @@ class Notifier:
         self.mediums = self._validate_medium(medium)
         self.force = force
 
-        self.event = self._get_event(trigger)
+        self._setup_album(kwargs.pop('album_id', None))
+        self._setup_song(kwargs.pop('song_id', None))
+
+        self.event = self._get_event(trigger, check_first=check_first)
         self.templates = self.event.templates.filter(active=True)
 
-        if 'album_id' in kwargs.keys():
-            try:
-                self.album = Album.objects.get(id=kwargs['album_id'])
-            except Album.DoesNotExist:
-                self.album = None
-        else:
-            self.album = None
 
+    def _get_event(self, trigger, check_first=False):
+        # if we are checking if its the first notification of this event:
+        events = Event.active_objects.all()
+        if check_first:
+            # get the notifications this user has received about this event
+            event_filter = Q(trigger=trigger) | Q(trigger=trigger+"-first")
+            events = get_events(events, *(event_filter,))
 
-    def _get_event(self, trigger):
+            notifications = Notification.objects.filter(user=self.user, event_template__event__in=events)
+            num_notifications = notifications.count()
+
+            if num_notifications == 0:
+                trigger += "-first"
+            else:
+                check_first=False
+
         try:
-            event = Event.objects.get(trigger=trigger)
+            return get_event(events, raise_exception=True, trigger=trigger)
         except Event.DoesNotExist:
-            raise ValueError(f"Trigger '{trigger}' does not correspond to an Event")
+            # if we're already not checking the first one
+            if not check_first:
+                logger.fatal("Failed to find notification event")
+                raise NotificationException("Failed to find notification event")
+                
 
-        return event
+            trigger = re.sub('\-first$', '', trigger)
+            return self._get_event(trigger, check_first=False)
 
     def _validate_medium(self, medium, *args, **kwargs):
         allowed_mediums = ['email','in_app','sms', 'push']
@@ -84,6 +106,24 @@ class Notifier:
         else:
             raise TypeError(f"Incorrect type for kwarg 'medium': {type(medium)}")
 
+    def _setup_album(self, album_id):
+        self.album = None
+        if album_id:
+            try:
+                self.album = Album.hidden_objects.get(id=album_id)
+            except Album.DoesNotExist:
+                pass
+        return self.album
+    
+    def _setup_song(self, song_id):
+        self.song = None
+        if song_id:
+            try:
+                self.song = Song.hidden_objects.get(id=song_id)
+            except Song.DoesNotExist:
+                pass
+        return self.song
+
     def _configure_kwargs(self):
         """ Configure base kwargs for message formatting """
         config = base_email_config
@@ -96,6 +136,8 @@ class Notifier:
         if self.album:
             config['album_name'] = self.album.name
             config['album_songs_count'] = self.album.songs.count()
+        if self.song:
+            config['song_name'] = self.album.title
 
         return config
 

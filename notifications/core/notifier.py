@@ -90,7 +90,7 @@ class Notifier:
 
         notification_template = random_object(self.templates.filter(medium='email'))
 
-        from_address = getattr(self.event, 'from_address', '"Revibe" <no-reply@revibe.tech>')
+        from_address = getattr(self.event, 'from_address', '"Revibe" <noreply@revibe.tech>')
 
         # get message subject
         subject = getattr(notification_template, 'subject')

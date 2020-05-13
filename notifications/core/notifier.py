@@ -84,6 +84,10 @@ class Notifier:
         return config
 
     def send_email(self):
+        # don't send anything if the user doesn't let us
+        if not self.user.profile.allow_email_notifications:
+            return
+
         config = self._configure_kwargs()
         config['user'] = self.user
         config['username'] = self.user.username
@@ -134,13 +138,25 @@ class Notifier:
         return True
 
     def send_sms(self):
-        pass
+        # don't send anything if the user doesn't let us
+        if not self.user.profile.allow_sms_notifications:
+            return
+        
+        return
 
     def send_in_app(self):
-        pass
+        # don't send anything if the user doesn't let us
+        if not self.user.profile.allow_in_app_notifications:
+            return
+        
+        return
 
     def send_push(self):
-        pass
+        # don't send anything if the user doesn't let us
+        if not self.user.profile.allow_push_notifications:
+            return
+        
+        return
 
     def send(self, *args, **kwargs):
         """ Small function name for the send_notification method """

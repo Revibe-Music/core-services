@@ -159,6 +159,21 @@ class Profile(models.Model):
         verbose_name=_("allow email reminders"),
         help_text=_("Allow reminders sent by email")
     )
+    allow_sms_notifications = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("allow sms notifications"),
+        help_text=_("Allow notifications to be sent by sms")
+    )
+    allow_push_notifications = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("allow pushy notifications"),
+        help_text=_("Allow push notifications to be sent to the user's device")
+    )
+    allow_in_app_notifications = models.BooleanField(
+        null=False, blank=True, default=True,
+        verbose_name=_("allow in-app notifications"),
+        help_text=_("Allow notifications to be sent in Revibe applications")
+    )
 
     def _link_to_self(self):
         return format_html(

@@ -26,6 +26,24 @@ class EventAdmin(admin.ModelAdmin):
         'description',
     ]
 
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'trigger', 'desired_action'),
+            'classes': ('extrapretty', 'wide'),
+        }),
+        ('Email', {
+            'fields': ('sent_address',),
+            'classes': ('extrapretty', 'wide', 'collapse', 'in'),
+        }),
+        ('Configuration', {
+            'fields': ('active', 'description', 'date_created', 'last_changed', ),
+            'classes': ('extrapretty', 'wide', 'collapse', 'in'),
+        }),
+    )
+    readonly_fields = (
+        'date_created', 'last_changed',
+    )
+
 
 @admin.register(NotificationTemplate)
 class NotificationTemplateAdmin(admin.ModelAdmin):
@@ -48,6 +66,25 @@ class NotificationTemplateAdmin(admin.ModelAdmin):
         'description',
         'event__description',
     ]
+
+    fieldsets = (
+        (None, {
+            'fields': ('event', 'medium', 'body',),
+            'classes': ('extrapretty', 'wide',),
+        }),
+        ('Email', {
+            'fields': ('subject', ),
+            'classes': ('extrapretty', 'wide', 'collapse', 'in'),
+        }),
+        ('Configuration', {
+            'fields': ('active', 'description', 'date_created', 'last_changed',),
+            'classes': ('extrapretty', 'wide', 'collapse', 'in'),
+        }),
+    )
+    readonly_fields = (
+        'date_created',
+        'last_changed',
+    )
 
 
 @admin.register(Notification)

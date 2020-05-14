@@ -590,7 +590,15 @@ class UserArtistViewSet(GenericPlatformViewSet):
         artist = self.serializer_class(artist, context=self.get_serializer_context())
         return responses.OK(serializer=artist)
 
+    @notifier(
+        trigger="create-artist-profile",
+        force=True,
+        medium='email', artist=True
+    )
     def create(self, request, *args, **kwargs):
+        """
+        Creates an Artist Profile
+        """
         kwargs['context'] = self.get_serializer_context()
         # check if user already has an artist object
         if request.user.artist != None:

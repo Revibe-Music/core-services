@@ -961,6 +961,11 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
     @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums', url_name="album_contributions")
     @notifier(
+        trigger='inverse-new-contribution', user_target='data.artist_id.artist_user',
+        methods=['post'], album=True,
+        force=True, medium='email', artist=True, check_first=True
+    )
+    @notifier(
         trigger='new-contribution',
         methods=['post'], album=True,
         force=True, medium='email', artist=True, check_first=True
@@ -1099,6 +1104,18 @@ class UserArtistViewSet(GenericPlatformViewSet):
             return responses.NO_REQUEST_TYPE()
 
     @action(detail=False, methods=['post'], url_path="contributions/approve")
+    @notifier(
+        trigger="approve-contribution",
+        medium='email', artist=True, check_first=True
+    )
+    @notifier(
+        trigger="approve-contribution-inverse", user_target="data.song_id.uploaded_by.artist_user",
+        force=True, medium='email', artist=True
+    )
+    @notifier(
+        trigger="approve-contribution-inverse", user_target="data.album_id.uploaded_by.artist_user",
+        force=True, medium='email', artist=True
+    )
     def approve_contribution(self, request, *args, **kwargs):
         """
         Approves or denies song and album contributions.

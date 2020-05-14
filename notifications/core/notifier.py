@@ -139,6 +139,10 @@ class Notifier:
         if self.song:
             config['song_name'] = self.album.title
 
+        # temp
+        config['contribution_status'] = "approve"
+        config['contribution_status_past'] = "approved"
+
         return config
 
     def send_email(self):
@@ -174,9 +178,11 @@ class Notifier:
             )
         except smtplib.SMTPException as e:
             self.mail_exception = e
+            raise e
             return False
         except Exception as e:
             self.mail_exception = e
+            raise e
             return False
         else:
             if (not sent) and settings.DEBUG:
@@ -235,7 +241,8 @@ class Notifier:
             # get the notifications of this user in the last cooldown time
             # if the user has been sent a notification in that time, don't send them anything
             notifications = Notification.objects.filter(user=self.user, date_created__gte=date_filter)
-            if notifications.count() >= 0:
+            print("User's notifications: ", notifications)
+            if notifications.count() > 0:
                 return False
 
 

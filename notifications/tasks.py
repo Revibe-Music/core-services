@@ -15,8 +15,8 @@ def send_notification(user_id, trigger, *args, **kwargs):
     user = CustomUser.objects.get(id=user_id)
 
     notifier = Notifier(user, trigger, *args, **kwargs)
-    notifier.send()
+    result = notifier.send()
 
-    return None
+    return result
 
 

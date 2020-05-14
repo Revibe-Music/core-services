@@ -139,7 +139,6 @@ class NotifierDecorator:
                     if _.status_code < 200 and _.status_code >= 300:
                         return _
 
-
             self.request = self._get_request(func_args, func_kwargs)
 
             # validate the stuff
@@ -179,8 +178,8 @@ class NotifierDecorator:
 
         wrapper.__name__ = func.__name__
         wrapper.__doc__ = func.__doc__
-        self.__name__ = func.__name__
-        self.__doc__ = func.__doc__
+        # self.__name__ = func.__name__
+        # self.__doc__ = func.__doc__
 
         return wrapper
 

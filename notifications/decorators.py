@@ -103,11 +103,12 @@ class NotifierDecorator:
     url_name = None
     kwargs = None
 
-    def __init__(self, trigger, user_target=None, methods=[], user_after_request=False, album=False, song=False, countdown=1, expires=one_hour, *conf_args, **conf_kwargs):
+    def __init__(self, trigger, user_target=None, methods=[], user_after_request=False, album=False, song=False, contribution=False, countdown=1, expires=one_hour, *conf_args, **conf_kwargs):
         self.trigger = trigger
         self.user_after_request = user_after_request
         self.album = album
         self.song = song
+        self.contribution = contribution
         self.countdown = countdown
         self.expires = expires
         self.conf_args = conf_args
@@ -138,6 +139,7 @@ class NotifierDecorator:
                 if hasattr(_, 'status_code'):
                     if _.status_code < 200 and _.status_code >= 300:
                         return _
+                self._result = result
 
             self.request = self._get_request(func_args, func_kwargs)
 
@@ -237,6 +239,8 @@ class NotifierDecorator:
             self.conf_kwargs['album_id'] = get_album_id(result)
         if self.song:
             self.conf_kwargs['song_id'] = get_song_id(result)
+        if self.contribution:
+            self.conf_kwargs['contribution'] = getattr(self._extract_result(self._result), 'data', None)
         self.conf_kwargs['inverse'] = self.inverse
 
     def _assert_request(self):

@@ -50,9 +50,13 @@ class Notifier:
 
         self._setup_album(kwargs.pop('album_id', None))
         self._setup_song(kwargs.pop('song_id', None))
+        self._setup_contribution(kwargs.pop('contribution', None))
 
         self.event = self._get_event(trigger, check_first=check_first)
         self.templates = self.event.templates.filter(active=True)
+
+        self.args = args
+        self.kwargs = kwargs
 
 
     def _get_event(self, trigger, check_first=False):
@@ -123,6 +127,19 @@ class Notifier:
             except Song.DoesNotExist:
                 pass
         return self.song
+    
+    def _setup_contribution(self, contribution):
+        self.is_contribution = bool(contribution)
+        if self.is_contribution:
+            self.contribution = contribution
+
+            try:
+                if 'album_id' in self.contribution.keys():
+                    self._setup_album(self.contribution.get("album_id"))
+                elif 'song_id' in self.contribution.keys():
+                    self._setup_song(self.contribution.get("album_id"))
+            except Exception:
+                pass
 
     def _configure_kwargs(self):
         """ Configure base kwargs for message formatting """
@@ -140,8 +157,9 @@ class Notifier:
             config['song_name'] = self.album.title
 
         # temp
-        config['contribution_status'] = "approve"
-        config['contribution_status_past'] = "approved"
+        if self.is_contribution:
+            config['contribution_status'] = "approve" if self.contribution.get('approved', False) else "deny"
+            config['contribution_status_past'] = "approved" if self.contribution.get('approved', False) else "denied"
 
         return config
 

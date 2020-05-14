@@ -1106,14 +1106,17 @@ class UserArtistViewSet(GenericPlatformViewSet):
     @action(detail=False, methods=['post'], url_path="contributions/approve")
     @notifier(
         trigger="approve-contribution",
+        contribution=True,
         medium='email', artist=True, check_first=True
     )
     @notifier(
         trigger="approve-contribution-inverse", user_target="data.song_id.uploaded_by.artist_user",
-        force=True, medium='email', artist=True
+        contribution=True,
+        force=True, medium='email', artist=True,
     )
     @notifier(
         trigger="approve-contribution-inverse", user_target="data.album_id.uploaded_by.artist_user",
+        contribution=True,
         force=True, medium='email', artist=True
     )
     def approve_contribution(self, request, *args, **kwargs):

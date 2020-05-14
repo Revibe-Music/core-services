@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
 
 from .models import *
 
@@ -34,10 +35,12 @@ class EventAdmin(admin.ModelAdmin):
         ('Email', {
             'fields': ('sent_address',),
             'classes': ('extrapretty', 'wide', 'collapse', 'in'),
+            'description': _("Fields that will only be utilized if this Event will use email notifications."),
         }),
         ('Configuration', {
             'fields': ('active', 'description', 'date_created', 'last_changed', ),
             'classes': ('extrapretty', 'wide', 'collapse', 'in'),
+            'description': _("Additional configuration options and descriptions.")
         }),
     )
     readonly_fields = (
@@ -75,10 +78,12 @@ class NotificationTemplateAdmin(admin.ModelAdmin):
         ('Email', {
             'fields': ('subject', ),
             'classes': ('extrapretty', 'wide', 'collapse', 'in'),
+            'description': ('Fields that will only be utilized if this is an email template.'),
         }),
         ('Configuration', {
             'fields': ('active', 'description', 'date_created', 'last_changed',),
             'classes': ('extrapretty', 'wide', 'collapse', 'in'),
+            'description': _("Additional configuration options and descriptions."),
         }),
     )
     readonly_fields = (

@@ -38,7 +38,7 @@ class Event(models.Model):
     )
     desired_action = models.CharField(
         max_length=255,
-        null=False, blank=False,
+        null=True, blank=True,
         verbose_name=_("desired action"),
         help_text=_("Action the user is desired to take after receiving this notification")
     )

@@ -4,10 +4,14 @@ Author: Jordan Prechac
 """
 
 from .auth import PasswordValidationError
+from .base import AccountsException
 
 # -----------------------------------------------------------------------------
 
+
+
 __all__ = [
+    AccountsException,
     PasswordValidationError
 ]
 

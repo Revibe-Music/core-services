@@ -42,6 +42,7 @@ from revibe._helpers import responses, const
 
 from accounts.adapter import TokenAuthSupportQueryString
 from accounts.artist.analytics import BarChart, CardChart, LineChart
+from accounts.exceptions import AccountsException, PasswordValidationError
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.serializers.v1 import *
@@ -958,12 +959,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
             'albums': album_serializer.data
         })
 
+    @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums', url_name="album_contributions")
     @notifier(
         trigger='new-contribution',
         methods=['post'], album=True,
         force=True, medium='email', artist=True, check_first=True
     )
-    @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums', url_name="album_contributions")
     def album_contributions(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
 
@@ -1381,12 +1382,19 @@ class UserViewSet(viewsets.GenericViewSet):
         else:
             return responses.SERIALIZER_ERROR_RESPONSE(serializer)
         return responses.DEFAULT_400_RESPONSE()
-    
+
     @action(detail=False, methods=['post'], url_path="change-password", url_name="change-password")
+    @notifier(
+        trigger="change-password",
+        force=True, medium='email',
+    )
     def change_password(self, request, *args, **kwargs):
         user = request.user
 
-        change_password(user, **dict(request.data))
+        try:
+            change_password(user, **dict(request.data))
+        except PasswordValidationError as e:
+            raise network.BadRequestError(str(e))
 
         return responses.UPDATED()
 

@@ -2,6 +2,7 @@ from revibe.settings.base import *
 
 ENV = 'PROD'
 DEBUG = False
+ADMIN_PATH = '68t9gui2btw4gfesvd89yiugh2354rw/'
 
 ALLOWED_HOSTS = [
     'api.revibe.tech',

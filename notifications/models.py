@@ -5,6 +5,7 @@ Author: Jordan Prechac
 
 from django.conf import settings
 from django.db import models
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 import datetime
@@ -66,6 +67,14 @@ class Event(models.Model):
     last_changed = models.DateTimeField(
         auto_now=True
     )
+
+    def _link_to_self(self):
+        return format_html(
+            "<a href='/{}notifications/event/{}'>{}</a>",
+            settings.ADMIN_PATH,
+            self.id,
+            self.__str__()
+        )
 
     # model stuff
     objects = managers.EventManager()

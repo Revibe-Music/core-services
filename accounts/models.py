@@ -74,7 +74,7 @@ class CustomUser(AbstractUser):
 
     def _link_to_self(self):
         return format_html(
-            "<a href='/{}/accounts/customuser/{}'>{}</a>",
+            "<a href='/{}accounts/customuser/{}'>{}</a>",
             settings.ADMIN_PATH,
             self.id,
             self.__str__()

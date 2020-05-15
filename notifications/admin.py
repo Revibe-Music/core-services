@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
 from .models import *
+from .utils.admin import actions
 
 # -----------------------------------------------------------------------------
 
@@ -15,7 +16,8 @@ class EventAdmin(admin.ModelAdmin):
         'active',
     )
     list_filter = (
-        'desired_action',
+        'sent_address',
+        # 'desired_action',
         ('active', admin.BooleanFieldListFilter),
     )
 
@@ -47,13 +49,15 @@ class EventAdmin(admin.ModelAdmin):
         'date_created', 'last_changed',
     )
 
+    actions = [actions.activate_events, actions.deactivate_events]
+
 
 @admin.register(NotificationTemplate)
 class NotificationTemplateAdmin(admin.ModelAdmin):
     # customize list display
     list_display = (
         '__str__',
-        'event',
+        '_get_link_event',
     )
     list_filter = (
         ('event', admin.RelatedOnlyFieldListFilter),
@@ -91,13 +95,20 @@ class NotificationTemplateAdmin(admin.ModelAdmin):
         'last_changed',
     )
 
+    actions = [actions.activate_templates, actions.deactivate_templates]
+
+    def _get_link_event(self, obj):
+        return obj.event._link_to_self()
+    _get_link_event.short_description = "event"
+    _get_link_event.admin_order_field = "event"
+
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
     # customize list display
     list_display = (
         'user',
-        '_event_name',
+        '_get_link_event',
         'seen',
         'action_taken',
     )
@@ -110,11 +121,11 @@ class NotificationAdmin(admin.ModelAdmin):
         ('event_template__event', admin.RelatedOnlyFieldListFilter),
     )
 
-    def _event_name(self, obj):
+    def _get_link_event(self, obj):
         try:
-            return obj.event_template.event.name
+            return obj.event_template.event._link_to_self()
         except Exception:
             return None
-    _event_name.short_description = 'event'
-    _event_name.admin_order_field = 'event_template__event__name'
+    _get_link_event.short_description = 'event'
+    _get_link_event.admin_order_field = 'event_template__event'
 

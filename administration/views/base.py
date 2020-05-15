@@ -26,7 +26,7 @@ def home(request):
     """
     # check database connection
     # ...
-    return responses.OK()
+    return HttpResponse(status=200)
 
 def blank_request(request, *args, **kwargs):
     return HttpResponse(status=200)

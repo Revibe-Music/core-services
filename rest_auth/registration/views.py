@@ -1,3 +1,4 @@
+from django.db.utils import IntegrityError
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
@@ -33,6 +34,7 @@ from .app_settings import RegisterSerializer, register_permission_classes
 
 from revibe._helpers import responses
 
+from accounts.exceptions.api import AccountsConflicError
 from accounts.models import Profile
 from accounts.serializers.v1 import UserSerializer
 from accounts.utils.models import create_access_token
@@ -145,8 +147,9 @@ class SocialLoginView(LoginView):
             self.user = self.serializer.validated_data['user']
             user_email = getattr(self.user, 'email', None)
             Profile.objects.create(user=self.user, email=user_email)
-        except Exception as e:
-            print(e)
+        except IntegrityError as e:
+            self.user.delete()
+            raise AccountsConflicError(str(e))
 
         return self.get_response()
 

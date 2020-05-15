@@ -12,6 +12,6 @@ from .base import AccountsException
 
 __all__ = [
     AccountsException,
-    PasswordValidationError
+    PasswordValidationError,
 ]
 

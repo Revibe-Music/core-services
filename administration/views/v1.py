@@ -297,9 +297,9 @@ class CompanyViewSet(GenericPlatformViewSet):
         data['Streams'] = serializer.data
 
         return responses.OK(data=data)
-    
+
     @action(detail=False, methods=['get'], url_path="search-metrics", url_name="search-metrics")
-    def stream_metrics(self, request, *args, **kwargs):
+    def search_metrics(self, request, *args, **kwargs):
         queryset = Search.objects.all()
         serializer_class = adm_ser_v1.SearchMetricsSerializer
 

@@ -439,13 +439,15 @@ class StreamMetricsSerializer(serializers.ModelSerializer):
     user_id = serializers.ReadOnlyField(source='user.id')
     stream_percentage = serializers.ReadOnlyField()
 
+    platform = serializers.SerializerMethodField(method_name='_get_platform', read_only=True)
+
     class Meta:
         model = Stream
         fields = [
             'id',
             'song_id',
             'user_id',
-            'alternate_platform',
+            'platform',
             'timestamp',
             'stream_duration',
             'stream_percentage',
@@ -453,6 +455,13 @@ class StreamMetricsSerializer(serializers.ModelSerializer):
             'is_saved',
             'source',
         ]
+    
+    def _get_platform(self, obj):
+        if getattr(obj, 'song', None):
+            return obj.song.platform.capitalize()
+        elif obj.alternate_platform:
+            return obj.alternate_platform
+        return None
 
 
 class SearchMetricsSerializer(serializers.ModelSerializer):

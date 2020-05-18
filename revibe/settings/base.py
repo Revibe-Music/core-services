@@ -209,7 +209,24 @@ SOCIALACCOUNT_STORE_TOKENS=True
 
 #Social Account Settings
 SOCIALACCOUNT_PROVIDERS = {
-     'google': {
+    'facebook': {
+        'METHOD': 'oauth2',
+        # 'SDK_URL': '//connect.facebook.net/{}/sdk.js', # leave out to use the default
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'INIT_PARAMS': {'cookie': True},
+        'FIELDS': [
+            'id',
+            'email',
+            'first_name',
+            'last_name',
+        ],
+        'EXCHANGE_TOKEN': True,
+        'LOCALE_FUNC': lambda request: 'en_US',
+        'VERIFIED_EMAIL': False,
+        'VERSION': 'v7.0',
+    },
+    'google': {
         'SCOPE': [
             'profile',
             'email',

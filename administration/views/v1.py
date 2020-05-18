@@ -25,7 +25,7 @@ from administration.models import *
 from administration.serializers import v1 as adm_ser_v1
 from administration.utils.models import see_alert
 from content import models as cnt_models
-from metrics.models import Stream
+from metrics.models import Search, Stream
 
 # -----------------------------------------------------------------------------
 
@@ -295,6 +295,19 @@ class CompanyViewSet(GenericPlatformViewSet):
 
         serializer = serializer_class(queryset, many=True)
         data['Streams'] = serializer.data
+
+        return responses.OK(data=data)
+    
+    @action(detail=False, methods=['get'], url_path="search-metrics", url_name="search-metrics")
+    def stream_metrics(self, request, *args, **kwargs):
+        queryset = Search.objects.all()
+        serializer_class = adm_ser_v1.SearchMetricsSerializer
+
+        data = {}
+        data['Search Count'] = queryset.count()
+
+        serializer = serializer_class(queryset, many=True)
+        data['Searches'] = serializer.data
 
         return responses.OK(data=data)
 

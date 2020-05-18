@@ -10,7 +10,7 @@ from accounts import models as acc_models
 from administration.models import *
 from administration.utils import retrieve_variable
 from content import models as cnt_models
-from metrics.models import Stream
+from metrics.models import Search, Stream
 
 # -----------------------------------------------------------------------------
 
@@ -454,4 +454,16 @@ class StreamMetricsSerializer(serializers.ModelSerializer):
             'source',
         ]
 
+
+class SearchMetricsSerializer(serializers.ModelSerializer):
+
+    user_id = serializers.ReadOnlyField(source='user.id')
+
+    class Meta:
+        model = Search
+        fields = [
+            'search_text',
+            'user_id',
+            'timestamp',
+        ]
 

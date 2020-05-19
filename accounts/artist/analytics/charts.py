@@ -7,7 +7,7 @@ from django.db.models import Count, Q
 
 from content.models import Song
 
-from .utils import Chart
+from .utils import Chart, format_title
 
 # -----------------------------------------------------------------------------
 
@@ -17,19 +17,19 @@ class LineChart(Chart):
 
     def format_data(self, data):
         # configure y axis
-        y_axis_title = getattr(self, 'type_', 'value').title()
+        y_axis_title = format_title(getattr(self, 'type_', 'value'))
         y_axis_config = {
             "title": y_axis_title
         }
 
         # configure x axis
-        x_axis_title = getattr(self, 'time_interval', 'time interval').title()
+        x_axis_title = format_title(getattr(self, 'time_interval', 'time interval').title())
         x_axis_config = {
             "title": x_axis_title
         }
 
         # configure chart info
-        title = getattr(self, 'title', f'{y_axis_title} by {x_axis_title}')
+        title = format_title(getattr(self, 'title', f'{y_axis_title} by {x_axis_title}'))
         description = getattr(self, 'description', None)
 
         final_data = {
@@ -50,6 +50,7 @@ class CardChart(Chart):
     def format_data(self, data):
         # configure chart info
         title = getattr(self, 'title', getattr(self, 'type_').title())
+        title = format_title(title)
         if getattr(self, 'time_period_string', None) != 'all-time':
             title += (' This ' + self.time_period_string.title()) if self.time_period_string != 'day' else " Today"
 
@@ -68,7 +69,7 @@ class BarChart(Chart):
 
     def format_data(self, data):
         # configure y axis
-        y_axis_title = getattr(self, 'type_', 'value').title()
+        y_axis_title = format_title(getattr(self, 'type_', 'value').title())
         y_axis_config = {
             "title": y_axis_title,
         }
@@ -81,7 +82,7 @@ class BarChart(Chart):
 
         # configure chart info
         title = f'Top {self.num_bars} Songs by {y_axis_title}'
-        description = getattr(self, 'description', None)
+        description = format_title(getattr(self, 'description', None))
 
         # final stuff
         final_data = {

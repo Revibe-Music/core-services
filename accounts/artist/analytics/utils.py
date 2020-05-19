@@ -22,8 +22,6 @@ from .serializers import DashboardSongSerializer
 
 # -----------------------------------------------------------------------------
 
-
-
 class Chart:
     def __init__(self, artist, type_, include_contributions=False, time_period=None, time_interval=None, num_bars=None, distinct=None, **kwargs):
         self.initial()
@@ -329,3 +327,7 @@ class Chart:
     def data(self):
         return self._calculate()
 
+
+def format_title(title):
+    s = title.title().replace('_', ' ').replace('Num', '').strip()
+    return s

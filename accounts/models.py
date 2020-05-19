@@ -8,6 +8,8 @@ from django.utils.translation import gettext_lazy as _
 
 from revibe.utils.classes import default_repr
 
+from . import managers
+
 # -----------------------------------------------------------------------------
 
 
@@ -79,6 +81,9 @@ class CustomUser(AbstractUser):
             self.id,
             self.__str__()
         )
+    
+    objects = models.Manager()
+    registered_objects = managers.RegisteredUserManager()
 
 
 class Profile(models.Model):

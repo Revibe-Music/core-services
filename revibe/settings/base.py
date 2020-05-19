@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'communication',
     'content',
     'cloud_storage',
+    'customer_success',
     'distribution',
     'marketplace',
     'merch',

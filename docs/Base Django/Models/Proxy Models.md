@@ -1,0 +1,1 @@
+https://www.benlopatin.com/using-django-proxy-models/

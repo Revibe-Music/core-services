@@ -1,11 +1,11 @@
 """
 """
 
-from django.db.models import Manager
+from django.contrib.auth.models import BaseUserManager
 
 # -----------------------------------------------------------------------------
 
-class RegisteredUserManager(Manager):
+class RegisteredUserManager(BaseUserManager):
     def get_queryset(self):
         return super().get_queryset().filter(
             programmatic_account=False,

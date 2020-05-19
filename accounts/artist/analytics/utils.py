@@ -329,5 +329,7 @@ class Chart:
 
 
 def format_title(title):
-    s = title.title().replace('_', ' ').replace('Num', '').strip()
-    return s
+    if title:
+        s = title.title().replace('_', ' ').replace('Num', '').strip()
+        return s
+    return title

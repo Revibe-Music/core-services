@@ -63,7 +63,7 @@ class Chart:
         self.related_song_field = field_options.get(self.calculation.root_object, None).get('related_song_field', None)
 
         self.include_contributions = include_contributions
-        self.num_bars = num_bars if num_bars else retrieve_variable('artist-dashboard_bar-chart_num-bars', 5)
+        self.num_bars = num_bars if num_bars else retrieve_variable('artist-dashboard_bar-chart_num-bars', 5, output_type=int)
 
         self.get_time_period(time_period)
         self.get_time_interval(time_interval)

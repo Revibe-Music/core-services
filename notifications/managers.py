@@ -14,3 +14,25 @@ class EventManager(models.Manager):
 class ActiveEventManager(EventManager):
     def get_queryset(self):
         return super().get_queryset().filter(active=True)
+
+
+# external events
+class ExternalEventManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(type='external')
+
+    def create(self, **kwargs):
+        kwargs.update({'type': 'external'})
+        return super().create(**kwargs)
+
+
+# temporal events
+class TemporalEventManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(type='temporal')
+    
+    def create(self, **kwargs):
+        kwargs.update({'type': 'temporal'})
+        return super().create(**kwargs)
+
+

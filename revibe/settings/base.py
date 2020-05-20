@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     'communication',
     'content',
     'cloud_storage',
-    'customer_success',
+    'customer_success.apps.CustomerSuccessConfig',
     'distribution',
     'marketplace',
     'merch',

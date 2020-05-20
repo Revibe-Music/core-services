@@ -26,6 +26,21 @@ class Event(models.Model):
         verbose_name=_("name"),
         help_text=_("Identifying name of the event")
     )
+
+    TEMPORAL = 'temporal'
+    EXTERNAL = 'external'
+    _type_choices = (
+        (EXTERNAL, 'External'),
+        (TEMPORAL, 'Temporal'),
+    )
+    type = models.CharField(
+        max_length=100,
+        choices=_type_choices,
+        null=False, blank=False, default=EXTERNAL,
+        verbose_name=_("type"),
+        help_text=_("The type of Event this is")
+    )
+
     trigger = models.CharField(
         max_length=255,
         null=False, blank=False,
@@ -89,6 +104,18 @@ class Event(models.Model):
     class Meta:
         verbose_name = "event"
         verbose_name_plural = "events"
+
+
+class ExternalEvent(Event):
+    objects = managers.ExternalEventManager()
+    class Meta:
+        proxy = True
+
+
+class TemporalEvent(Event):
+    objects = managers.TemporalEventManager()
+    class Meta:
+        proxy = True
 
 
 class NotificationTemplate(models.Model):

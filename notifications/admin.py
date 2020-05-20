@@ -1,12 +1,13 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
+from customer_success.utils.admin.inlines import ExternalEventActionInLine
+
 from .models import *
 from .utils.admin import actions
 
 # -----------------------------------------------------------------------------
 
-@admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     # customize list display
     list_display = (
@@ -39,7 +40,7 @@ class EventAdmin(admin.ModelAdmin):
             'classes': ('extrapretty', 'wide', 'collapse', 'in'),
             'description': _("Fields that will only be utilized if this Event will use email notifications."),
         }),
-        ('Configuration', {
+        ('Extras', {
             'fields': ('active', 'description', 'date_created', 'last_changed', ),
             'classes': ('extrapretty', 'wide', 'collapse', 'in'),
             'description': _("Additional configuration options and descriptions.")
@@ -49,8 +50,19 @@ class EventAdmin(admin.ModelAdmin):
         'date_created', 'last_changed',
     )
 
-    actions = [actions.activate_events, actions.deactivate_events]
+    actions = [actions.activate_events, actions.deactivate_events, actions.convert_type]
 
+
+@admin.register(ExternalEvent)
+class ExternalEventAdmin(EventAdmin):
+    inlines = [
+        ExternalEventActionInLine,
+    ]
+
+
+@admin.register(TemporalEvent)
+class TemporalEventAdmin(EventAdmin):
+    pass
 
 @admin.register(NotificationTemplate)
 class NotificationTemplateAdmin(admin.ModelAdmin):

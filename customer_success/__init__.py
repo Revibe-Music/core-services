@@ -1,0 +1,1 @@
+default_all_config = "customer_success.apps.CustomerSuccessConfig"

@@ -90,6 +90,15 @@ side_menu = [ # A list of application or custom item dicts
         ]
     },
     {
+        "label": _("Customer Success"),
+        "items": [
+            {"name": 'customer_success.pathway'},
+            {"name": 'customer_success.action'},
+            {"name": 'customer_success.pathwayaction'},
+            {"name": 'customer_success.actiontaken'},
+        ]
+    },
+    {
         "label": _("Marketplace"),
         "items": [
             {"name": 'marketplace.good'},
@@ -108,7 +117,8 @@ side_menu = [ # A list of application or custom item dicts
     {
         "label": _("Notifications"),
         "items": [
-            {"name": 'notifications.event'},
+            {"name": 'notifications.externalevent'},
+            {"name": 'notifications.temporalevent'},
             {"name": 'notifications.notificationtemplate'},
             {"name": 'notifications.notification'},
         ]

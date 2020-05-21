@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from accounts.admin_ext import actions
 from accounts.models import *
+from customer_success.utils.admin.inlines import UserPathsInline
 
 # -----------------------------------------------------------------------------
 
@@ -16,6 +17,10 @@ class CustomUserAdmin(admin.ModelAdmin):
         ('is_staff', admin.BooleanFieldListFilter),
         ('programmatic_account', admin.BooleanFieldListFilter),
     )
+
+    inlines = [
+        UserPathsInline,
+    ]
 
     # customize search
     search_fields = ['username', 'first_name', 'last_name']

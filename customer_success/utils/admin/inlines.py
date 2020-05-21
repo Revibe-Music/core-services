@@ -5,7 +5,7 @@ Author: Jordan Prechac
 
 from django.contrib import admin
 
-from customer_success.models import Action, PathwayAction
+from customer_success.models import Action, Pathway, PathwayAction
 
 from customer_success.utils.admin.forms import PathwayActionInlineForm
 
@@ -27,5 +27,22 @@ class PathwayActionInline(admin.TabularInline):
 
     verbose_name = "Pathway Ranking"
     verbose_name_plural = "Pathway Rankings"
+
+
+class PathUsersInline(admin.TabularInline):
+    model = Pathway.users.through
+
+    extra = 1
+
+    verbose_name = "User"
+    verbose_name_plural = "Users"
+
+class UserPathsInline(admin.TabularInline):
+    model = Pathway.users.through
+
+    extra = 1
+
+    verbose_name = "Path"
+    verbose_name_plural = "Customer Success Paths"
 
 

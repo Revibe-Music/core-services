@@ -15,6 +15,25 @@ class Pathway(models.Model):
         help_text=_("Human-readable name for the path")
     )
 
+    ARTIST = 'artist'
+    LISTENER = 'listener'
+    _type_choices = (
+        (ARTIST, 'Artist'),
+        (LISTENER, 'Listener'),
+    )
+    type = models.CharField(
+        max_length=100,
+        choices=_type_choices,
+        null=False, blank=False,
+        verbose_name=_("type"),
+        help_text=_("The user group that this pathway is designed for.")
+    )
+    default = models.BooleanField(
+        null=False, blank=False, default=False,
+        verbose_name=_("default"),
+        help_text=_("Denotes if this path is a default path for this user group.")
+    )
+
     # extras
     # active # doesn't make sense here
     description = models.TextField(

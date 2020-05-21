@@ -114,6 +114,11 @@ class ExternalEvent(Event):
 
 class TemporalEvent(Event):
     objects = managers.TemporalEventManager()
+
+    def __init__(self, *args, **kwargs):
+        self._meta.get_field('type').default = self.TEMPORAL
+        super().__init__(*args, **kwargs)
+
     class Meta:
         proxy = True
 

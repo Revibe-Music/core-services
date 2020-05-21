@@ -33,6 +33,14 @@ class Pathway(models.Model):
         verbose_name=_("default"),
         help_text=_("Denotes if this path is a default path for this user group.")
     )
+    users = models.ManyToManyField(
+        to='accounts.CustomUser',
+        related_name='cs_paths',
+        limit_choices_to={"programmatic_account": False},
+        blank=True,
+        verbose_name=_("users"),
+        help_text=_("Users that are likely to be interested in the services promoted on this path")
+    )
 
     # extras
     # active # doesn't make sense here

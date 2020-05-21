@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import *
-from .utils.admin.inlines import PathwayActionInline
+from .utils.admin.inlines import PathwayActionInline, PathUsersInline
 
 # -----------------------------------------------------------------------------
 
@@ -28,6 +28,11 @@ class PathwayAdmin(admin.ModelAdmin):
         ('default', admin.BooleanFieldListFilter),
         'type',
     )
+
+    inlines = [
+        PathwayActionInline,
+        PathUsersInline,
+    ]
 
     search_fields = [
         'name'

@@ -9,7 +9,7 @@ from .utils.admin.inlines import PathwayActionInline
 class PathwayAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
-            "fields": ('name',),
+            "fields": ('name', 'type', 'default',),
             "classes": ('extrapretty', 'wide',),
         }),
         ("Extras", {
@@ -21,6 +21,12 @@ class PathwayAdmin(admin.ModelAdmin):
 
     list_display = (
         'name',
+        'type',
+        'default',
+    )
+    list_filter = (
+        ('default', admin.BooleanFieldListFilter),
+        'type',
     )
 
     search_fields = [

@@ -234,7 +234,7 @@ class Notification(models.Model):
     date_created = models.DateTimeField(
         auto_now_add=True
     )
-    last_changed = models.DateField(
+    last_changed = models.DateTimeField(
         auto_now=True
     )
 

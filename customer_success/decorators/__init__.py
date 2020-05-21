@@ -1,12 +1,12 @@
 """
 Created: 21 May 2020
-Author: Jordan Precac
+Author: Jordan Prechac
 """
 
-from .attributor import Attributor
+from .attribution import attributor
 
 # -----------------------------------------------------------------------------
 
 __all__ = [
-    Attributor,
+    attributor,
 ]

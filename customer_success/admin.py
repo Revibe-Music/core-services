@@ -29,6 +29,10 @@ class PathwayAdmin(admin.ModelAdmin):
         'type',
     )
 
+    inlines = [
+        PathwayActionInline,
+    ]
+
     search_fields = [
         'name'
     ]

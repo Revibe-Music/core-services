@@ -287,13 +287,13 @@ class Chart:
 
     def _calculate_bars(self):
         if self.time_period:
-            obj_filter_keys = [self.related_song_field, self.time_field, 'gte'] if self.root_object != song else [self.time_field, 'gte']
+            obj_filter_keys = [self.related_song_field, self.time_field, 'gte'] if self.root_object != Song else [self.time_field, 'gte']
             obj_filter = Q(**{"__".join(obj_filter_keys): self.time_period})
             annotation = {
                 self.calculation.name: self.calculation.calculation(
                     '__'.join([self.related_song_field, self.calculation.lookup]),
                     distinct=self.use_distinct,
-                    filter=stream_filter
+                    filter=obj_filter
                 )
             }
         else:

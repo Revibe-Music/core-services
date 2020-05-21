@@ -1,12 +1,12 @@
 """
 Created: 21 May 2020
-Author: Jordan Precac
+Author: Jordan Prechac
 """
 
-from .attributor import Attributor
+from .base import BaseRequestDecorator
 
 # -----------------------------------------------------------------------------
 
 __all__ = [
-    Attributor,
+    BaseRequestDecorator,
 ]

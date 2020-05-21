@@ -62,6 +62,7 @@ from content.utils.models import (
     # genre stuff
     add_genres_to_object, remove_genres_from_object
 )
+from customer_success.decorators import attributor
 from metrics.models import Stream
 from music.models import *
 from music.serializers import v1 as music_ser_v1
@@ -789,6 +790,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         methods=['post'], album=True, 
         force=True, medium='email', artist=True, check_first=True
     )
+    @attributor(name="Upload Album", methods=['post'])
     def albums(self, request, *args, **kwargs):
         """
         """
@@ -1166,6 +1168,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
     # register social media
     @action(detail=False, methods=['post', 'patch', 'delete'], url_path="social-media", url_name="social_media")
+    @attributor(name="Register Social Media", methods=['post'])
     def register_social_media(self, request, *args, **kwargs):
         """
         Adds, edits, or removes a social media link from an artist's profile

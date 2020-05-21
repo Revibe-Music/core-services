@@ -3,11 +3,10 @@ Created: 08 May 2020
 Author: Jordan Prechac
 """
 
-from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 from rest_framework.request import Request
 
-import functools
+from revibe.decorators import BaseRequestDecorator
 
 from accounts.models import CustomUser
 
@@ -16,63 +15,10 @@ from .tasks import send_notification
 from .utils.objects import get_album_id, get_song_id, take_step
 
 # -----------------------------------------------------------------------------
+
 one_hour = 60*60
 
-# def notifier(trigger, user_after_request=False, album=False, song=False, countdown=1, expires=one_hour, *args, **kwargs):
-#     """ Sends a notification to the user referenced """
-
-#     def decorator(func):
-
-#         @wraps(func)
-#         def wrapper(*func_args, **func_kwargs):
-#             result = func(*func_args, **func_kwargs)
-
-#             USER = None
-#             REQUEST = get_request(func_args, func_kwargs)
-
-#             # check the request method
-#             methods = kwargs.pop('methods', [])
-#             if (REQUEST != None) and (methods != []):
-#                 methods = [m.upper() for m in methods]
-#                 # if the request method is not a notification method, skip all the other stuff
-#                 if REQUEST.method not in methods:
-#                     return result if not isinstance(result, tuple) else result[0]
-
-#             # check for extra stuff to pass to the Notifier class
-#             if album:
-#                 kwargs['album_id'] = get_album_id(result)
-#             if song:
-#                 kwargs['song_id'] = get_song_id(result)
-
-#             # do the normal check for a request
-#             if not user_after_request:
-#                 if REQUEST != None:
-#                     USER = get_user_from_request(REQUEST)
-
-#             # there won't be a user in the request, so we need to look after it
-#             elif (USER == None) and isinstance(result, tuple):
-#                 expect_user = result[1]
-#                 result = result[0]
-#                 if isinstance(expect_user, CustomUser):
-#                     USER = expect_user
-
-
-#             # we found a user in a request somewhere
-#             if USER != None:
-#                 user_id = USER.id
-#                 # send_notification.delay(user_id, trigger, *args, **kwargs)
-#                 send_notification.s(user_id, trigger, *args, **kwargs) \
-#                     .set(countdown=countdown) \
-#                     .set(expires=expires) \
-#                     .delay()
-
-#             return result
-
-#         return wrapper
-
-#     return decorator
-
-class NotifierDecorator:
+class NotifierDecorator(BaseRequestDecorator):
     """
     Decorator for sending notifications for defined actions.
 
@@ -126,9 +72,6 @@ class NotifierDecorator:
         
 
     def __call__(self, func):
-        # set docstrings and names
-        # self.__doc__ = func.__doc__
-        # self.__name__ = func.__name__
         def wrapper(*func_args, **func_kwargs):
             try:
                 result = func(*func_args, **func_kwargs)
@@ -137,7 +80,7 @@ class NotifierDecorator:
             else:
                 _ = self._extract_result(result)
                 if hasattr(_, 'status_code'):
-                    if _.status_code < 200 and _.status_code >= 300:
+                    if _.status_code < 200 or _.status_code >= 300:
                         return _
                 self._result = result
 
@@ -178,10 +121,9 @@ class NotifierDecorator:
 
             return self._extract_result(result)
 
+        # set function meta info
         wrapper.__name__ = func.__name__
         wrapper.__doc__ = func.__doc__
-        # self.__name__ = func.__name__
-        # self.__doc__ = func.__doc__
 
         return wrapper
 
@@ -197,41 +139,6 @@ class NotifierDecorator:
             if output != func[1]:
                 return False
         return True
-
-    def _extract_result(self, result):
-        """
-        Checks the result of the decorated function to avoid trying to send a tuple or list.
-        """
-        if isinstance(result, tuple):
-            return result[0]
-        else:
-            return result
-
-    # helper functions
-    def _get_request(self, args, kwargs, raise_exception=False):
-        # check the kwargs for a request
-        if 'request' in kwargs.keys():
-            request = kwargs.get('request')
-            self.request = request
-            return request
-        # check the args for a request
-        for arg in args:
-            if isinstance(arg, (HttpRequest, Request)):
-                # the argument is a request
-                self.request = arg
-                return arg
-        
-        # no request was found
-        if raise_exception:
-            raise NotificationException("Could not identify a request object in the function")
-
-    def _get_user_from_request(self, request):
-        user = getattr(request, 'user', None)
-        if (user not in [None, ""]) and (not isinstance(user, AnonymousUser)):
-            # we have a user
-            self.user = user
-            return self.user
-        return None
 
     def _attach_extras(self, result):
         """ Attach extra kwargs to the Notifier class based on the outcome of the main function """

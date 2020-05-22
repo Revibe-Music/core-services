@@ -6,7 +6,8 @@ from metrics.models import *
 
 @admin.register(Stream)
 class StreamAdmin(admin.ModelAdmin):
-    # customize list display
+    readonly_fields = ('timestamp',)
+
     list_display = (
         '__str__',
         'song',

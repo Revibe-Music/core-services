@@ -13,7 +13,7 @@ from administration.models import *
 @admin.register(ContactForm)
 class ContactFormAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__', 'assigned_to', 'get_resolution')
+    list_display = ('__str__', 'assigned_to', 'resolved', 'date_created',)
     list_filter = (
         ('assigned_to', admin.RelatedFieldListFilter),
         'subject',

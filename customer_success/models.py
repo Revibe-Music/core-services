@@ -249,5 +249,15 @@ class ActionTaken(models.Model):
         auto_now_add=True
     )
 
+    def __str__(self):
+        return f"{self.action} - {self.user}"
+
+    def __repr__(self):
+        return default_repr(self)
+
+    class Meta:
+        verbose_name = "action taken"
+        verbose_name_plural = "actions taken"
+
 
 

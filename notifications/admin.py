@@ -117,7 +117,22 @@ class NotificationTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    # customize list display
+    fieldsets = (
+        (None, {
+            "fields": ('event_template', 'user', 'is_artist',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Attribution", {
+            "fields": ('seen', 'action_taken', 'date_of_action',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('id', 'date_created', 'last_changed',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'in',),
+        })
+    )
+    readonly_fields = ('id', 'date_created', 'last_changed',)
+
     list_display = (
         'user',
         '_get_link_event',

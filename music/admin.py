@@ -3,6 +3,7 @@ from django.contrib import admin
 from revibe.admin import html_check_x
 
 from music.models import *
+from music.utils.admin import inlines
 
 # -----------------------------------------------------------------------------
 
@@ -15,20 +16,47 @@ class LibraryAdmin(admin.ModelAdmin):
 
 @admin.register(Playlist)
 class PlaylistAdmin(admin.ModelAdmin):
-    # customize list display
-    list_display = ('__str__', 'user', 'html_public')
+    fieldsets = (
+        (None, {
+            "fields": ('name', 'user', 'description',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Staff", {
+            "fields": ('is_public', 'revibe_curated', 'show_on_browse',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('id', 'date_created', 'last_changed',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'in',),
+        })
+    )
+    readonly_fields = ('id', 'date_created', 'last_changed',)
+
+    inlines = [
+        inlines.PlaylistSongInline,
+        inlines.PlaylistFollowerInline,
+    ]
+
+    list_display = (
+        'name',
+        '_link_to_user',
+        'is_public',
+    )
     list_filter = (
         ('is_public', admin.BooleanFieldListFilter),
         ('revibe_curated', admin.BooleanFieldListFilter),
     )
 
-    # customize search
     search_fields = ['user__username', 'name']
 
-    def html_public(self, obj):
-        return html_check_x(obj, 'is_public')
-    html_public.short_description = 'public status'
-    html_public.admin_order_field = 'is_public'
+    def _link_to_user(self, obj):
+        user = getattr(obj, 'user', None)
+        if user == None:
+            return None
+        
+        return user._link_to_self()
+    _link_to_user.short_description = "user"
+    _link_to_user.admin_order_field = "user"
 
 
 @admin.register(LibrarySong)

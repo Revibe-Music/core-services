@@ -55,6 +55,10 @@ class Playlist(models.Model):
     date_created = models.DateTimeField(
         auto_now_add=True
     )
+    last_changed = models.DateTimeField(
+        auto_now=True,
+        null=True
+    )
 
     class Meta:
         verbose_name = 'playlist'

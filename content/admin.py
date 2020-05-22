@@ -6,7 +6,8 @@ from revibe._helpers.symbols import CROSS_MARK, CHECK_MARK
 
 from content import browse
 from content.admin_ext import (
-    approve_contribution, remove_delete, perform_delete, reprocess_song, reprocess_image, update_mailchimp_info
+    approve_contribution, remove_delete, perform_delete, reprocess_song, reprocess_image, update_mailchimp_info,
+    inlines
 )
 from content.models import *
 
@@ -39,7 +40,11 @@ class ArtistAdmin(admin.ModelAdmin):
 
 @admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
-    # customize list display
+
+    inlines = [
+        inlines.AlbumContributorInline,
+    ]
+
     list_display = ('sortable_str','platform','uploaded_by', '_display_status', '_deletion_status')
     list_filter = ( # reverse of display order
         ('is_deleted', admin.BooleanFieldListFilter),
@@ -48,13 +53,10 @@ class AlbumAdmin(admin.ModelAdmin):
         'platform',
     )
 
-    # customize search
     search_fields = ['name', 'platform', 'uploaded_by__name']
 
-    # customize actions
     actions = [perform_delete, remove_delete, reprocess_image]
 
-    # other stuff
     empty_value_display = '-empty-'
 
     def _deletion_status(self, obj):
@@ -71,7 +73,26 @@ class AlbumAdmin(admin.ModelAdmin):
 
 @admin.register(Song)
 class SongAdmin(admin.ModelAdmin):
-    # customize list display
+    fieldsets = (
+        (None, {
+            "fields": ('title', 'duration', 'is_explicit', 'uploaded_by', 'album', 'album_order', 'platform',),
+            "classes": ('extrapretty', 'wide'),
+        }),
+        ("Extras", {
+            "fields": ('id', 'uri', 'isrc_code', 'is_displayed', 'is_deleted', 'uploaded_date', 'last_changed',)
+        })
+    )
+    readonly_fields = (
+        'id', 'uri',
+        'uploaded_date', 'last_changed',
+    )
+
+    inlines = [
+        inlines.SongContributorInline,
+        inlines.SongGenreInline,
+        inlines.SongTagInline,
+    ]
+
     list_display = (
         'sortable_str',
         'platform',
@@ -91,13 +112,10 @@ class SongAdmin(admin.ModelAdmin):
         'platform',
     )
 
-    # customize search
     search_fields = ['title', 'album__name', 'uploaded_by__name',]
 
-    # customize actions
     actions = [perform_delete, remove_delete, reprocess_song]
 
-    # other stuff
     empty_value_display = '-empty-'
 
     def _deletion_status(self, obj):

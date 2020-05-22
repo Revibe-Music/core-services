@@ -362,8 +362,8 @@ class Song(models.Model):
         null=False, blank=True, default=False,
         verbose_name=_("deletion status")
     )
-    last_changed = models.DateField(auto_now=True, null=True, blank=True)
-    uploaded_date = models.DateField(auto_now_add=True, null=True, blank=True, editable=False)
+    uploaded_date = models.DateTimeField(auto_now_add=True, null=True, blank=True, editable=False)
+    last_changed = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     album  = models.ForeignKey(Album, on_delete=models.CASCADE, null=False, blank=False)
     contributors = models.ManyToManyField(Artist, through='SongContributor', related_name="song_contributors")

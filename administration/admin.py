@@ -85,8 +85,23 @@ class CampaingAdmin(admin.ModelAdmin):
 
 @admin.register(YouTubeKey)
 class YoutubeKeyAdmin(admin.ModelAdmin):
-    # customize list display
-    list_display = ('sortable_str', 'point_budget', 'number_of_users', )
+    fieldsets = (
+        (None, {
+            "fields": ('key', 'point_budget', 'number_of_users',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('id', 'last_date_broken', 'date_created', 'last_changed',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'in',),
+        })
+    )
+    readonly_fields = ('id', 'last_date_broken', 'date_created', 'last_changed',)
+
+    list_display = (
+        'sortable_str',
+        'point_budget',
+        'number_of_users',
+    )
 
     def sortable_str(self, obj):
         """

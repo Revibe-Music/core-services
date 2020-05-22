@@ -22,17 +22,27 @@ class ContactFormAdmin(admin.ModelAdmin):
             "classes": ('extrapretty', 'wide',),
         }),
         ("Staff Info", {
-            "fields": ('assigned_to', 'resolved', 'date_created', 'last_changed',),
+            "fields": ('assigned_to', 'priority', 'resolved',),
             "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('date_created', 'last_changed',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'in',),
         })
     )
     readonly_fields = ('id', 'date_created', 'last_changed',)
 
-    list_display = ('__str__', 'assigned_to', 'resolved', 'date_created',)
+    list_display = (
+        '__str__',
+        'assigned_to',
+        'priority',
+        'resolved',
+        # 'date_created',
+    )
     list_filter = (
-        ('assigned_to', admin.RelatedFieldListFilter),
-        'subject',
         ('resolved', admin.BooleanFieldListFilter),
+        ('assigned_to', admin.RelatedFieldListFilter),
+        'priority',
     )
 
     search_fields = [
@@ -90,7 +100,26 @@ class AlertSeenAdmin(admin.ModelAdmin):
 
 @admin.register(ArtistSpotlight)
 class ArtistSpotlightAdmin(admin.ModelAdmin):
-    pass
+    fieldsets = (
+        (None, {
+            "fields": ('artist', 'date',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('description', 'date_created', 'last_changed',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'in',),
+        })
+    )
+    readonly_fields = ('date_created', 'last_changed',)
+
+    list_display = (
+        'artist',
+        'date',
+    )
+
+    search_fields = [
+        'artist__name',
+    ]
 
 
 @admin.register(Blog)

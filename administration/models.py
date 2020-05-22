@@ -56,6 +56,27 @@ class ContactForm(models.Model):
         help_text=_("Indicates if the request/issue has been resolved or not"),
         null=False, blank=False, default=False
     )
+
+    LOW = 'low'
+    MEDIUM = 'medium'
+    HIGH = 'high'
+    CRITICAL = 'critical'
+    EMERGENCY = 'emergency'
+    _priority_choices = (
+        (LOW, 'Low'),
+        (MEDIUM, 'Medium'),
+        (HIGH, 'High'),
+        (CRITICAL, 'Critical'),
+        (EMERGENCY, 'Emergency'),
+    )
+    priority = models.CharField(
+        max_length=100,
+        choices=_priority_choices,
+        null=True, blank=True,
+        verbose_name=_("priority"),
+        help_text=_("Importance of the form, if applicable")
+    )
+
     assigned_to = models.ForeignKey(
         'accounts.CustomUser',
         on_delete=models.SET_NULL,
@@ -65,11 +86,16 @@ class ContactForm(models.Model):
         verbose_name=_("staff member"),
         null=True, blank=True
     )
+
+    # extras
     date_created = models.DateTimeField(
-        help_text=_("When the form was submitted"),
-        auto_now_add=True, null=True
+        auto_now_add=True,
+        null=True
     )
-    last_changed = models.DateTimeField("Last time the form was edited", auto_now=True, null=True)
+    last_changed = models.DateTimeField(
+        auto_now=True,
+        null=True
+    )
 
     _message_limit = 50
     def __str__(self):
@@ -297,6 +323,21 @@ class ArtistSpotlight(models.Model):
         null=False, blank=False,
         verbose_name=_("artist"),
         help_text=_("Artist to spotlight on the Revibe Music home screen")
+    )
+
+    # extras
+    description = models.TextField(
+        null=True, blank=True,
+        verbose_name=_("description"),
+        help_text=_("Human-readable explanation of the Spotlight")
+    )
+    date_created = models.DateTimeField(
+        auto_now_add=True,
+        null=True # this field was added after model was created and uesd
+    )
+    last_changed = models.DateTimeField(
+        auto_now=True,
+        null=True # this field was added after model was created and uesd
     )
 
     def __str__(self):

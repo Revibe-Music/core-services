@@ -12,7 +12,22 @@ from administration.models import *
 
 @admin.register(ContactForm)
 class ContactFormAdmin(admin.ModelAdmin):
-    # customize list display
+    fieldsets = (
+        (None, {
+            "fields": ('id', 'subject', 'message',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("User Info", {
+            "fields": ('user', 'first_name', 'last_name', 'email',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Staff Info", {
+            "fields": ('assigned_to', 'resolved', 'date_created', 'last_changed',),
+            "classes": ('extrapretty', 'wide',),
+        })
+    )
+    readonly_fields = ('id', 'date_created', 'last_changed',)
+
     list_display = ('__str__', 'assigned_to', 'resolved', 'date_created',)
     list_filter = (
         ('assigned_to', admin.RelatedFieldListFilter),
@@ -20,7 +35,6 @@ class ContactFormAdmin(admin.ModelAdmin):
         ('resolved', admin.BooleanFieldListFilter),
     )
 
-    # customize search
     search_fields = [
         'message',
         'subject',

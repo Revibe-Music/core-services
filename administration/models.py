@@ -128,6 +128,16 @@ class Campaign(models.Model):
         help_text=_("Target audience")
     )
 
+    # extras
+    date_created = models.DateTimeField(
+        auto_now_add=True,
+        null=True
+    )
+    last_changed = models.DateTimeField(
+        auto_now=True,
+        null=True
+    )
+
     def __str__(self):
         return self.name
     
@@ -186,6 +196,10 @@ class YouTubeKey(models.Model):
 
     date_created = models.DateTimeField(
         auto_now_add=True
+    )
+    last_changed = models.DateTimeField(
+        auto_now=True,
+        null=True
     )
 
     @property
@@ -249,12 +263,16 @@ class Alert(models.Model):
     )
     enabled = models.BooleanField(
         null=False, blank=False, default=True,
-        verbose_name=_("Message is enabled"),
-        help_text=_("When set to off, will not be sent to any more users")
+        verbose_name=_("active"),
+        help_text=_("Enables/disables sending this alert")
     )
 
     date_created = models.DateTimeField(
         auto_now_add=True
+    )
+    last_changed = models.DateTimeField(
+        auto_now=True,
+        null=True
     )
 
     users_seen = models.ManyToManyField(
@@ -443,6 +461,10 @@ class Blog(models.Model):
 
     date_created = models.DateTimeField(
         auto_now_add=True
+    )
+    last_changed = models.DateTimeField(
+        auto_now=True,
+        null=True # field was added after model has been created and used
     )
 
     objects = models.Manager()

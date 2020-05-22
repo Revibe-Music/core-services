@@ -4,6 +4,7 @@ from revibe.admin import html_check_x
 from revibe.utils.language import text
 
 from administration.admin_ext import test_api_key, reset_user_count
+from administration.admin_ext import inlines
 from administration.models import *
 
 # -----------------------------------------------------------------------------
@@ -59,11 +60,26 @@ class ContactFormAdmin(admin.ModelAdmin):
 
 @admin.register(Campaign)
 class CampaingAdmin(admin.ModelAdmin):
-    # customize list display
-    list_display = ('__str__', '_budget', '_spent', 'create_url',)
+    fieldsets = (
+        (None, {
+            "fields": ('name', 'budget', 'spent', 'destination',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('uri', 'date_created', 'last_changed',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'in',),
+        }),
+    )
+    readonly_fields = ('date_created', 'last_changed',)
+
+    list_display = (
+        '__str__',
+        '_budget',
+        '_spent',
+        'create_url',
+    )
     # list_filter = (,)
 
-    # customize search
     search_fields = ['name']
 
 
@@ -90,7 +106,30 @@ class YoutubeKeyAdmin(admin.ModelAdmin):
 
 @admin.register(Alert)
 class AlertAdmin(admin.ModelAdmin):
-    pass
+    fieldsets = (
+        (None, {
+            "fields": ('subject', 'message', 'category',),
+            "classes": ('extrapretty', 'wide', ),
+        }),
+        ("Scheduling", {
+            "fields": ('start_date', 'end_date', 'enabled',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('id', 'date_created', 'last_changed',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'in',),
+        })
+    )
+    readonly_fields = ('id', 'date_created', 'last_changed',)
+
+    list_display = (
+        'subject',
+        'message',
+        'category',
+    )
+    list_filter = (
+        ('enabled', admin.BooleanFieldListFilter),
+    )
 
 
 @admin.register(AlertSeen)
@@ -124,8 +163,28 @@ class ArtistSpotlightAdmin(admin.ModelAdmin):
 
 @admin.register(Blog)
 class BlogAdmin(admin.ModelAdmin):
-    # customize list display
-    list_display = ('sortable_str', 'body_trunc', 'author', 'publish_date', )
+    fieldsets = (
+        (None, {
+            "fields": ('category', 'title', 'body', 'summary', 'header_image', 'side_image',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Publish Info", {
+            "fields": ('publish_date', 'author', 'artist', 'display_style',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('id', 'date_created', 'last_changed',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'in',),
+        })
+    )
+    readonly_fields = ('id', 'date_created', 'last_changed',)
+
+    list_display = (
+        'title',
+        'body_trunc',
+        'author',
+        'publish_date',
+    )
     list_filter = (
         ('tags', admin.RelatedOnlyFieldListFilter),
         ('publish_date', admin.DateFieldListFilter),
@@ -133,7 +192,11 @@ class BlogAdmin(admin.ModelAdmin):
         'category',
     )
 
-    # customize search
+    inlines = [ # add 'artists' and 'tags'
+        inlines.BlogArtistsInline,
+        inlines.BlogTagInline,
+    ]
+
     search_fields = [
         'title',
         'body',

@@ -4,6 +4,7 @@ from django.utils.html import format_html
 from revibe.admin import check_deletion, check_display
 from revibe._helpers.symbols import CROSS_MARK, CHECK_MARK
 
+from accounts.admin_ext.inlines import ArtistProfileInline
 from content import browse
 from content.admin_ext import (
     approve_contribution, remove_delete, perform_delete, reprocess_song, reprocess_image, update_mailchimp_info,
@@ -17,19 +18,33 @@ from content.models import *
 
 @admin.register(Artist)
 class ArtistAdmin(admin.ModelAdmin):
-    # customize list display
-    list_display = ('sortable_str','platform','artist_user')
+    fieldsets = (
+        (None, {
+            "fields": ('name', 'platform',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('id', 'uri', 'date_joined', 'last_changed',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'in',),
+        })
+    )
+    readonly_fields = (
+        'id', 'uri',
+        'date_joined', 'last_changed',
+    )
+
+    _inlines = []
+
+    list_display = ('sortable_str','platform','_link_to_user')
     list_filter = (
         'platform',
         ('date_joined', admin.DateFieldListFilter),
     )
-    # customize search
+
     search_fields = ['name', 'platform', 'artist_user__username'] # optional add 'song_uploaded_by__name' and 'album__uploaded_by__name'
 
-    # customize actions
     actions = [reprocess_image, update_mailchimp_info]
 
-    # other stuff
     empty_value_display = '-empty-'
 
     def sortable_str(self, obj):
@@ -37,12 +52,48 @@ class ArtistAdmin(admin.ModelAdmin):
     sortable_str.short_description = 'artist'
     sortable_str.admin_order_field = 'name'
 
+    def _link_to_user(self, obj):
+        try:
+            return obj.artist_user._link_to_self()
+        except Exception:
+            return None
+    _link_to_user.short_description = "user"
+    _link_to_user.admin_order_field = "artist_user"
+
+
+    def get_form(self, request, obj=None, **kwargs):
+        # add the Artist Profile inline IF the artist is a Revibe artist
+        # otherwise reset the inlines
+        if (obj) and (obj.platform == 'Revibe'):
+            self.inlines = self._inlines + [ArtistProfileInline,]
+        else:
+            self.inlines = self._inlines
+
+        return super().get_form(request, obj, **kwargs)
+
+
 
 @admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
 
+    fieldsets = (
+        (None, {
+            "fields": ('name', 'type', 'date_published', 'uploaded_by', 'platform',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('id', 'uri', 'is_displayed', 'is_deleted', 'uploaded_date', 'last_changed', )
+        })
+    )
+    readonly_fields = (
+        'id', 'uri',
+        'uploaded_date', 'last_changed',
+    )
+
     inlines = [
         inlines.AlbumContributorInline,
+        inlines.AlbumGenreInline,
+        inlines.AlbumTagInline,
     ]
 
     list_display = ('sortable_str','platform','uploaded_by', '_display_status', '_deletion_status')

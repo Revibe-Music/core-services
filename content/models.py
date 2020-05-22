@@ -179,6 +179,10 @@ class Artist(models.Model):
     # artist_image = one-to-many with 'Image'
 
     date_joined = models.DateTimeField(auto_now_add=True, null=True, blank=True, editable=False)
+    last_changed = models.DateTimeField(
+        auto_now=True,
+        null=True
+    )
 
     @property
     def number_of_streams_from_uploads(self):

@@ -245,13 +245,26 @@ class BlogTagAdmin(admin.ModelAdmin):
 
 @admin.register(Variable)
 class VariableAdmin(admin.ModelAdmin):
-    # customize list display
+    fieldsets = (
+        (None, {
+            "fields": ('key', 'value', 'rules', 'category',),
+            "classes": ('extrapretty', 'wide',)
+        }),
+        ("Extras", {
+            "fields": ('id', 'active', 'date_created', 'last_changed',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'id',),
+        })
+    )
+    readonly_fields = (
+        'id',
+        'date_created', 'last_changed',
+    )
+
     list_display = ('key', 'value')
     list_filter = (
         'category',
     )
 
-    # customize search
     search_fields = [
         'key',
         'value',

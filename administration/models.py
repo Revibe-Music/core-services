@@ -542,6 +542,21 @@ class Variable(models.Model):
         help_text=_("Type of variable this is. Only used for sorting/filtering in the admin portal.")
     )
 
+    # extras
+    active = models.BooleanField(
+        null=False, blank=False, default=True,
+        verbose_name=_("active"),
+        help_text=_("Enable/disable this variable.")
+    )
+    date_created = models.DateTimeField(
+        auto_now_add=True,
+        null=True
+    )
+    last_changed = models.DateTimeField(
+        auto_now=True,
+        null=True
+    )
+
     class Meta:
         verbose_name = "variable"
         verbose_name_plural = "variables"

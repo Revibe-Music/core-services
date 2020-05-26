@@ -53,6 +53,7 @@ DATABASES = {
 
 
 # AWS stuff
+USE_S3 = True
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 
@@ -81,24 +82,24 @@ AWS_SES_REGION_ENDPOINT = f'email.{AWS_SES_REGION_NAME}.amazonaws.com'
 
 _log_level = 'INFO' 
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': _log_level,
-            'class': 'logging.FileHandler',
-            'filename': '/opt/python/log/django.log',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': _log_level,
-            'propagate': True,
-        },
-    },
-}
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'file': {
+#             'level': _log_level,
+#             'class': 'logging.FileHandler',
+#             'filename': '/opt/python/log/django.log',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['file'],
+#             'level': _log_level,
+#             'propagate': True,
+#         },
+#     },
+# }
 
 _redis_url = "test-env-redis.7pqvq5.ng.0001.use2.cache.amazonaws.com"
 _redis_port = 6379

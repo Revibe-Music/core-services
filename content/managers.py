@@ -100,7 +100,7 @@ class GenreManager(models.Manager):
 # search managers
 class SearchManager(models.Manager):
     def get_queryset(self):
-        return super().get_queryset().order_by('order')
+        return super().get_queryset().order_by('model', 'order')
 
 class AlbumSearchManager(SearchManager):
     def get_queryset(self):

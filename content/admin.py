@@ -288,7 +288,7 @@ class PlaceholderContributionAdmin(admin.ModelAdmin):
 #     def get_queryset(self, request):
 #         return browse.top_songs_all_time()
 
-class SearchAdmin(admin.ModelAdmin):
+class BaseSearchAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             "fields": ('field', 'type', 'order',),
@@ -315,25 +315,42 @@ class SearchAdmin(admin.ModelAdmin):
         'active',
     )
 
-@admin.register(AlbumSearch)
-class AlbumSearchAdmin(SearchAdmin):
-    pass
+    
 
-@admin.register(ArtistSearch)
-class ArtistSearchAdmin(SearchAdmin):
-    pass
 
-@admin.register(GenreSearch)
-class GenreSearchAdmin(SearchAdmin):
-    pass
+@admin.register(Search)
+class SearchAdmin(BaseSearchAdmin):
+    fieldsets = BaseSearchAdmin.fieldsets
+    fieldsets[0][1]["fields"] = ('model',) + fieldsets[0][1]["fields"]
 
-@admin.register(SongSearch)
-class SongSearchAdmin(SearchAdmin):
-    pass
+    def get_list_display(self, request):
+        normal_thing = super().get_list_display(request)
 
-@admin.register(TagSearch)
-class TagSearchAdmin(SearchAdmin):
-    pass
+        return normal_thing[:1] + ('model',) + normal_thing[1:]
+
+    def get_list_filter(self, request):
+        result = super().get_list_filter(request)
+        return ('model',) + result
+
+# @admin.register(AlbumSearch)
+# class AlbumSearchAdmin(BaseSearchAdmin):
+#     pass
+
+# @admin.register(ArtistSearch)
+# class ArtistSearchAdmin(BaseSearchAdmin):
+#     pass
+
+# @admin.register(GenreSearch)
+# class GenreSearchAdmin(BaseSearchAdmin):
+#     pass
+
+# @admin.register(SongSearch)
+# class SongSearchAdmin(BaseSearchAdmin):
+#     pass
+
+# @admin.register(TagSearch)
+# class TagSearchAdmin(BaseSearchAdmin):
+#     pass
 
 
 

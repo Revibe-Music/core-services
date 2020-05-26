@@ -614,6 +614,8 @@ class Search(models.Model):
         auto_now=True
     )
 
+    objects = SearchManager()
+
     def __str__(self):
         return self.field
 

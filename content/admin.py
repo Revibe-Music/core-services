@@ -308,9 +308,11 @@ class SearchAdmin(admin.ModelAdmin):
         'field',
         'type',
         'order',
+        'active',
     )
     list_filter = (
         'type',
+        'active',
     )
 
 @admin.register(AlbumSearch)

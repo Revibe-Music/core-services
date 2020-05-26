@@ -288,3 +288,50 @@ class PlaceholderContributionAdmin(admin.ModelAdmin):
 #     def get_queryset(self, request):
 #         return browse.top_songs_all_time()
 
+class SearchAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {
+            "fields": ('field', 'type', 'order',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('id', 'active', 'description', 'date_created', 'last_changed',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'in',),
+        })
+    )
+    readonly_fields = (
+        'id',
+        'date_created', 'last_changed',
+    )
+
+    list_display = (
+        'field',
+        'type',
+        'order',
+    )
+    list_filter = (
+        'type',
+    )
+
+@admin.register(AlbumSearch)
+class AlbumSearchAdmin(SearchAdmin):
+    pass
+
+@admin.register(ArtistSearch)
+class ArtistSearchAdmin(SearchAdmin):
+    pass
+
+@admin.register(GenreSearch)
+class GenreSearchAdmin(SearchAdmin):
+    pass
+
+@admin.register(SongSearch)
+class SongSearchAdmin(SearchAdmin):
+    pass
+
+@admin.register(TagSearch)
+class TagSearchAdmin(SearchAdmin):
+    pass
+
+
+

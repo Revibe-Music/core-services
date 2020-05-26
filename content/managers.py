@@ -96,3 +96,30 @@ class GenreManager(models.Manager):
         
         return genre
 
+
+# search managers
+class SearchManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().order_by('order')
+
+class AlbumSearchManager(SearchManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(model='album')
+
+class ArtistSearchManager(SearchManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(model='artist')
+
+class GenreSearchManager(SearchManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(model='genre')
+
+class SongSearchManager(SearchManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(model='song')
+
+class TagSearchManager(SearchManager):
+    def get_queryset(self):
+        return super().get_queryset().filter(model='tag')
+
+

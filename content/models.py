@@ -540,3 +540,153 @@ class Genre(models.Model):
         verbose_name = "genre"
         verbose_name_plural = "genres"
 
+
+# search stuff
+
+class Search(models.Model):
+
+    ALBUM = 'album'
+    ARTIST = 'artist'
+    GENRE = 'genre'
+    SONG = 'song'
+    TAG = 'tag'
+    _model_choices = (
+        (ALBUM, 'Album'),
+        (ARTIST, 'Artist'),
+        (GENRE, 'Genre'),
+        (SONG, 'Song'),
+        (TAG, 'Tag'),
+    )
+    model = models.CharField(
+        max_length=100,
+        choices=_model_choices,
+        null=False, blank=False,
+        verbose_name=_("model"),
+        help_text=_("The model that is being searched.")
+    )
+
+    field = models.CharField(
+        max_length=255,
+        null=False, blank=False,
+        verbose_name=_("search field"),
+        help_text=_("The field to search for")
+    )
+
+    CONTAINS = 'contains'
+    ICONTAINS = 'icontains'
+    EXACT = 'exact'
+    IEXACT = 'iexact'
+    _type_choices = (
+        (CONTAINS, 'Contains'),
+        (ICONTAINS, 'Case-insensitive Contains'),
+        (EXACT, 'Exact'),
+        (IEXACT, 'Case-insensitive Exact')
+    )
+    type = models.CharField(
+        max_length=100,
+        choices=_type_choices,
+        null=False, blank=False,
+        verbose_name=_("search type"),
+        help_text=_("The type of search to execute. See the docs for information on how each works.")
+    )
+
+    order = models.IntegerField(
+        null=False, blank=False,
+        verbose_name=_("order"),
+        help_text=_("Order in which to execute the search function")
+    )
+
+    # extras
+    active = models.BooleanField(
+        null=False, blank=False, default=True,
+        verbose_name=_("active"),
+        help_text=_("Enables/disables the search field.")
+    )
+    description = models.TextField(
+        null=True, blank=True,
+        verbose_name=_("description"),
+        help_text=_("Human-readable explanation of the search field")
+    )
+    date_created = models.DateTimeField(
+        auto_now_add=True
+    )
+    last_changed = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return self.field
+
+    def __repr__(self):
+        return default_repr(self)
+
+    class Meta:
+        verbose_name = "search field"
+        verbose_name_plural = "search fields"
+
+
+class AlbumSearch(Search):
+    objects = AlbumSearchManager()
+
+    def __init__(self, *args, **kwargs):
+        self._meta.get_field('model').default = self.ALBUM
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        proxy = True
+        verbose_name = "album search field"
+        verbose_name_plural = "album search fields"
+
+
+class ArtistSearch(Search):
+    objects = ArtistSearchManager()
+
+    def __init__(self, *args, **kwargs):
+        self._meta.get_field('model').default = self.ARTIST
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        proxy = True
+        verbose_name = "artist search field"
+        verbose_name_plural = "artist search fields"
+
+
+class GenreSearch(Search):
+    objects = GenreSearchManager()
+
+    def __init__(self, *args, **kwargs):
+        self._meta.get_field('model').default = self.GENRE
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        proxy = True
+        verbose_name = "genre search field"
+        verbose_name_plural = "genre search fields"
+
+
+class SongSearch(Search):
+    objects = SongSearchManager()
+
+    def __init__(self, *args, **kwargs):
+        self._meta.get_field('model').default = self.SONG
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        proxy = True
+        verbose_name = "song search field"
+        verbose_name_plural = "song search fields"
+
+
+class TagSearch(Search):
+    objects = TagSearchManager()
+
+    def __init__(self, *args, **kwargs):
+        self._meta.get_field('model').default = self.TAG
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        proxy = True
+        verbose_name = "tag search field"
+        verbose_name_plural = "tag search fields"
+
+

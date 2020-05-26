@@ -90,6 +90,17 @@ side_menu = [ # A list of application or custom item dicts
         ]
     },
     {
+        "label": _("Content - Search"),
+        # since all the search models are named the same way, it's easier to generate the list than to explicitly define it
+        "items": [ {"name": f"content.{sf}search"} for sf in [
+            'artist',
+            'album',
+            'song',
+            'genre',
+            'tag',
+        ]]
+    },
+    {
         "label": _("Customer Success"),
         "items": [
             {"name": 'customer_success.pathway'},

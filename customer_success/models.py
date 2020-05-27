@@ -86,6 +86,11 @@ class Action(models.Model):
     )
 
     # verification
+    required_request_body_kwargs = models.TextField(
+        null=False, blank=False, default="{}",
+        verbose_name=_("request body kwargs"),
+        help_text=_("Keyword arguments that must evaludate to True when checked against the request parameter arguments. Must use JSON encoding.")
+    )
     required_request_params_kwargs = models.TextField(
         null=False, blank=False, default="{}",
         verbose_name=_("request param kwargs"),

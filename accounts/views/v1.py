@@ -137,6 +137,8 @@ class LoginAPI(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = LoginAccountSerializer
 
+    @attributor(name="Login Artist Portal", methods=['post'], user_target="data.user.user_id")
+    @attributor(name="Login Mobile App", methods=['post'], user_target="data.user.user_id")
     def post(self, request, *args, **kwargs):
         login_data = {
             "username": request.data['username'],

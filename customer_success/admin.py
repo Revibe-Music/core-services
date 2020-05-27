@@ -47,7 +47,7 @@ class ActionAdmin(admin.ModelAdmin):
             "classes": ('extrapretty', 'wide',),
         }),
         ("Verification", {
-            "fields": ('required_request_params_kwargs', 'required_response_body_kwargs',),
+            "fields": ('required_request_body_kwargs', 'required_request_params_kwargs', 'required_response_body_kwargs',),
             "classes": ('extrapretty', 'wide',),
         }),
         ("Notifications", {

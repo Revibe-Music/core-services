@@ -116,6 +116,15 @@ class PathwayActionAdmin(admin.ModelAdmin):
 
 @admin.register(ActionTaken)
 class ActionTakenAdmin(admin.ModelAdmin):
-    pass
+    readonly_fields = ('timestamp',)
+
+    list_display = (
+        'action',
+        'user',
+        'notification',
+    )
+    list_filter = (
+        ('timestamp', admin.DateFieldListFilter),
+    )
 
 

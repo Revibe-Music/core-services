@@ -47,17 +47,6 @@ class Event(models.Model):
         verbose_name=_("trigger"),
         help_text=_("Action that triggers the notification to be sent")
     )
-    trigger_delay = models.DurationField(
-        null=True, blank=True,
-        verbose_name=_("trigger delay"),
-        help_text=_("Time delay on sending the notification after the trigger is activated. Use the format '[DD] [[hh:]mm:]ss'.")
-    )
-    desired_action = models.CharField(
-        max_length=255,
-        null=True, blank=True,
-        verbose_name=_("desired action"),
-        help_text=_("Action the user is desired to take after receiving this notification")
-    )
     sent_address = models.CharField(
         max_length=255,
         null=True, blank=True,

@@ -15,3 +15,4 @@ media/
 app-logs/
 *.log
 todo.md
+*.pid

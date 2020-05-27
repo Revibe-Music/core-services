@@ -790,6 +790,11 @@ class UserArtistViewSet(GenericPlatformViewSet):
         methods=['post'], album=True, 
         force=True, medium='email', artist=True, check_first=True
     )
+    @notifier(
+        trigger='album-edit',
+        methods=['patch'], album=True,
+        force=True, medium='email', artist=True, check_first=True
+    )
     @attributor(name="Upload Album", methods=['post'])
     def albums(self, request, *args, **kwargs):
         """
@@ -980,6 +985,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         methods=['post'], album=True,
         force=True, medium='email', artist=True, check_first=True
     )
+    @attributor(name="Add Contributor", methods=['post'])
     def album_contributions(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
 
@@ -1052,6 +1058,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         methods=['post'], song=True,
         force=True, medium='email', artist=True, check_first=True
     )
+    @attributor(name="Add Contributor", methods=['post'])
     def song_contributions(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
 
@@ -1168,7 +1175,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
     # register social media
     @action(detail=False, methods=['post', 'patch', 'delete'], url_path="social-media", url_name="social_media")
-    @attributor(name="Register Social Media", methods=['post'])
+    @attributor(name="Add Relink", methods=['post'])
     def register_social_media(self, request, *args, **kwargs):
         """
         Adds, edits, or removes a social media link from an artist's profile

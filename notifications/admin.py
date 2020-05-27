@@ -13,12 +13,10 @@ class EventAdmin(admin.ModelAdmin):
     list_display = (
         'name',
         'trigger',
-        'desired_action',
         'active',
     )
     list_filter = (
         'sent_address',
-        # 'desired_action',
         ('active', admin.BooleanFieldListFilter),
     )
 
@@ -32,7 +30,7 @@ class EventAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'trigger', 'desired_action'),
+            'fields': ('name', 'trigger',),
             'classes': ('extrapretty', 'wide'),
         }),
         ('Email', {

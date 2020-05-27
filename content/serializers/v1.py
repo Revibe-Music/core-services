@@ -429,7 +429,7 @@ class SongSerializer(serializers.ModelSerializer):
         track_obj = add_track_to_song(song, track)
 
         return song
-    
+
     def update(self, instance, validated_data, *args, **kwargs):
         print(validated_data)
         img = validated_data.pop('file', None)

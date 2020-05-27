@@ -178,13 +178,11 @@ def square_image(image):
 def add_track_to_song(obj, track, *args, **kwargs):
     """
     """
-    print("adding track to song...")
     editing = kwargs.pop('edit', False)
     admin_edit = kwargs.pop('admin_edit', False)
 
     # skip everyting if there is no Track
     if not track and not admin_edit:
-        print("No track found")
         return None
 
     objs = {
@@ -215,13 +213,11 @@ def add_track_to_song(obj, track, *args, **kwargs):
         # convert_audio_file(track_obj)
 
         # create other audio files in a thread
-        print("starting thread...")
         t = threading.Thread(target=convert_audio_file, args=[track_obj])
         t.setDaemon(True)
         t.start()
 
     track_obj.save()
-    print("Finished adding track to song!")
     return track_obj
 
 
@@ -232,10 +228,10 @@ def convert_audio_file(obj, *args, **kwargs):
     # pass
     print("new thread!")
     if not obj.file:
-        print('no obj.file')
         return None
 
     ext = obj.file.name.split('.')[-1]
+    print("File extension: ", ext)
     new_formats = [
         {
             "format": "mp4",

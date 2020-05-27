@@ -140,6 +140,7 @@ class SongAdmin(admin.ModelAdmin):
 
     inlines = [
         inlines.SongContributorInline,
+        inlines.SongTrackInline,
         inlines.SongGenreInline,
         inlines.SongTagInline,
     ]

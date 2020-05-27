@@ -85,6 +85,18 @@ class Action(models.Model):
         help_text=_("Pathways in which this action is included")
     )
 
+    # verification
+    required_request_params_kwargs = models.TextField(
+        null=False, blank=False, default="{}",
+        verbose_name=_("request param kwargs"),
+        help_text=_("Keyword arguments that must evaluate to True when checked against the request parameter arguments. Must use JSON encoding.")
+    )
+    required_response_body_kwargs = models.TextField(
+        null=False, blank=False, default="{}",
+        verbose_name=_("response kwargs"),
+        help_text=_("Keywork arguments that must evaluate to True when checked against the response body. Must use JSON encoding.")
+    )
+
     # notification stuff
     event = models.ForeignKey(
         to='notifications.TemporalEvent',

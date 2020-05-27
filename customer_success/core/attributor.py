@@ -30,48 +30,49 @@ class Attributor:
         # steps
         # 1. get notifications user has received related to events that are
         #    associated with this action
-        # 2. mark the most recent nofication as having been successful, and mark the datetime
+        # 2. if there are events,
+        #    mark the most recent nofication as having been successful, and mark the datetime
         # 3. Record that this user performed this action
 
 
         # 1.
         core_event = self.action.event
         extra_events = self.action.extra_events.all()
-        if not (core_event or extra_events.count()):
-            raise CustomerSuccessException("Action has no events")
+        if (core_event or extra_events.count()):
+            # raise CustomerSuccessException("Action has no events")
 
-        # get the action's event info
-        core_event_id = getattr(core_event, 'id', None)
-        extra_events_ids = [e[0] for e in extra_events.values_list('id')]
+            # get the action's event info
+            core_event_id = getattr(core_event, 'id', None)
+            extra_events_ids = [e[0] for e in extra_events.values_list('id')]
 
-        # generate notification filters
-        notification_event_filter = Q(event_template__event__id=core_event_id) | Q(event_template__event__id__in=extra_events_ids)
-        notification_filter_args = (notification_event_filter,)
-        notification_filter_kwargs = {
-            "user": self.user,
-            "date_created__gte": self._action_date_filter()
-        }
+            # generate notification filters
+            notification_event_filter = Q(event_template__event__id=core_event_id) | Q(event_template__event__id__in=extra_events_ids)
+            notification_filter_args = (notification_event_filter,)
+            notification_filter_kwargs = {
+                "user": self.user,
+                "date_created__gte": self._action_date_filter()
+            }
 
-        # query for notifications
-        notifications = Notification.objects.filter(*notification_filter_args, **notification_filter_kwargs)
-        notifications = notifications.distinct()
+            # query for notifications
+            notifications = Notification.objects.filter(*notification_filter_args, **notification_filter_kwargs)
+            notifications = notifications.distinct()
 
-        # 2. 
-        if notifications.count() > 0:
-            # get the most recent notification
-            notifications = notifications.order_by('-date_created')
-            notif = notifications.first()
+            # 2. 
+            if notifications.count() > 0:
+                # get the most recent notification
+                notifications = notifications.order_by('-date_created')
+                notif = notifications.first()
 
-            # change it's info
-            if not notif.action_taken:
-                notif.action_taken = True
-                notif.date_of_action = timezone.now()
-                notif.save()
+                # change it's info
+                if not notif.action_taken:
+                    notif.action_taken = True
+                    notif.date_of_action = timezone.now()
+                    notif.save()
 
-            self.notif = notif
+                self.notif = notif
         else:
             self.notif = None
-        
+
         # 3.
         ActionTaken.objects.create(action=self.action, user=self.user, notification=self.notif)
 

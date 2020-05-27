@@ -46,6 +46,10 @@ class ActionAdmin(admin.ModelAdmin):
             "fields": ('name',),
             "classes": ('extrapretty', 'wide',),
         }),
+        ("Verification", {
+            "fields": ('required_request_params_kwargs', 'required_response_body_kwargs',),
+            "classes": ('extrapretty', 'wide',),
+        }),
         ("Notifications", {
             "fields": ('event', 'extra_events', 'interval_period', 'number_of_period',),
             "classes": ('extrapretty', 'wide',),

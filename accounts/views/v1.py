@@ -986,6 +986,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         force=True, medium='email', artist=True, check_first=True
     )
     @attributor(name="Add Contributor", methods=['post'])
+    @attributor(name="Invite Contributor", methods=['post'])
     def album_contributions(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
 
@@ -1059,6 +1060,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
         force=True, medium='email', artist=True, check_first=True
     )
     @attributor(name="Add Contributor", methods=['post'])
+    @attributor(name="Invite Contributor", methods=['post'])
     def song_contributions(self, request, *args, **kwargs):
         artist = self.get_current_artist(request)
 

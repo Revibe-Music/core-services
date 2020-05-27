@@ -3,7 +3,10 @@ Created: 21 May 2020
 Author: Jordan Prechac
 """
 
+import json
+
 from revibe.decorators import BaseRequestDecorator
+from revibe.utils.params import get_url_param
 
 from customer_success.models import Action
 from customer_success.tasks import attribute_action
@@ -47,7 +50,8 @@ class AttributionDecorator(BaseRequestDecorator):
             self.request = self._get_request(func_args, func_kwargs)
 
             # perform validation
-            if self.request.method.upper() not in self.methods:
+            valid = self.validate()
+            if not valid:
                 return self._extract_result(self._result)
 
             # get the user
@@ -70,6 +74,57 @@ class AttributionDecorator(BaseRequestDecorator):
         wrapper.__doc__  = func.__doc__
 
         return wrapper
+    
+    def validate(self):
+        to_run = [(self._assert_method, True), (self._get_action, True), (self._assert_request_kwargs, True), ]
+
+        for func in to_run:
+            output = func[0]()
+            if output != func[1]:
+                return False
+        return True
+
+
+    def _assert_method(self):
+        if self.methods != []:
+            if self.request.method not in self.methods:
+                return False
+        
+        return True
+
+    def _get_action(self):
+        try:
+            action = Action.objects.filter(active=True).get(name=self.name)
+        except Action.DoesNotExist:
+            return False
+        
+        self.action = action
+        return True
+
+    def _assert_request_kwargs(self):
+        kwargs_json = self.action.required_request_params_kwargs
+        try:
+            kwargs = json.loads(kwargs_json)
+        except Exception:
+            return True
+
+        # skip the stuff if there are no kwargs
+        if kwargs == {}:
+            return True
+        
+        # for each kwarg, check the params for that value. If the value is suppose to be None, the kwargs can be empty
+        params = self.request.query_params
+        for key, value in kwargs.items():
+            param = get_url_param(params, key, None)
+
+            # if it's a list or a tuple of good values, check that the param is in the list
+            # otherwise, check for equality
+            valid = param in value if isinstance(value, (list, tuple)) else param == value
+
+            if not valid:
+                return False
+        
+        return True
 
 
 attributor = AttributionDecorator

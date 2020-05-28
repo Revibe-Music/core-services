@@ -42,6 +42,33 @@ class Pathway(models.Model):
         help_text=_("Users that are likely to be interested in the services promoted on this path")
     )
 
+    # progression
+    beginner_quota = models.DecimalField(
+        max_digits=3, decimal_places=2,
+        null=True, blank=True,
+        verbose_name=_("beginner quota")
+    )
+    intermediate_quota = models.DecimalField(
+        max_digits=3, decimal_places=2,
+        null=True, blank=True,
+        verbose_name=_("intermediate quota")
+    )
+    advanced_quota = models.DecimalField(
+        max_digits=3, decimal_places=2,
+        null=True, blank=True,
+        verbose_name=_("advanced quota")
+    )
+    special_quota = models.DecimalField(
+        max_digits=3, decimal_places=2,
+        null=True, blank=True,
+        verbose_name=_("special quota")
+    )
+    other_quota = models.DecimalField(
+        max_digits=3, decimal_places=2,
+        null=True, blank=True,
+        verbose_name=_("other quota")
+    )
+
     # extras
     # active # doesn't make sense here
     description = models.TextField(

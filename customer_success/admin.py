@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
 
 from .models import *
 from .utils.admin.inlines import PathwayActionInline, PathUsersInline
@@ -11,6 +12,11 @@ class PathwayAdmin(admin.ModelAdmin):
         (None, {
             "fields": ('name', 'type', 'default',),
             "classes": ('extrapretty', 'wide',),
+        }),
+        ("Progression", {
+            "fields": ('beginner_quota', 'intermediate_quota', 'advanced_quota', 'special_quota', 'other_quota'),
+            "classes": ('extrapretty', 'wide',),
+            "description": _("The percentage of actions a user must complete in each rank to progress to the next rank.")
         }),
         ("Extras", {
             "fields": ('description', 'date_created', 'last_changed',),

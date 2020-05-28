@@ -10,13 +10,14 @@ from celery import shared_task
 from accounts.models import CustomUser
 
 from .core import Attributor
+from .core.weekly_email import send_weekly_email
 
 # -----------------------------------------------------------------------------
 
 
 @shared_task
-def weekly_email(active=True, inactive=True, new=True, *args, **kwargs):
-    print("This function has been disabled")
+def weekly_email(run_async=True):
+    return send_weekly_email(run_async=run_async)
 
 
 @shared_task

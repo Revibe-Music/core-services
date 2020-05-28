@@ -206,7 +206,7 @@ class Notifier:
             if (not sent) and settings.DEBUG:
                 send_mail(
                     subject="Failed message",
-                    message=f"Failed to send email message. Sent: '{sent}'",
+                    message=f"Failed to send email message. Sent to '{self.email}'",
                     from_email=from_address,
                     recipient_list=["jordanprechac@revibe.tech",]
                 )

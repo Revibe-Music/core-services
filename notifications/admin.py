@@ -94,7 +94,7 @@ class NotificationTemplateAdmin(admin.ModelAdmin):
             'classes': ('extrapretty', 'wide', 'collapse', 'in'),
             'description': ('Fields that will only be utilized if this is an email template.'),
         }),
-        ('Configuration', {
+        ('Extras', {
             'fields': ('active', 'description', 'date_created', 'last_changed',),
             'classes': ('extrapretty', 'wide', 'collapse', 'in'),
             'description': _("Additional configuration options and descriptions."),

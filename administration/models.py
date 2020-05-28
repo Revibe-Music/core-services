@@ -674,9 +674,9 @@ class Survey(models.Model):
     # core fields
     name = models.CharField(
         max_length=255,
-        null=False, blank=False, unique=True,
+        null=False, blank=False,
         verbose_name=_("name"),
-        help_text=_("Name of the survey. Must be unique")
+        help_text=_("Name of the survey")
     )
     response = models.TextField(
         null=False, blank=False,

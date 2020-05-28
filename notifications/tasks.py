@@ -4,6 +4,7 @@ Author: Jordan Prechac
 """
 
 from django.core.mail import send_mail
+from django.conf import settings
 from celery import shared_task
 
 import datetime
@@ -27,9 +28,9 @@ def test_send_notification():
     """
     Sends an email to 
     """
-    to_address = "dev@revibe.tech"
+    to_address = "jordanprechac@revibe.tech"
     subject = "Celery Beat Confirmation"
-    message = "If you are reading this email then Celery Beat is working in Production.\n\n" + \
+    message = f"If you are reading this email then Celery Beat is working in environment'{settings.ENV}' .\n\n" + \
         f"Execution time: {datetime.datetime.now()}"
     from_email = "noreply@revibe.tech"
 

@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 import datetime
+import json
 import random
 
 import logging
@@ -354,4 +355,33 @@ class SurveyViewSet(viewsets.ModelViewSet):
         pass
     def destroy(self, request, *args, **kwargs):
         pass
+
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        print(data)
+
+        if 'response' in data.keys():
+            return super().create(request, *args, **kwargs)
+
+        else:
+            # no 'response' field found, so get all the fields as the response
+            name = data.get('name', None)
+            if name == None:
+                raise network.BadRequestError("Field 'name' is required")
+
+            new_data = {}
+            for key, value in data.items():
+                if key != 'name':
+                    new_data[key] = value
+
+            new_new_data = {
+                "name": name,
+                "response": json.dumps(new_data)
+            }
+            serializer = self.serializer_class(data=new_new_data)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+            return responses.OK(serializer=serializer)
+
 

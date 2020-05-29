@@ -1,12 +1,12 @@
 # Get Django environment variables
-djangoenv=`cat /opt/python/current/env | tr '\n' ',' | sed 's/%/%%/g' | sed 's/export //g' | sed 's/$PATH/%(ENV_PATH)s/g' | sed 's/$DAPHNEPYTHONPATH//g' | sed 's/$LD_LIBRARY_PATH//g'`
-djangoenv=${djangoenv%?}
+daphneenv=`cat /opt/python/current/env | tr '\n' ',' | sed 's/export //g' | sed 's/$PATH/%(ENV_PATH)s/g' | sed 's/$PYTHONPATH//g' | sed 's/$LD_LIBRARY_PATH//g' | sed 's/%/%%/g'`
+daphneenv=${daphneenv%?}
 
 # Create daemon configuration script
 daemonconf="[program:daphne]
 command=/opt/python/run/venv/bin/daphne -b :: -p 5000 revibe.asgi:application
 directory=/opt/python/current/app
-user=ec2-user
+user=nobody
 numprocs=1
 stdout_logfile=/var/log/stdout_daphne.log
 stderr_logfile=/var/log/stderr_daphne.log
@@ -23,12 +23,12 @@ stopwaitsecs = 600
 ; taking care of its children as well.
 killasgroup=true
 
-environment=$djangoenv
+environment=$daphneenv
 
 [program:worker]
 command=/opt/python/run/venv/bin/python /opt/python/current/app/revibe/manage.py runworker channels default
 directory=/opt/python/current/app
-user=ec2-user
+user=nobody
 numprocs=1
 process_name=worker%(process_num)d
 stdout_logfile=/var/log/stdout_worker.log
@@ -46,7 +46,7 @@ stopwaitsecs = 600
 ; taking care of its children as well.
 killasgroup=true
 
-environment=$djangoenv
+environment=$daphneenv
 "
 
 # Create the Supervisor conf script
@@ -72,5 +72,5 @@ fi
 /usr/local/bin/supervisorctl -c /opt/python/etc/supervisord.conf update
 
 # Start/restart processes through Supervisor
-/usr/local/bin/supervisorctl -c /opt/python/etc/supervisord.conf restart daphne
-/usr/local/bin/supervisorctl -c /opt/python/etc/supervisord.conf restart worker:*
+# /usr/local/bin/supervisorctl -c /opt/python/etc/supervisord.conf restart daphne
+# /usr/local/bin/supervisorctl -c /opt/python/etc/supervisord.conf restart worker:*

@@ -52,12 +52,17 @@ class ActionAdmin(admin.ModelAdmin):
             "fields": ('name',),
             "classes": ('extrapretty', 'wide',),
         }),
-        ("Verification", {
-            "fields": ('required_request_body_kwargs', 'required_request_params_kwargs', 'required_response_body_kwargs',),
-            "classes": ('extrapretty', 'wide',),
-        }),
         ("Notifications", {
             "fields": ('event', 'extra_events', 'interval_period', 'number_of_period',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Recurrence", {
+            "fields": ('recurring', 'recur_interval_period', 'recur_number_of_periods',),
+            "classes": ('extrapretty', 'wide',),
+            "description": Action.RECURRENCE_DESCRIPTION,
+        }),
+        ("Verification", {
+            "fields": ('required_request_body_kwargs', 'required_request_params_kwargs', 'required_response_body_kwargs',),
             "classes": ('extrapretty', 'wide',),
         }),
         ("Extras", {
@@ -92,7 +97,7 @@ class ActionAdmin(admin.ModelAdmin):
 class PathwayActionAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
-            "fields": ('pathway', 'action', 'ranking',),
+            "fields": ('pathway', 'action', 'ranking', 'allow_recurrence',),
             "classes": ('extrapretty', 'wide',),
         }),
         ("Extras", {

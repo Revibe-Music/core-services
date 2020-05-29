@@ -16,6 +16,7 @@ class PathwayActionInlineForm(forms.ModelForm):
             'pathway',
             'action',
             'ranking',
+            # 'allow_recurrence',
             'active',
         ]
 

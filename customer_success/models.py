@@ -167,6 +167,29 @@ class Action(models.Model):
         help_text=_("Number of interval periods to use for time filtering")
     )
 
+    # recurrence
+    RECURRENCE_DESCRIPTION = _("##### NOT IMPLEMENTED ##### Options to set this action as a recurring action. If 'recurring' is checked, the time period fields cannot be blank for the recurrence to work.")
+    recurring = models.BooleanField(
+        null=False, blank=False, default=False,
+        verbose_name=_("recurring"),
+        help_text=_("Marks the action as recurring. This action can notify the users after the users has performed the action")
+    )
+    _recur_time_choices = (
+        (DAYS, 'Day(s)'),
+    )
+    recur_interval_period = models.CharField(
+        max_length=50, 
+        choices=_recur_time_choices,
+        null=True, blank=True,
+        verbose_name=_("time period"),
+        help_text=_("The type of time period to use for recurrance")
+    )
+    recur_number_of_periods = models.IntegerField(
+        null=True, blank=True,
+        verbose_name=_("number of periods"),
+        help_text=_("The number of interval periods to wait before resending this action's notification.")
+    )
+
     # extras
     active = models.BooleanField(
         null=False, blank=True, default=True,
@@ -234,6 +257,11 @@ class PathwayAction(models.Model):
         null=False, blank=False,
         verbose_name=_("ranking"),
         help_text=_("The group in which this action resides in this pathway")
+    )
+    allow_recurrence = models.BooleanField(
+        null=False, blank=False, default=False,
+        verbose_name=_("allow recurrence"),
+        help_text=_("Allow action recurrence in this path")
     )
 
     # extras

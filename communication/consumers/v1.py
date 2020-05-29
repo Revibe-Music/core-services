@@ -25,6 +25,7 @@ class ChatConsumer(AsyncConsumer):
         user = self.scope.get('user', None)
         if user == None:
             raise Exception("No User Found")
+        self.username = user.username
         other_username = self.scope['url_route']['kwargs']['username']
 
         # check if users are friends, or allow random messages
@@ -52,29 +53,36 @@ class ChatConsumer(AsyncConsumer):
             text_data_json = json.loads(text_data)
         else:
             text_data_json = text_data
-        message_body = text_data_json['message']
+        message_text = text_data_json['message']
 
-        # echo the message
-        await self.send({
-            "type": "websocket.send",
-            "text": message_body
-        })
+        body = {
+            "message": message_text,
+            "username": self.username,
+        }
 
-        # # send message to the group
-        # await self.channel_layer.group_send(
-        #     self.chat.group_name,
-        #     {
-        #         "type": "chat_message",
-        #         "text": message_body
-        #     }
-        # )
+        message_body = json.dumps(body)
+
+        # # echo the message
+        # await self.send({
+        #     "type": "websocket.send",
+        #     "text": message_body
+        # })
+
+        # send message to the group
+        await self.channel_layer.group_send(
+            self.chat.group_name,
+            {
+                "type": "chat_message",
+                "text": message_body
+            }
+        )
 
     async def chat_message(self, event):
         """
         Received message from the group, send that message to the clients
         """
-        print("messaged", event)
-        message_body = json.loads(event.get('text', None))
+        print("Messaged!", event)
+        message_body = event.get('text', None)
 
         # send the message to the clients
         await self.send({

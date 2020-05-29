@@ -22,8 +22,13 @@
 
         chatSocket.onmessage = function(e) {
             console.log("message", e);
-            const data = e.data;
-            document.querySelector('#chat-log').value += (data + '\n');
+            const json_data = e.data;
+            const data = JSON.parse(json_data)
+
+            const message = data.message
+            const username = data.username
+
+            document.querySelector('#chat-log').value += ("(" + username + ") " + message + '\n');
         };
 
         chatSocket.onerror = function(e) {

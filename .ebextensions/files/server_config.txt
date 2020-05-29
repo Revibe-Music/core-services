@@ -1,0 +1,144 @@
+#####
+Configures the Celery, CeleryBeat, and Channels (Daphne) configurations.
+#####
+
+# get django environment variables
+djangoenv=`cat /opt/python/current/env | tr '\n' ',' | sed 's/export //g' | sed 's/$PATH/%(ENV_PATH)s/g' | sed 's/$PYTHONPATH//g' | sed 's/$LD_LIBRARY_PATH//g' | sed 's/%/%%/g'`
+djangoenv=${djangoenv%?}
+
+# create celery beat config script
+celerybeatconf="[program:celeryd-beat]
+; Set full path to celery program if using virtualenv
+command=/opt/python/run/venv/bin/celery beat -A revibe --loglevel=INFO --workdir=/tmp -S django --pidfile /tmp/celerybeat.pid
+
+directory=/opt/python/current/app
+user=nobody
+numprocs=1
+stdout_logfile=/var/log/celery-beat.log
+stderr_logfile=/var/log/celery-beat.log
+autostart=false
+autorestart=true
+startsecs=10
+
+; Need to wait for currently executing tasks to finish at shutdown.
+; Increase this if you have very long running tasks.
+stopwaitsecs = 10
+
+; When resorting to send SIGKILL to the program to terminate it
+; send SIGKILL to its whole process group instead,
+; taking care of its children as well.
+killasgroup=true
+
+; if rabbitmq is supervised, set its priority higher
+; so it starts first
+priority=998
+
+environment=$djangoenv
+"
+
+# create celery worker config script
+celeryworkerconf="[program:celeryd-worker]
+; Set full path to celery program if using virtualenv
+command=/opt/python/run/venv/bin/celery worker -A revibe --loglevel=INFO
+
+directory=/opt/python/current/app
+user=nobody
+numprocs=1
+stdout_logfile=/var/log/celery-worker.log
+stderr_logfile=/var/log/celery-worker.log
+autostart=true
+autorestart=true
+startsecs=10
+
+; Need to wait for currently executing tasks to finish at shutdown.
+; Increase this if you have very long running tasks.
+stopwaitsecs = 600
+
+; When resorting to send SIGKILL to the program to terminate it
+; send SIGKILL to its whole process group instead,
+; taking care of its children as well.
+killasgroup=true
+
+; if rabbitmq is supervised, set its priority higher
+; so it starts first
+priority=999
+
+environment=$djangoenv
+"
+
+# Create Daphne configuration script
+daemonconf="[program:daphne]
+command=/opt/python/run/venv/bin/daphne -b :: -p 5000 revibe.asgi:application
+directory=/opt/python/current/app
+user=nobody
+numprocs=1
+stdout_logfile=/var/log/stdout_daphne.log
+stderr_logfile=/var/log/stderr_daphne.log
+autostart=true
+autorestart=true
+startsecs=10
+
+; Need to wait for currently executing tasks to finish at shutdown.
+; Increase this if you have very long running tasks.
+stopwaitsecs = 600
+
+; When resorting to send SIGKILL to the program to terminate it
+; send SIGKILL to its whole process group instead,
+; taking care of its children as well.
+killasgroup=true
+
+environment=$djangoenv
+"
+
+# Create Channels Worker configuration script
+workerconf="[program:worker]
+command=/opt/python/run/venv/bin/python /opt/python/current/app/revibe/manage.py runworker channels default
+directory=/opt/python/current/app
+user=nobody
+numprocs=1
+process_name=worker%(process_num)d
+stdout_logfile=/var/log/stdout_worker.log
+stderr_logfile=/var/log/stderr_worker.log
+autostart=true
+autorestart=true
+startsecs=10
+
+; Need to wait for currently executing tasks to finish at shutdown.
+; Increase this if you have very long running tasks.
+stopwaitsecs = 600
+
+; When resorting to send SIGKILL to the program to terminate it
+; send SIGKILL to its whole process group instead,
+; taking care of its children as well.
+killasgroup=true
+
+environment=$djangoenv
+"
+
+# Create script files
+echo "$celerybeatconf" | tee /opt/python/etc/celerybeat.conf
+echo "$celeryworkerconf" | tee /opt/python/etc/celeryworker.conf
+echo "$daemonconf" | tee /opt/python/etc/daemon.conf
+echo "$workerconf" | tee /opt/python/etc/worker.conf
+
+
+
+# Add configuration script to supervisord conf (if not there already)
+if ! grep -Fxq "[include]" /opt/python/etc/supervisord.conf
+    then
+    echo "" | tee -a /opt/python/etc/supervisord.conf
+    echo "[include]" | tee -a /opt/python/etc/supervisord.conf
+    echo "files: celerybeat.conf celeryworker.conf daemon.conf worker.conf" | tee -a /opt/python/etc/supervisord.conf
+fi
+if ! grep -Fxq "[inet_http_server]" /opt/python/etc/supervisord.conf
+    then
+    echo "" | sudo tee -a /opt/python/etc/supervisord.conf
+    echo "[inet_http_server]" | sudo tee -a /opt/python/etc/supervisord.conf
+    echo "port = 127.0.0.1:9001" | sudo tee -a /opt/python/etc/supervisord.conf
+fi
+
+# Reread the Supervisor config
+/usr/local/bin/supervisorctl -c /opt/python/etc/supervisord.conf reread
+
+# Update Supervisor in cache without restarting all services
+/usr/local/bin/supervisorctl -c /opt/python/etc/supervisord.conf update

@@ -73,7 +73,7 @@ _log_level = 'DEBUG' if DEBUG else 'INFO'
 # }
 
 
-_redis_url = "test-env-redis.7pqvq5.ng.0001.use2.cache.amazonaws.com"
+_redis_url = "api-communication-redis.7pqvq5.ng.0001.use2.cache.amazonaws.com"
 _redis_port = 6379
 CHANNEL_LAYERS = {
     "default": {

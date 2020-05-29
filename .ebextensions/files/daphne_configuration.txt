@@ -1,5 +1,5 @@
 # Get Django environment variables
-djangoenv=`cat /opt/python/current/env | tr '\n' ',' | sed 's/%/%%/g' | sed 's/export //g' | sed 's/$PATH/%(ENV_PATH)s/g' | sed 's/$PYTHONPATH//g' | sed 's/$LD_LIBRARY_PATH//g'`
+djangoenv=`cat /opt/python/current/env | tr '\n' ',' | sed 's/%/%%/g' | sed 's/export //g' | sed 's/$PATH/%(ENV_PATH)s/g' | sed 's/$DAPHNEPYTHONPATH//g' | sed 's/$LD_LIBRARY_PATH//g'`
 djangoenv=${djangoenv%?}
 
 # Create daemon configuration script

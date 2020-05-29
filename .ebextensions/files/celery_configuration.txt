@@ -65,10 +65,10 @@ echo "$celerybeatconf" | tee /opt/python/etc/celerybeat.conf
 echo "$celeryworkerconf" | tee /opt/python/etc/celeryworker.conf
 
 # add configuration script to supervisord conf (if not there already)
-if ! grep -Fxq "[include]" /opt/python/etc/supervisord.conf
+if ! grep -Fxq "[include-celery]" /opt/python/etc/supervisord.conf
   then
   echo "" | tee -a /opt/python/etc/supervisord.conf
-  echo "[include]" | tee -a /opt/python/etc/supervisord.conf
+  echo "[include-celery]" | tee -a /opt/python/etc/supervisord.conf
   echo "files: celerybeat.conf celeryworker.conf" | tee -a /opt/python/etc/supervisord.conf
 fi
 

@@ -44,6 +44,11 @@ class ChatConsumer(AsyncConsumer):
             "type": "websocket.accept"
         })
 
+        await self.send({
+            "type": "websocket.send",
+            "text": json.dumps({"message": "Connected!"})
+        })
+
     async def websocket_receive(self, event):
         print("Received!", event)
 

@@ -30,10 +30,10 @@
         chatSocket.onmessage = function(e) {
             console.log("message", e);
             const json_data = e.data;
-            const data = JSON.parse(json_data)
+            const data = JSON.parse(json_data);
 
-            const message = data.message
-            const username = data.username
+            const message = data.message;
+            const username = data.username;
 
             document.querySelector('#chat-log').value += ("(" + username + ") " + message + '\n');
         };
@@ -61,6 +61,12 @@
             }));
             messageInputDom.value = '';
         };
+
+        window.onbeforeunload = function() {
+            if (chatSocket.readyState === WebSocet.OPEN) {
+                chatSocket.close();
+            }
+        }
     </script>
 </body>
 </html>

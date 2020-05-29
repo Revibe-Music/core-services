@@ -13,7 +13,14 @@
     <script>
         var username = JSON.parse(document.getElementById('room-name').textContent);
         host = window.location.host;
-        var websocket_endpoint = 'ws://' + host + '/ws/v1/communication/chat/' + username + '/?authorization=k8Bshewg0LkMdx8YX8iuHwpTN5gsTw';
+        const host_protocol = window.location.protocol;
+        var protocol;
+        if (host_protocol == 'https:') {
+            protocol = 'wss://';
+        } else {
+            protocol = 'ws://';
+        }
+        var websocket_endpoint = protocol + host + '/ws/v1/communication/chat/' + username + '/?authorization=k8Bshewg0LkMdx8YX8iuHwpTN5gsTw';
         const chatSocket = new WebSocket(websocket_endpoint);
 
         chatSocket.onopen = function(e) {

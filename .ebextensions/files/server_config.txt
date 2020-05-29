@@ -1,6 +1,6 @@
-#####
-Configures the Celery, CeleryBeat, and Channels (Daphne) configurations.
-#####
+# ####
+# Configures the Celery, CeleryBeat, and Channels (Daphne) configurations.
+# ####
 
 # get django environment variables
 djangoenv=`cat /opt/python/current/env | tr '\n' ',' | sed 's/export //g' | sed 's/$PATH/%(ENV_PATH)s/g' | sed 's/$PYTHONPATH//g' | sed 's/$LD_LIBRARY_PATH//g' | sed 's/%/%%/g'`

@@ -163,6 +163,21 @@ class Notifier:
 
         return config
 
+    def format_html(self, html, config):
+        pieces = html.split('<body>')
+        if len(pieces) < 1:
+            return pieces[0].format(**config)
+
+        else:
+            head, body = pieces
+
+            body = body.format(**config)
+
+            final = head + "<body>" + body
+
+            return final
+
+
     def send_email(self):
         # don't send anything if the user doesn't let us
         if not self.user.profile.allow_email_notifications:
@@ -183,7 +198,7 @@ class Notifier:
 
         # configure email body content
         html_format = notification_template.body
-        html_message = html_format.format(**config)
+        html_message = self.format_html(html_format, config)
         plain_message = strip_tags(html_message)
 
         try:

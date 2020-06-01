@@ -48,10 +48,12 @@ class EmailConfiguration:
         'reset_password': { # forgot password
             _template: 'accounts/reset_password',
             'subject': 'Temporary Password',
+            'from_address': '"Revibe Support" <noreply@revibe.tech>',
         },
         'password_reset': {
             _template: 'accounts/password_reset', # password has been changed
             'subject': 'Your password has been changed',
+            'from_address': '"Revibe Support" <noreply@revibe.tech>',
         },
     }
 
@@ -87,6 +89,7 @@ class EmailConfiguration:
         if subject != None:
             artist_name = self.user.artist.name if getattr(self.user, 'artist', None) != None else None
             subject = subject.format(artist_name=artist_name, username=self.user.username)
+            self.subject = subject
 
         return template
 
@@ -117,12 +120,14 @@ class EmailConfiguration:
         html_message = self.configure_email()
         plain_message = strip_tags(html_message)
 
+        from_address =self.template.get('from_address', self.from_address)
+
         num_sent = 0
         for rec in self.recipients:
             num_sent += send_mail(
                 subject=self.subject,
                 message=plain_message,
-                from_email=self.from_address,
+                from_email=from_address,
                 recipient_list=[rec,],
                 html_message=html_message,
                 fail_silently=self.fail_silently

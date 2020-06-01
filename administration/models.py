@@ -506,9 +506,11 @@ class BlogTag(models.Model):
 
 class Variable(models.Model):
 
+    CLEANUP = 'cleanup'
     _category_choices = (
         ('artist-portal', 'Artist Portal Dashboard'),
         ('browse', 'Browse'),
+        (CLEANUP, 'Cleanup'),
         ('cs', 'Customer Success'),
         ('notifications', 'Notifications'),
         ('search', 'Search'),

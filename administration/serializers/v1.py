@@ -411,6 +411,8 @@ class ContactFormMetricsSerializer(serializers.ModelSerializer):
             'resolved',
             'assigned_to',
             'priority',
+            'date_created',
+            'last_changed',
         ]
 
     def get_name(self, obj):

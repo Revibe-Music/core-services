@@ -410,6 +410,7 @@ class ContactFormMetricsSerializer(serializers.ModelSerializer):
             'message',
             'resolved',
             'assigned_to',
+            'priority',
         ]
 
     def get_name(self, obj):

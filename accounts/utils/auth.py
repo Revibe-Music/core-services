@@ -16,6 +16,7 @@ from revibe.contrib.email import EmailConfiguration
 
 from accounts.exceptions import PasswordValidationError
 from accounts.models import CustomUser, Profile
+from administration.utils import retrieve_variable
 
 # -----------------------------------------------------------------------------
 
@@ -67,8 +68,9 @@ def reset_password(email=None, username=None, user=None):
         raise AccountNotFound("Could not find this user")
 
     # generate temp password
+    password_length = retrieve_variable('temporary-password-length', 20, output_type=int)
     letters = string.ascii_letters + string.digits
-    temp_password = ''.join(random.choice(letters) for i in range(20))
+    temp_password = ''.join(random.choice(letters) for i in range(password_length))
 
     # set temp password
     user.set_password(temp_password)

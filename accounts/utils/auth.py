@@ -3,6 +3,7 @@ Created: 5 Mar. 2020
 Author: Jordan Prechac
 """
 
+from django.db.models.query import QuerySet
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 
@@ -53,11 +54,15 @@ def get_user_by_username_or_email(email=None, username=None):
     return None
 
 
-def reset_password(email=None, username=None):
+def reset_password(email=None, username=None, user=None):
     """
     """
-    # get the user by email/username
-    user = get_user_by_username_or_email(email, username)
+    if user:
+        if isinstance(user, QuerySet):
+            user = user.first()
+    else:
+        # get the user by email/username
+        user = get_user_by_username_or_email(email, username)
     if user == None:
         raise AccountNotFound("Could not find this user")
 

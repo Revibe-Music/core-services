@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 
 from accounts.admin_ext import actions
 from accounts.models import *
@@ -9,9 +10,43 @@ from customer_success.utils.admin.inlines import UserPathsInline
 # Register your models here.
 
 @admin.register(CustomUser)
-class CustomUserAdmin(admin.ModelAdmin):
-    # customize list display
-    list_display = ('__str__', '_full_name', 'date_joined', 'id')
+class CustomUserAdmin(UserAdmin):
+    actions = [actions.update_mailchimp_info, actions.reset_password,]
+
+    fieldsets = (
+        (None, {
+            "fields": ('username', 'password', 'id',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Personal Info", {
+            "fields": ('first_name', 'last_name', 'email',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Access", {
+            "fields": ('programmatic_account', 'temporary_account', ('is_artist', 'artist',), ('is_manager', 'manager',),),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Permissions", {
+            "fields": ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions', 'force_change_password',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Important Dates", {
+            "fields": ('last_login', 'date_joined',),
+            "classes": ('extrapretty', 'wide',),
+        })
+    )
+    readonly_fields = (
+        'id',
+        'last_login', 'date_joined', 'date_registered',
+        'log_in_mobile_app', 'log_in_artist_portal',
+    )
+
+    # list_display = ('__str__', '_full_name', 'date_joined', 'id')
+    list_display = (
+        'username',
+        '_full_name',
+        'date_joined',
+    )
     list_filter = (
         ('date_joined', admin.DateFieldListFilter),
         ('is_staff', admin.BooleanFieldListFilter),
@@ -20,13 +55,10 @@ class CustomUserAdmin(admin.ModelAdmin):
 
     inlines = [
         UserPathsInline,
+        # friends in line,
     ]
 
-    # customize search
     search_fields = ['username', 'first_name', 'last_name']
-
-    # customize actions
-    actions = [actions.update_mailchimp_info]#[change_password]
 
     def _full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"

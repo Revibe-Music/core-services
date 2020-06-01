@@ -114,10 +114,6 @@ class EmailConfiguration:
 
     def send_email(self, *args, **kwargs):
 
-        # only send emails in the cloud
-        if not settings.USE_S3:
-            raise network.BadEnvironmentError("Cannot send emails outside of a cloud environment")
-
         html_message = self.configure_email()
         plain_message = strip_tags(html_message)
 

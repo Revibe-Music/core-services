@@ -31,7 +31,7 @@ class CustomUserAdmin(UserAdmin):
             "classes": ('extrapretty', 'wide',),
         }),
         ("Important Dates", {
-            "fields": ('last_login', 'date_joined',),
+            "fields": ('last_login', 'date_joined', 'date_registered',),
             "classes": ('extrapretty', 'wide',),
         })
     )

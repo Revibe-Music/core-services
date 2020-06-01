@@ -260,8 +260,13 @@ class VariableAdmin(admin.ModelAdmin):
         'date_created', 'last_changed',
     )
 
-    list_display = ('key', 'value')
+    list_display = (
+        'key',
+        'value',
+        'active',
+    )
     list_filter = (
+        ('active', admin.BooleanFieldListFilter),
         'category',
     )
 

@@ -68,10 +68,11 @@ class NotificationTemplateAdmin(admin.ModelAdmin):
     list_display = (
         '__str__',
         '_get_link_event',
+        'active',
     )
     list_filter = (
         ('event', admin.RelatedOnlyFieldListFilter),
-        ('event__active', admin.BooleanFieldListFilter),
+        ('active', admin.BooleanFieldListFilter),
     )
 
     # customize search

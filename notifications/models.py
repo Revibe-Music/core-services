@@ -85,7 +85,7 @@ class Event(models.Model):
     active_objects = managers.ActiveEventManager()
 
     def __str__(self):
-        return self.name
+        return self.name + f" ({self.type.capitalize()})"
 
     def __repr__(self):
         return default_repr(self)

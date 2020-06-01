@@ -165,7 +165,7 @@ class Notifier:
 
     def format_html(self, html, config):
         pieces = html.split('<body>')
-        if len(pieces) < 1:
+        if len(pieces) <= 1:
             return pieces[0].format(**config)
 
         else:

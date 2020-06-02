@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'music',
     'notifications',
     'payments',
+    'surveys',
 
     # installed apps
     'rest_framework',

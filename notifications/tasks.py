@@ -11,6 +11,7 @@ import datetime
 
 from accounts.models import CustomUser
 from .core import Notifier
+from .core.recap import send_artist_recap_email
 
 # -----------------------------------------------------------------------------
 
@@ -42,4 +43,17 @@ def test_send_notification():
     )
 
     return
+
+
+@shared_task
+def artist_recap_email(weeks=1):
+    """
+    """
+    artists = CustomUser.registered_objects.filter(
+        artist__isnull=False, # they must be an artist
+        profile__allow_email_reminders=True, profile__allow_email_notifications=True # they must allow notifications
+    )
+
+    for artist in artists:
+        send_artist_recap_email(artist, weeks=weeks)
 

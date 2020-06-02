@@ -31,7 +31,7 @@ from .config import base_email_config
 # -----------------------------------------------------------------------------
 
 class Notifier:
-    def __init__(self, user, trigger, artist=False, force=False, medium='email', check_first=False, *args, **kwargs):
+    def __init__(self, user, trigger, artist=False, force=False, medium='email', check_first=False, extra_configs=None, *args, **kwargs):
         """
         """
         self.user = user
@@ -55,6 +55,7 @@ class Notifier:
         self.event = self._get_event(trigger, check_first=check_first)
         self.templates = self.event.templates.filter(active=True)
 
+        self.extra_configs = extra_configs
         self.args = args
         self.kwargs = kwargs
 
@@ -144,6 +145,11 @@ class Notifier:
     def _configure_kwargs(self):
         """ Configure base kwargs for message formatting """
         config = base_email_config
+
+        # add extra configs
+        if isinstance(self.extra_configs, dict):
+            config.update(self.extra_configs)
+
         config['user'] = self.user
         config['artist'] = getattr(self, 'artist', None)
 

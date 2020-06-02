@@ -7,6 +7,8 @@ Author: Jordan Prechac
 
 from revibe._helpers import const
 
+import datetime
+
 from administration.utils import retrieve_variable
 
 # -----------------------------------------------------------------------------
@@ -26,5 +28,11 @@ base_email_config = {
 
     # contact
     "support_email": retrieve_variable("support_email", getattr(const, 'SUPPORT_EMAIL', 'support@revibe.tech')),
+
+    # footer # TODO
+    # current_year: 
+    # company_name
+    # mailing address
+    # update preferences link
 }
 

@@ -159,13 +159,17 @@ class Notifier:
         if self.album:
             config['album_name'] = self.album.name
             config['album_songs_count'] = self.album.songs.count()
+            # TODO: add album uploader name
         if self.song:
             config['song_name'] = self.album.title
+            # TODO: add song uploader name
 
         # temp
         if self.is_contribution:
             config['contribution_status'] = "approve" if self.contribution.get('approved', False) else "deny"
             config['contribution_status_past'] = "approved" if self.contribution.get('approved', False) else "denied"
+            # TODO: add contribution uploader name
+            # TODO: add contribution type
 
         return config
 

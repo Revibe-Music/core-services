@@ -19,6 +19,7 @@ from revibe._helpers import status
 from accounts.models import CustomUser, Profile, ArtistProfile
 from administration.models import Alert, Blog, Campaign, YouTubeKey, Variable
 from content.models import *
+from surveys.models import ArtistOfTheWeek
 
 # -----------------------------------------------------------------------------
 # mixins
@@ -347,6 +348,15 @@ class MetricsMixin:
     pass
 
 
+class SurveysMixin:
+    def _get_artistoftheweek(self):
+        if not hasattr(self, 'artist_user'):
+            return None
+        app = ArtistOfTheWeek.objects.create(user=self.artist_user, promotion_ideas="We could go the mall")
+        self.artistoftheweek = app
+        return app
+
+
 # -----------------------------------------------------------------------------
 # classes
 
@@ -370,7 +380,7 @@ class AuthorizedAPITestCase(
 
 
 class RevibeTestCase(
-    AuthorizedAPITestCase, ContentMixin, MusicMixin, AdministrationMixin, MetricsMixin
+    AuthorizedAPITestCase, ContentMixin, MusicMixin, AdministrationMixin, MetricsMixin, SurveysMixin
 ):
     """
     Combines the Authentication functionality with objects from each of the apps.

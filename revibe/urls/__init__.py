@@ -17,8 +17,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, re_path, include
 
-from logging import getLogger
-logger = getLogger(__name__)
+from . import api
 
 from administration.views import base
 
@@ -26,16 +25,6 @@ from administration.views import base
 from communication import views
 
 # -----------------------------------------------------------------------------
-
-v1_urls = [
-    path('account/', include('accounts.urls.v1')),
-    path('administration/', include('administration.urls.v1')),
-    path('content/', include('content.urls.v1')),
-    path('marketplace/', include('marketplace.urls.v1')),
-    path('metrics/', include('metrics.urls.v1')),
-    path('music/', include('music.urls.v1')),
-    path('storage/', include('cloud_storage.urls.v1')),
-]
 
 admin_path = settings.ADMIN_PATH
 
@@ -48,7 +37,10 @@ urlpatterns = [
     path('jet/dashboard/', include('jet.dashboard.urls', namespace='jet-dashboard')),
     path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     path('hc/', base.home, name="health_check"),
-    path('v1/', include(v1_urls)),
+
+    # api urls
+    path('v1/', include(api.v1_urls)), # TODO: Deprecate these urls
+    path('api/', include(api.urlpatterns)),
 
     # temp
     path('communication/', views.index, name="index"),

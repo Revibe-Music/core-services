@@ -56,6 +56,11 @@ class ExpectationFailedError(APIException):
 
 # 5xx Errors
 
+class ServerError(APIException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    default_detail = "Server error"
+    default_code = "server_error"
+
 class NotImplementedError(APIException):
     status_code = status.HTTP_501_NOT_IMPLEMENTED
     default_detail = "The requested feature is not currently available"

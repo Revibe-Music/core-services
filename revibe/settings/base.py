@@ -53,6 +53,7 @@ INSTALLED_APPS = [
 
     # my apps
     'accounts',
+    'accounts.referrals',
     'administration',
     'communication',
     'content',

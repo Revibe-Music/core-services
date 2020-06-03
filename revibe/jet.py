@@ -59,6 +59,12 @@ side_menu = [ # A list of application or custom item dicts
         ]
     },
     {
+        "label": _("Accounts - Referrals"),
+        "items": [
+            {"name": 'referrals.referral'},
+        ]
+    },
+    {
         "label": _("Administration"),
         "items": [
             {"name": 'administration.artistspotlight'},

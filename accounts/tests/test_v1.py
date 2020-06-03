@@ -13,6 +13,7 @@ from revibe._helpers.test import RevibeTestCase
 from revibe._helpers import status
 
 from accounts.models import CustomUser, Profile
+from accounts.referrals.models import Referral
 from administration.models import Campaign
 from content.models import *
 
@@ -57,14 +58,14 @@ class TestRegister(RevibeTestCase):
         self.assert201(response)
 
         referrer = self.user
-        new_user = CustomUser.objects.get(username=response.data['user']['username'])
+        referral = Referral.objects.get(referrer=referrer)
         self.assertTrue(
-            bool(getattr(new_user.profile, "referrer", False)),
-            msg="Could not find the profile's 'referrer'"
+            bool(referral),
+            msg="A referral object could not be found"
         )
         self.assertEqual(
-            str(referrer.id), str(new_user.profile.referrer.id),
-            msg="The expected referrer is not listed as the new user's referrer"
+            str(referral.referree.id), str(response.data['user']['user_id']),
+            msg=f"The Referral's referree's ID is not the same as the created user's ID. Referree: {referral.referree.id}, new user: {response.data['user']['user_id']}"
         )
 
     def test_register_with_campaign(self):

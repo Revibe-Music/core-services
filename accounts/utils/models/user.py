@@ -19,6 +19,7 @@ from revibe._helpers import const
 
 from accounts._helpers import validation
 from accounts.models import CustomUser
+from accounts.referrals.utils.models.referral import attach_referral as attach_user_referral
 from accounts.serializers import v1 as act_ser_v1
 from administration.utils.models import retrieve_variable
 from administration.models import Campaign
@@ -54,12 +55,22 @@ def attach_referrer(params, profile, *args, **kwargs):
     # check for user referral
     uid = get_url_param(params, 'uid')
     if uid != None:
+    #     try:
+    #         referrer = CustomUser.objects.get(id=uid)
+    #         profile.referrer = referrer
+    #         profile.save()
+    #     except Exception as e:
+    #         pass
         try:
             referrer = CustomUser.objects.get(id=uid)
-            profile.referrer = referrer
-            profile.save()
+            referree = profile.user
+            attach_user_referral(
+                referrer=referrer,
+                referree=referree,
+                ip_address=kwargs.get('ip_address', None)
+            )
         except Exception as e:
-            pass
+            print(e)
 
     return profile
 

@@ -43,4 +43,7 @@ urlpatterns = [
     path("facebook-authentication/callback/", OAuth2CallbackView.adapter_view(v1.FacebookOAuth2Adapter), name="facebook-callback"),
 
     path('profile/reset-password/', v1.view_reset_password, name='reset-password'),
+
+    # referrals
+    path("referrals/", include('accounts.referrals.api.v1.urls')),
 ]

@@ -1054,7 +1054,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
     @notifier(
         trigger='inverse-new-contribution', user_target="data.artist_id.artist_user",
         methods=['post'], song=True,
-        force=True, medium='email', artsit=True, check_first=True
+        force=True, medium='email', artist=True, check_first=True
     )
     @notifier(
         trigger='new-contribution',

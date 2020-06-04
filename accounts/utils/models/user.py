@@ -19,7 +19,8 @@ from revibe._helpers import const
 
 from accounts._helpers import validation
 from accounts.models import CustomUser
-from accounts.referrals.utils.models.referral import attach_referral as attach_user_referral
+from accounts.referrals.tasks import add_referral_points
+from accounts.referrals.utils import attach_referral as attach_user_referral
 from accounts.serializers import v1 as act_ser_v1
 from administration.utils.models import retrieve_variable
 from administration.models import Campaign
@@ -175,6 +176,12 @@ def register_new_user(data, params, old_user=None, *args, **kwargs):
         except Exception:
             pass
     
+    # assign points for referral stuff
+    try:
+        add_referral_points.s(user.id, "new_user", datetime.datetime.now()).delay()
+    except Exception:
+        pass
+
     return data
 
 

@@ -37,3 +37,72 @@ class ReferralAdmin(admin.ModelAdmin):
     _link_to_referree.admin_order_field = "referree"
 
 
+@admin.register(PointCategory)
+class PointCategoryAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {
+            "fields": ('name', 'points',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Configuration", {
+            "fields": ('repeating', 'expiration_interval', 'expiration_number_of_periods',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('active', 'description', 'date_created', 'last_changed', 'id',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'in',),
+        })
+    )
+    readonly_fields = (
+        'id',
+        'date_created', 'last_changed',
+    )
+
+    list_display = (
+        'name',
+        'points',
+        'active',
+    )
+    list_filter = (
+        ('active', admin.BooleanFieldListFilter),
+    )
+
+    search_fields = (
+        'name',
+        'description',
+    )
+
+
+@admin.register(Point)
+class PointAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {
+            "fields": ('referral', 'category', 'points',),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('timestamp', 'id',),
+            "classes": ('extrapretty', 'wide', 'collapse', 'in',),
+        }),
+    )
+    readonly_fields = (
+        'id',
+        'timestamp',
+    )
+
+    list_display = (
+        '_user',
+        'points',
+        'category',
+    )
+    list_filter = (
+        ('timestamp', admin.DateFieldListFilter),
+    )
+
+    def _user(self, obj):
+        if obj.referral:
+            return obj.referral.referrer
+    _user.short_description = "referring user"
+
+
+

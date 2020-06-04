@@ -3,6 +3,7 @@
 
 from revibe.utils.params import get_url_param
 
+from accounts.models import CustomUser
 from accounts.referrals.exceptions import ReferralException
 from accounts.referrals.models import Referral
 
@@ -25,6 +26,20 @@ def attach_referral(referrer, referree, ip_address=None, *args, **kwargs):
     referral = Referral.objects.create(referrer=referrer, referree=referree, referree_ip_address=ip_address)
 
     # do a points thing with the referral
+
+    return referral
+
+
+def get_referral(referree: CustomUser, referrer: CustomUser = None):
+    kwargs = {
+        "referree": referree
+    }
+    if referrer:
+        kwargs['referrer'] = referrer
+    try:
+        referral = Referral.objects.get(**kwargs)
+    except Exception:
+        return None
 
     return referral
 

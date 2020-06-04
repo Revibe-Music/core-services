@@ -45,6 +45,7 @@ from accounts.artist.analytics import BarChart, CardChart, LineChart
 from accounts.exceptions import AccountsException, PasswordValidationError
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
+from accounts.referrals.tasks import add_referral_points
 from accounts.serializers.v1 import *
 from accounts.utils.auth import change_password, reset_password
 from accounts.utils.models import register_new_user
@@ -628,6 +629,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         # check placeholder contributions
         create_permananent_contribs(artist)
+
+        # add referral points
+        try:
+            add_referral_points.s(request.user.id, "create_artist_profile", datetime.datetime.now()).delay()
+        except Exception:
+            pass
 
         if not settings.DEBUG:
             try:

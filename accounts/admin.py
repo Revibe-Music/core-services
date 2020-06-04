@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from accounts.admin_ext import actions
+from accounts.admin_ext import actions, inlines
 from accounts.models import *
 from customer_success.utils.admin.inlines import UserPathsInline
 
@@ -56,6 +56,7 @@ class CustomUserAdmin(UserAdmin):
     inlines = [
         UserPathsInline,
         # friends in line,
+        inlines.ReferralInline,
     ]
 
     search_fields = ['username', 'first_name', 'last_name']

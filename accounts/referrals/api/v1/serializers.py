@@ -49,7 +49,7 @@ class ReferralSerializer(serializers.ModelSerializer):
 
 
 class PointSerializer(serializers.ModelSerializer):
-    category_name = serializers.CharField(source='category.name')
+    category_name = serializers.SerializerMethodField('_get_category_name', read_only=True)
 
     class Meta:
         model = Point
@@ -64,6 +64,11 @@ class PointSerializer(serializers.ModelSerializer):
         pass
     def create(self, instance, validated_data, *args, **kwargs):
         pass
+
+    def _get_category_name(self, obj):
+        if obj.category:
+            return obj.category.name
+        return None
 
 
 

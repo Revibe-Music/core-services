@@ -120,7 +120,8 @@ class RegistrationAPI(generics.GenericAPIView):
         old_user = request.user if not isinstance(request.user, AnonymousUser) else None
 
         # perform registration
-        register_data = register_new_user(data, params, old_user, request=request, *args, **kwargs)
+        add_artist = True if request.data.get('device_type', None) == 'browser' else False
+        register_data = register_new_user(data, params, old_user, request=request, add_artist=add_artist, *args, **kwargs)
 
         # format the data from register_new_user
         return_data = {
@@ -151,7 +152,8 @@ class LoginAPI(generics.GenericAPIView):
 
             user = serializer.validated_data
 
-            access_token, refresh_token = generate_tokens(user, request, use_default_app=True, delete_old_tokens=True)
+            add_artist = True if device == 'browser' else False
+            access_token, refresh_token = generate_tokens(user, request, use_default_app=True, delete_old_tokens=True, add_artist=add_artist)
 
             user.last_login = timezone.now()
             user.save()

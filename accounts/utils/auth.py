@@ -26,7 +26,7 @@ from administration.utils import retrieve_variable
 
 # -----------------------------------------------------------------------------
 
-def generate_scopes(user, application: Application, return_as_string: bool =True):
+def generate_scopes(user, application: Application, return_as_string: bool =True, add_artist: bool=False):
     scopes = []
 
     if 'revibe' in application.name.lower():
@@ -35,7 +35,7 @@ def generate_scopes(user, application: Application, return_as_string: bool =True
     if application.name == 'Revibe Music':
         scopes.append('music')
 
-    if application.name == 'Revibe Artists':
+    if application.name == 'Revibe Artists' or add_artist:
         scopes.append('artist')
 
     if user.is_staff:
@@ -47,7 +47,7 @@ def generate_scopes(user, application: Application, return_as_string: bool =True
         return scopes
 
 
-def generate_tokens(user: CustomUser, request, use_default_app: bool =False, delete_old_tokens: bool=False, *args, **kwargs):
+def generate_tokens(user: CustomUser, request, use_default_app: bool =False, delete_old_tokens: bool=False, add_artist: bool=False, *args, **kwargs):
     """
 
 
@@ -82,7 +82,7 @@ def generate_tokens(user: CustomUser, request, use_default_app: bool =False, del
         expires=expire,
         token=common.generate_token(),
         application=application,
-        scope=generate_scopes(user, application)
+        scope=generate_scopes(user, application, add_artist=add_artist)
     )
     access_token.save()
 

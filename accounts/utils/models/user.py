@@ -138,7 +138,7 @@ def register_new_user(data, params, old_user=None, *args, **kwargs):
         user.date_registered = timezone.now()
 
     # get the tokens set up
-    access_token, refresh_token = generate_tokens(user, kwargs.get('request'), use_default_app=True)
+    access_token, refresh_token = generate_tokens(user, kwargs.get('request'), use_default_app=True, add_artist=kwargs.get('add_artist', False))
 
     # prep return information
     data = {

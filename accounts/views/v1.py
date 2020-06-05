@@ -42,12 +42,12 @@ from revibe._helpers import responses, const
 
 from accounts.adapter import TokenAuthSupportQueryString
 from accounts.artist.analytics import BarChart, CardChart, LineChart
-from accounts.exceptions import AccountsException, PasswordValidationError
+from accounts.exceptions import AccountsException, PasswordValidationError, AuthError
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.referrals.tasks import add_referral_points
 from accounts.serializers.v1 import *
-from accounts.utils.auth import change_password, reset_password
+from accounts.utils.auth import change_password, reset_password, generate_tokens, refresh_access_token
 from accounts.utils.models import register_new_user
 from accounts._helpers import validation
 from administration.models import Campaign
@@ -147,48 +147,11 @@ class LoginAPI(generics.GenericAPIView):
         }
         serializer = self.get_serializer(data=login_data)
         if serializer.is_valid():
-
             device = request.data['device_type']
 
             user = serializer.validated_data
 
-            scopes = ["first-party"]
-            if device == 'browser':
-                scopes.append('artist')
-            if user.is_staff:
-                scopes.append("ADMIN")
-            scope = " ".join(scopes)
-
-            tokens = AccessToken.objects.filter(user=user)
-            for at in tokens:
-                if at.scope == scope:
-                    at.source_refresh_token.delete()
-                    at.delete()
-
-            application = Application.objects.get(name="Revibe First Party Application")
-
-            time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME
-            expire = timezone.now() + datetime.timedelta(hours=time)
-
-            access_token = AccessToken(
-                user=user,
-                expires=expire,
-                token=common.generate_token(),
-                application=application,
-                scope=scope
-            )
-            access_token.save()
-
-            refresh_token = RefreshToken(
-                user=user,
-                token=common.generate_token(),
-                application=application,
-                access_token=access_token
-            )
-            refresh_token.save()
-
-            access_token.source_refresh_token = refresh_token
-            access_token.save()
+            access_token, refresh_token = generate_tokens(user, request, use_default_app=True, delete_old_tokens=True)
 
             user.last_login = timezone.now()
             user.save()
@@ -228,18 +191,9 @@ class RefreshTokenAPI(generics.GenericAPIView):
 
         # get tokens
         try:
-            refresh_token = RefreshToken.objects.get(token=request.data['refresh_token'])
-        except RefreshToken.DoesNotExist as e:
+            access_token = refresh_access_token(request.data['refresh_token'])
+        except AuthError:
             raise network.BadEnvironmentError("This account has been logged in on another device, please log in again")
-        access_token = refresh_token.access_token
-
-        access_token.token = common.generate_token()
-
-        device = request.data['device_type']
-        time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME
-        access_token.expires = timezone.now() + datetime.timedelta(hours=time)
-
-        access_token.save()
 
         user = access_token.user
         user.last_login = timezone.now()

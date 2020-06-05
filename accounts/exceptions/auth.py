@@ -10,3 +10,7 @@ from .base import AccountsException
 
 class PasswordValidationError(AccountsException):
     pass
+
+class AuthError(AccountsException):
+    pass
+

@@ -76,3 +76,13 @@ def convert_param_to_bool(params, var, default=None, *args, **kwargs):
         return bool(default)
     else:
         return None
+
+
+def get_request_header(request, header_name, default=None):
+    headers = request.META
+
+    header = headers.get(header_name, default)
+
+    return header
+
+

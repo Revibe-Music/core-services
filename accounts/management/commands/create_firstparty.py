@@ -24,6 +24,6 @@ class Command(BaseCommand):
             if settings.DEBUG:
                 print("<Application: 'Revibe Artists'> application created")
         elif settings.DEBUG:
-            print("<Application: 'Revibe Music'> already exists")
+            print("<Application: 'Revibe Artists'> already exists")
 
 

@@ -11,7 +11,7 @@ from django.utils.decorators import method_decorator
 from django.utils.html import strip_tags
 from rest_framework import viewsets, permissions, generics, status
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, APIException
 from rest_framework.response import Response
 from rest_auth.registration.views import SocialConnectView, SocialLoginView
 from oauth2_provider.views import TokenView, RevokeTokenView
@@ -931,18 +931,32 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
 
         elif request.method == 'POST':
-            if 'platform' not in request.data.keys():
-                _mutable = request.data._mutable
-                request.data._mutable = True
-                request.data['platform'] = str(self.platform)
-                request.data._mutable = _mutable
+            try:
+                if 'platform' not in request.data.keys():
+                    _mutable = request.data._mutable
+                    request.data._mutable = True
+                    request.data['platform'] = str(self.platform)
+                    request.data._mutable = _mutable
 
-            serializer = content_ser_v1.SongSerializer(data=request.data, *args, **kwargs)
-            if not serializer.is_valid():
-                return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
+                serializer = content_ser_v1.SongSerializer(data=request.data, *args, **kwargs)
+                if not serializer.is_valid():
+                    return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
 
-            serializer.save()
-            return responses.CREATED(serializer=serializer)
+                serializer.save()
+                return responses.CREATED(serializer=serializer)
+            except Exception as e:
+                if isinstance(e, APIException):
+                    raise e
+                else:
+                    # send Jordan an email with the issue
+                    send_mail(
+                        subject="Upload song error",
+                        message=f"Error uploading song. \n\nError: {str(e)} \n\nDatetime: {datetime.datetime.now()} \n\nArtist: {artist.name}",
+                        from_email='"Song Upload Error" <noreply@revibe.tech>',
+                        recipient_list=["jordanprechac@revibe.tech",],
+                        fail_silently=True
+                    )
+                    return responses.PROGRAM_ERROR(str(e))
 
         elif request.method == 'PATCH':
             instance = Song.objects.get(pk=song_id)

@@ -22,6 +22,7 @@ from accounts.models import CustomUser
 from accounts.referrals.tasks import add_referral_points
 from accounts.referrals.utils import attach_referral as attach_user_referral
 from accounts.serializers import v1 as act_ser_v1
+from accounts.utils.auth import generate_tokens
 from administration.utils.models import retrieve_variable
 from administration.models import Campaign
 
@@ -137,29 +138,7 @@ def register_new_user(data, params, old_user=None, *args, **kwargs):
         user.date_registered = timezone.now()
 
     # get the tokens set up
-    time = const.BROWSER_EXPIRY_TIME if device == 'browser' else const.DEFAULT_EXPIRY_TIME
-    expire = timezone.now() + datetime.timedelta(hours=time)
-
-    scopes = ['first-party']
-    if device == 'browser':
-        scopes.append('artist')
-    scope = " ".join(scopes)
-
-    access_token = AccessToken.objects.create(
-        user=user,
-        expires=expire,
-        token=common.generate_token(),
-        application=application,
-        scope=scope
-    )
-    refresh_token = RefreshToken.objects.create(
-        user=user,
-        token=common.generate_token(),
-        application=application,
-        access_token=access_token
-    )
-    access_token.source_refresh_token = refresh_token
-    access_token.save()
+    access_token, refresh_token = generate_tokens(user, kwargs.get('request'), use_default_app=True)
 
     # prep return information
     data = {

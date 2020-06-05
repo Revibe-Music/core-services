@@ -120,7 +120,7 @@ class RegistrationAPI(generics.GenericAPIView):
         old_user = request.user if not isinstance(request.user, AnonymousUser) else None
 
         # perform registration
-        register_data = register_new_user(data, params, old_user, *args, **kwargs)
+        register_data = register_new_user(data, params, old_user, request=request, *args, **kwargs)
 
         # format the data from register_new_user
         return_data = {

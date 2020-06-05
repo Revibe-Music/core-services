@@ -3,6 +3,8 @@ Created: 04 June 2020
 Author: Jordan Prechac
 """
 
+from django.db.models import Sum
+
 import datetime
 
 from accounts.models import CustomUser
@@ -59,7 +61,7 @@ def assign_points(referral_id, category, time_done: datetime.datetime = None):
     # step 5
 
     # step 6
-    new_point = Point.objects.create(referral=referral, category=category, points=category.points)
+    new_point = Point.objects.create(user=referrer, referral=referral, category=category, points=category.points)
 
     # step 7
     extra_configs = {"points": category.points}
@@ -73,6 +75,11 @@ def assign_points(referral_id, category, time_done: datetime.datetime = None):
         force=True, medium='email', check_first=True, extra_configs=extra_configs
     ).delay()
 
+
+def get_total_points(queryset, *args, **kwargs):
+    total = queryset.aggregate(total_points=Sum('points'))
+
+    return total
 
 
 

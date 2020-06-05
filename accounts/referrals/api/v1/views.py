@@ -3,6 +3,7 @@
 
 from django.db.models import Q
 from rest_framework import viewsets
+from rest_framework.decorators import action
 
 from revibe._helpers import responses
 from revibe.exceptions import api
@@ -10,10 +11,11 @@ from revibe.exceptions import api
 from accounts.models import CustomUser
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.referrals.exceptions import ReferralException
-from accounts.referrals.models import Referral
+from accounts.referrals.models import Point, Referral
+from accounts.referrals.utils.models.point import get_total_points
 from notifications.decorators import notifier
 
-from .serializers import ReferralSerializer
+from .serializers import PointSerializer, ReferralSerializer
 
 # -----------------------------------------------------------------------------
 
@@ -76,4 +78,28 @@ class ReferralViewset(viewsets.ModelViewSet):
         return responses.CREATED(serializer=serializer)
 
 
+class PointViewset(viewsets.ModelViewSet):
+    serializer_class = PointSerializer
+    permission_classes = [TokenOrSessionAuthentication,]
+    required_alternate_scopes = {
+        "GET": [["ADMIN"], ['first-party']]
+    }
+
+    def get_queryset(self):
+        user = self.request.user
+        return Point.objects.get_user_points(user)
+
+    def create(self, request, *args, **kwargs):
+        raise api.NotImplementedError("Cannot create points")
+    def update(self, request, pk=None, *args, **kwargs):
+        raise api.NotImplementedError("Cannot edit points")
+    def destroy(self, request, pk=None, *args, **kwargs):
+        raise api.NotImplementedError("Cannot delete points")
+
+    @action(detail=False, methods=['get'], url_path='total', url_name='total-points')
+    def total_points(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        data = get_total_points(queryset)
+
+        return responses.OK(data=data)
 

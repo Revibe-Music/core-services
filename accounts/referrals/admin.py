@@ -77,7 +77,7 @@ class PointCategoryAdmin(admin.ModelAdmin):
 class PointAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
-            "fields": ('referral', 'category', 'points',),
+            "fields": ('user', 'referral', 'category', 'points',),
             "classes": ('extrapretty', 'wide',),
         }),
         ("Extras", {

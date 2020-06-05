@@ -11,3 +11,19 @@ class Command(BaseCommand):
                 print("<Application: 'Revibe First Party Application'> application created")
         elif settings.DEBUG:
             print("<Application: 'Revibe First Party Application'> already exists")
+        
+        if not Application.objects.filter(name="Revibe Music").exists():
+            Application.objects.create(client_type="confidential", authorization_grant_type="password", name="Revibe Music")
+            if settings.DEBUG:
+                print(f"<Application: 'Revibe Music'> application created")
+        elif settings.DEBUG:
+            print("<Application: 'Revibe Music'> already exists")
+        
+        if not Application.objects.filter(name="Revibe Artists").exists():
+            Application.objects.create(client_type="confidential", authorization_grant_type="password", name="Revibe Artists")
+            if settings.DEBUG:
+                print("<Application: 'Revibe Artists'> application created")
+        elif settings.DEBUG:
+            print("<Application: 'Revibe Music'> already exists")
+
+

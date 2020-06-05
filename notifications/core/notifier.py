@@ -151,25 +151,39 @@ class Notifier:
             config.update(self.extra_configs)
 
         config['user'] = self.user
+        config['username'] = self.user.username
         config['artist'] = getattr(self, 'artist', None)
 
         if config['artist'] not in  [None, False]:
             config['artist_name'] = self.user.artist.name
+            config['artist_bio'] = self.user.artist.artist_profile.about_me
+            config['artist_city'] = self.user.artist.artist_profile.city
+            config['artist_state'] = self.user.artist.artist_profile.state
+            config['artist_country'] = self.user.artist.artist_profile.country
+            config['artist_zip_code'] = self.user.artist.artist_profile.zip_code
 
         if self.album:
             config['album_name'] = self.album.name
             config['album_songs_count'] = self.album.songs.count()
-            # TODO: add album uploader name
+            config['album_type'] = self.album.type
+            config['album_uploader'] = self.album.uploaded_by.name
+            try:
+                image = self.album.album_image.filter(is_original=True).first()
+                config['album_image'] = image.url
+            except Exception:
+                config['album_image'] = "Error getting Album Artwork"
+
         if self.song:
-            config['song_name'] = self.album.title
+            config['song_name'] = self.song.title
+            config['song_uploader'] = self.song.song_uploaded_by.name
             # TODO: add song uploader name
 
         # temp
         if self.is_contribution:
             config['contribution_status'] = "approve" if self.contribution.get('approved', False) else "deny"
             config['contribution_status_past'] = "approved" if self.contribution.get('approved', False) else "denied"
-            # TODO: add contribution uploader name
-            # TODO: add contribution type
+            config['uploader_artist_name'] = self.contribution.get('artist_name', '-artist-')
+            config['contribution_type'] = self.contribution.get('contribution_type','-contribution-')
 
         return config
 

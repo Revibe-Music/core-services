@@ -56,10 +56,7 @@ class Image(models.Model):
         return f"{self.obj.name if self.obj else '-no object-'} ({self.dimensions})"
     
     def __repr__(self):
-        if self.file_path:
-            return "<{}: {} ({})".format(self.__class__.__name__, self.url, self.dimensions)
-        else:
-            return "<{}: ({})".format(self.__class__.__name__, self.dimensions)
+        return default_repr(self)
 
     @property
     def obj(self):

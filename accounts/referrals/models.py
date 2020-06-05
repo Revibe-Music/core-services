@@ -3,6 +3,8 @@ from django.utils.translation import gettext_lazy as _
 
 from revibe.utils.classes import default_repr
 
+from .managers import *
+
 # -----------------------------------------------------------------------------
 
 
@@ -117,18 +119,25 @@ class PointCategory(models.Model):
 
 
 class Point(models.Model):
+    user = models.ForeignKey(
+        to='accounts.CustomUser',
+        on_delete=models.SET_NULL,
+        related_name='points',
+        null=True, blank=True,
+        verbose_name=_("user")
+    )
     referral = models.ForeignKey(
         to='Referral',
         on_delete=models.SET_NULL,
         related_name="points",
-        null=True, blank=False,
+        null=True, blank=True,
         verbose_name=_("referral")
     )
     category = models.ForeignKey(
         to='PointCategory',
         on_delete=models.SET_NULL,
         related_name=_("assigned_points"),
-        null=True, blank=False,
+        null=True, blank=True,
         verbose_name=_("category")
     )
 
@@ -141,6 +150,8 @@ class Point(models.Model):
     timestamp = models.DateTimeField(
         auto_now_add=True
     )
+
+    objects = PointManager()
 
     def __str__(self):
         if self.category and self.referral:

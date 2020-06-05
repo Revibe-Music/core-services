@@ -6,7 +6,7 @@ from rest_framework import serializers
 from revibe.exceptions.api import ServiceUnavailableError
 
 from accounts.models import CustomUser
-from accounts.referrals.models import Referral
+from accounts.referrals.models import Point, Referral
 from accounts.referrals.utils.models.referral import attach_referral
 
 # -----------------------------------------------------------------------------
@@ -44,8 +44,26 @@ class ReferralSerializer(serializers.ModelSerializer):
         return instance
 
 
-    def update(self, instnace, validated_data, *args, **kwargs):
+    def update(self, instance, validated_data, *args, **kwargs):
         raise ServiceUnavailableError("Cannot edit referrals")
+
+
+class PointSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name')
+
+    class Meta:
+        model = Point
+        fields = [
+            'id',
+            'category_name',
+            'points',
+            'timestamp',
+        ]
+
+    def create(self, validated_data, *args, **kwargs):
+        pass
+    def create(self, instance, validated_data, *args, **kwargs):
+        pass
 
 
 

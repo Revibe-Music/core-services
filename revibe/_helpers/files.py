@@ -23,6 +23,7 @@ from revibe.utils.aws.s3 import delete_s3_object
 from revibe._errors import network
 
 from content.models import Artist, Album, Image, Track
+from content.tasks import convert_track_task
 
 # -----------------------------------------------------------------------------
 
@@ -213,73 +214,77 @@ def add_track_to_song(obj, track, *args, **kwargs):
         # convert_audio_file(track_obj)
 
         # create other audio files in a thread
-        t = threading.Thread(target=convert_audio_file, args=[track_obj])
-        t.setDaemon(True)
-        t.start()
+        # t = threading.Thread(target=convert_audio_file, args=[track_obj])
+        # t.setDaemon(True)
+        # t.start()
+        convert_track_task \
+            .s(track_obj.song.id) \
+            .set(countdown=10) \
+            .delay()
 
     track_obj.save()
     return track_obj
 
 
-def convert_audio_file(obj, *args, **kwargs):
-    """
-    Takes an input audio file and converts it to 3 different quality AAc files.
-    """
-    # pass
-    print("new thread!")
-    if not obj.file:
-        return None
+# def convert_audio_file(obj, *args, **kwargs):
+#     """
+#     Takes an input audio file and converts it to 3 different quality AAc files.
+#     """
+#     # pass
+#     print("new thread!")
+#     if not obj.file:
+#         return None
 
-    ext = obj.file.name.split('.')[-1]
-    print("File extension: ", ext)
-    new_formats = [
-        {
-            "format": "mp4",
-            "encoding": "aac",
-            "bitrate": "96k",
-            "filename": "low",
-        },
-        {
-            "format": "mp4",
-            "encoding": "aac",
-            "bitrate": "128k",
-            "filename": "medium",
-        },
-        {
-            "format": "mp4",
-            "encoding": "aac",
-            "bitrate":"256k",
-            "filename": "high",
-        },
-    ]
+#     ext = obj.file.name.split('.')[-1]
+#     print("File extension: ", ext)
+#     new_formats = [
+#         {
+#             "format": "mp4",
+#             "encoding": "aac",
+#             "bitrate": "96k",
+#             "filename": "low",
+#         },
+#         {
+#             "format": "mp4",
+#             "encoding": "aac",
+#             "bitrate": "128k",
+#             "filename": "medium",
+#         },
+#         {
+#             "format": "mp4",
+#             "encoding": "aac",
+#             "bitrate":"256k",
+#             "filename": "high",
+#         },
+#     ]
 
-    byte_data = obj.file.read()
-    byte_format = BytesIO(byte_data)
+#     byte_data = obj.file.read()
+#     byte_format = BytesIO(byte_data)
 
-    segment = AudioSegment.from_file(file=byte_format, format=ext)
-    logger.info("Created audio segment")
-    logger.debug(segment)
+#     segment = AudioSegment.from_file(file=byte_format, format=ext)
+#     logger.info("Created audio segment")
+#     logger.debug(segment)
 
-    # for f in formats:
-    for f in new_formats:
-        channels = f.get('channels', 2)
-        output = BytesIO()
-        segment.export(output, format=f['format'], codec=f['encoding'], bitrate=f['bitrate'], parameters=["-ac", str(channels)])
+#     # for f in formats:
+#     for f in new_formats:
+#         channels = f.get('channels', 2)
+#         output = BytesIO()
+#         segment.export(output, format=f['format'], codec=f['encoding'], bitrate=f['bitrate'], parameters=["-ac", str(channels)])
 
-        value = output.getvalue()
-        file_name = f"{f['filename']}.{f['format']}"
+#         value = output.getvalue()
+#         file_name = f"{f['filename']}.{f['format']}"
 
-        track = Track.objects.create(is_original=False, song=obj.song)
-        track.file.save(file_name, ContentFile(value))
-        track.save()
-        logger.info(f"File {file_name} has been created.")
+#         track = Track.objects.create(is_original=False, song=obj.song)
+#         track.file.save(file_name, ContentFile(value))
+#         track.save()
+#         logger.info(f"File {file_name} has been created.")
 
-        del value
-        gc.collect()
+#         del value
+#         gc.collect()
 
-    del segment
-    gc.collect()
+#     del segment
+#     gc.collect()
 
-    connection.close()
+#     connection.close()
 
 

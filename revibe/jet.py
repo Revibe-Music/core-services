@@ -50,17 +50,19 @@ side_menu = [ # A list of application or custom item dicts
     {
         "label": _("Accounts"),
         'items': [
-            {"name": 'accounts.customuser', "label": _("Users")},
-            {"name": 'accounts.profile'},
-            {"name": 'auth.group'},
             {"name": 'content.artist'},
             {"name": 'accounts.artistprofile'},
-            {"name": "accounts.social"}
+            {"name": 'auth.group'},
+            {"name": 'accounts.profile'},
+            {"name": "accounts.social"},
+            {"name": 'accounts.customuser', "label": _("Users")},
         ]
     },
     {
         "label": _("Accounts - Referrals"),
         "items": [
+            {"name": 'referrals.pointcategory'},
+            {"name": 'referrals.point'},
             {"name": 'referrals.referral'},
         ]
     },
@@ -71,18 +73,18 @@ side_menu = [ # A list of application or custom item dicts
             {"name": 'administration.blog'},
             {"name": 'administration.campaign'},
             {"name": 'administration.contactform'},
-            {"name": 'administration.alert'},
+            # {"name": 'administration.alert'},
             {"name": 'administration.variable'},
             {"name": 'administration.youtubekey'},
         ]
     },
-    {
-        "label": _("Communications"),
-        "items": [
-            {"name": 'communication.chat'},
-            {"name": 'communication.message'},
-        ]
-    },
+    # {
+    #     "label": _("Communications"),
+    #     "items": [
+    #         {"name": 'communication.chat'},
+    #         {"name": 'communication.message'},
+    #     ]
+    # },
     {
         "label": _("Content"),
         "items": [
@@ -95,17 +97,6 @@ side_menu = [ # A list of application or custom item dicts
             {"name": "content.track"},
         ]
     },
-    # {
-    #     "label": _("Content - Search"),
-    #     # since all the search models are named the same way, it's easier to generate the list than to explicitly define it
-    #     "items": [ {"name": f"content.{sf}search"} for sf in [
-    #         'artist',
-    #         'album',
-    #         'song',
-    #         'genre',
-    #         'tag',
-    #     ]]
-    # },
     {
         "label": _("Customer Success"),
         "items": [
@@ -115,14 +106,23 @@ side_menu = [ # A list of application or custom item dicts
             {"name": 'customer_success.actiontaken'},
         ]
     },
+    # {
+    #     "label": _("Marketplace"),
+    #     "items": [
+    #         {"name": 'marketplace.good'},
+    #         {"name": 'marketplace.transaction'},
+    #         {"name": 'content.image'},
+    #         {"name": 'content.track'},
+    #     ],
+    # },
     {
-        "label": _("Marketplace"),
+        "label": _("Metrics"),
         "items": [
-            {"name": 'marketplace.good'},
-            {"name": 'marketplace.transaction'},
-            {"name": 'content.image'},
-            {"name": 'content.track'},
-        ],
+            # {"name": 'metrics.artistpublicurlclick'},
+            # {"name": 'metrics.appsession'},
+            {"name": 'metrics.search'},
+            {"name": 'metrics.stream'},
+        ]
     },
     {
         "label": _("Music"),
@@ -145,15 +145,6 @@ side_menu = [ # A list of application or custom item dicts
         "items": [
             {"name": 'cloud_storage.file'},
             {"name": 'cloud_storage.fileshare'},
-        ]
-    },
-    {
-        "label": _("Usage"),
-        "items": [
-            {"name": 'metrics.artistpublicurlclick'},
-            {"name": 'metrics.appsession'},
-            {"name": 'metrics.stream'},
-            {"name": 'metrics.search'},
         ]
     },
     {

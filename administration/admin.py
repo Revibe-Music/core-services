@@ -119,7 +119,7 @@ class YoutubeKeyAdmin(admin.ModelAdmin):
     actions = [test_api_key, reset_user_count]
 
 
-@admin.register(Alert)
+# @admin.register(Alert)
 class AlertAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
@@ -147,7 +147,7 @@ class AlertAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(AlertSeen)
+# @admin.register(AlertSeen)
 class AlertSeenAdmin(admin.ModelAdmin):
     pass
 
@@ -292,7 +292,7 @@ class ArtistAnalyticsCalculationAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Survey)
+# @admin.register(Survey)
 class SurveyAdmin(admin.ModelAdmin):
     pass
 

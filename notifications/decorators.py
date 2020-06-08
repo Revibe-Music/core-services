@@ -78,6 +78,10 @@ class NotifierDecorator(BaseRequestDecorator):
             self.user_target = user_target
         else:
             self.inverse = False
+        
+        self.before_call_funcs = [
+            (self._get_event, [self.trigger], {}), 
+        ]
 
 
     def execute_wrapping(self, func_args, func_kwargs):
@@ -232,7 +236,6 @@ class NotifierDecorator(BaseRequestDecorator):
         if isinstance(obj, CustomUser):
             self.user = obj
             return self.user
-
 
     def _get_event(self, trigger=None):
         trigger = trigger if trigger else self.trigger

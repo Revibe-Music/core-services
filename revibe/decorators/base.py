@@ -27,6 +27,7 @@ class BaseRequestDecorator:
 
             # do the decorator stuff
             try:
+
                 self.execute_wrapping(func_args, func_kwargs)
             except Exception as e:
                 print(f"Error wrapping function '{func.__name__}' with decorator '{self.__class__.__name__}'. Exception: {e}")
@@ -43,6 +44,11 @@ class BaseRequestDecorator:
     def execute_wrapping(self, func_args, func_kwargs):
         raise NotImplementedError()
 
+    def _pre_wrapper_funcs(self):
+        funcs = getattr(self, before_call_funcs, [])
+
+        for func in funcs:
+            func[0](*func[1], **func[2])
 
     def _extract_result(self, result):
         if isinstance(result, tuple):

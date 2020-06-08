@@ -6,9 +6,16 @@ Author: Jordan Prechac
 from django.http import HttpRequest
 from rest_framework.request import Request
 
+import json
+
+import logging
+logger = logging.getLogger(__name__)
+
 from revibe.decorators import BaseRequestDecorator
+from revibe.utils.params import get_url_param, get_request_header
 
 from accounts.models import CustomUser
+from notifications.models import Event
 
 from .exceptions import NotificationException
 from .tasks import send_notification
@@ -61,6 +68,8 @@ class NotifierDecorator(BaseRequestDecorator):
         self.conf_kwargs = conf_kwargs
         self.methods = [m.upper() for m in methods]
 
+        self.event = self._get_event(self.trigger)
+
         self.user = None
         self.request = None
 
@@ -69,70 +78,51 @@ class NotifierDecorator(BaseRequestDecorator):
             self.user_target = user_target
         else:
             self.inverse = False
-        
 
-    def __call__(self, func):
-        def wrapper(*func_args, **func_kwargs):
-            try:
-                result = func(*func_args, **func_kwargs)
-            except Exception as e:
-                raise e
-            else:
-                _ = self._extract_result(result)
-                if hasattr(_, 'status_code'):
-                    if _.status_code < 200 or _.status_code >= 300:
-                        return _
-                self._result = result
 
-            self.request = self._get_request(func_args, func_kwargs)
+    def execute_wrapping(self, func_args, func_kwargs):
+        self.request = self._get_request(func_args, func_kwargs)
 
-            # validate the stuff
-            valid = self.validate()
-            if not valid:
-                return self._extract_result(result)
+        # validate the stuff
+        valid = self.validate()
+        if not valid:
+            return self._extract_result(self._result)
 
-            # sending a notification to the user that initiated the action
-            if not self.inverse:
-                # do the normal thing of getting the user from the request
-                if not self.user_after_request:
-                    self.user = self._get_user_from_request(self.request)
+        # sending a notification to the user that initiated the action
+        if not self.inverse:
+            # do the normal thing of getting the user from the request
+            if not self.user_after_request:
+                self.user = self._get_user_from_request(self.request)
 
-                # there is no user in the request, so we need to look at the result for a user
-                elif (self.user == None) and isinstance(result, tuple):
-                    expected_user = result[1]
-                    result = result[0]
-                    if isinstance(expected_user, CustomUser):
-                        self.user = expected_user
+            # there is no user in the request, so we need to look at the result for a user
+            elif (self.user == None) and isinstance(self._result, tuple):
+                expected_user = self._result[1]
+                if isinstance(expected_user, CustomUser):
+                    self.user = expected_user
 
-            else:
-                self.get_inverse_user(self._extract_result(result))
+        else:
+            self.get_inverse_user(self._extract_result(self._result))
 
-            # we found a user in a request somewhere
-            if self.user != None:
-                # attach extra stuff to the Notifier class
-                self._attach_extras(result)
+        # we found a user in a request somewhere
+        if self.user != None:
+            # attach extra stuff to the Notifier class
+            self._attach_extras(self._result)
 
-                user_id = self.user.id
-                # where the magic happens
-                send_notification.s(user_id, self.trigger, *self.conf_args, **self.conf_kwargs) \
-                    .set(countdown=self.countdown) \
-                    .set(expires=self.expires) \
-                    .delay()
+            user_id = self.user.id
+            # where the magic happens
+            send_notification.s(user_id, self.trigger, *self.conf_args, **self.conf_kwargs) \
+                .set(countdown=self.countdown) \
+                .set(expires=self.expires) \
+                .delay()
 
-            return self._extract_result(result)
-
-        # set function meta info
-        wrapper.__name__ = func.__name__
-        wrapper.__doc__ = func.__doc__
-
-        return wrapper
+        return self._extract_result(self._result)
 
 
     def validate(self, *args, **kwargs):
         # list of validation function to run before executing the notification stuff
         # each tuple is the function to run and the expected output
         # if any function does not return the expected output, stop the loop and return False
-        to_run = [(self._assert_request, True), (self._assert_method, True)]
+        to_run = [(self._assert_event, True), (self._assert_request, True), (self._assert_method, True), (self._perform_model_validation, True),]
 
         for func in to_run:
             output = func[0]()
@@ -164,6 +154,73 @@ class NotifierDecorator(BaseRequestDecorator):
 
         return True
 
+    def _assert_event(self):
+        if self.event == None:
+            return False
+        elif isinstance(self.event, Event):
+            return True
+        return False
+
+    def _perform_model_validation(self):
+        """  """
+        # check params
+        kwargs_json = self.event.required_request_params
+        if kwargs_json != "{}":
+            try:
+                kwargs = json.loads(kwargs_json)
+            except Exception as err:
+                logger.warn(f"Failed to load kwargs as json. Exception: {str(err)}")
+                return True
+        
+            params = self.request.query_params
+
+            for key, value in kwargs.items():
+                param = get_url_param(params, key, None)
+
+                valid = (param in value) if isinstance(value, (list, tuple)) else (param == value)
+
+                if not valid:
+                    return False
+        
+        # check headers
+        kwargs_json = self.event.required_request_headers
+        if kwargs_json != "{}":
+            try:
+                kwargs = json.loads(kwargs_json)
+            except Exception as err:
+                logger.warn(f"Failed to load kwargs as json. Exception: {str(err)}")
+                return True
+            
+            headers = self.request.META
+
+            for key, value in kwargs.items():
+                header = get_request_header(request, key, None)
+
+                valid = (header in value) if isinstance(value, (list, tuple)) else (param == value)
+
+                if not valid:
+                    return False
+
+        # check request body
+        kwargs_json = self.event.required_request_body
+        if kwargs_json != "{}":
+            try:
+                kwargs = json.loads(kwargs_json)
+            except Exception as err:
+                logger.warn(f"Failed to load kwargs as json. Exception: {str(err)}")
+                return True
+            
+            body = dict(request.body)
+
+            for key, value in kwargs.items():
+                b = body.get(key, None)
+                valid = (b in value) if isinstance(value, (list, tuple)) else (b == value)
+
+                if not valid:
+                    return False
+
+        return True
+
     def get_inverse_user(self, result, result_index=None):
         steps = self.user_target.split('.')
 
@@ -175,6 +232,17 @@ class NotifierDecorator(BaseRequestDecorator):
         if isinstance(obj, CustomUser):
             self.user = obj
             return self.user
+
+
+    def _get_event(self, trigger=None):
+        trigger = trigger if trigger else self.trigger
+        event = Event.objects.filter(active=True, trigger=trigger)
+
+        if event.exists():
+            self.event = event.first()
+            return self.event
+
+        return None
 
 
 notifier = NotifierDecorator

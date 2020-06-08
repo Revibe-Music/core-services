@@ -12,6 +12,38 @@ from revibe.exceptions import RevibeException
 # -----------------------------------------------------------------------------
 
 class BaseRequestDecorator:
+
+    def __call__(self, func):
+        def wrapper(*func_args, **func_kwargs):
+            # execute the function
+            result = func(*func_args, **func_kwargs)
+
+            # check for a proper status code in the response
+            _ = self._extract_result(result)
+            if hasattr(_, 'status_code'):
+                if _.status_code < 200 or _.status_code >= 300:
+                    return _
+            self._result = result
+
+            # do the decorator stuff
+            try:
+                self.execute_wrapping(func_args, func_kwargs)
+            except Exception as e:
+                print(f"Error wrapping function '{func.__name__}' with decorator '{self.__class__.__name__}'. Exception: {e}")
+
+            # return the original result
+            return self._extract_result(self._result)
+
+        # set function meta info
+        wrapper.__name__ = func.__name__
+        wrapper.__doc__ = func.__doc__
+
+        return wrapper
+
+    def execute_wrapping(self, func_args, func_kwargs):
+        raise NotImplementedError()
+
+
     def _extract_result(self, result):
         if isinstance(result, tuple):
             return result[0]

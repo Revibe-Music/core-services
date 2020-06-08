@@ -36,56 +36,31 @@ class AttributionDecorator(BaseRequestDecorator):
             self.inverse = False
 
 
-    def __call__(self, func):
+    def execute_wrapping(self, func_args, func_kwargs):
+        # get the request object
+        self.request = self._get_request(func_args, func_kwargs)
 
-        def wrapper(*func_args, **func_kwargs):
-            # execute function,
-            # if exception or bad status code, return that
-            # instead of running the decorator stuff
-            try:
-                result = func(*func_args, **func_kwargs)
-            except Exception as e:
-                raise e
-            else:
-                _ = self._extract_result(result)
-                if hasattr(_, 'status_code'):
-                    if _.status_code < 200 or _.status_code >= 300:
-                        return _
-                self._result = result
-
-
-            # get the request object
-            self.request = self._get_request(func_args, func_kwargs)
-
-            # perform validation
-            valid = self.validate()
-            if not valid:
-                return self._extract_result(self._result)
-
-            # get the user
-            if not self.inverse:
-                self._get_user_from_request(self.request)
-            else:
-                self.get_inverse_user(self._extract_result(self._result))
-
-            # if user if found, attribute the notification to the action taken
-            if self.user != None:
-
-                user_id = self.user.id
-                # trigger the Celery task to run
-                attribute_action.s(user_id, self.name, *self.conf_args, **self.conf_kwargs) \
-                    .set(countdown=self.countdown) \
-                    .delay()
-
-            # return the result of the original function
+        # perform validation
+        valid = self.validate()
+        if not valid:
             return self._extract_result(self._result)
 
-        # set function meta info
-        wrapper.__name__ = func.__name__
-        wrapper.__doc__  = func.__doc__
+        # get the user
+        if not self.inverse:
+            self._get_user_from_request(self.request)
+        else:
+            self.get_inverse_user(self._extract_result(self._result))
 
-        return wrapper
-    
+        # if user if found, attribute the notification to the action taken
+        if self.user != None:
+
+            user_id = self.user.id
+            # trigger the Celery task to run
+            attribute_action.s(user_id, self.name, *self.conf_args, **self.conf_kwargs) \
+                .set(countdown=self.countdown) \
+                .delay()
+
+
     def validate(self):
         to_run = [(self._assert_method, True), (self._get_action, True), (self._assert_request_kwargs, True), ]
 

@@ -53,6 +53,13 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(ExternalEvent)
 class ExternalEventAdmin(EventAdmin):
+    fieldsets = EventAdmin.fieldsets[:2] + ((
+        "Verification", {
+            "fields": ('required_request_headers', 'required_request_body', 'required_request_params', 'required_response_body',),
+            "classes": ('extrapretty', 'wide',),
+        },
+    ),) + EventAdmin.fieldsets[2:]
+
     inlines = [
         ExternalEventActionInLine,
     ]

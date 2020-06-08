@@ -54,6 +54,28 @@ class Event(models.Model):
         help_text=_("Email address the message is sent from. If ANY templates of this event use email notifications, this field CANNOT be blank!")
     )
 
+    # verification
+    required_request_headers = models.TextField(
+        null=False, blank=False, default="{}",
+        verbose_name=_("request headers"),
+        help_text=_("Keyward arguments that must evaluate to True when checked against the request headers")
+    )
+    required_request_body = models.TextField(
+        null=False, blank=False, default="{}",
+        verbose_name=_("request body"),
+        help_text=_("Keyward arguments that must evaluate to True when checked against the request body")
+    )
+    required_request_params = models.TextField(
+        null=False, blank=False, default="{}",
+        verbose_name=_("request params"),
+        help_text=_("Keyward arguments that must evaluate to True when checked against the request parameters")
+    )
+    required_response_body = models.TextField(
+        null=False, blank=False, default="{}",
+        verbose_name=_("response body"),
+        help_text=_("Keyward arguments that must evaluate to True when checked against the response body")
+    )
+
     # extras
     active = models.BooleanField(
         null=False, blank=True, default=True,

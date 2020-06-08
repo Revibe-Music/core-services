@@ -68,8 +68,6 @@ class NotifierDecorator(BaseRequestDecorator):
         self.conf_kwargs = conf_kwargs
         self.methods = [m.upper() for m in methods]
 
-        self.event = self._get_event(self.trigger)
-
         self.user = None
         self.request = None
 

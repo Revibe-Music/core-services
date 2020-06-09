@@ -888,6 +888,7 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
         elif request.method == 'POST':
             try:
+                # set 'Revibe' as the default platform
                 if 'platform' not in request.data.keys():
                     _mutable = request.data._mutable
                     request.data._mutable = True
@@ -898,7 +899,22 @@ class UserArtistViewSet(GenericPlatformViewSet):
                 if not serializer.is_valid():
                     return responses.SERIALIZER_ERROR_RESPONSE(serializer=serializer)
 
-                serializer.save()
+                song = serializer.save()
+
+                # send Kayne an email with newly uploaded songs
+                try:
+                    to_send_mail = retrieve_variable('kayne-send-email-on-song-upload', False, is_bool=True)
+                    if to_send_mail:
+                        send_mail(
+                            subject="Song Upload Notification",
+                            message=f"New song uploaded.\nSong '{song.title}' uploaded by {artist.name} at {datetime.datetime.now()}.",
+                            recipient_list=[retrieve_variable("kayne-song-upload-email-address", "kaynelynn@revibe.tech", output_type=str),],
+                            from_email='"Revibe System Notification" <noreply@revibe.tech>',
+                            fail_silently=True
+                        )
+                except Exception:
+                    pass
+
                 return responses.CREATED(serializer=serializer)
             except Exception as e:
                 if isinstance(e, APIException):

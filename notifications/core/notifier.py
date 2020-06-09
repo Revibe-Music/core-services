@@ -161,6 +161,11 @@ class Notifier:
             config['artist_state'] = self.user.artist.artist_profile.state
             config['artist_country'] = self.user.artist.artist_profile.country
             config['artist_zip_code'] = self.user.artist.artist_profile.zip_code
+            try:
+                image = self.artist.artist_image.filter(is_original.first())
+                config['artist_image'] = image.url
+            except Exception:
+                config['artist_image'] = "Error getting Artist artwork"
 
         if self.album:
             config['album_name'] = self.album.name
@@ -171,7 +176,7 @@ class Notifier:
                 image = self.album.album_image.filter(is_original=True).first()
                 config['album_image'] = image.url
             except Exception:
-                config['album_image'] = "Error getting Album Artwork"
+                config['album_image'] = "Error getting Album artwork"
 
         if self.song:
             config['song_name'] = self.song.title

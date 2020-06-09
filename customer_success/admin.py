@@ -66,11 +66,14 @@ class ActionAdmin(admin.ModelAdmin):
             "classes": ('extrapretty', 'wide',),
         }),
         ("Extras", {
-            "fields": ('active', 'description', 'date_created', 'last_changed',),
+            "fields": ('active', 'description', 'date_created', 'last_changed', 'id',),
             "classes": ('extrapretty', 'wide', 'collapse', 'in',),
         })
     )
-    readonly_fields = ('date_created', 'last_changed',)
+    readonly_fields = (
+        'id',
+        'date_created', 'last_changed',
+    )
 
     list_display = (
         'name',

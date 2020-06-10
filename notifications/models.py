@@ -9,6 +9,7 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 import datetime
+import uuid
 
 from revibe.utils.classes import default_repr
 
@@ -230,6 +231,11 @@ class Notification(models.Model):
         verbose_name=_("seen"),
         help_text=_("The notified user has seen the notification")
     )
+    date_seen = models.DateTimeField(
+        null=True, blank=True,
+        verbose_name=_("date seen"),
+        help_text=_("When the notification was seen")
+    )
     action_taken = models.BooleanField(
         null=True, blank=True, default=None,
         verbose_name=_("action taken"),
@@ -239,6 +245,13 @@ class Notification(models.Model):
         null=True, blank=True,
         verbose_name=_("date of action"),
         help_text=_("Date & time the desired action was taken")
+    )
+
+    # tracking
+    read_id = models.UUIDField(
+        null=True, blank=True,
+        verbose_name=_("read id"),
+        help_text=_("ID to use for tracking the notification")
     )
 
     # extras

@@ -25,6 +25,7 @@ from content.models import Album, Song
 from notifications.exceptions import NotificationException
 from notifications.models import Event, Notification
 from notifications.utils.models.event import get_event, get_events
+from notifications.utils.models.notification import create_notification_uuid
 
 from .config import base_email_config
 
@@ -225,6 +226,9 @@ class Notifier:
         if subject == None:
             subject = retrieve_variable('notification_email_subject_default', 'Revibe Notifications')
 
+        # add the attribution/read-validation information
+        notification_read_id = create_notification_uuid()
+
         # configure email body content
         html_format = notification_template.body
         html_message = self.format_html(html_format, config)
@@ -258,7 +262,8 @@ class Notifier:
                 Notification.objects.create(
                     user=self.user,
                     event_template=notification_template,
-                    is_artist=bool(getattr(self, 'artist', False))
+                    is_artist=bool(getattr(self, 'artist', False)),
+                    read_id=notification_read_id
                 )
 
         return True

@@ -128,16 +128,24 @@ class NotificationAdmin(admin.ModelAdmin):
             "fields": ('event_template', 'user', 'is_artist',),
             "classes": ('extrapretty', 'wide',),
         }),
+        ("Tracking", {
+            "fields": ('seen', 'read_id', 'date_seen',),
+            "classes": ('extrapretty', 'wide',),
+        }),
         ("Attribution", {
-            "fields": ('seen', 'action_taken', 'date_of_action',),
+            "fields": ('action_taken', 'date_of_action',),
             "classes": ('extrapretty', 'wide',),
         }),
         ("Extras", {
-            "fields": ('id', 'date_created', 'last_changed',),
+            "fields": ('date_created', 'last_changed', 'id',),
             "classes": ('extrapretty', 'wide', 'collapse', 'in',),
         })
     )
-    readonly_fields = ('id', 'date_created', 'last_changed',)
+    readonly_fields = (
+        'seen', 'read_id', 'date_seen',
+        'id',
+        'date_created', 'last_changed',
+    )
 
     list_display = (
         'user',

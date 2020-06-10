@@ -143,13 +143,15 @@ class Notifier:
             except Exception:
                 pass
 
-    def _configure_kwargs(self):
+    def _configure_kwargs(self, **extras):
         """ Configure base kwargs for message formatting """
         config = base_email_config
 
         # add extra configs
         if isinstance(self.extra_configs, dict):
             config.update(self.extra_configs)
+
+        config.update(extras)
 
         config['user'] = self.user
         config['username'] = self.user.username
@@ -193,6 +195,17 @@ class Notifier:
 
         return config
 
+    def configure_tracking_kwargs(self, tracking_id):
+        kwargs = {}
+
+        kwargs['tracking_id'] = tracking_id
+        kwargs['tracking_link'] = f"https://api.revibe.tech/api/v1/notifications/images/{tracking_id}/"
+        kwargs['tracking_html'] = """<div>
+        <image src='{link}' width='1' height='1' />
+        </div>""".format(link=kwargs['tracking_link'])
+
+        return kwargs
+
     def format_html(self, html, config):
         pieces = html.split('<body>')
         if len(pieces) <= 1:
@@ -213,9 +226,12 @@ class Notifier:
         if not self.user.profile.allow_email_notifications:
             return
 
-        config = self._configure_kwargs()
-        config['user'] = self.user
-        config['username'] = self.user.username
+        # add the attribution/read-validation information
+        notification_read_id = create_notification_uuid()
+        notification_tracking_kwargs = self.configure_tracking_kwargs(notification_read_id)
+
+        # add configuration stuff
+        config = self._configure_kwargs(**notification_tracking_kwargs)
 
         notification_template = random_object(self.templates.filter(medium='email'))
 
@@ -225,9 +241,6 @@ class Notifier:
         subject = getattr(notification_template, 'subject')
         if subject == None:
             subject = retrieve_variable('notification_email_subject_default', 'Revibe Notifications')
-
-        # add the attribution/read-validation information
-        notification_read_id = create_notification_uuid()
 
         # configure email body content
         html_format = notification_template.body

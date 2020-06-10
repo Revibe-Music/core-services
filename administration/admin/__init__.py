@@ -3,9 +3,10 @@ from django.contrib import admin
 from revibe.admin import html_check_x
 from revibe.utils.language import text
 
-from administration.admin_ext import test_api_key, reset_user_count
-from administration.admin_ext import inlines
 from administration.models import *
+
+from . import inlines
+from .actions import test_api_key, reset_user_count
 
 # -----------------------------------------------------------------------------
 
@@ -150,6 +151,37 @@ class AlertAdmin(admin.ModelAdmin):
 # @admin.register(AlertSeen)
 class AlertSeenAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(ArtistOfTheWeek)
+class ArtistOfTheWeekAdmin(admin.ModelAdmin):
+    fieldsets = (
+        (None, {
+            "fields": ('artist', 'start_date', 'statement', 'highlighted_album'),
+            "classes": ('extrapretty', 'wide',),
+        }),
+        ("Extras", {
+            "fields": ('active', 'description', 'date_created', 'last_changed', 'id',),
+        })
+    )
+    readonly_fields = (
+        'id',
+        'date_created', 'last_changed',
+    )
+
+    list_display = (
+        'artist',
+        'start_date',
+        'active',
+    )
+    list_filter = (
+        ('start_date', admin.DateFieldListFilter),
+        ('active', admin.BooleanFieldListFilter),
+    )
+
+    inlines = [
+        inlines.ArtistOfTheWeekImageInline,
+    ]
 
 
 @admin.register(ArtistSpotlight)

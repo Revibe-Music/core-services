@@ -6,6 +6,9 @@ Author: Jordan Prechac
 from django.contrib import admin
 
 from administration.models import Blog
+from content.models import Image
+
+from . import forms
 
 # -----------------------------------------------------------------------------
 
@@ -25,3 +28,15 @@ class BlogArtistsInline(admin.TabularInline):
 
     verbose_name = "Artist"
     verbose_name_plural = "Artists"
+
+
+class ArtistOfTheWeekImageInline(admin.TabularInline):
+    model = Image
+    form = forms.ArtistOfTheWeekImageInlineForm
+
+    extra = 0
+
+    verbose_name = "Image"
+    verbose_name_plural = "Images"
+
+

@@ -29,6 +29,14 @@ class Image(models.Model):
         related_name="album_image",
         null=True, blank=True
     )
+    artistoftheweek = models.ForeignKey(
+        to='administration.ArtistOfTheWeek',
+        on_delete=models.CASCADE,
+        related_name='images',
+        null=True, blank=True,
+        verbose_name=_("artist of the week"),
+        help_text=_("Artist of the Week related object")
+    )
 
     file = models.FileField(
         help_text="The file that will be uploaded / is uploaded in S3",
@@ -53,7 +61,13 @@ class Image(models.Model):
         super().delete()
 
     def __str__(self):
-        return f"{self.obj.name if self.obj else '-no object-'} ({self.dimensions})"
+        name = '-no object-'
+        if self.obj:
+            if hasattr(self.obj, 'name'):
+                name = self.obj.name
+            elif hasattr(self.obj, 'artist'):
+                name = self.obj.artist.name
+        return f"{name} ({self.dimensions})"
     
     def __repr__(self):
         return default_repr(self)
@@ -64,6 +78,8 @@ class Image(models.Model):
             return self.artist
         elif self.album:
             return self.album
+        elif self.artistoftheweek:
+            return self.artistoftheweek
         return None
 
     @property

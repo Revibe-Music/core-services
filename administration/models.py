@@ -328,6 +328,67 @@ class AlertSeen(models.Model):
         verbose_name_plural = "alerts seen"
 
 
+class ArtistOfTheWeek(models.Model):
+
+    # core fields
+    artist = models.ForeignKey(
+        to='content.artist',
+        on_delete=models.CASCADE,
+        related_name='weeks',
+        limit_choices_to={'platform': const.REVIBE_STRING},
+        null=False, blank=False,
+        verbose_name=_("artist")
+    )
+    start_date = models.DateField(
+        null=False, blank=False,
+        verbose_name=_("start date"),
+        help_text=_("When to start this artist's week. Will last for 7 days, including this one.")
+    )
+
+    statement = models.TextField(
+        null=True, blank=True,
+        verbose_name=_("statement"),
+        help_text=_("Statement/quote from the artist")
+    )
+    highlighted_album = models.ForeignKey(
+        to='content.Album',
+        on_delete=models.SET_NULL,
+        related_name='highlights',
+        limit_choices_to={'is_deleted': False, "platform": const.REVIBE_STRING},
+        null=True, blank=True,
+        verbose_name=_("highlighted album"),
+        help_text=_("An album the Artist would like to highlight for the week")
+    )
+
+    # extras
+    active = models.BooleanField(
+        null=False, blank=False, default=True,
+        verbose_name=_("active"),
+        help_text=_("Enables the object to be used in the apps")
+    )
+    description = models.TextField(
+        null=True, blank=True,
+        verbose_name=_("description"),
+        help_text=_("Human-readable information about this Artist of the Week")
+    )
+    date_created = models.DateTimeField(
+        auto_now_add=True
+    )
+    last_changed = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return f"{self.artist.name} ({self.start_date})"
+
+    def __repr__(self):
+        return classes.default_repr(self)
+
+    class Meta:
+        verbose_name = "artist of the week"
+        verbose_name_plural = "artists of the week"
+
+
 class ArtistSpotlight(models.Model):
 
     date = models.DateField(

@@ -11,13 +11,14 @@ from administration.models import ArtistOfTheWeek
 # -----------------------------------------------------------------------------
 
 
-def get_current_artist_of_the_week(return_artist: bool=True):
+def get_current_artist_of_the_week(return_artist: bool=True, date: datetime.date=None):
     """
     """
-    today = datetime.date.today()
-    time_period = today - datetime.timedelta(days=6)
+    starter = datetime.date.today() if not date else date
+    time_period = starter - datetime.timedelta(days=6)
+    exclude_date = starter + datetime.timedelta(days=1)
 
-    aotws = ArtistOfTheWeek.objects.filter(start_date__gte=time_period).order_by('-start_date')
+    aotws = ArtistOfTheWeek.objects.filter(start_date__gte=time_period, start_date__lte=exclude_date).order_by('-start_date')
 
     if not aotws.exists():
         return None

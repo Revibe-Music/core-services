@@ -16,5 +16,5 @@ router.register('surveys', views.SurveyViewSet, 'surveys')
 
 urlpatterns = [
     path('', include(router.urls)),
-
+    path('artistoftheweek/', views.get_artist_of_the_week, name="artist-of-the-week"),
 ]

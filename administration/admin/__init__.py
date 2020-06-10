@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 
 from revibe.admin import html_check_x
@@ -332,6 +333,6 @@ class SurveyAdmin(admin.ModelAdmin):
 # general admin information and changes
 admin.site.empty_value_display = "-empty-"
 admin.site.site_header = "Revibe Administration"
-admin.site.index_title = "Revibe"
+admin.site.index_title = "Revibe" if settings.ENV == 'PROD' else f"Revibe {settings.ENV}"
 admin.site.site_title = "Revibe Administration"
 admin.site.site_url = "/hc/"

@@ -1,6 +1,6 @@
 from django.db.models import Exists
 from rest_framework import permissions, status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 
 import datetime
@@ -24,7 +24,9 @@ from accounts.artist import analytics
 from accounts.permissions import TokenOrSessionAuthentication, AdminOnlyTokenPermissions
 from administration.models import *
 from administration.utils.models import see_alert
+from administration.utils.models.artist_of_the_week import get_current_artist_of_the_week
 from content import models as cnt_models
+from content.serializers.v1 import ArtistSerializer
 from metrics.models import Search, Stream
 
 from . import serializers as adm_ser_v1
@@ -385,4 +387,25 @@ class SurveyViewSet(viewsets.ModelViewSet):
                 serializer.save()
             return responses.OK(serializer=serializer)
 
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def get_artist_of_the_week(request, *args, **kwargs):
+    # get the date param if it's included
+    params = request.query_params
+    date_string = get_url_param(params, 'date', None)
+    if date_string:
+        date_date = datetime.datetime.strptime(date_string, '%Y-%m-%d')
+    else:
+        date_date = None
+
+    artist = get_current_artist_of_the_week(date=date_date)
+
+    # return nothing if there's no artist
+    if not artist:
+        return None
+
+    # return the serialized data
+    serializer = ArtistSerializer(instance=artist, many=False)
+    return responses.OK(serializer=serializer)
 

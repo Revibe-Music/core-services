@@ -19,6 +19,7 @@ from revibe._helpers import status
 from accounts.models import CustomUser, Profile, ArtistProfile
 from administration.models import Alert, Blog, Campaign, YouTubeKey, Variable
 from content.models import *
+from notifications.models import *
 from surveys.models import ArtistOfTheWeek
 
 # -----------------------------------------------------------------------------
@@ -348,6 +349,19 @@ class MetricsMixin:
     pass
 
 
+class NotificationsMixin:
+    def _get_external_event(self):
+        if not hasattr(self, 'external_event'):
+            event = ExternalEvent.objects.create(name="External Event 1", trigger="external-event-1")
+
+            self.external_event = event
+
+    def _get_external_event_template(self):
+        if (hasattr(self, 'external_event')) and (not hasattr(self, 'external_event_template')):
+            template = NotificationTemplate.objects.create(event=self.external_event, medium='email', body="Sup")
+
+            self.external_event_template = template
+
 class SurveysMixin:
     def _get_artistoftheweek(self):
         if not hasattr(self, 'artist_user'):
@@ -380,7 +394,7 @@ class AuthorizedAPITestCase(
 
 
 class RevibeTestCase(
-    AuthorizedAPITestCase, ContentMixin, MusicMixin, AdministrationMixin, MetricsMixin, SurveysMixin
+    AuthorizedAPITestCase, ContentMixin, MusicMixin, AdministrationMixin, MetricsMixin, NotificationsMixin, SurveysMixin
 ):
     """
     Combines the Authentication functionality with objects from each of the apps.

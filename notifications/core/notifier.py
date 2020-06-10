@@ -201,7 +201,7 @@ class Notifier:
         kwargs['tracking_id'] = tracking_id
         kwargs['tracking_link'] = f"https://api.revibe.tech/api/v1/notifications/images/{tracking_id}/"
         kwargs['tracking_html'] = """<div>
-        <image src='{link}' width='1' height='1' />
+        <img src='{link}' width='1' height='1' />
         </div>""".format(link=kwargs['tracking_link'])
 
         return kwargs

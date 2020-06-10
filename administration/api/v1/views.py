@@ -23,10 +23,11 @@ from accounts import models as acc_models
 from accounts.artist import analytics
 from accounts.permissions import TokenOrSessionAuthentication, AdminOnlyTokenPermissions
 from administration.models import *
-from administration.serializers import v1 as adm_ser_v1
 from administration.utils.models import see_alert
 from content import models as cnt_models
 from metrics.models import Search, Stream
+
+from . import serializers as adm_ser_v1
 
 # -----------------------------------------------------------------------------
 

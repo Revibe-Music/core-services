@@ -120,6 +120,11 @@ class Event(models.Model):
 
 class ExternalEvent(Event):
     objects = managers.ExternalEventManager()
+
+    def __init__(self, *args, **kwargs):
+        self._meta.get_field('type').default = self.EXTERNAL
+        super().__init__(*args, **kwargs)
+
     class Meta:
         proxy = True
 

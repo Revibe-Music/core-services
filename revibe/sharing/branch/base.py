@@ -44,6 +44,30 @@ class Branch:
 
         self.branch_api_key = retrieve_variable("branch-api-key", "test")
 
+    @property
+    def api_key(self):
+        if not hasattr(self, '_api_key'):
+            self._api_key = retrieve_variable('branch-api-key', 'abcdefg')
+        return self._api_key
+
+    def refresh_api_key(self):
+        self._api_key = retrieve_variable('branch-api-key', 'zyxwvut')
+        return self._api_key
+
+
+    @property
+    def body(self):
+        return self._body
+
+    @body.setter
+    def body(self, x: dict):
+        self._body = x
+
+    @property
+    def json(self):
+        return json.dumps(self.body)
+
+
     def send(self, *args, **kwargs):
         # validate
         self.validate()
@@ -102,8 +126,24 @@ class Branch:
 
 class BranchDeepLinkingAPICreate(Branch):
 
-    def __init__(self, url, *args, **kwargs):
-        super().__init__(url=url, method='post', *args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(url='/v1/url', method='post', *args, **kwargs)
+
+    @Branch.body.setter
+    def body(self, x: dict):
+        _body = x
+
+        # add the API key
+        _body['branch_key'] = self.api_key
+
+        # add fields to the body 'data' object
+        if 'data' not in _body.keys():
+            _body['data'] = {}
+
+        if '$desktop_url' not in _body['data'].keys():
+            _body['data']['$desktop_url'] = retrieve_variable('branch-desktop-url', "https://revibe.tech/")
+
+        self._body = _body
 
     def _200(self, response: requests.Response):
         return self._201(response)

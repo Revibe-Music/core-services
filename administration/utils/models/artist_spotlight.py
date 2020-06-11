@@ -33,7 +33,7 @@ def todays_artist_spotlight():
 
     # if there isn't a spotlight for today, get this week's Artist of the Week
     artist = get_current_artist_of_the_week(return_artist=True)
-    if artist.artist_profile.hide_all_content:
+    if (not artist) or artist.artist_profile.hide_all_content:
         return None
     return artist
 

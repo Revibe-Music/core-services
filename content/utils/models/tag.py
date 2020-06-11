@@ -4,7 +4,7 @@ Author: Jordan Prechac
 """
 
 from content.models import Album, Song, Tag
-
+from content.utils.types import _validate_list
 
 # -----------------------------------------------------------------------------
 
@@ -21,10 +21,13 @@ def get_tag(text, *args, **kwargs):
     return tag
 
 
-def add_tag_to_song(tags, song, *args, **kwargs):
+def add_tag_to_song(tags, song, raise_exception: bool=False, *args, **kwargs):
     """
     Add tags to a song
     """
+    # enforce that the 'tags' are a list
+    tags = _validate_list(tags)
+
     # get the song, if the sent data isn't already a Song object
     if type(song) != Song:
         song = Song.objects.get(id=song)
@@ -40,6 +43,9 @@ def remove_tag_from_song(tags, song, *args, **kwargs):
     """
     Remove tags from a song
     """
+    # enforce that the 'tags' are a list
+    tags = _validate_list(tags)
+
     if type(song) != Song:
         song = Song.objects.get(id=song)
     
@@ -50,10 +56,13 @@ def remove_tag_from_song(tags, song, *args, **kwargs):
     return True
 
 
-def add_tag_to_album(tags, album, *args, **kwargs):
+def add_tag_to_album(tags, album, raise_exception: bool=False, *args, **kwargs):
     """
     Add tags to an album
     """
+    # enforce that the 'tags' are a list
+    tags = _validate_list(tags)
+
     # get the album, if the sent data isn't already an album object
     if type(album) != Album:
         album = Album.objects.get(id=album)
@@ -69,6 +78,9 @@ def remove_tag_from_album(tags, album, *args, **kwargs):
     """
     Remove tags from an album
     """
+    # enforce that the 'tags' are a list
+    tags = _validate_list(tags)
+
     if type(album) != Album:
         album = Album.objects.get(id=album)
     

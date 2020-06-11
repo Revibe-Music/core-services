@@ -15,6 +15,14 @@ class AlertDisplayManager(models.Manager):
         return super().get_queryset().filter(q_filter)
 
 
+class ArtistOfTheWeekActiveManager(models.Manager):
+    def get_queryset(self):
+        q_filter = Q(
+            active=True
+        )
+        return super().get_queryset().filter(q_filter)
+
+
 class BlogDisplayManager(models.Manager):
     def get_queryset(self):
         q_filter = Q(

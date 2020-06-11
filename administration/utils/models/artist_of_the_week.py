@@ -18,7 +18,7 @@ def get_current_artist_of_the_week(return_artist: bool=True, date: datetime.date
     time_period = starter - datetime.timedelta(days=6)
     exclude_date = starter + datetime.timedelta(days=1)
 
-    aotws = ArtistOfTheWeek.objects.filter(start_date__gte=time_period, start_date__lte=exclude_date).order_by('-start_date')
+    aotws = ArtistOfTheWeek.active_objects.filter(start_date__gte=time_period, start_date__lte=exclude_date).order_by('-start_date')
 
     if not aotws.exists():
         return None

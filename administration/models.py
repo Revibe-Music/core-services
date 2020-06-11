@@ -378,6 +378,9 @@ class ArtistOfTheWeek(models.Model):
         auto_now=True
     )
 
+    objects = models.Manager()
+    active_objects = managers.ArtistOfTheWeekActiveManager()
+
     def __str__(self):
         return f"{self.artist.name} ({self.start_date})"
 

@@ -19,7 +19,7 @@ from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope,TokenM
 from oauth2_provider.models import Application, AccessToken, RefreshToken
 from oauthlib import common
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter, GoogleOAuth2AdapterWeb, GoogleOAuth2AdapterMobile
 from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
@@ -380,6 +380,7 @@ class GoogleLogin(SocialLoginView):
     """
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
+    callback_ending = ""
 
     @property
     def callback_url(self):
@@ -396,11 +397,19 @@ class GoogleLogin(SocialLoginView):
             # local
             root = "127.0.0.1:8000"
 
-        return f"{method}{root}/v1/account/google-authentication/callback/"
+        return f"{method}{root}/v1/account/google-authentication/callback/{self.callback_ending}"
 
     @notifier(trigger="social-register", force=True, medium='email', skip_first=True)
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
+
+class GoogleLoginWeb(GoogleLogin):
+    adapter_class = GoogleOAuth2AdapterWeb
+    callback_ending = "web/"
+
+class GoogleLoginMobile(GoogleLogin):
+    adapter_class = GoogleOAuth2AdapterMobile
+    callback_ending = "mobile/"
 
 
 class FacebookLogin(SocialLoginView):

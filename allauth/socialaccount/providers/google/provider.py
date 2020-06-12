@@ -59,5 +59,13 @@ class GoogleProvider(OAuth2Provider):
                        primary=True))
         return ret
 
+class GoogleProviderWeb(GoogleProvider):
+    id = 'google-web'
+    name = 'Google Web'
 
-provider_classes = [GoogleProvider]
+class GoogleProviderMobile(GoogleProvider):
+    id = 'google-mobile'
+    name = 'Google Mobile'
+
+
+provider_classes = [GoogleProvider, GoogleProviderWeb, GoogleProviderMobile]

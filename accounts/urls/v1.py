@@ -37,8 +37,12 @@ urlpatterns = [
     path('send-email', v1.SendRegisterLink.as_view(), name="send-email"),
 
     # social authentication
-    path("google-authentication/", v1.GoogleLogin.as_view(), name="google-login"),
-    path("google-authentication/callback/", OAuth2CallbackView.adapter_view(v1.GoogleOAuth2Adapter), name="google-callback"),
+    path("google-authentication/", v1.GoogleLoginWeb.as_view(), name="google-login"), # needs to be deprecated!
+    path("google-authentication/web/", v1.GoogleLoginWeb.as_view(), name="google-login-web"),
+    path("google-authentication/mobile/", v1.GoogleLoginMobile.as_view(), name="google-login-mobile"),
+    path("google-authentication/callback/web/", OAuth2CallbackView.adapter_view(v1.GoogleOAuth2AdapterWeb), name="google-callback-web"),
+    path("google-authentication/callback/mobile/", OAuth2CallbackView.adapter_view(v1.GoogleOAuth2AdapterMobile), name="google-callback-mobile"),
+
     path("facebook-authentication/", v1.FacebookLogin.as_view(), name="facebook-login"),
     path("facebook-authentication/callback/", OAuth2CallbackView.adapter_view(v1.FacebookOAuth2Adapter), name="facebook-callback"),
 

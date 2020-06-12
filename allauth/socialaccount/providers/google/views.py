@@ -6,7 +6,7 @@ from allauth.socialaccount.providers.oauth2.views import (
     OAuth2LoginView,
 )
 
-from .provider import GoogleProvider
+from .provider import GoogleProvider, GoogleProviderWeb, GoogleProviderMobile
 
 
 class GoogleOAuth2Adapter(OAuth2Adapter):
@@ -36,6 +36,11 @@ class GoogleOAuth2Adapter(OAuth2Adapter):
                                    extra_data)
         return login
 
+class GoogleOAuth2AdapterWeb(GoogleOAuth2Adapter):
+    provider_id = GoogleProviderWeb.id
+
+class GoogleOAuth2AdapterMobile(GoogleOAuth2Adapter):
+    provider_id = GoogleProviderMobile.id
 
 
 oauth2_login = OAuth2LoginView.adapter_view(GoogleOAuth2Adapter)

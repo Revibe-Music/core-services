@@ -33,7 +33,7 @@ logger = getLogger(__name__)
 
 from revibe.auth.artist import get_authenticated_artist
 from revibe.viewsets import GenericPlatformViewSet
-from revibe.utils import mailchimp
+from revibe.utils import mailchimp, mail
 from revibe.utils.params import get_url_param
 from revibe._errors import accounts ,network
 from revibe._errors.accounts import AccountNotFound, NotArtistError
@@ -401,7 +401,16 @@ class GoogleLogin(SocialLoginView):
 
     @notifier(trigger="social-register", force=True, medium='email', skip_first=True)
     def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+        try:
+            return super().post(request, *args, **kwargs)
+        except Exception as e:
+            mail.error_email(
+                retrieve_variable('social-auth-email-logging-email', 'dev@revibe.tech'),
+                f"`accounts.views.v1.{self.__class__.__name__}.post`",
+                exc,
+                raise_exception=False
+            )
+            raise e
 
 class GoogleLoginWeb(GoogleLogin):
     adapter_class = GoogleOAuth2AdapterWeb

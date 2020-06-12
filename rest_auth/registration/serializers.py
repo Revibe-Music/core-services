@@ -133,15 +133,15 @@ class SocialLoginSerializer(serializers.Serializer):
             login = self.get_social_login(adapter, app, social_token, access_token)
             complete_social_login(request, login)
         except HTTPError as e:
-            to_send_email = retrieve_variable('social-auth-email-logging-switch', False, output_type=bool)
-            if to_send_email:
-                send_mail(
-                    subject="Social Auth Error",
-                    message=f"""The social auth fucked up. \nException: {e} \nTimestamp:{datetime.datetime.now()}""",
-                    from_email='"Logging" <noreply@revibe.tech>',
-                    recipient_list=[retrieve_variable("social-auth-email-logging-email", "kaynelynn@revibe.tech"),],
-                    fail_silently=True
-                )
+            # to_send_email = retrieve_variable('social-auth-email-logging-switch', False, output_type=bool)
+            # if to_send_email:
+            send_mail(
+                subject="Social Auth Error",
+                message=f"""The social auth fucked up. \nException: {e} \nTimestamp:{datetime.datetime.now()}""",
+                from_email='"Logging" <noreply@revibe.tech>',
+                recipient_list=[retrieve_variable("social-auth-email-logging-email", "kaynelynn@revibe.tech"),],
+                fail_silently=True
+            )
             raise serializers.ValidationError(_("Incorrect value"))
 
         if not login.is_existing:

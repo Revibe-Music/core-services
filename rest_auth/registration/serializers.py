@@ -138,7 +138,7 @@ class SocialLoginSerializer(serializers.Serializer):
                 send_mail(
                     subject="Social Auth Error",
                     message=f"""The social auth fucked up. \nException: {e} \nTimestamp:{datetime.datetime.now()}""",
-                    from_email='"Logging" <noreply@revibe.tech',
+                    from_email='"Logging" <noreply@revibe.tech>',
                     recipient_list=[retrieve_variable("social-auth-email-logging-email", "kaynelynn@revibe.tech"),],
                     fail_silently=True
                 )

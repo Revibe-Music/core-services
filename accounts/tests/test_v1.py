@@ -68,6 +68,26 @@ class TestRegister(RevibeTestCase):
             msg=f"The Referral's referree's ID is not the same as the created user's ID. Referree: {referral.referree.id}, new user: {response.data['user']['user_id']}"
         )
 
+    def test_register_no_username(self):
+        # configure request
+        url = reverse('register')
+
+        data = {
+            "password": "password",
+            "device_type": "mobile",
+            "profile": {}
+        }
+
+        # send request
+        response = self.client.post(url, data, format="json")
+
+        # validate response
+        self.assert409(response)
+        self.assertTrue(
+            'username' in response.data.keys(),
+            msg="No username field errors were returned"
+        )
+
     def test_register_with_campaign(self):
         self._get_campaign()
         # send request

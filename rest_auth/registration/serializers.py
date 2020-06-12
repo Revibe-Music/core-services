@@ -1,6 +1,7 @@
 from django.http import HttpRequest
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
 
 try:
     from allauth.account import app_settings as allauth_settings
@@ -16,6 +17,10 @@ except ImportError:
 
 from rest_framework import serializers
 from requests.exceptions import HTTPError
+
+import datetime
+
+from administration.utils import retrieve_variable
 
 
 class SocialAccountSerializer(serializers.ModelSerializer):
@@ -127,7 +132,16 @@ class SocialLoginSerializer(serializers.Serializer):
         try:
             login = self.get_social_login(adapter, app, social_token, access_token)
             complete_social_login(request, login)
-        except HTTPError:
+        except HTTPError as e:
+            to_send_email = retrieve_variable('social-auth-email-logging-switch', False, output_type=bool)
+            if to_send_email:
+                send_mail(
+                    subject="Social Auth Error",
+                    message=f"""The social auth fucked up. \nException: {e} \nTimestamp:{datetime.datetime.now()}""",
+                    from_email='"Logging" <noreply@revibe.tech',
+                    recipient_list=[retrieve_variable("social-auth-email-logging-email", "kaynelynn@revibe.tech"),],
+                    fail_silently=True
+                )
             raise serializers.ValidationError(_("Incorrect value"))
 
         if not login.is_existing:

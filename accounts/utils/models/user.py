@@ -79,17 +79,17 @@ def attach_referrer(params, profile, *args, **kwargs):
 
 def validate_username_and_email(username, email):
     errors = {}
-    useranme_errors = []
+    username_errors = []
     email_errors = []
 
     # username validation
     if not username:
         username_errors.append("Field 'username' is required")
     if not validation.check_username(username):
-        useranme_errors.append(f"Username '{username}' already exists")
+        username_errors.append(f"Username '{username}' already exists")
     # add any errors to the errors dict
-    if useranme_errors != []:
-        errors['username'] = useranme_errors
+    if username_errors != []:
+        errors['username'] = username_errors
 
     # email validation
     if email and (not validation.check_email(email)):

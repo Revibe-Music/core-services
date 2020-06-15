@@ -26,11 +26,15 @@ def song_link_from_template(song, template):
 
     # if the template has tags 
     tags = template.tags_to_list()
-    if tags: data['tags'] = tags
+    if tags != None: link_data['tags'] = tags
 
     # add the core data to the link data
     link_data['data'] = data
 
-    branch = BranchDeepLinkingAPICreate(body=data)
+    branch = BranchDeepLinkingAPICreate(body=link_data)
+    url = branch.send()
+
+    if isinstance(url, str): return url
+    raise Exception(f"Bad response: {url}")
 
 

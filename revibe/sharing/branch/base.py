@@ -131,7 +131,7 @@ class BranchDeepLinkingAPICreate(Branch):
 
     def _validate_body_fields(self, body):
         required_fields = ['channel', 'feature', 'campaign', 'branch_key',]
-        optional_fields = ['stage', 'tags',]
+        optional_fields = ['stage', 'tags', 'body',]
         all_fields = required_fields + optional_fields
 
         # loop through the fields, raising an error with each field that is wrong

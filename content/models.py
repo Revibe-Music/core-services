@@ -432,6 +432,15 @@ class Song(models.Model):
         verbose_name_plural = 'songs'
 
 
+    # branch stuff
+    @property
+    def canonical_identifier(self):
+        platform = self.platform.lower()
+        obj_type = 'song'
+        id = str(self.id)
+        return f"{platform}:{obj_type}:{id}"
+
+
 class SongContributor(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, null=False, related_name='artist_to_song')
     song = models.ForeignKey(Song, on_delete=models.CASCADE, null=False, related_name='song_to_artist')

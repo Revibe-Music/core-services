@@ -265,7 +265,8 @@ class Platform:
         try:
             library = Library.objects.get(user=user, platform=self.__class__.__name__)
         except Library.DoesNotExist as e:
-            raise plt_er.PlatformNotFoundError("This user does not have a {} library".format(self.__class__.__name__))
+            # raise plt_er.PlatformNotFoundError("This user does not have a {} library".format(self.__class__.__name__))
+            library = Library.objects.create(user=user, platform=self.__class__.__name__)
 
         song = self.save(data, *args, **kwargs)
 

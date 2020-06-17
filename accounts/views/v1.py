@@ -402,7 +402,12 @@ class GoogleLogin(SocialLoginView):
     @notifier(trigger="social-register", force=True, medium='email', skip_first=True)
     def post(self, request, *args, **kwargs):
         try:
-            return super().post(request, *args, **kwargs)
+            response = super().post(request, *args, **kwargs)
+
+            # add 'new_user' field to response data, if it's a good status code
+            if response.status_code in (200, 201): response.data['new_user'] = self.is_new_user
+            return response
+
         except Exception as e:
             mail.error_email(
                 retrieve_variable('social-auth-email-logging-email', 'dev@revibe.tech'),

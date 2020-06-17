@@ -226,8 +226,8 @@ class NotificationTemplate(models.Model):
         return default_repr(self)
 
     class Meta:
-        verbose_name = "notification template"
-        verbose_name_plural = "notification templates"
+        verbose_name = "template"
+        verbose_name_plural = "templates"
 
 
     # branch stuff

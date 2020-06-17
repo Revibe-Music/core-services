@@ -33,12 +33,13 @@ class Branch:
 
     root_url = "https://api2.branch.io"
 
-    def __init__(self, url, method, headers: dict=None, body: (dict, list)=None, params: dict=None, *args, **kwargs):
+    def __init__(self, url, method, headers: dict={}, body: (dict, list)={}, params: dict={}, use_json: bool=True, *args, **kwargs):
         """
         Contructor method
         """
         self.url = self.root_url + url
         self.method = method
+        self.use_json = use_json
 
         self.headers = headers
         self.body = body
@@ -67,6 +68,15 @@ class Branch:
     def json(self):
         return json.dumps(self.body)
 
+    @property
+    def headers(self):
+        return self._headers
+
+    @headers.setter
+    def headers(self, h):
+        if self.use_json: h['Content-Type'] = 'application/json'
+        self._headers = h
+
 
     def send(self, *args, **kwargs):
         # validate
@@ -74,7 +84,8 @@ class Branch:
 
         # send the request
         func = getattr(requests, self.method.lower())
-        response = func(url=self.url, params=self.params, data=self.body, headers=self.headers)
+        data = self.json if self.use_json else self.body
+        response = func(url=self.url, params=self.params, data=data, headers=self.headers)
 
         return self.handle_status(response)
 
@@ -100,10 +111,7 @@ class Branch:
         pass
 
     def _201(self, response: requests.Response):
-        text = response.status_code
-        data = json.loads(text)
-
-        return data
+        return response.json()
 
     def _204(self, response: requests.Response):
         return

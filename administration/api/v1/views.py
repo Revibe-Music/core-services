@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from revibe.pagination import CustomLimitOffsetPagination
-from revibe.sharing import mobile_app_sharing_link
+from revibe.sharing.base import mobile_app_sharing_link
 from revibe.viewsets import GenericPlatformViewSet
 from revibe.utils.params import get_url_param
 from revibe._errors import network

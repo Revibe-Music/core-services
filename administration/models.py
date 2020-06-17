@@ -10,9 +10,6 @@ from revibe.utils import classes
 from revibe.utils.language import text
 
 from administration import managers
-from content.models import Album, Song
-from metrics.models import Stream
-from music.models import Library, Playlist
 
 # -----------------------------------------------------------------------------
 

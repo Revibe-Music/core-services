@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 from revibe._helpers import const
 from revibe.contrib.queries.querysets import random_object
-from revibe.sharing.branch import song_link_from_template, album_link_from_template, artist_link_from_template
+from revibe.sharing.branch.models import song_link_from_template, album_link_from_template, artist_link_from_template
 
 from administration.utils import retrieve_variable
 from content.models import Album, Song

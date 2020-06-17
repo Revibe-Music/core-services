@@ -6,6 +6,8 @@ import requests
 
 from administration.utils import retrieve_variable
 
+from .exceptions import BranchException
+
 # -----------------------------------------------------------------------------
 
 
@@ -41,8 +43,6 @@ class Branch:
         self.headers = headers
         self.body = body
         self.params = params
-
-        self.branch_api_key = retrieve_variable("branch-api-key", "test")
 
     @property
     def api_key(self):
@@ -109,15 +109,15 @@ class Branch:
         return
 
     def _400(self, response: requests.Response):
-        pass
+        raise BranchException(response.json())
     def _401(self, response: requests.Response):
-        pass
+        raise BranchException(response.json())
     def _403(self, response: requests.Response):
-        pass
+        raise BranchException(response.json())
     def _404(self, response: requests.Response):
-        pass
+        raise BranchException(response.json())
     def _409(self, response: requests.Response):
-        pass
+        raise BranchException(response.json())
 
     def __str__(self):
         return f"{self.url} - {self.method.upper()}"
@@ -131,7 +131,7 @@ class BranchDeepLinkingAPICreate(Branch):
 
     def _validate_body_fields(self, body):
         required_fields = ['channel', 'feature', 'campaign', 'branch_key',]
-        optional_fields = ['stage', 'tags', 'body',]
+        optional_fields = ['stage', 'tags', 'data',]
         all_fields = required_fields + optional_fields
 
         # loop through the fields, raising an error with each field that is wrong

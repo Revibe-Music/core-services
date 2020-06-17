@@ -184,7 +184,7 @@ class NotificationTemplate(models.Model):
         max_length=255,
         null=True, blank=True,
         verbose_name=_("channel"),
-        help_text=_("Branch channel/source")
+        help_text=_("Branch channel/source. Defaults to the Event's type (External/Temporal).")
     )
     # feature: use 'medium' field, no field
     # campaigns: use Event name, have an override field TODO
@@ -192,13 +192,13 @@ class NotificationTemplate(models.Model):
         max_length=255,
         null=True, blank=True,
         verbose_name=_("campaign"),
-        help_text=_("Branch campaign/what?")
+        help_text=_("Branch campaign field. Defaults to Event's 'name' field.")
     )
     # tags: comma-separated values. Gonna have to parse that out into a list later
     branch_tags = models.TextField(
         null=True, blank=True,
         verbose_name=_("tags"),
-        help_text=_("Comma-separated tags for branch links")
+        help_text=_("Comma-separated tags for branch links. Will be null if left blank.")
     )
 
     # extras

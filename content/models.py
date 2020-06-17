@@ -8,6 +8,7 @@ import uuid
 from logging import getLogger
 logger = getLogger(__name__)
 
+from revibe.sharing.branch.utils import generate_canonical_identifier
 from revibe.utils.aws.s3 import delete_s3_object
 from revibe.utils.classes import default_repr
 
@@ -230,6 +231,14 @@ class Artist(models.Model):
         verbose_name = 'artist'
         verbose_name_plural = 'artists'
 
+    # branch stuff
+    @property
+    def canonical_identifier(self):
+        platform = self.platform.lower()
+        obj_type = 'artist'
+        id = str(self.id)
+        return generate_canonical_identifier(platform, obj_type, id)
+
 
 class Album(models.Model):
     id = models.CharField(max_length=255, primary_key=True, default=uuid.uuid4, editable=False)
@@ -297,6 +306,14 @@ class Album(models.Model):
         verbose_name = 'album'
         verbose_name_plural = 'albums'
         ordering = ['name',]
+
+    # branch stuff
+    @property
+    def canonical_identifier(self):
+        platform = self.platform.lower()
+        obj_type = 'album'
+        id = str(self.id)
+        return generate_canonical_identifier(platform, obj_type, id)
 
 
 class AlbumContributor(models.Model):
@@ -438,7 +455,7 @@ class Song(models.Model):
         platform = self.platform.lower()
         obj_type = 'song'
         id = str(self.id)
-        return f"{platform}:{obj_type}:{id}"
+        return generate_canonical_identifier(platform, obj_type, id)
 
 
 class SongContributor(models.Model):

@@ -3,12 +3,11 @@ Created: 15 June 2020
 """
 
 from .base import BranchDeepLinkingAPICreate
+from .exceptions import BranchException
 
 # -----------------------------------------------------------------------------
 
-
-def song_link_from_template(song, template):
-
+def _link_from_template(data, template):
     link_data = {}
 
     # add link meta/tracking info
@@ -17,6 +16,19 @@ def song_link_from_template(song, template):
     link_data['campaign'] = template.get_branch_campaign()
     link_data['tags'] = template.tags_to_list()
 
+    # if the template has tags, add them
+    tags = template.tags_to_list()
+    if tags != None: link_data['tags'] = tags
+
+    link_data['data'] = data
+
+    branch = BranchDeepLinkingAPICreate(body=link_data)
+    url = branch.send()
+
+    if isinstance(url, str): return url
+    raise BranchException(f"Bad response: {url}")
+
+def song_link_from_template(song, template):
     # add the link core fields
     data = {
         "$canonical_identifier": song.canonical_identifier,
@@ -24,17 +36,25 @@ def song_link_from_template(song, template):
         "$og_description": "Song - Revibe Music",
     }
 
-    # if the template has tags 
-    tags = template.tags_to_list()
-    if tags != None: link_data['tags'] = tags
+    return _link_from_template(data, template)
 
-    # add the core data to the link data
-    link_data['data'] = data
+def album_link_from_template(album, template):
+    # add the link data core fields
+    data = {
+        "$canonical_identifier": album.canonical_identifier,
+        "$og_title": album.name,
+        "$og_description": "Album - Revibe Music",
+    }
 
-    branch = BranchDeepLinkingAPICreate(body=link_data)
-    url = branch.send()
+    return _link_from_template(data, template)
 
-    if isinstance(url, str): return url
-    raise Exception(f"Bad response: {url}")
+def artist_link_from_template(artist, template):
+    # add the link data core fields
+    data = {
+        "$canonical_identifier": artist.canonical_identifier,
+        "$og_title": artist.name,
+        "$og_description": "Artist - Revibe Music",
+    }
 
+    return _link_from_template(data, template)
 

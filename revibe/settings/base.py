@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.openid',
     'allauth.socialaccount.providers.spotify',
+    'allauth.socialaccount.providers.twitter',
 ]
 
 MIDDLEWARE = [

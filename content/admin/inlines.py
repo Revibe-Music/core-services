@@ -5,8 +5,9 @@ Author: Jordan Prechac
 
 from django.contrib import admin
 
-from content.admin_ext.forms import AlbumContributorInlineForm, SongContributorInlineForm
 from content.models import Album, AlbumContributor, Song, SongContributor, Track
+
+from .forms import AlbumContributorInlineForm, SongContributorInlineForm
 
 # -----------------------------------------------------------------------------
 
@@ -72,4 +73,3 @@ class SongTrackInline(admin.TabularInline):
 
     verbose_name = "track"
     verbose_name_plural = "tracks"
-

@@ -5,12 +5,10 @@ from revibe.admin import check_deletion, check_display
 from revibe._helpers.symbols import CROSS_MARK, CHECK_MARK
 
 from accounts.admin_ext.inlines import ArtistProfileInline
-from content import browse
-from content.admin_ext import (
-    approve_contribution, remove_delete, perform_delete, reprocess_song, reprocess_image, update_mailchimp_info,
-    inlines
-)
 from content.models import *
+
+from . import inlines
+from .actions import approve_contribution, remove_delete, perform_delete, reprocess_song, reprocess_image, update_mailchimp_info
 
 # -----------------------------------------------------------------------------
 

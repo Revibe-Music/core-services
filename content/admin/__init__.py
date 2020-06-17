@@ -7,7 +7,7 @@ from revibe._helpers.symbols import CROSS_MARK, CHECK_MARK
 from accounts.admin.inlines import ArtistProfileInline
 from content.models import *
 
-from . import inlines
+from . import forms, inlines
 from .actions import approve_contribution, remove_delete, perform_delete, reprocess_song, reprocess_image, update_mailchimp_info
 
 # -----------------------------------------------------------------------------
@@ -30,6 +30,8 @@ class ArtistAdmin(admin.ModelAdmin):
         'id', 'uri',
         'date_joined', 'last_changed',
     )
+
+    form = forms.ArtistAdminForm
 
     _inlines = []
 
@@ -87,6 +89,8 @@ class AlbumAdmin(admin.ModelAdmin):
         'uploaded_date', 'last_changed',
     )
 
+    form = forms.AlbumAdminForm
+
     inlines = [
         inlines.AlbumSongInline,
         inlines.AlbumContributorInline,
@@ -135,6 +139,8 @@ class SongAdmin(admin.ModelAdmin):
         'id', 'uri',
         'uploaded_date', 'last_changed',
     )
+
+    form = forms.SongAdminForm
 
     inlines = [
         inlines.SongContributorInline,

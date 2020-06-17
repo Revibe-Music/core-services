@@ -5,7 +5,7 @@ Author: Jordan Prechac
 
 from django import forms
 
-from content.models import AlbumContributor, Song, SongContributor
+from content.models import Album, AlbumContributor, Artist, Song, SongContributor
 
 # -----------------------------------------------------------------------------
 
@@ -43,4 +43,31 @@ class SongContributorInlineForm(forms.ModelForm):
             'approved',
             'primary_artist',
         ]
+
+_platform_choices = (
+    ('Revibe', 'Revibe'),
+    ('Spotify', 'Spotify'),
+    ('YouTube', 'Youtube'),
+)
+class AlbumAdminForm(forms.ModelForm):
+    class Meta:
+        model = Album
+        fields = '__all__'
+        widgets = {
+            "platform": forms.Select(choices=_platform_choices)
+        }
+class ArtistAdminForm(forms.ModelForm):
+    class Meta:
+        model = Artist
+        fields = '__all__'
+        widgets = {
+            "platform": forms.Select(choices=_platform_choices)
+        }
+class SongAdminForm(forms.ModelForm):
+    class Meta:
+        model = Song
+        fields = '__all__'
+        widgets = {
+            "platform": forms.Select(choices=_platform_choices)
+        }
 

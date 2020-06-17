@@ -239,7 +239,7 @@ class NotificationTemplate(models.Model):
         campaign = self.branch_campaign if self.branch_campaign else self.event.name
         return campaign.lower()
 
-    def tags_to_list(self):
+    def _tags_to_list(self):
         tags_text = self.branch_tags
 
         # if the field is empty, return None
@@ -252,6 +252,16 @@ class NotificationTemplate(models.Model):
             # if the tags are not in JSON format, assume it's a comma-separated list and create an array
             tags_list = [t.strip() for t in tags_text.split(',')]
             return tags_list
+
+    def tags_to_list(self):
+        tags = self._tags_to_list()
+        auto_tag = ['auto']
+        if not tags: # 'tags' is either [] or None
+            return auto_tag
+
+        if 'auto' not in tags: tags += auto_tag
+
+        return tags
 
 
 class Notification(models.Model):

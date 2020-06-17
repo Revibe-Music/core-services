@@ -8,7 +8,7 @@ from revibe._helpers.files import add_image_to_obj, add_track_to_song
 from revibe.serializers import CustomDateField, ProcessedOnlyListSerializer
 
 from accounts.models import CustomUser
-from accounts.serializers.base import BaseSocialMediaSerializer
+from accounts.api.serializers import BaseSocialMediaSerializer
 from content.models import *
 from content.mixins import ContributionSerializerMixin
 from content.utils import analytics, models

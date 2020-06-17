@@ -46,7 +46,6 @@ from accounts.exceptions import AccountsException, PasswordValidationError, Auth
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.referrals.tasks import add_referral_points
-from accounts.serializers.v1 import *
 from accounts.utils.auth import change_password, reset_password, generate_tokens, refresh_access_token
 from accounts.utils.models import register_new_user
 from accounts._helpers import validation
@@ -68,6 +67,8 @@ from metrics.models import Stream
 from music.models import *
 from music.serializers import v1 as music_ser_v1
 from notifications.decorators import notifier
+
+from .serializers import *
 
 # -----------------------------------------------------------------------------
 

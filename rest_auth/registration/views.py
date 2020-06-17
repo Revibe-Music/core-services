@@ -36,7 +36,7 @@ from revibe._helpers import responses
 
 from accounts.exceptions.api import AccountsConflicError
 from accounts.models import Profile
-from accounts.serializers.v1 import UserSerializer
+from accounts.api.v1.serializers import UserSerializer
 from accounts.utils.models import create_access_token
 
 sensitive_post_parameters_m = method_decorator(

@@ -38,11 +38,12 @@ class GenreTestCase(RevibeTestCase):
         genre = Genre.objects.get_or_create(txt)
 
         # test that it's there
-        self.assertRaises(
-            Genre.DoesNotExist,
-            Genre.objects.get,
-            **{'text__exact': txt}
-        )
+        # g = Genre.objects.get(text__exact=txt)
+        # self.assertRaises(
+        #     Genre.DoesNotExist,
+        #     Genre.objects.get,
+        #     **{'text__exact': txt}
+        # )
         self.assertEqual(
             genre, Genre.objects.get(text__iexact=txt.lower()),
             msg="The object was not created properly"

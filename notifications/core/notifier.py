@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 from revibe._helpers import const
 from revibe.contrib.queries.querysets import random_object
+from revibe.sharing.branch import song_link_from_template, album_link_from_template, artist_link_from_template
 
 from administration.utils import retrieve_variable
 from content.models import Album, Song
@@ -55,6 +56,7 @@ class Notifier:
 
         self.event = self._get_event(trigger, check_first=check_first)
         self.templates = self.event.templates.filter(active=True)
+        self.email_template = random_object(self.templates.filter(medium='email'))
 
         self.extra_configs = extra_configs
         self.args = args
@@ -143,7 +145,7 @@ class Notifier:
             except Exception:
                 pass
 
-    def _configure_kwargs(self, **extras):
+    def _configure_kwargs(self, template, **extras):
         """ Configure base kwargs for message formatting """
         config = base_email_config
 
@@ -169,6 +171,10 @@ class Notifier:
                 config['artist_image'] = image.url
             except Exception:
                 config['artist_image'] = "Error getting Artist artwork"
+            try:
+                config['artist_deep_link'] = artist_link_from_template(self.user.artist, template)
+            except Exception:
+                config['artist_deep_link'] = retrieve_variable('home_website', 'https://revibe.tech')
 
         if self.album:
             config['album_name'] = self.album.name
@@ -180,11 +186,19 @@ class Notifier:
                 config['album_image'] = image.url
             except Exception:
                 config['album_image'] = "Error getting Album artwork"
+            try:
+                config['album_deep_link'] = album_link_from_template(self.album, template)
+            except Exception:
+                config['album_deep_link'] = retrieve_variable('home_website', 'https://revibe.tech')
 
         if self.song:
             config['song_name'] = self.song.title
             config['song_uploader'] = self.song.song_uploaded_by.name
             # TODO: add song uploader name
+            try:
+                config['song_deep_link'] = song_link_from_template(self.song, template)
+            except Exception:
+                config['song_deep_link'] = retrieve_variable('home_website', 'https://revibe.tech')
 
         # temp
         if self.is_contribution:
@@ -231,19 +245,17 @@ class Notifier:
         notification_tracking_kwargs = self.configure_tracking_kwargs(notification_read_id)
 
         # add configuration stuff
-        config = self._configure_kwargs(**notification_tracking_kwargs)
-
-        notification_template = random_object(self.templates.filter(medium='email'))
+        config = self._configure_kwargs(template=self.email_template, **notification_tracking_kwargs)
 
         from_address = getattr(self.event, 'from_address', '"Revibe" <noreply@revibe.tech>')
 
         # get message subject
-        subject = getattr(notification_template, 'subject')
+        subject = getattr(self.email_template, 'subject')
         if subject == None:
             subject = retrieve_variable('notification_email_subject_default', 'Revibe Notifications')
 
         # configure email body content
-        html_format = notification_template.body
+        html_format = self.email_template.body
         html_message = self.format_html(html_format, config)
         plain_message = strip_tags(html_message)
 
@@ -274,7 +286,7 @@ class Notifier:
             elif sent:
                 Notification.objects.create(
                     user=self.user,
-                    event_template=notification_template,
+                    event_template=self.email_template,
                     is_artist=bool(getattr(self, 'artist', False)),
                     read_id=notification_read_id
                 )

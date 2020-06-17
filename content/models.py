@@ -231,6 +231,14 @@ class Artist(models.Model):
         verbose_name = 'artist'
         verbose_name_plural = 'artists'
 
+    def _link_to_self(self):
+        return format_html(
+            "<a href='/{}content/artist/{}'>{}</a>",
+            settings.ADMIN_PATH,
+            self.id,
+            self.__str__()
+        )
+
     # branch stuff
     @property
     def canonical_identifier(self):

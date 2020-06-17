@@ -4,7 +4,7 @@ from django.utils.html import format_html
 from revibe.admin import check_deletion, check_display
 from revibe._helpers.symbols import CROSS_MARK, CHECK_MARK
 
-from accounts.admin_ext.inlines import ArtistProfileInline
+from accounts.admin.inlines import ArtistProfileInline
 from content.models import *
 
 from . import inlines

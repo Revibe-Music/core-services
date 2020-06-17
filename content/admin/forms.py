@@ -9,6 +9,18 @@ from content.models import Album, AlbumContributor, Artist, Song, SongContributo
 
 # -----------------------------------------------------------------------------
 
+_contributor_choices = (
+    ('Artist', 'Artist'),
+    ('Feature', 'Feature'),
+    ('Producer', 'Producer'),
+    ('Mixing', 'Mixing'),
+    ('Mastering', 'Mastering'),
+    ('Song Writer', 'Song Writer'),
+    ('Vocals', 'Vocals'),
+    ('Programmer/Beat Maker', 'Programmer/Beat Maker'),
+    ('Graphic Designer', 'Graphic Designer')
+)
+
 class AlbumContributorInlineForm(forms.ModelForm):
     class Meta:
         model = AlbumContributor
@@ -20,6 +32,9 @@ class AlbumContributorInlineForm(forms.ModelForm):
             'approved',
             'primary_artist',
         ]
+        widgets = {
+            "contribution_type": forms.Select(choices=_contributor_choices)
+        }
 
 
 class AlbumSongInlineForm(forms.ModelForm):
@@ -43,6 +58,9 @@ class SongContributorInlineForm(forms.ModelForm):
             'approved',
             'primary_artist',
         ]
+        widgets = {
+            "contribution_type": forms.Select(choices=_contributor_choices)
+        }
 
 _platform_choices = (
     ('Revibe', 'Revibe'),

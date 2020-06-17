@@ -46,6 +46,9 @@ urlpatterns = [
     path("facebook-authentication/", views.FacebookLogin.as_view(), name="facebook-login"),
     path("facebook-authentication/callback/", OAuth2CallbackView.adapter_view(views.FacebookOAuth2Adapter), name="facebook-callback"),
 
+    path("twitter-authentication/", views.TwitterLogin.as_view(), name="twitter-login"),
+    path("twitter-authentication/callback/", OAuth2CallbackView.adapter_view(views.TwitterOAuthAdapter), name="twitter-callback"),
+
     path('profile/reset-password/', views.view_reset_password, name='reset-password'),
 
     # referrals

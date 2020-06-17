@@ -156,7 +156,7 @@ class NotificationTemplate(models.Model):
     # notification_method = models.
     _medium_choices = (
         ('email', 'Email'),
-        ('in_app', 'In-App'),
+        ('in-app', 'In-App'),
         ('push', 'Push'),
         ('sms', 'Text Message'),
     )

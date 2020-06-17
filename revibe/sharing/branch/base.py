@@ -129,6 +129,39 @@ class BranchDeepLinkingAPICreate(Branch):
     def __init__(self, *args, **kwargs):
         super().__init__(url='/v1/url', method='post', *args, **kwargs)
 
+    def _validate_body_fields(self, body):
+        required_fields = ['channel', 'feature', 'campaign', 'branch_key',]
+        optional_fields = ['stage', 'tags', 'body',]
+        all_fields = required_fields + optional_fields
+
+        # loop through the fields, raising an error with each field that is wrong
+        errors = {}
+        for key, value in body.items():
+            errors[key] = []
+
+            # if the key is not in the available fields, record an error
+            if key not in all_fields:
+                errors[key].append(f"Unknown field: '{key}'")
+
+            # if there are no errors, remove the value from the errors dictionary
+            if errors[key] == []:
+                errors.pop(key)
+
+        # loop through the required fields, record an error if they are not present
+        for field in required_fields:
+            # add this field to the errors dict if it isn't there already
+            if field not in errors.keys(): errors[field] = []
+
+            # if the required field is not present, log it
+            if field not in body.keys(): errors[field].append(f"Field '{field}' is required")
+
+            # remove the 'field' key-value pair from the dictionary if there were no errors
+            if errors[field] == []: errors.pop(field)
+
+        # raise an error if there are errors
+        if errors != {}: raise TypeError(str(errors))
+
+
     @Branch.body.setter
     def body(self, x: dict):
         _body = x
@@ -136,9 +169,19 @@ class BranchDeepLinkingAPICreate(Branch):
         # add the API key
         _body['branch_key'] = self.api_key
 
+        # validate body fields
+        self._validate_body_fields(_body)
+
         # add fields to the body 'data' object
         if 'data' not in _body.keys():
             _body['data'] = {}
+
+        # required fields n shit
+        # $cononical_identifier: "platform:content-type:id"
+        # $og_title: object name
+        # $og_description: dependent on content type, "Artist - Revibe Music"
+        # $og_image_url: depends on content type, either album or artist image
+        # $desktop_url: "https://revibe.tech/"
 
         if '$desktop_url' not in _body['data'].keys():
             _body['data']['$desktop_url'] = retrieve_variable('branch-desktop-url', "https://revibe.tech/")
@@ -151,9 +194,10 @@ class BranchDeepLinkingAPICreate(Branch):
     def _201(self, response: requests.Response):
         data = super()._201(response)
 
-        if 'url' in data.keys():
-            return data.get('url')
-        return data
+        # if 'url' in data.keys():
+        #     return data.get('url')
+        # return data
+        return data.get('url', data)
 
     def _409(self, response: requests.Response):
         pass

@@ -9,6 +9,7 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 import datetime
+import json
 import uuid
 
 from revibe.utils.classes import default_repr
@@ -177,6 +178,29 @@ class NotificationTemplate(models.Model):
         help_text=_("The format-string message to send to the user. If this is an email template, paste the HTML here.")
     )
 
+    # branch stuff
+    # channel : use event type, have override field TODO
+    branch_channel = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        verbose_name=_("channel"),
+        help_text=_("Branch channel/source")
+    )
+    # feature: use 'medium' field, no field
+    # campaigns: use Event name, have an override field TODO
+    branch_campaign = models.CharField(
+        max_length=255,
+        null=True, blank=True,
+        verbose_name=_("campaign"),
+        help_text=_("Branch campaign/what?")
+    )
+    # tags: comma-separated values. Gonna have to parse that out into a list later
+    branch_tags = models.TextField(
+        null=True, blank=True,
+        verbose_name=_("tags"),
+        help_text=_("Comma-separated tags for branch links")
+    )
+
     # extras
     active = models.BooleanField(
         null=False, blank=True, default=True,
@@ -204,6 +228,30 @@ class NotificationTemplate(models.Model):
     class Meta:
         verbose_name = "notification template"
         verbose_name_plural = "notification templates"
+
+
+    # branch stuff
+    def get_branch_channel(self):
+        channel = self.branch_channel if self.branch_channel else self.event.type
+        return channel.lower()
+
+    def get_branch_campaign(self):
+        campaign = self.branch_campaign if self.branch_campaign else self.event.name
+        return campaign.lower()
+
+    def tags_to_list(self):
+        tags_text = self.branch_tags
+
+        # if the field is empty, return None
+        if tags_text in [None, "", " ", "[]"]: return None
+
+        try:
+            # check if the tags have been input as a JSON-serialized list
+            return json.loads(tags_text)
+        except json.JSONDecodeError:
+            # if the tags are not in JSON format, assume it's a comma-separated list and create an array
+            tags_list = [t.strip() for t in tags_text.split(',')]
+            return tags_list
 
 
 class Notification(models.Model):

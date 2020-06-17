@@ -5,7 +5,7 @@ Author: Jordan Prechac
 
 from django import forms
 
-from content.models import AlbumContributor, SongContributor
+from content.models import AlbumContributor, Song, SongContributor
 
 # -----------------------------------------------------------------------------
 
@@ -19,6 +19,16 @@ class AlbumContributorInlineForm(forms.ModelForm):
             'pending',
             'approved',
             'primary_artist',
+        ]
+
+
+class AlbumSongInlineForm(forms.ModelForm):
+    class Meta:
+        model = Song
+        fields = [
+            'title',
+            'album_order',
+            'is_displayed',
         ]
 
 

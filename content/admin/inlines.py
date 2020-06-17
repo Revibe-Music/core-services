@@ -7,9 +7,21 @@ from django.contrib import admin
 
 from content.models import Album, AlbumContributor, Song, SongContributor, Track
 
-from .forms import AlbumContributorInlineForm, SongContributorInlineForm
+from .forms import AlbumContributorInlineForm, SongContributorInlineForm, AlbumSongInlineForm
 
 # -----------------------------------------------------------------------------
+
+
+class AlbumSongInline(admin.TabularInline):
+    model = Song
+    form = AlbumSongInlineForm
+
+    extra = 0
+    ordering = ['album_order']
+
+    verbose_name = "song"
+    verbose_name_plural = "songs"
+
 
 class AlbumContributorInline(admin.TabularInline):
     model = AlbumContributor

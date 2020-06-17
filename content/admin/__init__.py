@@ -70,7 +70,6 @@ class ArtistAdmin(admin.ModelAdmin):
         return super().get_form(request, obj, **kwargs)
 
 
-
 @admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
 
@@ -89,6 +88,7 @@ class AlbumAdmin(admin.ModelAdmin):
     )
 
     inlines = [
+        inlines.AlbumSongInline,
         inlines.AlbumContributorInline,
         inlines.AlbumGenreInline,
         inlines.AlbumTagInline,

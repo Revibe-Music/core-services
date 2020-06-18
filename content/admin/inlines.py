@@ -27,7 +27,7 @@ class AlbumContributorInline(admin.TabularInline):
     model = AlbumContributor
     form = AlbumContributorInlineForm
 
-    extra = 1
+    extra = 0
 
     verbose_name = "contributor"
     verbose_name_plural = "contributors"
@@ -55,7 +55,7 @@ class SongContributorInline(admin.TabularInline):
     model = SongContributor
     form = SongContributorInlineForm
 
-    extra = 1
+    extra = 0
 
     verbose_name = "contributor"
     verbose_name_plural = "contributors"

@@ -20,11 +20,12 @@ logger = logging.getLogger(__name__)
 from revibe._helpers import const
 from revibe.contrib.queries.querysets import random_object
 from revibe.sharing.branch.models import song_link_from_template, album_link_from_template, artist_link_from_template
+from revibe.template import render_html
 
 from administration.utils import retrieve_variable
 from content.models import Album, Song
 from notifications.exceptions import NotificationException
-from notifications.models import Event, Notification
+from notifications.models import Event, Notification, NotificationTemplate
 from notifications.utils.models.event import get_event, get_events
 from notifications.utils.models.notification import create_notification_uuid
 
@@ -56,7 +57,7 @@ class Notifier:
 
         self.event = self._get_event(trigger, check_first=check_first)
         self.templates = self.event.templates.filter(active=True)
-        self.email_template = random_object(self.templates.filter(medium='email'))
+        self.email_template = self.templates.filter(medium='email').order_by('?').first()
 
         self.extra_configs = extra_configs
         self.args = args
@@ -220,24 +221,28 @@ class Notifier:
 
         return kwargs
 
-    def format_html(self, html, config):
-        pieces = html.split('<body>')
-        if len(pieces) <= 1:
-            return pieces[0].format(**config)
+    def format_html(self, html, config, template=None):
+        if (template is None) or (template.render_version == NotificationTemplate.RENDER_V1):
+            pieces = html.split('<body>')
+            if len(pieces) <= 1:
+                return pieces[0].format(**config)
 
+            else:
+                head, body = pieces
+
+                body = body.format(**config)
+
+                final = head + "<body>" + body
+
+                return final
         else:
-            head, body = pieces
-
-            body = body.format(**config)
-
-            final = head + "<body>" + body
-
-            return final
+            # newer version of template rendering
+            return render_html(html, config)
 
 
     def send_email(self):
         # don't send anything if the user doesn't let us
-        if not self.user.profile.allow_email_notifications:
+        if (not self.user.profile.allow_email_notifications) or (self.email_template is None):
             return
 
         # add the attribution/read-validation information
@@ -256,7 +261,7 @@ class Notifier:
 
         # configure email body content
         html_format = self.email_template.body
-        html_message = self.format_html(html_format, config)
+        html_message = self.format_html(html_format, config, self.email_template)
         plain_message = strip_tags(html_message)
 
         try:

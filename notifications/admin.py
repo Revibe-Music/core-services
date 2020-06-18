@@ -78,6 +78,7 @@ class NotificationTemplateAdmin(admin.ModelAdmin):
         'active',
     )
     list_filter = (
+        'render_version',
         ('event', admin.RelatedOnlyFieldListFilter),
         ('active', admin.BooleanFieldListFilter),
     )
@@ -94,7 +95,7 @@ class NotificationTemplateAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('event', 'medium', 'body',),
+            'fields': ('event', 'medium', 'body', 'render_version',),
             'classes': ('extrapretty', 'wide',),
         }),
         ('Email', {

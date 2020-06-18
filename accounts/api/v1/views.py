@@ -19,7 +19,8 @@ from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope,TokenM
 from oauth2_provider.models import Application, AccessToken, RefreshToken
 from oauthlib import common
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter, GoogleOAuth2AdapterWeb, GoogleOAuth2AdapterMobile
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from accounts.providers.google.views import GoogleOAuth2AdapterWeb, GoogleOAuth2AdapterMobile
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
 from allauth.socialaccount.providers.twitter.views import TwitterOAuthAdapter
@@ -410,14 +411,14 @@ class GoogleLogin(SocialLoginView):
             if response.status_code in (200, 201): response.data['new_user'] = self.is_new_user
             return response
 
-        except Exception as e:
+        except Exception as exc:
             mail.error_email(
                 retrieve_variable('social-auth-email-logging-email', 'dev@revibe.tech'),
                 f"`accounts.views.v1.{self.__class__.__name__}.post`",
                 exc,
                 raise_exception=False
             )
-            raise e
+            raise exc
 
 class GoogleLoginWeb(GoogleLogin):
     adapter_class = GoogleOAuth2AdapterWeb

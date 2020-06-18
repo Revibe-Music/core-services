@@ -178,6 +178,20 @@ class NotificationTemplate(models.Model):
         help_text=_("The format-string message to send to the user. If this is an email template, paste the HTML here.")
     )
 
+    RENDER_V1 = "v1"
+    RENDER_V2 = "v2"
+    _render_version_choices = (
+        (RENDER_V1, "Simple Python Rendering (V1)"),
+        (RENDER_V2, "Django Template Rendering (V2)"),
+    )
+    render_version = models.CharField(
+        max_length=255,
+        choices=_render_version_choices,
+        null=False, blank=True, default=RENDER_V2,
+        verbose_name=_("render version"),
+        help_text=_("Version of HTML rendering to use when formatting the message.")
+    )
+
     # branch stuff
     # channel : use event type, have override field TODO
     branch_channel = models.CharField(

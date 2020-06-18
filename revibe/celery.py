@@ -18,7 +18,8 @@ app.config_from_object('django.conf:settings', namespace="CELERY") # only for ce
 # app.config_from_object('django.conf:settings') # for celery < 4.0
 
 # Load task modules from all registered Django app configs.
-app.autodiscover_tasks(settings.INSTALLED_APPS)
+app.autodiscover_tasks() # default thing
+# app.autodiscover_tasks(settings.INSTALLED_APPS) # use this to discover all tasks. May be necessary in the future
 
 
 @app.task(bind=True)

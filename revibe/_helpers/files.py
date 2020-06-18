@@ -183,7 +183,7 @@ def add_track_to_song(obj, track, *args, **kwargs):
     admin_edit = kwargs.pop('admin_edit', False)
 
     # skip everyting if there is no Track
-    if not track and not admin_edit:
+    if (not track) and (not admin_edit):
         return None
 
     objs = {
@@ -198,9 +198,9 @@ def add_track_to_song(obj, track, *args, **kwargs):
         for t in tracks:
             t.delete()
 
-    if type(track) == str:
+    if isinstance(track, str):
         track_obj = Track.objects.create(reference=track, is_original=True, **objs)
-    elif type(track) == dict:
+    elif isinstance(track, dict):
         track_obj = Track.objects.create(reference=track['track'], is_original=True, **objs)
     else: # it's a file
         if not admin_edit:

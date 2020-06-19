@@ -1,23 +1,22 @@
 """
 """
 
-from celery import shared_task
+from __future__ import absolute_import, unicode_literals
+
+# from celery import shared_task
+from revibe.celery import app
 
 # from revibe.utils.mail import error_email
 
-# from administration.models import ContactForm
+from administration.models import ContactForm
 
-# from .utils.models.track import convert_track
+from .utils.models.track import convert_track
 
 # -----------------------------------------------------------------------------
 
-@shared_task
+# @shared_task
+@app.task(bind=True)
 def convert_track_task(song_id, *args, **kwargs):
-    # apparently we have to import things within the task?
-    from administration.models import ContactForm
-    from content.utils.models.track import convert_track
-
-
     try:
         worked = convert_track(song_id, *args, **kwargs)
         if not bool(worked):

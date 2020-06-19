@@ -9,14 +9,18 @@ from celery import shared_task
 
 import datetime
 
-from accounts.models import CustomUser
-from .core import Notifier
-from .core.recap import send_artist_recap_email
+# from accounts.models import CustomUser
+# from .core import Notifier
+# from .core.recap import send_artist_recap_email
 
 # -----------------------------------------------------------------------------
 
 @shared_task
 def send_notification(user_id, trigger, *args, **kwargs):
+    from accounts.models import CustomUser
+    from notifications.core.notifier import Notifier
+
+
     user = CustomUser.objects.get(id=user_id)
 
     notifier = Notifier(user, trigger, *args, **kwargs)
@@ -49,6 +53,9 @@ def test_send_notification():
 def artist_recap_email(weeks=1):
     """
     """
+    from accounts.models import CustomUser
+    from notifications.core.recap import send_artist_recap_email
+
     artists = CustomUser.registered_objects.filter(
         artist__isnull=False, # they must be an artist
         profile__allow_email_reminders=True, profile__allow_email_notifications=True # they must allow notifications

@@ -3,6 +3,8 @@ Created: 08 May 2020
 Author: Jordan Prechac
 """
 
+from __future__ import absolute_import
+
 from django.core.mail import send_mail
 from django.conf import settings
 from celery import shared_task

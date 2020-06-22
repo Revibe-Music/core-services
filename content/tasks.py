@@ -10,7 +10,7 @@ from celery import shared_task
 
 from administration.models import ContactForm
 
-from .utils.models.track import convert_track
+from content.utils.models.track import convert_track
 
 # -----------------------------------------------------------------------------
 

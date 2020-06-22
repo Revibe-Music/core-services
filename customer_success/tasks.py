@@ -11,8 +11,8 @@ from celery import shared_task
 
 from accounts.models import CustomUser
 
-from .core import Attributor
-from .core.weekly_email import send_weekly_email
+from customer_success.core import Attributor
+from customer_success.core.weekly_email import send_weekly_email
 
 # -----------------------------------------------------------------------------
 

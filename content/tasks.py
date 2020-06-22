@@ -3,8 +3,8 @@
 
 from __future__ import absolute_import, unicode_literals
 
-# from celery import shared_task
-from revibe.celery import app
+from celery import shared_task
+# from revibe.celery import app
 
 # from revibe.utils.mail import error_email
 
@@ -14,8 +14,8 @@ from .utils.models.track import convert_track
 
 # -----------------------------------------------------------------------------
 
-# @shared_task
-@app.task(bind=True)
+# @app.task(bind=True)
+@shared_task
 def convert_track_task(song_id, *args, **kwargs):
     try:
         worked = convert_track(song_id, *args, **kwargs)

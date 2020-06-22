@@ -71,6 +71,7 @@ _log_level = 'DEBUG' if DEBUG else 'INFO'
 #         },
 #     },
 # }
+LOGGING = {} # disable logging
 
 
 _redis_url = "api-communication-redis.7pqvq5.ng.0001.use2.cache.amazonaws.com"

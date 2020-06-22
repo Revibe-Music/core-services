@@ -2,9 +2,9 @@
 Created: 17 June 2020
 """
 
-from revibe.exceptions import RevibeException
+# from revibe.exceptions import RevibeException
 
 # -----------------------------------------------------------------------------
 
-class BranchException(RevibeException):
+class BranchException(Exception):
     pass

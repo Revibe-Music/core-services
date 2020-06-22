@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from revibe._errors.network import ProgramError, ExpectationFailedError, BadRequestError
 from revibe._helpers import const
-from revibe._helpers.files import add_image_to_obj, add_track_to_song
+from revibe._helpers.files import add_image_to_obj#, add_track_to_song
 from revibe.serializers import CustomDateField, ProcessedOnlyListSerializer
 
 from accounts.models import CustomUser
@@ -12,6 +12,7 @@ from accounts.api.serializers import BaseSocialMediaSerializer
 from content.models import *
 from content.mixins import ContributionSerializerMixin
 from content.utils import analytics, models
+from content.utils.files import add_track_to_song
 from cloud_storage.models import File
 from metrics.models import Stream
 
@@ -417,7 +418,7 @@ class SongSerializer(serializers.ModelSerializer):
 
             track = file_obj.file
 
-        print(validated_data)
+        # print(validated_data)
         # save the song
         song = Song(**validated_data, uploaded_by=artist, album=album)
         song.save()
@@ -431,12 +432,12 @@ class SongSerializer(serializers.ModelSerializer):
         return song
 
     def update(self, instance, validated_data, *args, **kwargs):
-        print(validated_data)
-        img = validated_data.pop('file', None)
+        # print(validated_data)
+        track = validated_data.pop('file', None)
 
         instance = super().update(instance, validated_data, *args, **kwargs)
 
-        image_obj = add_track_to_song(instance, img, edit=True)
+        image_obj = add_track_to_song(instance, track, edit=True)
 
         return instance
 

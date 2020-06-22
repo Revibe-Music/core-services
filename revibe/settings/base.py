@@ -355,3 +355,25 @@ LOGGING = {
     },
 }
 
+
+AUDIO_FILE_OUTPUT_FORMATS = [
+    {
+        "format": "mp4",
+        "encoding": "aac",
+        "bitrate": "96k",
+        "filename": "low",
+    },
+    {
+        "format": "mp4",
+        "encoding": "aac",
+        "bitrate": "128k",
+        "filename": "medium",
+    },
+    {
+        "format": "mp4",
+        "encoding": "aac",
+        "bitrate":"256k",
+        "filename": "high",
+    },
+]
+

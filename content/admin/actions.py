@@ -1,5 +1,7 @@
-from revibe._helpers.files import add_track_to_song, add_image_to_obj
+from revibe._helpers.files import add_image_to_obj
 from revibe.utils import mailchimp
+
+from content.utils.files import add_track_to_song
 
 # -----------------------------------------------------------------------------
 

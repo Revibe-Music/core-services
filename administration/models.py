@@ -620,6 +620,8 @@ class Variable(models.Model):
         null=True
     )
 
+    objects = managers.VariableManger()
+
     class Meta:
         verbose_name = "variable"
         verbose_name_plural = "variables"

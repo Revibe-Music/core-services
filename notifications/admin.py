@@ -39,12 +39,13 @@ class EventAdmin(admin.ModelAdmin):
             'description': _("Fields that will only be utilized if this Event will use email notifications."),
         }),
         ('Extras', {
-            'fields': ('active', 'description', 'date_created', 'last_changed', ),
+            'fields': ('active', 'description', 'date_created', 'last_changed', 'id',),
             'classes': ('extrapretty', 'wide', 'collapse', 'in'),
             'description': _("Additional configuration options and descriptions.")
         }),
     )
     readonly_fields = (
+        'id',
         'date_created', 'last_changed',
     )
 
@@ -108,12 +109,13 @@ class NotificationTemplateAdmin(admin.ModelAdmin):
             'classes': ('extrapretty', 'wide', 'collapse', 'in',),
         }),
         ('Extras', {
-            'fields': ('active', 'description', 'date_created', 'last_changed',),
+            'fields': ('active', 'description', 'date_created', 'last_changed', 'id',),
             'classes': ('extrapretty', 'wide', 'collapse', 'in'),
             'description': _("Additional configuration options and descriptions."),
         }),
     )
     readonly_fields = (
+        'id',
         'date_created',
         'last_changed',
     )

@@ -134,10 +134,11 @@ class NotifierDecorator(BaseRequestDecorator):
 
     def _attach_extras(self, result):
         """ Attach extra kwargs to the Notifier class based on the outcome of the main function """
+        data = result.data
         if self.album:
-            self.conf_kwargs['album_id'] = get_album_id(result)
+            self.conf_kwargs['album_id'] = get_album_id(data)
         if self.song:
-            self.conf_kwargs['song_id'] = get_song_id(result)
+            self.conf_kwargs['song_id'] = get_song_id(data)
         if self.contribution:
             self.conf_kwargs['contribution'] = getattr(self._extract_result(self._result), 'data', None)
         self.conf_kwargs['inverse'] = self.inverse

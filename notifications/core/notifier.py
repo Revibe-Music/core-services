@@ -166,6 +166,8 @@ class Notifier:
         config['username'] = self.user.username
         config['artist'] = getattr(self, 'artist', None)
 
+        config['template_id'] = template.id
+
         if config['artist'] not in  [None, False]:
             config['artist_name'] = self.user.artist.name
             config['artist_bio'] = self.user.artist.artist_profile.about_me
@@ -184,8 +186,9 @@ class Notifier:
                 config['artist_deep_link'] = retrieve_variable('home_website', 'https://revibe.tech')
 
         if self.album:
+            config['album'] = self.album
             config['album_name'] = self.album.name
-            config['album_songs_count'] = self.album.songs.count()
+            config['album_songs_count'] = self.album.song_set.count()
             config['album_type'] = self.album.type
             config['album_uploader'] = self.album.uploaded_by.name
             try:

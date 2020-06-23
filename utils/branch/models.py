@@ -26,6 +26,7 @@ def _link_from_template(data, template):
     url = branch.send()
 
     if isinstance(url, str): return url
+
     raise BranchException(f"Bad response: {url}")
 
 def song_link_from_template(song, template):

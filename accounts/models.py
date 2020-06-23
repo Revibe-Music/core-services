@@ -180,6 +180,46 @@ class Profile(models.Model):
         help_text=_("Allow notifications to be sent in Revibe applications")
     )
 
+    # new notification stuff:
+    """
+    Master 'Off Switch'??
+
+    Split Listener & Artist notifications...
+
+    Emails:
+        all emails - master 'Off Switch'
+        types:
+            newletters
+            transactional
+            suggestions (customer success)
+            promotional - just marketing stuff
+            recap
+
+    Push:
+        all push - master 'Off Switch'
+        types:
+            transactional
+            suggestions
+            promotional
+            follows (ex. artist I follow uploads a new song)
+
+    In-App:
+        all in-app
+        types:
+            transactional
+            suggestions
+            promotional
+            follows (ex. artist I follow uploads a new song)
+
+    Text:
+        all text
+        types:
+            transactional
+            suggestions
+            promotional
+
+    """
+
     def _link_to_self(self):
         return format_html(
             "<a href='/{}/accounts/profile/{}'>{}</a>",

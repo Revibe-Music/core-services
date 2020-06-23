@@ -437,7 +437,8 @@ class SongSerializer(serializers.ModelSerializer):
 
         instance = super().update(instance, validated_data, *args, **kwargs)
 
-        image_obj = add_track_to_song(instance, track, edit=True)
+        # only add the track if there is one
+        if track is not None: image_obj = add_track_to_song(instance, track=track, editing=True)
 
         return instance
 

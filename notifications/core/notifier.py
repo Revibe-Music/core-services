@@ -3,6 +3,9 @@ Created: 07 May 2020
 Author: Jordan Prechac
 """
 
+from __future__ import absolute_import
+
+from django.apps import apps
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Q
@@ -17,18 +20,22 @@ import sys
 import logging
 logger = logging.getLogger(__name__)
 
-from revibe._helpers import const
-from revibe.sharing.branch.models import song_link_from_template, album_link_from_template, artist_link_from_template
-from revibe.template import render_html
+from utils.branch.models import song_link_from_template, album_link_from_template, artist_link_from_template
+from utils.template import render_html
 
 from administration.utils import retrieve_variable
-from content.models import Album, Song
 from notifications.exceptions import NotificationException
-from notifications.models import Event, Notification, NotificationTemplate
 from notifications.utils.models.event import get_event, get_events
 from notifications.utils.models.notification import create_notification_uuid
 
-from .config import base_email_config
+from notifications.core.config import base_email_config
+
+Album = apps.get_model('content', 'Album')
+Song  = apps.get_model('content', 'Song')
+Event = apps.get_model('notifications', 'Event')
+Notification = apps.get_model('notifications', 'Notification')
+NotificationTemplate = apps.get_model('notifications', 'NotificationTemplate')
+
 
 # -----------------------------------------------------------------------------
 

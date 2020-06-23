@@ -5,15 +5,18 @@ Author: Jordan Prechac
 
 from __future__ import absolute_import
 
+from django.apps import apps
 from django.core.mail import send_mail
 from django.conf import settings
 from celery import shared_task
 
 import datetime
 
-from accounts.models import CustomUser
+# from accounts.models import CustomUser
 from notifications.core import Notifier
 from notifications.core.recap import send_artist_recap_email
+
+CustomUser = apps.get_model('accounts', 'CustomUser')
 
 # -----------------------------------------------------------------------------
 

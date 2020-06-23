@@ -352,3 +352,9 @@ class Notification(models.Model):
         verbose_name = "notification"
         verbose_name_plural = "notifications"
 
+
+# class Settings(models.Model):
+#     pass
+
+
+

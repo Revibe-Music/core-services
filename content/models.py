@@ -8,12 +8,13 @@ import uuid
 from logging import getLogger
 logger = getLogger(__name__)
 
-from revibe.sharing.branch.utils import generate_canonical_identifier
 from revibe.utils.aws.s3 import delete_s3_object
 from revibe.utils.classes import default_repr
 
 from content import model_exts as ext
 from content.managers import *
+
+from utils.branch.utils import generate_canonical_identifier
 
 # -----------------------------------------------------------------------------
 

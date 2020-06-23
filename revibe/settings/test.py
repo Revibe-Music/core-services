@@ -43,7 +43,7 @@ STATICFILES_STORAGE = 'revibe.storage_backends.StaticStorage'
 # media file settings
 MEDIA_LOCATION = 'media'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
-DEFAULT_FILE_STORAGE = 'revibe.storage_backends.MediaStorage' # custom storage settings
+DEFAULT_FILE_STORAGE = 'utils.storage_backends.MediaStorage' # custom storage settings
 # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage' # default storage settings
 
 # email settings

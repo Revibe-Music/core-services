@@ -270,10 +270,6 @@ class SendRegisterLink(generics.GenericAPIView):
         type: (string) the type of invite to send,
             must be one of 'artist_invite', 'contribution', 'contribution_black'
         """
-        # only send emails when in the cloud
-        if not settings.USE_S3:
-            raise network.BadEnvironmentError()
-
         # validate data
         self._validate_request(request)
 

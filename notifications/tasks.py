@@ -67,5 +67,8 @@ def artist_recap_email(weeks=1):
     )
 
     for artist in artists:
-        send_artist_recap_email(artist, weeks=weeks)
+        try:
+            send_artist_recap_email(artist, weeks=weeks)
+        except Exception as e:
+            print(e)
 

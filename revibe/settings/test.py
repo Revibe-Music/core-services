@@ -53,24 +53,24 @@ AWS_SES_REGION_ENDPOINT = f'email.{AWS_SES_REGION_NAME}.amazonaws.com'
 
 
 _log_level = 'DEBUG'
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'file': {
-#             'level': _log_level,
-#             'class': 'logging.FileHandler',
-#             'filename': '/opt/python/log/django.log',
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['file'],
-#             'level': _log_level,
-#             'propagate': True,
-#         },
-#     },
-# }
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'django-file': {
+            'level': _log_level,
+            'class': 'logging.FileHandler',
+            'filename': '/opt/python/log/django.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['django-file'],
+            'level': _log_level,
+            'propagate': True,
+        },
+    },
+}
 # LOGGING = {} # disable logging
 
 

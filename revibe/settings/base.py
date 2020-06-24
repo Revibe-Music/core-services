@@ -339,20 +339,27 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
-        'celery': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/opt/python/log/celery.log',
-            'formatter': 'simple',
-            'maxBytes': 1024 * 1024 * 100, # 100 mb
-        },
+        # 'celery': {
+        #     'level': 'DEBUG',
+        #     'class': 'logging.handlers.RotatingFileHandler',
+        #     'filename': '/opt/python/log/celery.log',
+        #     'formatter': 'simple',
+        #     'maxBytes': 1024 * 1024 * 100, # 100 mb
+        # },
     },
-    'loggers': {
-        'celery': {
-            'handlers': ['celery', 'console',],
-            'level': 'INFO',
-        },
-    },
+    # 'loggers': 
+    # {
+    #     'celery': {
+    #         'handlers': ['celery', 'console',],
+    #         'level': 'INFO',
+    #     },
+    # },
+    # {
+    #     'revibe': {
+    #         'handlers': ['console',],
+    #         'level': 'INFO',
+    #     },
+    # },
 }
 
 

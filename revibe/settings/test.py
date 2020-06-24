@@ -51,8 +51,8 @@ EMAIL_BACKEND = "django_ses.SESBackend"
 AWS_SES_REGION_NAME = "us-east-1"
 AWS_SES_REGION_ENDPOINT = f'email.{AWS_SES_REGION_NAME}.amazonaws.com'
 
-_log_level = 'DEBUG' if DEBUG else 'INFO' 
 
+_log_level = 'DEBUG'
 # LOGGING = {
 #     'version': 1,
 #     'disable_existing_loggers': False,
@@ -71,7 +71,7 @@ _log_level = 'DEBUG' if DEBUG else 'INFO'
 #         },
 #     },
 # }
-LOGGING = {} # disable logging
+# LOGGING = {} # disable logging
 
 
 _redis_url = "api-communication-redis.7pqvq5.ng.0001.use2.cache.amazonaws.com"

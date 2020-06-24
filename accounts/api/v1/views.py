@@ -1021,12 +1021,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
     @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums', url_name="album_contributions")
     @notifier(
-        trigger='inverse-new-contribution', user_target='data.artist_id.artist_user',
+        trigger='inverse-new-album-contribution', user_target='data.artist_id.artist_user',
         methods=['post'], album=True,
         force=True, medium='email', artist=True, check_first=True
     )
     @notifier(
-        trigger='new-contribution',
+        trigger='new-album-contribution',
         methods=['post'], album=True,
         force=True, medium='email', artist=True, check_first=True
     )
@@ -1095,12 +1095,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
     @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/songs', url_name="song_contributions")
     @notifier(
-        trigger='inverse-new-contribution', user_target="data.artist_id.artist_user",
+        trigger='inverse-new-song-contribution', user_target="data.artist_id.artist_user",
         methods=['post'], song=True,
         force=True, medium='email', artist=True, check_first=True
     )
     @notifier(
-        trigger='new-contribution',
+        trigger='new-song-contribution',
         methods=['post'], song=True,
         force=True, medium='email', artist=True, check_first=True
     )

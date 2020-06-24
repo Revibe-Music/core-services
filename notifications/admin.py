@@ -24,7 +24,6 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = [
         'name',
         'trigger',
-        'desired_action',
         'description',
     ]
 

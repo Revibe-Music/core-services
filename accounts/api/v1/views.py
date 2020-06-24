@@ -44,6 +44,7 @@ from revibe._helpers import responses, const
 
 from accounts.adapter import TokenAuthSupportQueryString
 from accounts.artist.analytics import BarChart, CardChart, LineChart
+from accounts.artist.analytics.listen_for_change import get_artist_listen_for_change_streams
 from accounts.exceptions import AccountsException, PasswordValidationError, AuthError
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
@@ -1415,8 +1416,15 @@ class ArtistAnalyticsViewSet(GenericPlatformViewSet):
 
         # return responses.OK(data=page)
     
-    @action(detail=False, methods=['get'], url_path=r"(?P<endpoint>[a-zA-Z0-9-]+)", url_name="charts")
-    def analytics_endpoint(self, request, endpoint=None, *args, **kwargs):
+    @action(detail=False, methods=['get'], url_path=r"(?P<endpoint>[a-zA-Z0-9-]+)", url_name="charts-DEPRECATED")
+    def deprecated_chart_stuff(self, request, endpoint=None, *args, **kwargs):
+        if endpoint and endpoint=='listen-for-change': return self.listen_for_change(request, *args, **kwargs)
+
+        return self.chart_analytics(request, endpoint=endpoint, *args, **kwargs)
+
+
+    @action(detail=False, methods=['get'], url_path=r"chart/(?P<endpoint>[a-zA-Z0-9-]+)", url_name="charts")
+    def chart_analytics(self, request, endpoint=None, *args, **kwargs):
         # get optional param values
         params = request.query_params
         type_ = get_url_param(params, 'type')
@@ -1441,6 +1449,21 @@ class ArtistAnalyticsViewSet(GenericPlatformViewSet):
 
         # return the stuff
         return responses.OK(data=chart.data)
+
+
+    @action(detail=False, methods=['get'], url_path="listen-for-change", url_name="list-for-change")
+    def listen_for_change(self, request, *args, **kwargs):
+        """
+        Counts streams for the authenticated artist for the Listen For Change thing we're going
+        Time period: June 22-28, 2020
+
+        Computation steps:
+        1. import the calculation
+        2. return the thingy
+        """
+        num_streams = get_artist_listen_for_change_streams(self.artist)
+
+        return responses.OK(data=num_streams)
 
 
 class UserViewSet(viewsets.GenericViewSet):

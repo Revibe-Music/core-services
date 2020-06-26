@@ -13,7 +13,7 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register("artistoftheweek", views.ArtistOfTheWeekViewset, "artistoftheweek-application")
-
+router.register("contact", views.ContactViewset, "contact")
 
 urlpatterns = [
     path("", include(router.urls)),

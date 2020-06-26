@@ -24,6 +24,9 @@ from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
 
+from accounts.artist.analytics.listen_for_change import get_artist_listen_for_change_streams
+
+
 import datetime
 import json
 import requests
@@ -1383,8 +1386,15 @@ class ArtistAnalyticsViewSet(GenericPlatformViewSet):
 
         # return responses.OK(data=page)
     
-    @action(detail=False, methods=['get'], url_path=r"(?P<endpoint>[a-zA-Z0-9-]+)", url_name="charts")
-    def analytics_endpoint(self, request, endpoint=None, *args, **kwargs):
+    @action(detail=False, methods=['get'], url_path=r"(?P<endpoint>[a-zA-Z0-9-]+)", url_name="charts-DEPRECATED")
+    def deprecated_chart_stuff(self, request, endpoint=None, *args, **kwargs):
+        if endpoint and endpoint=='listen-for-change': 
+            return self.listen_for_change(request, *args, **kwargs)
+        
+        return self.chart_analytics(request, endpoint=endpoint, *args, **kwargs)
+
+    @action(detail=False, methods=['get'], url_path=r"chart/(?P<endpoint>[a-zA-Z0-9-]+)", url_name="charts")
+    def chart_analytics(self, request, endpoint=None, *args, **kwargs):
         # get optional param values
         params = request.query_params
         type_ = get_url_param(params, 'type')
@@ -1409,6 +1419,17 @@ class ArtistAnalyticsViewSet(GenericPlatformViewSet):
 
         # return the stuff
         return responses.OK(data=chart.data)
+    
+    @action(detail=False, methods=['get'], url_path="listen-for-change", url_name="list-for-change")
+    def listen_for_change(self, request, *args, **kwargs):
+        """
+        counts streams:
+        import calculation, return
+        """
+        num_streams = get_artist_listen_for_change_streams(self.artist)
+
+        return responses.OK(data=num_streams)
+        
 
 
 class UserViewSet(viewsets.GenericViewSet):

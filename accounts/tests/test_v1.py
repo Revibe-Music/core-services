@@ -12,10 +12,12 @@ logger = logging.getLogger(__name__)
 from revibe._helpers.test import RevibeTestCase
 from revibe._helpers import status
 
+from django.db.models import Q, Count
 from accounts.models import CustomUser, Profile
 from accounts.referrals.models import Referral
 from administration.models import Campaign
 from content.models import *
+from metrics.models import Stream
 
 # -----------------------------------------------------------------------------
 
@@ -1100,4 +1102,83 @@ class TagSongsTestCase(RevibeTestCase):
             msg="Could not find the tag that should have been created"
         )
 
+
+class TestArtistEventStreams(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._get_artist_user()
+        self._create_album()
+        self._create_song()
+        self.content_song.uploaded_by = self.artist_user.artist
+        self.content_song.save()
+
+        self.url = reverse('artist-analytics-list-for-change')
+
+    # ensure a number of streams is returned
+    def test_num_streams(self):
+        # create stream for created song
+        Stream.objects.create(
+            song=self.content_song,
+            stream_duration=238,
+            is_downloaded=False,
+            is_saved=False,
+        )
+        # response which gets songs
+        response = self.client.get(self.url, format="json", **self._get_headers(artist=True))
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            response.data, {'num_streams':1},
+        )
+
+        # prints b'{"num_streams":1}'
+        print(response.content)
+        
+    # through date: june 28 2020
+    # def test_after_end_date(self):
+    #    Stream.objects.create(
+    #        song=self.content_song,
+    #        stream_duration=238,
+    #        is_downloaded=False,
+    #        is_saved=False,
+    #        timestamp="2020-06-29T15:58:44.767594-06:00"
+    #    )
+        # response which gets songs
+    #    response = self.client.get(self.url, format="json", **self._get_headers(artist=True))
+
+        # validate response
+    #    self.assert200(response)
+    #    self.assertReturnDict(response)
+    #    self.assertEqual(
+    #        response.content,
+    #        None,
+    #    )
+
+    #    print(response.content)
+    
+    # def test_during_week(self):
+    #    Stream.objects.create(
+    #        song=self.content_song,
+    #        stream_duration=238,
+    #        is_downloaded=False,
+    #        is_saved=False,
+    #        timestamp="2020-06-24T15:58:44.767594-06:00"
+    #    )
+        # response which gets streams
+    #    response = self.client.get(self.url, format="json", **self._get_headers(artist=True))
+
+        # validate response
+    #    self.assert200(response)
+    #    self.assertReturnDict(response)
+    #    self.assertEqual(
+    #        response.content,
+    #        b'{"num_streams":1}',
+    #    )
+
+        # prints b'{"num_streams":1}'
+    #    print(response.content)
+        
 

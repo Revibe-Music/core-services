@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
+from accounts import managers
 from revibe.utils.classes import default_repr
 
 from .utils.models import custom_file_upload
@@ -147,6 +148,53 @@ class ArtistOfTheWeek(models.Model):
     class Meta:
         verbose_name = "artist of the week"
         verbose_name_plural = "artists of the week"
+
+# contact model
+class Contact(models.Model):
+    user = models.ForeignKey(
+        to='accounts.CustomUser',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name=_("user"),
+    )
+    first = models.CharField(
+        max_length=100, 
+        blank=True, 
+        default='', 
+        verbose_name=_("first name")
+    )
+    last = models.CharField(
+        max_length=100, 
+        blank=True, 
+        default='', 
+        verbose_name=_("last name")
+    )
+    email = models.EmailField(
+        max_length=250, 
+        blank=True, 
+        default='', 
+        verbose_name=_("contact email")
+    )
+    subject = models.CharField(
+        max_length=250, 
+        blank=True, default='', 
+        verbose_name=_("contact subject")
+    )
+    message = models.TextField(
+        verbose_name=_("contact message")
+    )
+    date_created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("date and time")
+    )
+
+    def full_name(self):
+        return f"{self.first} {self.last}" if self.first and self.last else ""
+
+    def __str__(self):
+        return self.full_name()
+    
+    objects = models.Manager()
 
 
 

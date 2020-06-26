@@ -30,4 +30,15 @@ class BaseArtistOfTheWeekSerializer(serializers.ModelSerializer):
         ]
 
 
+class BaseContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = [
+            'first',
+            'last',
+            'email',
+            'subject',
+            'message',
+            'date_created',
+        ]
 

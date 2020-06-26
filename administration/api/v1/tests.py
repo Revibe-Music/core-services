@@ -16,6 +16,7 @@ from revibe.utils.urls import add_query_params
 from accounts.models import CustomUser, Profile
 from administration.models import Alert, AlertSeen, Blog, ContactForm, YouTubeKey
 from content.models import Artist, Album, Song
+from metrics.models import Stream
 
 # -----------------------------------------------------------------------------
 
@@ -332,4 +333,43 @@ class TestVariablesViews(RevibeTestCase):
             'share_text' in response.data.keys(),
             msg="The share text is not in the response"
         )
+
+
+class TestListenForChange(RevibeTestCase):
+    def setUp(self):
+        self._get_application()
+        self._get_user()
+        self._get_superuser()
+        self._create_song()
+        Stream.objects.create(
+            song=self.content_song,
+            stream_duration=100
+        )
+        Stream.objects.create(
+            song=self.content_song,
+            stream_duration=124
+        )
+        self.url = reverse('company-event-listen-for-change-admin')
+
+    def test_correct_request(self):
+        # send request
+        response = self.client.get(self.url, format="json", **self._get_headers(sper=True))
+
+        # validate response
+        self.assert200(response)
+        self.assertReturnDict(response)
+        self.assertEqual(
+            response.data['num_streams'], 2,
+            msg="Improper number of streams returned"
+        )
+
+    def test_bad_permissions(self):
+        # send request
+        response = self.client.get(self.url, format="json", **self._get_headers())
+
+        # validate response
+        self.assert403(response)
+
+
+
 

@@ -29,7 +29,9 @@ from content import models as cnt_models
 from content.serializers.v1 import ArtistSerializer
 from metrics.models import Search, Stream
 
-from . import serializers as adm_ser_v1
+
+from administration.api.v1 import serializers as adm_ser_v1
+from administration.api.v1.utils import get_all_listen_for_change
 
 # -----------------------------------------------------------------------------
 
@@ -219,7 +221,6 @@ class CompanyViewSet(GenericPlatformViewSet):
 
         return responses.OK(data=chart.data)
 
-
     @action(detail=False, methods=['get'], url_path="album-metrics", url_name="album-metrics")
     def album_metrics(self, request, *args, **kwargs):
         queryset = cnt_models.Album.objects.filter(platform=const.REVIBE_STRING)
@@ -314,6 +315,13 @@ class CompanyViewSet(GenericPlatformViewSet):
         data['Searches'] = serializer.data
 
         return responses.OK(data=data)
+
+    @action(detail=False, methods=['get'], url_path="event/listen-for-change", url_name="event-listen-for-change-admin")
+    def listen_for_change(self, request, *args, **kwargs):
+        num_streams = get_all_listen_for_change()
+
+        return responses.OK(data=num_streams)
+
 
 
 class BlogViewSet(viewsets.ModelViewSet):

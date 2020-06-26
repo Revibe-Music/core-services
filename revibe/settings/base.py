@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.openid',
     'allauth.socialaccount.providers.spotify',
+    'allauth.socialaccount.providers.twitter',
 ]
 
 MIDDLEWARE = [
@@ -320,4 +321,66 @@ CELERY_RESULT_BACKEND = None
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+
+
+# logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'simple': {
+            'format': '%(levelname)s %(messaged)s',
+            'datefmt': '%y %b %d %H:%M:%S',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        # 'celery': {
+        #     'level': 'DEBUG',
+        #     'class': 'logging.handlers.RotatingFileHandler',
+        #     'filename': '/opt/python/log/celery.log',
+        #     'formatter': 'simple',
+        #     'maxBytes': 1024 * 1024 * 100, # 100 mb
+        # },
+    },
+    # 'loggers': 
+    # {
+    #     'celery': {
+    #         'handlers': ['celery', 'console',],
+    #         'level': 'INFO',
+    #     },
+    # },
+    # {
+    #     'revibe': {
+    #         'handlers': ['console',],
+    #         'level': 'INFO',
+    #     },
+    # },
+}
+
+
+AUDIO_FILE_OUTPUT_FORMATS = [
+    {
+        "format": "mp4",
+        "encoding": "aac",
+        "bitrate": "96k",
+        "filename": "low",
+    },
+    {
+        "format": "mp4",
+        "encoding": "aac",
+        "bitrate": "128k",
+        "filename": "medium",
+    },
+    {
+        "format": "mp4",
+        "encoding": "aac",
+        "bitrate":"256k",
+        "filename": "high",
+    },
+]
 

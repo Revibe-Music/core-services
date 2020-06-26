@@ -5,16 +5,29 @@ Author: Jordan Prechac
 
 from django.contrib import admin
 
-from content.admin_ext.forms import AlbumContributorInlineForm, SongContributorInlineForm
 from content.models import Album, AlbumContributor, Song, SongContributor, Track
 
+from .forms import AlbumContributorInlineForm, SongContributorInlineForm, AlbumSongInlineForm
+
 # -----------------------------------------------------------------------------
+
+
+class AlbumSongInline(admin.TabularInline):
+    model = Song
+    form = AlbumSongInlineForm
+
+    extra = 0
+    ordering = ['album_order']
+
+    verbose_name = "song"
+    verbose_name_plural = "songs"
+
 
 class AlbumContributorInline(admin.TabularInline):
     model = AlbumContributor
     form = AlbumContributorInlineForm
 
-    extra = 1
+    extra = 0
 
     verbose_name = "contributor"
     verbose_name_plural = "contributors"
@@ -42,7 +55,7 @@ class SongContributorInline(admin.TabularInline):
     model = SongContributor
     form = SongContributorInlineForm
 
-    extra = 1
+    extra = 0
 
     verbose_name = "contributor"
     verbose_name_plural = "contributors"
@@ -72,4 +85,3 @@ class SongTrackInline(admin.TabularInline):
 
     verbose_name = "track"
     verbose_name_plural = "tracks"
-

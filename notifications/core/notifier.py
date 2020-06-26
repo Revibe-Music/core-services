@@ -3,6 +3,9 @@ Created: 07 May 2020
 Author: Jordan Prechac
 """
 
+from __future__ import absolute_import
+
+from django.apps import apps
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Q
@@ -17,17 +20,22 @@ import sys
 import logging
 logger = logging.getLogger(__name__)
 
-from revibe._helpers import const
-from revibe.contrib.queries.querysets import random_object
+from utils.branch.models import song_link_from_template, album_link_from_template, artist_link_from_template
+from utils.template import render_html
 
 from administration.utils import retrieve_variable
-from content.models import Album, Song
 from notifications.exceptions import NotificationException
-from notifications.models import Event, Notification
 from notifications.utils.models.event import get_event, get_events
 from notifications.utils.models.notification import create_notification_uuid
 
-from .config import base_email_config
+from notifications.core.config import base_email_config
+
+Album = apps.get_model('content', 'Album')
+Song  = apps.get_model('content', 'Song')
+Event = apps.get_model('notifications', 'Event')
+Notification = apps.get_model('notifications', 'Notification')
+NotificationTemplate = apps.get_model('notifications', 'NotificationTemplate')
+
 
 # -----------------------------------------------------------------------------
 
@@ -55,6 +63,7 @@ class Notifier:
 
         self.event = self._get_event(trigger, check_first=check_first)
         self.templates = self.event.templates.filter(active=True)
+        self.email_template = self.templates.filter(medium='email').order_by('?').first()
 
         self.extra_configs = extra_configs
         self.args = args
@@ -143,7 +152,7 @@ class Notifier:
             except Exception:
                 pass
 
-    def _configure_kwargs(self, **extras):
+    def _configure_kwargs(self, template, **extras):
         """ Configure base kwargs for message formatting """
         config = base_email_config
 
@@ -157,6 +166,8 @@ class Notifier:
         config['username'] = self.user.username
         config['artist'] = getattr(self, 'artist', None)
 
+        config['template_id'] = template.id
+
         if config['artist'] not in  [None, False]:
             config['artist_name'] = self.user.artist.name
             config['artist_bio'] = self.user.artist.artist_profile.about_me
@@ -169,10 +180,15 @@ class Notifier:
                 config['artist_image'] = image.url
             except Exception:
                 config['artist_image'] = "Error getting Artist artwork"
+            try:
+                config['artist_deep_link'] = artist_link_from_template(self.user.artist, template)
+            except Exception:
+                config['artist_deep_link'] = retrieve_variable('home_website', 'https://revibe.tech')
 
         if self.album:
+            config['album'] = self.album
             config['album_name'] = self.album.name
-            config['album_songs_count'] = self.album.songs.count()
+            config['album_songs_count'] = self.album.song_set.count()
             config['album_type'] = self.album.type
             config['album_uploader'] = self.album.uploaded_by.name
             try:
@@ -180,11 +196,19 @@ class Notifier:
                 config['album_image'] = image.url
             except Exception:
                 config['album_image'] = "Error getting Album artwork"
+            try:
+                config['album_deep_link'] = album_link_from_template(self.album, template)
+            except Exception:
+                config['album_deep_link'] = retrieve_variable('home_website', 'https://revibe.tech')
 
         if self.song:
             config['song_name'] = self.song.title
             config['song_uploader'] = self.song.song_uploaded_by.name
             # TODO: add song uploader name
+            try:
+                config['song_deep_link'] = song_link_from_template(self.song, template)
+            except Exception:
+                config['song_deep_link'] = retrieve_variable('home_website', 'https://revibe.tech')
 
         # temp
         if self.is_contribution:
@@ -206,24 +230,28 @@ class Notifier:
 
         return kwargs
 
-    def format_html(self, html, config):
-        pieces = html.split('<body>')
-        if len(pieces) <= 1:
-            return pieces[0].format(**config)
+    def format_html(self, html, config, template=None):
+        if (template is None) or (template.render_version == NotificationTemplate.RENDER_V1):
+            pieces = html.split('<body>')
+            if len(pieces) <= 1:
+                return pieces[0].format(**config)
 
+            else:
+                head, body = pieces
+
+                body = body.format(**config)
+
+                final = head + "<body>" + body
+
+                return final
         else:
-            head, body = pieces
-
-            body = body.format(**config)
-
-            final = head + "<body>" + body
-
-            return final
+            # newer version of template rendering
+            return render_html(html, config)
 
 
     def send_email(self):
         # don't send anything if the user doesn't let us
-        if not self.user.profile.allow_email_notifications:
+        if (not self.user.profile.allow_email_notifications) or (self.email_template is None):
             return
 
         # add the attribution/read-validation information
@@ -231,20 +259,18 @@ class Notifier:
         notification_tracking_kwargs = self.configure_tracking_kwargs(notification_read_id)
 
         # add configuration stuff
-        config = self._configure_kwargs(**notification_tracking_kwargs)
-
-        notification_template = random_object(self.templates.filter(medium='email'))
+        config = self._configure_kwargs(template=self.email_template, **notification_tracking_kwargs)
 
         from_address = getattr(self.event, 'from_address', '"Revibe" <noreply@revibe.tech>')
 
         # get message subject
-        subject = getattr(notification_template, 'subject')
+        subject = getattr(self.email_template, 'subject')
         if subject == None:
             subject = retrieve_variable('notification_email_subject_default', 'Revibe Notifications')
 
         # configure email body content
-        html_format = notification_template.body
-        html_message = self.format_html(html_format, config)
+        html_format = self.email_template.body
+        html_message = self.format_html(html_format, config, self.email_template)
         plain_message = strip_tags(html_message)
 
         try:
@@ -274,7 +300,7 @@ class Notifier:
             elif sent:
                 Notification.objects.create(
                     user=self.user,
-                    event_template=notification_template,
+                    event_template=self.email_template,
                     is_artist=bool(getattr(self, 'artist', False)),
                     read_id=notification_read_id
                 )

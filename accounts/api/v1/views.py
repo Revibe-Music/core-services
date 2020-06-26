@@ -19,9 +19,11 @@ from oauth2_provider.contrib.rest_framework import TokenHasReadWriteScope,TokenM
 from oauth2_provider.models import Application, AccessToken, RefreshToken
 from oauthlib import common
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter, GoogleOAuth2AdapterWeb, GoogleOAuth2AdapterMobile
-from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from accounts.providers.google.views import GoogleOAuth2AdapterWeb, GoogleOAuth2AdapterMobile
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from allauth.socialaccount.providers.spotify.views import SpotifyOAuth2Adapter
+from allauth.socialaccount.providers.twitter.views import TwitterOAuthAdapter
 from allauth.socialaccount.models import SocialAccount, SocialToken, SocialApp
 
 from accounts.artist.analytics.listen_for_change import get_artist_listen_for_change_streams
@@ -45,11 +47,11 @@ from revibe._helpers import responses, const
 
 from accounts.adapter import TokenAuthSupportQueryString
 from accounts.artist.analytics import BarChart, CardChart, LineChart
+from accounts.artist.analytics.listen_for_change import get_artist_listen_for_change_streams
 from accounts.exceptions import AccountsException, PasswordValidationError, AuthError
 from accounts.permissions import TokenOrSessionAuthentication
 from accounts.models import *
 from accounts.referrals.tasks import add_referral_points
-from accounts.serializers.v1 import *
 from accounts.utils.auth import change_password, reset_password, generate_tokens, refresh_access_token
 from accounts.utils.models import register_new_user
 from accounts._helpers import validation
@@ -71,6 +73,8 @@ from metrics.models import Stream
 from music.models import *
 from music.serializers import v1 as music_ser_v1
 from notifications.decorators import notifier
+
+from .serializers import *
 
 # -----------------------------------------------------------------------------
 
@@ -270,10 +274,6 @@ class SendRegisterLink(generics.GenericAPIView):
         type: (string) the type of invite to send,
             must be one of 'artist_invite', 'contribution', 'contribution_black'
         """
-        # only send emails when in the cloud
-        if not settings.USE_S3:
-            raise network.BadEnvironmentError()
-
         # validate data
         self._validate_request(request)
 
@@ -405,15 +405,20 @@ class GoogleLogin(SocialLoginView):
     @notifier(trigger="social-register", force=True, medium='email', skip_first=True)
     def post(self, request, *args, **kwargs):
         try:
-            return super().post(request, *args, **kwargs)
-        except Exception as e:
+            response = super().post(request, *args, **kwargs)
+
+            # add 'new_user' field to response data, if it's a good status code
+            if response.status_code in (200, 201): response.data['new_user'] = self.is_new_user
+            return response
+
+        except Exception as exc:
             mail.error_email(
                 retrieve_variable('social-auth-email-logging-email', 'dev@revibe.tech'),
                 f"`accounts.views.v1.{self.__class__.__name__}.post`",
                 exc,
                 raise_exception=False
             )
-            raise e
+            raise exc
 
 class GoogleLoginWeb(GoogleLogin):
     adapter_class = GoogleOAuth2AdapterWeb
@@ -446,6 +451,34 @@ class FacebookLogin(SocialLoginView):
             root = "127.0.0.1:8000"
 
         return f"{method}{root}/v1/account/facebook-authentication/callback/"
+
+    @notifier(trigger="social-register", force=True, medium='email', skip_first=True)
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+class TwitterLogin(SocialLoginView):
+    """
+    """
+    adapter_class = TwitterOAuthAdapter
+    client_class = OAuth2Client
+
+    @property
+    def callback_url(self):
+        method = "http://"
+        root = ""
+        if settings.DEBUG == False:
+            # production
+            method = "https://"
+            root = "api.revibe.tech"
+        elif settings.USE_S3 == True:
+            # test
+            root = "test-env.myrpupud2p.us-east-2.elasticbeanstalk.com"
+        else:
+            # local
+            root = "127.0.0.1:8000"
+
+        return f"{method}{root}/v1/account/twitter-authentication/callback/"
 
     @notifier(trigger="social-register", force=True, medium='email', skip_first=True)
     def post(self, request, *args, **kwargs):
@@ -992,12 +1025,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
     @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/albums', url_name="album_contributions")
     @notifier(
-        trigger='inverse-new-contribution', user_target='data.artist_id.artist_user',
+        trigger='inverse-new-album-contribution', user_target='data.artist_id.artist_user',
         methods=['post'], album=True,
         force=True, medium='email', artist=True, check_first=True
     )
     @notifier(
-        trigger='new-contribution',
+        trigger='new-album-contribution',
         methods=['post'], album=True,
         force=True, medium='email', artist=True, check_first=True
     )
@@ -1066,12 +1099,12 @@ class UserArtistViewSet(GenericPlatformViewSet):
 
     @action(detail=False, methods=['get','post','patch','delete'], url_path='contributions/songs', url_name="song_contributions")
     @notifier(
-        trigger='inverse-new-contribution', user_target="data.artist_id.artist_user",
+        trigger='inverse-new-song-contribution', user_target="data.artist_id.artist_user",
         methods=['post'], song=True,
         force=True, medium='email', artist=True, check_first=True
     )
     @notifier(
-        trigger='new-contribution',
+        trigger='new-song-contribution',
         methods=['post'], song=True,
         force=True, medium='email', artist=True, check_first=True
     )
@@ -1388,10 +1421,10 @@ class ArtistAnalyticsViewSet(GenericPlatformViewSet):
     
     @action(detail=False, methods=['get'], url_path=r"(?P<endpoint>[a-zA-Z0-9-]+)", url_name="charts-DEPRECATED")
     def deprecated_chart_stuff(self, request, endpoint=None, *args, **kwargs):
-        if endpoint and endpoint=='listen-for-change': 
-            return self.listen_for_change(request, *args, **kwargs)
-        
+        if endpoint and endpoint=='listen-for-change': return self.listen_for_change(request, *args, **kwargs)
+
         return self.chart_analytics(request, endpoint=endpoint, *args, **kwargs)
+
 
     @action(detail=False, methods=['get'], url_path=r"chart/(?P<endpoint>[a-zA-Z0-9-]+)", url_name="charts")
     def chart_analytics(self, request, endpoint=None, *args, **kwargs):
@@ -1430,6 +1463,21 @@ class ArtistAnalyticsViewSet(GenericPlatformViewSet):
 
         return responses.OK(data=num_streams)
         
+
+
+    @action(detail=False, methods=['get'], url_path="listen-for-change", url_name="list-for-change")
+    def listen_for_change(self, request, *args, **kwargs):
+        """
+        Counts streams for the authenticated artist for the Listen For Change thing we're going
+        Time period: June 22-28, 2020
+
+        Computation steps:
+        1. import the calculation
+        2. return the thingy
+        """
+        num_streams = get_artist_listen_for_change_streams(self.artist)
+
+        return responses.OK(data=num_streams)
 
 
 class UserViewSet(viewsets.GenericViewSet):

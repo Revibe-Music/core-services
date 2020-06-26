@@ -3,12 +3,16 @@ Created: 4 Mar. 2020
 Author: Jordan Prechac
 """
 
+from django.apps import apps
+
 import logging
 logger = logging.getLogger(__name__)
 
-from . import sections
+from content.browse import sections
 
-from administration.utils import retrieve_variable
+# from administration.utils import retrieve_variable
+
+Variable = apps.get_model('administration', 'Variable')
 
 # -----------------------------------------------------------------------------
 
@@ -17,14 +21,14 @@ def full_browse_page():
 
     # get time period
     default_time_period = "last_week"
-    time_period = retrieve_variable("browse_time_period", default_time_period)
+    time_period = Variable.objects.retrieve("browse_time_period", default_time_period)
     if time_period != sections.time_lookup.keys():
         time_period = default_time_period
 
     # get limit of items
     default_browse_page_limit = 5
     try:
-        browse_page_variable = int(retrieve_variable("browse_page_limit", default_browse_page_limit))
+        browse_page_variable = int(Variable.objects.retrieve("browse_page_limit", default_browse_page_limit))
     except ValueError:
         browse_page_variable = default_browse_page_limit
 
@@ -80,7 +84,7 @@ def full_browse_page():
     for func in browses:
         # skip this section if the admin variable says to skip it
         if 'variable' in func.keys():
-            run = retrieve_variable(func.get('variable'), True, is_bool=True)
+            run = Variable.objects.retrieve(func.get('variable'), True, output_type=bool)
             if not run:
                 continue
 

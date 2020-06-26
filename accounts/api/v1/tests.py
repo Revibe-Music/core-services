@@ -507,6 +507,7 @@ class TestArtistSongs(RevibeTestCase):
             "album_id":str(self.song_album.id)
         }
         response = self.client.post(self.url, data, format="multipart", **self._get_headers(artist=True))
+        print(response.data)
 
         # validate response
         self.assert201(response)

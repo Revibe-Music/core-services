@@ -10,9 +10,6 @@ from revibe.utils import classes
 from revibe.utils.language import text
 
 from administration import managers
-from content.models import Album, Song
-from metrics.models import Stream
-from music.models import Library, Playlist
 
 # -----------------------------------------------------------------------------
 
@@ -622,6 +619,8 @@ class Variable(models.Model):
         auto_now=True,
         null=True
     )
+
+    objects = managers.VariableManger()
 
     class Meta:
         verbose_name = "variable"

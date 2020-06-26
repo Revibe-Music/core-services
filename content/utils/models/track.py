@@ -76,4 +76,6 @@ def convert_track(song_id, *args, **kwargs):
     del segment
     gc.collect()
 
+    return True
+
 

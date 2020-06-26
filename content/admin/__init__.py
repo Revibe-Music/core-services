@@ -4,13 +4,11 @@ from django.utils.html import format_html
 from revibe.admin import check_deletion, check_display
 from revibe._helpers.symbols import CROSS_MARK, CHECK_MARK
 
-from accounts.admin_ext.inlines import ArtistProfileInline
-from content import browse
-from content.admin_ext import (
-    approve_contribution, remove_delete, perform_delete, reprocess_song, reprocess_image, update_mailchimp_info,
-    inlines
-)
+from accounts.admin.inlines import ArtistProfileInline
 from content.models import *
+
+from . import forms, inlines
+from .actions import approve_contribution, remove_delete, perform_delete, reprocess_song, reprocess_image, update_mailchimp_info
 
 # -----------------------------------------------------------------------------
 
@@ -32,6 +30,8 @@ class ArtistAdmin(admin.ModelAdmin):
         'id', 'uri',
         'date_joined', 'last_changed',
     )
+
+    form = forms.ArtistAdminForm
 
     _inlines = []
 
@@ -72,7 +72,6 @@ class ArtistAdmin(admin.ModelAdmin):
         return super().get_form(request, obj, **kwargs)
 
 
-
 @admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
 
@@ -90,7 +89,10 @@ class AlbumAdmin(admin.ModelAdmin):
         'uploaded_date', 'last_changed',
     )
 
+    form = forms.AlbumAdminForm
+
     inlines = [
+        inlines.AlbumSongInline,
         inlines.AlbumContributorInline,
         inlines.AlbumGenreInline,
         inlines.AlbumTagInline,
@@ -137,6 +139,8 @@ class SongAdmin(admin.ModelAdmin):
         'id', 'uri',
         'uploaded_date', 'last_changed',
     )
+
+    form = forms.SongAdminForm
 
     inlines = [
         inlines.SongContributorInline,

@@ -9,7 +9,7 @@ from django.urls import path, include
 
 
 v1_urls = [
-    path('account/', include('accounts.urls.v1')),
+    path('account/', include('accounts.api.v1.urls')),
     path('administration/', include('administration.api.v1.urls')),
     path('content/', include('content.urls.v1')),
     path('marketplace/', include('marketplace.urls.v1')),

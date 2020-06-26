@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from accounts.admin_ext import actions, inlines
 from accounts.models import *
 from customer_success.utils.admin.inlines import UserPathsInline
+
+from . import actions, inlines
 
 # -----------------------------------------------------------------------------
 
@@ -54,6 +55,7 @@ class CustomUserAdmin(UserAdmin):
     )
 
     inlines = [
+        inlines.ProfileInline,
         UserPathsInline,
         # friends in line,
         inlines.ReferralInline,
@@ -92,7 +94,7 @@ class SocialAdmin(admin.ModelAdmin):
 @admin.register(ArtistProfile)
 class ArtistProfileAdmin(admin.ModelAdmin):
     # customize list display
-    list_display = ('__str__', 'artist', 'email', 'get_artist_username')
+    list_display = ('__str__', '_link_to_artist', 'email', 'get_artist_username')
     list_filter = (
         'city',
         'state',
@@ -106,6 +108,11 @@ class ArtistProfileAdmin(admin.ModelAdmin):
         return obj.artist.artist_user._link_to_self()
     get_artist_username.allow_tags = True
     get_artist_username.short_description = 'user'
+
+    def _link_to_artist(self, obj):
+        return obj.artist._link_to_self()
+    _link_to_artist.short_description = "artist"
+    _link_to_artist.admin_order_field = "artist"
 
 
 @admin.register(StaffProfile)

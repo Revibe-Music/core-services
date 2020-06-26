@@ -156,7 +156,7 @@ class NotificationTemplate(models.Model):
     # notification_method = models.
     _medium_choices = (
         ('email', 'Email'),
-        ('in_app', 'In-App'),
+        ('in-app', 'In-App'),
         ('push', 'Push'),
         ('sms', 'Text Message'),
     )
@@ -178,13 +178,27 @@ class NotificationTemplate(models.Model):
         help_text=_("The format-string message to send to the user. If this is an email template, paste the HTML here.")
     )
 
+    RENDER_V1 = "v1"
+    RENDER_V2 = "v2"
+    _render_version_choices = (
+        (RENDER_V1, "Simple Python Rendering (V1)"),
+        (RENDER_V2, "Django Template Rendering (V2)"),
+    )
+    render_version = models.CharField(
+        max_length=255,
+        choices=_render_version_choices,
+        null=False, blank=True, default=RENDER_V2,
+        verbose_name=_("render version"),
+        help_text=_("Version of HTML rendering to use when formatting the message.")
+    )
+
     # branch stuff
     # channel : use event type, have override field TODO
     branch_channel = models.CharField(
         max_length=255,
         null=True, blank=True,
         verbose_name=_("channel"),
-        help_text=_("Branch channel/source")
+        help_text=_("Branch channel/source. Defaults to the Event's type (External/Temporal).")
     )
     # feature: use 'medium' field, no field
     # campaigns: use Event name, have an override field TODO
@@ -192,13 +206,13 @@ class NotificationTemplate(models.Model):
         max_length=255,
         null=True, blank=True,
         verbose_name=_("campaign"),
-        help_text=_("Branch campaign/what?")
+        help_text=_("Branch campaign field. Defaults to Event's 'name' field.")
     )
     # tags: comma-separated values. Gonna have to parse that out into a list later
     branch_tags = models.TextField(
         null=True, blank=True,
         verbose_name=_("tags"),
-        help_text=_("Comma-separated tags for branch links")
+        help_text=_("Comma-separated tags for branch links. Will be null if left blank.")
     )
 
     # extras
@@ -226,8 +240,8 @@ class NotificationTemplate(models.Model):
         return default_repr(self)
 
     class Meta:
-        verbose_name = "notification template"
-        verbose_name_plural = "notification templates"
+        verbose_name = "template"
+        verbose_name_plural = "templates"
 
 
     # branch stuff
@@ -239,7 +253,7 @@ class NotificationTemplate(models.Model):
         campaign = self.branch_campaign if self.branch_campaign else self.event.name
         return campaign.lower()
 
-    def tags_to_list(self):
+    def _tags_to_list(self):
         tags_text = self.branch_tags
 
         # if the field is empty, return None
@@ -252,6 +266,16 @@ class NotificationTemplate(models.Model):
             # if the tags are not in JSON format, assume it's a comma-separated list and create an array
             tags_list = [t.strip() for t in tags_text.split(',')]
             return tags_list
+
+    def tags_to_list(self):
+        tags = self._tags_to_list()
+        auto_tag = ['auto']
+        if not tags: # 'tags' is either [] or None
+            return auto_tag
+
+        if 'auto' not in tags: tags += auto_tag
+
+        return tags
 
 
 class Notification(models.Model):
@@ -327,4 +351,10 @@ class Notification(models.Model):
     class Meta:
         verbose_name = "notification"
         verbose_name_plural = "notifications"
+
+
+# class Settings(models.Model):
+#     pass
+
+
 

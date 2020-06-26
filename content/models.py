@@ -14,6 +14,8 @@ from revibe.utils.classes import default_repr
 from content import model_exts as ext
 from content.managers import *
 
+from utils.branch.utils import generate_canonical_identifier
+
 # -----------------------------------------------------------------------------
 
 class Image(models.Model):
@@ -230,6 +232,22 @@ class Artist(models.Model):
         verbose_name = 'artist'
         verbose_name_plural = 'artists'
 
+    def _link_to_self(self):
+        return format_html(
+            "<a href='/{}content/artist/{}'>{}</a>",
+            settings.ADMIN_PATH,
+            self.id,
+            self.__str__()
+        )
+
+    # branch stuff
+    @property
+    def canonical_identifier(self):
+        platform = self.platform.lower()
+        obj_type = 'artist'
+        id = str(self.id)
+        return generate_canonical_identifier(platform, obj_type, id)
+
 
 class Album(models.Model):
     id = models.CharField(max_length=255, primary_key=True, default=uuid.uuid4, editable=False)
@@ -297,6 +315,14 @@ class Album(models.Model):
         verbose_name = 'album'
         verbose_name_plural = 'albums'
         ordering = ['name',]
+
+    # branch stuff
+    @property
+    def canonical_identifier(self):
+        platform = self.platform.lower()
+        obj_type = 'album'
+        id = str(self.id)
+        return generate_canonical_identifier(platform, obj_type, id)
 
 
 class AlbumContributor(models.Model):
@@ -438,7 +464,7 @@ class Song(models.Model):
         platform = self.platform.lower()
         obj_type = 'song'
         id = str(self.id)
-        return f"{platform}:{obj_type}:{id}"
+        return generate_canonical_identifier(platform, obj_type, id)
 
 
 class SongContributor(models.Model):

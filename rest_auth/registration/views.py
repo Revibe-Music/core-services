@@ -36,7 +36,7 @@ from revibe._helpers import responses
 
 from accounts.exceptions.api import AccountsConflicError
 from accounts.models import Profile
-from accounts.serializers.v1 import UserSerializer
+from accounts.api.v1.serializers import UserSerializer
 from accounts.utils.models import create_access_token
 
 sensitive_post_parameters_m = method_decorator(
@@ -143,13 +143,17 @@ class SocialLoginView(LoginView):
         self.login()
 
         # add profile object to user
-        try:
-            self.user = self.serializer.validated_data['user']
-            user_email = getattr(self.user, 'email', None)
-            Profile.objects.create(user=self.user, email=user_email)
-        except IntegrityError as e:
-            self.user.delete()
-            raise AccountsConflicError(str(e))
+        if getattr(self.serializer.validated_data['user'], 'profile', None) == None:
+            try:
+                self.user = self.serializer.validated_data['user']
+                user_email = getattr(self.user, 'email', None)
+                Profile.objects.create(user=self.user, email=user_email)
+            except IntegrityError as e:
+                self.user.delete()
+                raise AccountsConflicError(str(e))
+            self.is_new_user = True
+        else:
+            self.is_new_user = False
 
         return self.get_response()
 

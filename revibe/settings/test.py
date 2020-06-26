@@ -43,7 +43,7 @@ STATICFILES_STORAGE = 'revibe.storage_backends.StaticStorage'
 # media file settings
 MEDIA_LOCATION = 'media'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
-DEFAULT_FILE_STORAGE = 'revibe.storage_backends.MediaStorage' # custom storage settings
+DEFAULT_FILE_STORAGE = 'utils.storage_backends.MediaStorage' # custom storage settings
 # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage' # default storage settings
 
 # email settings
@@ -51,26 +51,27 @@ EMAIL_BACKEND = "django_ses.SESBackend"
 AWS_SES_REGION_NAME = "us-east-1"
 AWS_SES_REGION_ENDPOINT = f'email.{AWS_SES_REGION_NAME}.amazonaws.com'
 
-_log_level = 'DEBUG' if DEBUG else 'INFO' 
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'file': {
-#             'level': _log_level,
-#             'class': 'logging.FileHandler',
-#             'filename': '/opt/python/log/django.log',
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['file'],
-#             'level': _log_level,
-#             'propagate': True,
-#         },
-#     },
-# }
+_log_level = 'DEBUG'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'django-file': {
+            'level': _log_level,
+            'class': 'logging.FileHandler',
+            'filename': '/opt/python/log/django.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['django-file'],
+            'level': _log_level,
+            'propagate': True,
+        },
+    },
+}
+# LOGGING = {} # disable logging
 
 
 _redis_url = "api-communication-redis.7pqvq5.ng.0001.use2.cache.amazonaws.com"

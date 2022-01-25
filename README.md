@@ -1,37 +1,53 @@
-# Revibe API
-Welcome to the Revibe API repository.
+<div id="top"></div>
 
 
-# Apps
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
 
-The Revibe API is broken into 5 apps, **Accounts**, **Content**, **Music**, **Metrics**, and **Administration**. Each app is designed to contain the basic funcitonality for individual components of Revibe's business model.
+<a href="https://github.com/Revibe-Music">
+    <img src="./RevibeLogo.png" alt="Revibe Logo" ></a>
 
-You may notice in the published Revibe API documentation that these 5 areas are referred to as *namespaces*. The reason for the difference is that Django refers to these individual components as apps, so that's the terminology used here; but outside of Django, 'apps' is a very general term, which is why we avoid using it in published documentation.
+  <h3 align="center">Revibe Core Services</h3>
+<!-- PROJECT SHIELDS -->
+<div align="center">
+  
+[![Contributors][contributors-shield]][contributors-url] [![MIT License][license-shield]][license-url] ![archive-shield] ![top-languages-shield] ![languages-count-shield]
+</div>
+  Revibe was intended to provide an all-in-one business solution to independent artists, along with a proprietary streaming app that was tailored to underground hip-hop fans. The core services ran on AWS and powered the entire Revibe web and mobile platform.
+  <p align="center">
+    <!-- <a href="#demos">View Docs</a>
+    · -->
+    <a href="#contact">Contact</a>
+  </p>
+</div>
 
-## Accounts
 
-## Content
 
-## Music
+<!-- TABLE OF CONTENTS -->
+<!-- <details>
+  <summary>Table of Contents</summary>
 
-## Metrics
-
-## Administration
+- [Features](#features)
+  - [Tech Highlights](#tech-highlights)
+- [Tech Specs](#tech-specs)
+  - [Backend](#backend)
+  - [Patterns](#patterns)
+- [Demos](#demos)
+  - [Videos](#videos)
+  - [Screenshots](#screenshots)
+- [Contributors](#contributors)
+- [License](#license)
+- [Contact](#contact)
+- [Acknowledgments](#acknowledgments)
+- [TO DO](#to-do)
+</details> -->
 
 
 # Conventions and Standards
 
 All parts of this API follow a set of rules that dictate things like code organization, url naming, serializer purposing, HTTP status codes, and more; for the simple reason of having a consistent set of standards to make API consumption easy for Revibe's front-end development and continued API development simpler for whichever sorry souls have to pick this up after me. 
 
-## Models
-
-## Serializers
-
-## Platforms
-
-## Views & ViewSets
-
-*Some stuff about views and some stuff about viewsets...*
 
 ### Status Codes
 
@@ -63,7 +79,7 @@ All parts of this API follow a set of rules that dictate things like code organi
 - 503 Service Unavailable - the requested endpoint cannot be reached in the current environment, this is usually an indication that some kind of AWS resource is only accessible while running the app in the cloud.
 - 512 Program Error: basically a 500 error but intentionally not that
 
-### Recording Request Data
+## Recording Request Data
 
 All requests in the API have a unique string identifier, called the **Request Code** that is used to track usage of the API. The standard for creating each request's name is "*version*-*app*-*viewset*-*url name*-*request type*". For example, the request to get details about an Album - /v1/content/album/*album_id*/ - is named "v1-content-album-detail-get". 
 
@@ -97,5 +113,42 @@ logger, anything from the *revibe* module, and anything from any other API app.
 Docs: [Implementing Celery with Django in AWS Elastic Beanstalk](https://stackoverflow.com/questions/41161691/how-to-run-a-celery-worker-with-django-app-scalable-by-aws-elastic-beanstalk)
 
 # Authors
+Lead Developer - Jordan Prechac - [**jprechac@gmail.com**](mailto:jprechac@gmail.com "Jordan Prechac")
+Developer - Riley Stephens
 
-Jordan Prechac - [**jprechac@gmail.com**](mailto:jprechac@gmail.com "Jordan Prechac")
+Product Manager - Kayne Lynn
+
+<!-- MARKDOWN LINKS & IMAGES -->
+
+<!-- Project URLS-->
+[github-url]: https://github.com/Revibe-Music/core-services
+[repo-path]: Revibe-Music/core-services
+[logo-path]: https://github.com/Revibe-Music/core-services/blob/main/assets/RevibeLogo.png
+
+<!-- Contributors-->
+[contributors-shield]: https://img.shields.io/github/contributors/Revibe-Music/core-services.svg?style=for-the-badge
+[contributors-url]: https://github.com/Revibe-Music/core-services/graphs/contributors
+
+<!-- License-->
+[license-shield]: https://img.shields.io/github/license/Revibe-Music/core-services.svg?style=for-the-badge
+[license-url]: https://github.com/Revibe-Music/core-services/blob/main/LICENSE.txt
+
+<!-- Build Status-->
+[archive-shield]: https://img.shields.io/static/v1?label=status&message=archived&color=red&style=for-the-badge
+
+<!-- Languages-->
+[top-languages-shield]: https://img.shields.io/github/languages/top/Revibe-Music/core-services.svg?style=for-the-badge
+[languages-count-shield]: https://img.shields.io/github/languages/count/Revibe-Music/core-services?style=for-the-badge
+
+<!-- Stars-->
+[stars-shield]: https://img.shields.io/github/stars/Revibe-Music/core-services.svg?style=for-the-badge
+[stars-url]: https://github.com/Revibe-Music/core-services/stargazers
+
+<!-- Forks-->
+[forks-shield]: https://img.shields.io/github/forks/Revibe-Music/core-services.svg?style=for-the-badge
+[forks-url]: https://github.com/Revibe-Music/core-services/network/members
+
+
+<!-- Social-->
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/othneildrew
